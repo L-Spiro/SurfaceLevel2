@@ -66,7 +66,7 @@ namespace sl2 {
 		static inline size_t								GetActualPlaneSize( size_t _sSize );
 
 		/**
-		 * Allocates N mipmaps.
+		 * Allocates a texture of a given number of mipmaps, array indices, faces, and dimensions.
 		 * 
 		 * \param PARM DESC
 		 * \param PARM DESC
@@ -78,7 +78,7 @@ namespace sl2 {
 		// == Members.
 		std::vector<std::unique_ptr<std::vector<uint8_t>>>	m_vMipMaps;								/**< The array of mipmaps.  Index 0 is the base level. */
 		size_t												m_stArraySize;							/**< Number of slices in an array.  1 for flat 1D/2D images. */
-		size_t												m_stSlices;								/**< The number of slices in the image. */
+		size_t												m_stSlices;								/**< The number of slices in the image (for 3D textures). */
 		size_t												m_stFaces;								/**< 1 for normal textures, 6 for cube textures. */
 		uint32_t											m_ui32Width;							/**< The width of the texture. */
 		uint32_t											m_ui32Height;							/**< The height of the texture. */
