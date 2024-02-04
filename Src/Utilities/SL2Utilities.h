@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <cmath>
 #include <string>
 #include <vector>
 
@@ -20,6 +21,11 @@
 #ifndef SL2_PI
 #define SL2_PI												3.1415926535897932384626433832795
 #endif	// #ifndef SL2_PI
+
+#ifndef SL2_ROUND_UP
+/** Round up to the next nearest Xth, where X is a power of 2. */
+#define SL2_ROUND_UP( VALUE, X )							((VALUE) + (((X) - (VALUE) & ((X) - 1)) & ((X) - 1)))
+#endif	// #ifndef SL2_ROUND_UP
 
 
 namespace sl2 {
@@ -171,6 +177,89 @@ namespace sl2 {
 		 **/
 		static std::vector<std::string>						Tokenize( const std::string &_sString, std::string::value_type _vtDelimiter, bool _bAllowEmptyStrings );
 
+		/**
+		 * Converts a single float value from sRGB space to linear space.  Performs an accurate conversion.
+		 *
+		 * \param _fVal The value to convert.
+		 * \return Returns the converted value.
+		 */
+		static inline float __fastcall						SRgbToLinear( float _fVal );
+
+		/**
+		 * Converts a single float value from linear space to sRGB space.  Performs an accurate conversion.
+		 *
+		 * \param _fVal The value to convert.
+		 * \return Returns the converted value.
+		 */
+		static inline float __fastcall						LinearToSRgb( float _fVal );
+
+		/**
+		 * Minimum between 2 values.
+		 *
+		 * \param _tLeft Left value.
+		 * \param _tRight Right value.
+		 * \return Returns the minimum between the two values.
+		 */
+		template <class T>
+		static T											Min( T _tLeft, T _tRight ) {
+			return _tLeft < _tRight ? _tLeft : _tRight;
+		}
+
+		/**
+		 * Maximum between 2 values.
+		 *
+		 * \param _tLeft Left value.
+		 * \param _tRight Right value.
+		 * \return Returns the maximum between the two values.
+		 */
+		template <class T>
+		static T											Max( T _tLeft, T _tRight ) {
+			return _tLeft > _tRight ? _tLeft : _tRight;
+		}
+
+		/**
+		 * Clamps the given value between the given range.
+		 *
+		 * \param _tValue The value to clamp.
+		 * \param _tLow Lower limit for the clamped value.
+		 * \param _tHigh Upper limit for the clamped value.
+		 * \return Returns the given value clamped within the given range.
+		 */
+		template <class T>
+		static T											Clamp( T _tValue, T _tLow, T _tHigh ) {
+			if ( _tValue < _tLow ) { return _tLow; }
+			if ( _tValue > _tHigh ) { return _tHigh; }
+			return _tValue;
+		}
 	};
+
+
+	// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	// DEFINITIONS
+	// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	// == Functions.
+	/**
+	 * Converts a single float value from sRGB space to linear space.  Performs an accurate conversion.
+	 *
+	 * \param _fVal The value to convert.
+	 * \return Returns the converted value.
+	 */
+	inline float __fastcall CUtilities::SRgbToLinear( float _fVal ) {
+		return _fVal <= 0.04045f ?
+			_fVal * (1.0f / 12.92f) :
+			std::powf( (_fVal + 0.055f) * (1.0f / 1.055f), 2.4f );
+	}
+
+	/**
+	 * Converts a single float value from linear space to sRGB space.  Performs an accurate conversion.
+	 *
+	 * \param _fVal The value to convert.
+	 * \return Returns the converted value.
+	 */
+	inline float __fastcall CUtilities::LinearToSRgb( float _fVal ) {
+		return _fVal <= 0.0031308f ?
+			_fVal * 12.92f :
+			1.055f * std::powf( _fVal, 1.0f / 2.4f ) - 0.055f;
+	}
 
 }	// namespace sl2

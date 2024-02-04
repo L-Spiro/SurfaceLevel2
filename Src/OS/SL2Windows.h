@@ -47,6 +47,9 @@
 #ifdef SL2_WINDOWS
 
 #define SL2_FASTCALL							__fastcall
+#define SL2_EXPECT( COND, VAL )			(COND)
+#define SL2_PREFETCH_LINE( ADDR )		_mm_prefetch( reinterpret_cast<const char *>(ADDR), _MM_HINT_T0 )
+#define SL2_PREFETCH_LINE_WRITE( ADDR )
 
 #ifndef SL2_WIN64
 // Mercilessly ripped from: https://stackoverflow.com/a/46924301

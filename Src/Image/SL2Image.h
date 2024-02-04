@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include "SL2Formats.h"
+#include "SL2Surface.h"
 #include <cstdint>
 #include <memory>
 #include <vector>
@@ -63,25 +65,37 @@ namespace sl2 {
 		 * \param _sSize The base size of the byte buffer previously calculated by the texture's width, height, and texel size.
 		 * \return Returns the adjusted size of the texture plane to actually be allocated.
 		 **/
-		static inline size_t								GetActualPlaneSize( size_t _sSize );
+		//static inline size_t								GetActualPlaneSize( size_t _sSize );
 
-		/**
-		 * Allocates a texture of a given number of mipmaps, array indices, faces, and dimensions.
-		 * 
-		 * \param PARM DESC
-		 * \param PARM DESC
-		 * \return DESC
-		 **/
+		
 
 
 	protected :
 		// == Members.
-		std::vector<std::unique_ptr<std::vector<uint8_t>>>	m_vMipMaps;								/**< The array of mipmaps.  Index 0 is the base level. */
-		size_t												m_stArraySize;							/**< Number of slices in an array.  1 for flat 1D/2D images. */
-		size_t												m_stSlices;								/**< The number of slices in the image (for 3D textures). */
-		size_t												m_stFaces;								/**< 1 for normal textures, 6 for cube textures. */
+		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *		m_pkifFormat;							/**< The texture format. */
+		std::vector<std::unique_ptr<CSurface>>				m_vMipMaps;								/**< The array of mipmaps.  Index 0 is the base level. */
+		size_t												m_sArraySize;							/**< Number of slices in an array.  1 for flat 1D/2D images. */
+		size_t												m_sFaces;								/**< 1 for normal textures, 6 for cube textures. */
+		size_t												m_sBaseSize;							/**< CFormat::GetFormatSize( _pkifFormat, _ui32Width, _ui32Height, _ui32Depth ). */
 		uint32_t											m_ui32Width;							/**< The width of the texture. */
 		uint32_t											m_ui32Height;							/**< The height of the texture. */
+		uint32_t											m_ui32Depth;							/**< The number of slices in the image (for 3D textures). */
+
+
+		// == Functions.
+		/**
+		 * Allocates a texture of a given number of mipmaps, array indices, faces, and dimensions.
+		 * 
+		 * \param _pkifFormat DESC
+		 * \param _ui32Width Width of the image base mipmap level.
+		 * \param _ui32Height Height of the image base mipmap level.
+		 * \param _ui32Depth Depth of the image base mipmap level.
+		 * \param _sMips Number of mipmaps.  Must be at least 1.  If 0, a fully mipmap chain is allocated.
+		 * \param _sArray Number of array slices.  Must be at least 1.
+		 * \param _sFaces Number of faces.  Either 1 or 6.
+		 * \return DESC
+		 **/
+		bool												AllocateTexture( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, size_t _sMips = 1, size_t _sArray = 1, size_t _sFaces = 1 );
 	};
 	
 
@@ -97,8 +111,8 @@ namespace sl2 {
 	 * \param _sSize The base size of the byte buffer previously calculated by the texture's width, height, and texel size.
 	 * \return Returns the adjusted size of the texture plane to actually be allocated.
 	 **/
-	inline size_t CImage::GetActualPlaneSize( size_t _sSize ) {
+	/*inline size_t CImage::GetActualPlaneSize( size_t _sSize ) {
 		return ((_sSize + sizeof( uint64_t )) + (sizeof( uint64_t ) - 1)) & ~(sizeof( uint64_t ) - 1);
-	}
+	}*/
 
 }	// namespace sl2
