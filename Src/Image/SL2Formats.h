@@ -1411,6 +1411,50 @@ namespace sl2 {
 		 * Gets the size, in bytes, of a texel format.
 		 *
 		 * \param _vfFormat The texel format.
+		 * \param _ui32Width The width of the image.
+		 * \param _ui32Height The height of the image.
+		 * \param _ui32Depth The depth of the image.
+		 * \return Returns the size of the given format in bytes.
+		 */
+		static inline uint32_t SL2_FASTCALL											GetFormatSize( SL2_VKFORMAT _vfFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) { return GetFormatSize( FindFormatDataByVulkan( _vfFormat ), _ui32Width, _ui32Height, _ui32Depth ); }
+
+		/**
+		 * Gets the size, in bytes, of a texel format.
+		 *
+		 * \param _dfFormat The texel format.
+		 * \param _ui32Width The width of the image.
+		 * \param _ui32Height The height of the image.
+		 * \param _ui32Depth The depth of the image.
+		 * \return Returns the size of the given format in bytes.
+		 */
+		static inline uint32_t SL2_FASTCALL											GetFormatSize( SL2_DXGI_FORMAT _dfFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) { return GetFormatSize( FindFormatDataByDx( _dfFormat ), _ui32Width, _ui32Height, _ui32Depth ); }
+
+		/**
+		 * Gets the size, in bytes, of a texel format.
+		 *
+		 * \param _kifFormat The texel format.
+		 * \param _ui32Width The width of the image.
+		 * \param _ui32Height The height of the image.
+		 * \param _ui32Depth The depth of the image.
+		 * \return Returns the size of the given format in bytes.
+		 */
+		static inline uint32_t SL2_FASTCALL											GetFormatSize( SL2_KTX_INTERNAL_FORMAT _kifFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) { return GetFormatSize( FindFormatDataByOgl( _kifFormat ), _ui32Width, _ui32Height, _ui32Depth ); }
+
+		/**
+		 * Gets the size, in bytes, of a texel format.
+		 *
+		 * \param _mpfFormat The texel format.
+		 * \param _ui32Width The width of the image.
+		 * \param _ui32Height The height of the image.
+		 * \param _ui32Depth The depth of the image.
+		 * \return Returns the size of the given format in bytes.
+		 */
+		static inline uint32_t SL2_FASTCALL											GetFormatSize( SL2_MTLPIXELFORMAT _mpfFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) { return GetFormatSize( FindFormatDataByMetal( _mpfFormat ), _ui32Width, _ui32Height, _ui32Depth ); }
+
+		/**
+		 * Gets the size, in bytes, of a texel format.
+		 *
+		 * \param _vfFormat The texel format.
 		 * \return Returns the size of the given format in bytes.
 		 */
 		static inline uint32_t SL2_FASTCALL											GetFormatSize( SL2_VKFORMAT _vfFormat ) { return GetFormatSize( FindFormatDataByVulkan( _vfFormat ) ); }
@@ -3817,7 +3861,7 @@ namespace sl2 {
 
 		uint32_t ui32SrcStride = CFormat::GetRowSize( SL2_VK_FORMAT_R32G32B32A32_SFLOAT, pdtdData->ui32Width );
 		const uint8_t * pui8Src = pdtdData->pui8Src;
-		pui8Src += (CFormat::GetFormatSize( SL2_VK_FORMAT_R32G32B32A32_SFLOAT ) * pdtdData->ui32Width * pdtdData->ui32Height) * pdtdData->ui32SrcZ;
+		pui8Src += (CFormat::GetFormatSize( SL2_VK_FORMAT_R32G32B32A32_SFLOAT, pdtdData->ui32Width, pdtdData->ui32Height, pdtdData->ui32SrcZ ));
 		pui8Src += (ui32SrcStride << 2) * pdtdData->ui32SrcY;
 
 		uint32_t ui32BlockSize = CFormat::DxtBlockSize( (*pdtdData->pkifdFormatData) );

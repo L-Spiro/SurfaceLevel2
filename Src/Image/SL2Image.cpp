@@ -83,19 +83,26 @@ namespace sl2 {
 	bool CImage::AllocateTexture( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, size_t _sMips, size_t _sArray, size_t _sFaces ) {
 		if ( !_sMips ) {
 			_sMips = CUtilities::Max( size_t( std::round( std::log2( _ui32Width ) ) ), size_t( std::round( std::log2( _ui32Height ) ) ) );
-			_sMips = CUtilities::Max( size_t( std::round( std::log2( _ui32Depth ) ) ), _sMips );
+			_sMips = CUtilities::Max( size_t( std::round( std::log2( _ui32Depth ) ) ), _sMips ) + 1;
 		}
 		if ( !_sMips ) { return false; }
-		
 
+		m_sArraySize = _sArray;
+		m_sFaces = _sFaces;
+		m_ui32Width = _ui32Width;
+		m_ui32Height = _ui32Height;
+		m_ui32Depth = _ui32Depth;
+		m_pkifFormat = _pkifFormat;
+		
+		size_t sSrcBaseSize = CFormat::GetFormatSize( _pkifFormat, _ui32Width, _ui32Height, _ui32Depth );
 		try {
 			m_vMipMaps.resize( _sMips );
 			for ( size_t I = 0; I < _sMips; ++I ) {
 				size_t sBaseSize = CFormat::GetFormatSize( _pkifFormat, _ui32Width, _ui32Height, _ui32Depth );
 				size_t sFullSize = sBaseSize * _sArray * _sFaces;
-				if ( !sFullSize ) { return false; }
+				if ( !sFullSize ) { Reset(); return false; }
 
-				m_vMipMaps[I] = std::make_unique<CSurface>( sFullSize );
+				m_vMipMaps[I] = std::make_unique<CSurface>( sFullSize, sBaseSize, _ui32Width, _ui32Height, _ui32Depth );
 
 				_ui32Width = CUtilities::Max<uint32_t>( _ui32Width >> 1, 1 );
 				_ui32Height = CUtilities::Max<uint32_t>( _ui32Height >> 1, 1 );
@@ -103,8 +110,10 @@ namespace sl2 {
 			}
 		}
 		catch ( ... ) {
+			Reset();
 			return false;
 		}
+		
 		return true;
 	}
 
