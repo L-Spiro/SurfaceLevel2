@@ -21,8 +21,37 @@
   <ItemGroup>
     <ClInclude Include="Src\Files\SL2FileBase.h" />
     <ClInclude Include="Src\Files\SL2StdFile.h" />
+    <ClInclude Include="Src\Image\KTX-Software\include\ktx.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_containers.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_containers_impl.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_file_headers.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_global_selector_cb.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_global_selector_palette.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_internal.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_uastc.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\basisu\zstd\zstd.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\basisu\zstd\zstd_errors.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\basis_sgd.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\dfdutils\dfd.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\dfdutils\KHR\khrplatform.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\dfdutils\KHR\khr_df.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\filestream.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\formatsize.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\gl_format.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\ktxint.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\memstream.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\texture.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\texture1.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\texture2.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\uthash.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\vkformat_enum.h" />
+    <ClInclude Include="Src\Image\KTX-Software\lib\vk_format.h" />
+    <ClInclude Include="Src\Image\KTX-Software\utils\unused.h" />
     <ClInclude Include="Src\Image\SL2Formats.h" />
     <ClInclude Include="Src\Image\SL2Image.h" />
+    <ClInclude Include="Src\Image\SL2KtxTexture.h" />
     <ClInclude Include="Src\Image\SL2Surface.h" />
     <ClInclude Include="Src\Image\Squish\alpha.h" />
     <ClInclude Include="Src\Image\Squish\clusterfit.h" />
@@ -44,11 +73,45 @@
     <ClInclude Include="Src\Thread\SL2Events.h" />
     <ClInclude Include="Src\Utilities\SL2Float16.h" />
     <ClInclude Include="Src\Utilities\SL2FloatX.h" />
+    <ClInclude Include="Src\Utilities\SL2Stream.h" />
     <ClInclude Include="Src\Utilities\SL2Utilities.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Files\SL2FileBase.cpp" />
     <ClCompile Include="Src\Files\SL2StdFile.cpp" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Src\Image\KTX-Software\lib\basisu\zstd\zstd.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\basis_transcode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Src\Image\KTX-Software\lib\checkheader.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\dfdutils\colourspaces.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\dfdutils\createdfd.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\dfdutils\interpretdfd.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\dfdutils\printdfd.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\dfdutils\queries.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\dfdutils\vk2dfd.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\etcdec.cxx" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\etcunpack.cxx" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\filestream.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\hashlist.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\info.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\memstream.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\strings.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\swap.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\texture.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\texture1.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\texture2.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\vkformat_check.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\vkformat_str.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\writer1.c" />
+    <ClCompile Include="Src\Image\KTX-Software\lib\writer2.c" />
     <ClCompile Include="Src\Image\SL2Formats.cpp" />
     <ClCompile Include="Src\Image\SL2Image.cpp" />
     <ClCompile Include="Src\Image\SL2Surface.cpp" />
@@ -61,10 +124,30 @@
     <ClCompile Include="Src\Image\Squish\rangefit.cpp" />
     <ClCompile Include="Src\Image\Squish\singlecolourfit.cpp" />
     <ClCompile Include="Src\Image\Squish\squish.cpp" />
-    <ClCompile Include="Src\SL2SurfaceLevel2.cpp" />
+    <ClCompile Include="Src\SL2SurfaceLevel2.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="Src\Thread\SL2Events.cpp" />
     <ClCompile Include="Src\Utilities\SL2FloatX.cpp" />
     <ClCompile Include="Src\Utilities\SL2Utilities.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_astc.inc" />
+    <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_astc_0_255.inc" />
+    <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_atc_55.inc" />
+    <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_atc_56.inc" />
+    <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_bc7_m5_alpha.inc" />
+    <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_bc7_m5_color.inc" />
+    <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_dxt1_5.inc" />
+    <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_dxt1_6.inc" />
+    <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_pvrtc2_45.inc" />
+    <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_pvrtc2_alpha_33.inc" />
+    <None Include="Src\Image\KTX-Software\lib\dfdutils\dfd2vk.inl" />
+    <None Include="Src\Image\KTX-Software\lib\dfdutils\vk2dfd.inl" />
+    <None Include="Src\Image\KTX-Software\lib\texture_funcs.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -118,18 +201,31 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BASISU_NO_ITERATOR_DEBUG_LEVEL;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <StringPooling>true</StringPooling>
+      <OpenMPSupport>true</OpenMPSupport>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)$(Platform)\$(Configuration)\FreeImage.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibOpenJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibPNG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibRaw.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibTIFF4.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibWebP.lib;$(ProjectDir)$(Platform)\$(Configuration)\OpenEXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\ZLib.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -138,30 +234,39 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <OpenMPSupport>true</OpenMPSupport>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)$(Platform)\$(Configuration)\FreeImage.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibOpenJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibPNG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibRaw.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibTIFF4.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibWebP.lib;$(ProjectDir)$(Platform)\$(Configuration)\OpenEXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\ZLib.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BASISU_NO_ITERATOR_DEBUG_LEVEL;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <StringPooling>true</StringPooling>
+      <OpenMPSupport>true</OpenMPSupport>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)$(Platform)\$(Configuration)\FreeImage.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibOpenJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibPNG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibRaw.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibTIFF4.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibWebP.lib;$(ProjectDir)$(Platform)\$(Configuration)\OpenEXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\ZLib.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -170,16 +275,20 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <OpenMPSupport>true</OpenMPSupport>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)$(Platform)\$(Configuration)\FreeImage.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibOpenJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibPNG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibRaw.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibTIFF4.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibWebP.lib;$(ProjectDir)$(Platform)\$(Configuration)\OpenEXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\ZLib.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

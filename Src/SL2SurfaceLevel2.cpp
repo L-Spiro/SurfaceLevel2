@@ -8,16 +8,20 @@
 
 #include "SL2SurfaceLevel2.h"
 #include "Files/SL2StdFile.h"
+#include "Image/SL2Image.h"
+
+#include <format>
 #include <iostream>
 
 int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
     --_iArgC;
     std::u16string sThisDir = sl2::CFileBase::GetFilePath( reinterpret_cast<const char16_t *>((*_wcpArgV++)) );
-
+    ::FreeImage_Initialise();
     sl2::SL2_OPTIONS oOptions;
 
-#define SL2_ERRORT( TXT, CODE )					sl2::PrintError( (TXT), (CODE) );						\
-												if ( oOptions.bPause ) { ::system( "pause" ); }	        \
+#define SL2_ERRORT( TXT, CODE )					sl2::PrintError( reinterpret_cast<const char16_t *>(TXT), (CODE) );						\
+												if ( oOptions.bPause ) { ::system( "pause" ); }	                                        \
+                                                ::FreeImage_DeInitialise();                                                             \
 												return (CODE)
 #define SL2_ERROR( CODE )						SL2_ERRORT( nullptr, (CODE) )
 
@@ -90,7 +94,19 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 
 #undef SL2_ADV
 #undef SL2_CHECK
-    return 0;
+
+    if ( oOptions.vfFinalFormat == sl2::SL2_VK_FORMAT_UNDEFINED ) { oOptions.vfFinalFormat = oOptions.vfAutoFormat; }
+    for ( size_t I = 0; I < oOptions.vInputs.size(); ++I ) {
+        sl2::CImage iImage;
+        sl2::SL2_ERRORS eError = iImage.LoadFile( oOptions.vInputs[I].c_str() );
+        if ( eError != sl2::SL2_E_SUCCESS ) {
+            SL2_ERRORT( std::format( L"Fail to load file: \"{}\".",
+               reinterpret_cast<const wchar_t *>(oOptions.vInputs[I].c_str()) ).c_str(), eError );
+        }
+    }
+
+
+    SL2_ERROR( sl2::SL2_E_SUCCESS );
 
 #undef SL2_ERROR
 #undef SL2_ERRORT

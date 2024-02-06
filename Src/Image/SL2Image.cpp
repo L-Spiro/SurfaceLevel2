@@ -13,16 +13,18 @@
  */
 
 #include "SL2Image.h"
+#include "SL2KtxTexture.h"
+#include "../Files/SL2StdFile.h"
+#include "../Utilities/SL2Stream.h"
+
+#include <basisu_transcoder.h>
 
 
 namespace sl2 {
 
 	CImage::CImage() :
 		m_sArraySize( 0 ),
-		m_ui32Depth( 0 ),
 		m_sFaces( 0 ),
-		m_ui32Width( 0 ),
-		m_ui32Height( 0 ),
 		m_pkifFormat( nullptr ) {
 	}
 	CImage::~CImage() {
@@ -41,15 +43,9 @@ namespace sl2 {
 		m_vMipMaps = std::move( _iOther.m_vMipMaps );
 		m_sArraySize = _iOther.m_sArraySize;
 		m_sFaces = _iOther.m_sFaces;
-		m_ui32Width = _iOther.m_ui32Width;
-		m_ui32Height = _iOther.m_ui32Height;
-		m_ui32Depth = _iOther.m_ui32Depth;
 		m_pkifFormat = _iOther.m_pkifFormat;
 		_iOther.m_sArraySize = 0;
 		_iOther.m_sFaces = 0;
-		_iOther.m_ui32Width = 0;
-		_iOther.m_ui32Height = 0;
-		_iOther.m_ui32Depth = 0;
 		_iOther.m_pkifFormat = nullptr;
 		return (*this);
 	}
@@ -61,11 +57,38 @@ namespace sl2 {
 	void CImage::Reset() {
 		m_sArraySize = 0;
 		m_sFaces = 0;
-		m_ui32Width = 0;
-		m_ui32Height = 0;
-		m_ui32Depth = 0;
 		m_vMipMaps = std::vector<std::unique_ptr<CSurface>>();
 		m_pkifFormat = nullptr;
+	}
+
+	/**
+	 * Loads an image file.  All image slices, faces, and array slices will be loaded.
+	 * 
+	 * \param _pcFile The name of the file to load.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS CImage::LoadFile( const char16_t * _pcFile ) {
+		std::vector<uint8_t> vFile;
+		{
+			CStdFile sfFile;
+			if ( !sfFile.Open( _pcFile ) ) { return SL2_E_FILENOTFOUND; }
+			if ( !sfFile.LoadToMemory( vFile ) ) { return SL2_E_OUTOFMEMORY; }
+		}
+
+		return LoadFile( vFile );
+	}
+
+	/**
+	 * Loads an image file.  All image slices, faces, and array slices will be loaded.
+	 * 
+	 * \param _vData The image file to load.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS CImage::LoadFile( const std::vector<uint8_t> &_vData ) {
+		//CStream sFile( _vData );
+		if ( SL2_E_SUCCESS == LoadKtx1( _vData ) ) { return SL2_E_SUCCESS; }
+		if ( SL2_E_SUCCESS == LoadKtx2( _vData ) ) { return SL2_E_SUCCESS; }
+		return LoadFreeImage( _vData );
 	}
 
 	/**
@@ -78,7 +101,7 @@ namespace sl2 {
 	 * \param _sMips Number of mipmaps.  Must be at least 1.  If 0, a fully mipmap chain is allocated.
 	 * \param _sArray Number of array slices.  Must be at least 1.
 	 * \param _sFaces Number of faces.  Either 1 or 6.
-	 * \return DESC
+	 * \return Returns true if all mipmaps could be allocated and the texture size is valid (non-0) and a supported format.
 	 **/
 	bool CImage::AllocateTexture( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, size_t _sMips, size_t _sArray, size_t _sFaces ) {
 		if ( !_sMips ) {
@@ -89,16 +112,14 @@ namespace sl2 {
 
 		m_sArraySize = _sArray;
 		m_sFaces = _sFaces;
-		m_ui32Width = _ui32Width;
-		m_ui32Height = _ui32Height;
-		m_ui32Depth = _ui32Depth;
 		m_pkifFormat = _pkifFormat;
 		
 		size_t sSrcBaseSize = CFormat::GetFormatSize( _pkifFormat, _ui32Width, _ui32Height, _ui32Depth );
+		if ( !sSrcBaseSize ) { Reset(); return false; }
 		try {
 			m_vMipMaps.resize( _sMips );
 			for ( size_t I = 0; I < _sMips; ++I ) {
-				size_t sBaseSize = CFormat::GetFormatSize( _pkifFormat, _ui32Width, _ui32Height, _ui32Depth );
+				size_t sBaseSize = GetActualPlaneSize( CFormat::GetFormatSize( _pkifFormat, _ui32Width, _ui32Height, _ui32Depth ) );
 				size_t sFullSize = sBaseSize * _sArray * _sFaces;
 				if ( !sFullSize ) { Reset(); return false; }
 
@@ -115,6 +136,414 @@ namespace sl2 {
 		}
 		
 		return true;
+	}
+
+	/**
+	 * Loads using the FreeImage library.
+	 * 
+	 * \param _vData The file to load.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS CImage::LoadFreeImage( const std::vector<uint8_t> &_vData ) {
+		SL2_FREE_IMAGE fiImage( _vData );
+		if ( !fiImage.pmMemory ) { return SL2_E_OUTOFMEMORY; }
+
+		FREE_IMAGE_FORMAT fifFormat = ::FreeImage_GetFileTypeFromMemory( fiImage.pmMemory, 0 );
+		if ( FIF_UNKNOWN == fifFormat ) { return SL2_E_INVALIDFILETYPE; }
+
+		SL2_FREEIMAGE_LOAD_FROM_MEMORY flfmData( fiImage );
+		int iTransIndex = ::FreeImage_GetTransparentIndex( flfmData.pbBitmap );
+
+		uint32_t ui32Width = ::FreeImage_GetWidth( flfmData.pbBitmap );
+		uint32_t ui32Height = ::FreeImage_GetHeight( flfmData.pbBitmap );
+		constexpr uint32_t ui32Depth = 1;
+
+#define FreeImage_GetScanLine( DATA, Y )	FreeImage_GetScanLine( DATA, ui32Height - Y - 1 )
+
+		FREE_IMAGE_TYPE fitType = ::FreeImage_GetImageType( flfmData.pbBitmap );
+
+		switch ( fitType ) {
+			case FIT_BITMAP : {
+				switch ( ::FreeImage_GetBPP( flfmData.pbBitmap ) ) {
+					case 1 : {
+						if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8A8_UNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+						uint8_t * pui8Dst = Data();
+						const RGBQUAD * prgbqPal = ::FreeImage_GetPalette( flfmData.pbBitmap );
+						if ( prgbqPal ) {
+							for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+								const uint8_t * pui8Data = ::FreeImage_GetScanLine( flfmData.pbBitmap, Y );
+								for ( uint32_t X = 0; X < ui32Width; ++X ) {
+									uint8_t ui8Bit = (pui8Data[X>>3] >> (X % 8)) & 1;
+									BYTE bAlpha = prgbqPal[ui8Bit].rgbReserved;
+									if ( iTransIndex != -1 ) {
+										bAlpha = (iTransIndex == ui8Bit) ? 0 : 255;
+									}
+									CFormat::SL2_RGBA_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA_UNORM *>(pui8Dst) + (Y * ui32Width) + X;
+									pRgb->ui8Rgba[SL2_PC_R] = prgbqPal[ui8Bit].rgbRed;
+									pRgb->ui8Rgba[SL2_PC_G] = prgbqPal[ui8Bit].rgbGreen;
+									pRgb->ui8Rgba[SL2_PC_B] = prgbqPal[ui8Bit].rgbBlue;
+									pRgb->ui8Rgba[SL2_PC_A] = bAlpha;
+								}
+							}
+							break;
+						}
+						return SL2_E_INVALIDDATA;
+					}
+					case 4 : {
+						if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8A8_UNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+						uint8_t * pui8Dst = Data();
+						const RGBQUAD * prgbqPal = ::FreeImage_GetPalette( flfmData.pbBitmap );
+						if ( prgbqPal ) {
+							for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+								const uint8_t * pui8Data = ::FreeImage_GetScanLine( flfmData.pbBitmap, Y );
+								for ( uint32_t X = 0; X < ui32Width; ++X ) {
+									uint8_t ui8Bit = (pui8Data[X>>1] >> (X % 2 << 2)) & 0xF;
+									BYTE bAlpha = prgbqPal[ui8Bit].rgbReserved;
+									if ( iTransIndex != -1 ) {
+										bAlpha = (iTransIndex == ui8Bit) ? 0 : 255;
+									}
+									CFormat::SL2_RGBA_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA_UNORM *>(pui8Dst) + (Y * ui32Width) + X;
+									pRgb->ui8Rgba[SL2_PC_R] = prgbqPal[ui8Bit].rgbRed;
+									pRgb->ui8Rgba[SL2_PC_G] = prgbqPal[ui8Bit].rgbGreen;
+									pRgb->ui8Rgba[SL2_PC_B] = prgbqPal[ui8Bit].rgbBlue;
+									pRgb->ui8Rgba[SL2_PC_A] = bAlpha;
+								}
+							}
+							break;
+						}
+						return SL2_E_INVALIDDATA;
+					}
+					case 8 : {
+						if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8A8_UNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+						uint8_t * pui8Dst = Data();
+						const RGBQUAD * prgbqPal = ::FreeImage_GetPalette( flfmData.pbBitmap );
+						if ( prgbqPal ) {
+							for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+								const uint8_t * pui8Data = ::FreeImage_GetScanLine( flfmData.pbBitmap, Y );
+								for ( uint32_t X = 0; X < ui32Width; ++X ) {
+									uint8_t ui8Bit = pui8Data[X];
+									BYTE bAlpha = prgbqPal[ui8Bit].rgbReserved;
+									if ( iTransIndex != -1 ) {
+										bAlpha = (iTransIndex == ui8Bit) ? 0 : 255;
+									}
+									CFormat::SL2_RGBA_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA_UNORM *>(pui8Dst) + (Y * ui32Width) + X;
+									pRgb->ui8Rgba[SL2_PC_R] = prgbqPal[ui8Bit].rgbRed;
+									pRgb->ui8Rgba[SL2_PC_G] = prgbqPal[ui8Bit].rgbGreen;
+									pRgb->ui8Rgba[SL2_PC_B] = prgbqPal[ui8Bit].rgbBlue;
+									pRgb->ui8Rgba[SL2_PC_A] = bAlpha;
+								}
+							}
+							break;
+						}
+						return SL2_E_INVALIDDATA;
+					}
+					case 16 : {
+						
+						uint8_t * pui8Dst = Data();
+
+						unsigned uRedMask = ::FreeImage_GetRedMask( flfmData.pbBitmap );
+						unsigned uGreenMask = ::FreeImage_GetGreenMask( flfmData.pbBitmap );
+						unsigned uBlueMask = ::FreeImage_GetBlueMask( flfmData.pbBitmap );
+						if ( (uRedMask == FI16_565_RED_MASK) && (uGreenMask == FI16_565_GREEN_MASK) && (uBlueMask == FI16_565_BLUE_MASK) ) {
+							if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R5G6B5_UNORM_PACK16 ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+							uint8_t * pui8Dst = Data();
+							for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+								const uint16_t * pui16Data = reinterpret_cast<uint16_t *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
+								for ( uint32_t X = 0; X < ui32Width; ++X ) {
+									CFormat::SL2_R5G6B5_PACKED * pRgb = reinterpret_cast<CFormat::SL2_R5G6B5_PACKED *>(pui8Dst) + (Y * ui32Width) + X;
+									pRgb->ui16R = (pui16Data[X] & FI16_565_RED_MASK) >> FI16_565_RED_SHIFT;
+									pRgb->ui16G = (pui16Data[X] & FI16_565_GREEN_MASK) >> FI16_565_GREEN_SHIFT;
+									pRgb->ui16B = (pui16Data[X] & FI16_565_BLUE_MASK) >> FI16_565_BLUE_SHIFT;
+								}
+							}
+						}
+						else {
+							if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R5G5B5A1_UNORM_PACK16 ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+							uint8_t * pui8Dst = Data();
+							for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+								const uint16_t * pui16Data = reinterpret_cast<uint16_t *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
+								for ( uint32_t X = 0; X < ui32Width; ++X ) {
+									CFormat::SL2_A1R5G6B5_PACKED * pRgba = reinterpret_cast<CFormat::SL2_A1R5G6B5_PACKED *>(pui8Dst) + (Y * ui32Width) + X;
+									pRgba->ui16R = (pui16Data[X] & FI16_555_RED_MASK) >> FI16_555_RED_SHIFT;
+									pRgba->ui16G = (pui16Data[X] & FI16_555_GREEN_MASK) >> FI16_555_GREEN_SHIFT;
+									pRgba->ui16B = (pui16Data[X] & FI16_555_BLUE_MASK) >> FI16_555_BLUE_SHIFT;
+									pRgba->ui16A = (pui16Data[X] >> 7);
+								}
+							}
+						}
+						break;
+					}
+					case 24 : {
+						if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8_UNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+						uint8_t * pui8Dst = Data();
+						for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+							const RGBTRIPLE * prgbtData = reinterpret_cast<RGBTRIPLE *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
+							for ( uint32_t X = 0; X < ui32Width; ++X ) {
+								CFormat::SL2_RGB_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGB_UNORM *>(pui8Dst) + (Y * ui32Width) + X;
+								pRgb->ui8Rgb[SL2_PC_R] = prgbtData[X].rgbtRed;
+								pRgb->ui8Rgb[SL2_PC_G] = prgbtData[X].rgbtGreen;
+								pRgb->ui8Rgb[SL2_PC_B] = prgbtData[X].rgbtBlue;
+							}
+						}
+						break;
+					}
+					case 32 : {
+						if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8A8_UNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+						uint8_t * pui8Dst = Data();
+						for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+							const RGBQUAD * prgbqData = reinterpret_cast<RGBQUAD *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
+							for ( uint32_t X = 0; X < ui32Width; ++X ) {
+								CFormat::SL2_RGBA_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA_UNORM *>(pui8Dst) + (Y * ui32Width) + X;
+								pRgb->ui8Rgba[SL2_PC_R] = prgbqData[X].rgbRed;
+								pRgb->ui8Rgba[SL2_PC_G] = prgbqData[X].rgbGreen;
+								pRgb->ui8Rgba[SL2_PC_B] = prgbqData[X].rgbBlue;
+								pRgb->ui8Rgba[SL2_PC_A] = prgbqData[X].rgbReserved;
+							}
+						}
+						break;
+					}
+				}
+				break;	// FIT_BITMAP
+			}
+			case FIT_UINT16 : {
+				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16G16B16_UNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+				uint8_t * pui8Dst = Data();
+				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+					const uint16_t * pui16Data = reinterpret_cast<uint16_t *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+						uint16_t ui16Bit = pui16Data[X];
+						CFormat::SL2_RGB16_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGB16_UNORM *>(pui8Dst) + (Y * ui32Width) + X;
+						pRgb->ui16Rgb[SL2_PC_R] = ui16Bit;
+						pRgb->ui16Rgb[SL2_PC_G] = ui16Bit;
+						pRgb->ui16Rgb[SL2_PC_B] = ui16Bit;
+					}
+				}
+				break;	// FIT_UINT16
+			}
+			case FIT_INT16 : {
+				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16G16B16_SNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+				uint8_t * pui8Dst = Data();
+				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+					const uint16_t * pui16Data = reinterpret_cast<uint16_t *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+						uint16_t ui16Bit = pui16Data[X];
+						CFormat::SL2_RGB16_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGB16_UNORM *>(pui8Dst) + (Y * ui32Width) + X;
+						pRgb->ui16Rgb[SL2_PC_R] = ui16Bit;
+						pRgb->ui16Rgb[SL2_PC_G] = ui16Bit;
+						pRgb->ui16Rgb[SL2_PC_B] = ui16Bit;
+					}
+				}
+				break;	// FIT_INT16
+			}
+			case FIT_UINT32 : {
+				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R32_UINT ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+				uint8_t * pui8Dst = Data();
+				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+					const uint32_t * pui32Data = reinterpret_cast<uint32_t *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+						uint32_t * pRgb = reinterpret_cast<uint32_t *>(pui8Dst) + (Y * ui32Width) + X;
+						pRgb[0] = pui32Data[X];
+					}
+				}
+				break;	// FIT_UINT32
+			}
+			case FIT_INT32 : {
+				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R32_SINT ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+				uint8_t * pui8Dst = Data();
+				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+					const int32_t * pi32Data = reinterpret_cast<int32_t *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+						int32_t * pRgb = reinterpret_cast<int32_t *>(pui8Dst) + (Y * ui32Width) + X;
+						pRgb[0] = pi32Data[X];
+					}
+				}
+				break;	// FIT_INT32
+			}
+			case FIT_FLOAT : {
+				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R32_SFLOAT ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+				uint8_t * pui8Dst = Data();
+				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+					const float * pfData = reinterpret_cast<float *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+						float fBit = pfData[X];
+						float * pRgb = reinterpret_cast<float *>(pui8Dst) + (Y * ui32Width) + X;
+						pRgb[0] = fBit;
+					}
+				}
+				break;	// FIT_FLOAT
+			}
+			case FIT_DOUBLE : {
+				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64_SFLOAT ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+				uint8_t * pui8Dst = Data();
+				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+					const double * pdData = reinterpret_cast<double *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+						double * pRgb = reinterpret_cast<double *>(pui8Dst) + (Y * ui32Width) + X;
+						pRgb[0] = pdData[X];
+					}
+				}
+				break;	// FIT_DOUBLE
+			}
+			case FIT_COMPLEX : {
+				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64_SFLOAT ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+				uint8_t * pui8Dst = Data();
+				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+					const FICOMPLEX * pfData = reinterpret_cast<FICOMPLEX *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+						FICOMPLEX * pRgb = reinterpret_cast<FICOMPLEX *>(pui8Dst) + (Y * ui32Width) + X;
+						(*pRgb) = pfData[X];
+					}
+				}
+				break;	// FIT_COMPLEX
+			}
+			case FIT_RGB16 : {
+				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16G16B16_UNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+				uint8_t * pui8Dst = Data();
+				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+					const FIRGB16 * pfrgb16Data = reinterpret_cast<FIRGB16 *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+						CFormat::SL2_RGB16_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGB16_UNORM *>(pui8Dst) + (Y * ui32Width) + X;
+						pRgb->ui16Rgb[SL2_PC_R] = pfrgb16Data[X].red;
+						pRgb->ui16Rgb[SL2_PC_G] = pfrgb16Data[X].green;
+						pRgb->ui16Rgb[SL2_PC_B] = pfrgb16Data[X].blue;
+					}
+				}
+				break;	// FIT_RGB16
+			}
+			case FIT_RGBA16 : {
+				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16G16B16A16_UNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+				uint8_t * pui8Dst = Data();
+				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+					const FIRGBA16 * pfrgba16Data = reinterpret_cast<FIRGBA16 *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+						CFormat::SL2_RGBA16_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA16_UNORM *>(pui8Dst) + (Y * ui32Width) + X;
+						pRgb->ui16Rgba[SL2_PC_R] = pfrgba16Data[X].red;
+						pRgb->ui16Rgba[SL2_PC_G] = pfrgba16Data[X].green;
+						pRgb->ui16Rgba[SL2_PC_B] = pfrgba16Data[X].blue;
+						pRgb->ui16Rgba[SL2_PC_A] = pfrgba16Data[X].alpha;
+					}
+				}
+				break;	// FIT_RGBA16
+			}
+			case FIT_RGBF : {
+				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R32G32B32_SFLOAT ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+				uint8_t * pui8Dst = Data(); 
+				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+					const FIRGBF * pfData = reinterpret_cast<FIRGBF *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+						CFormat::SL2_RGB * pRgb = reinterpret_cast<CFormat::SL2_RGB *>(pui8Dst) + (Y * ui32Width) + X;
+						pRgb->fRgb[SL2_PC_R] = pfData[X].red;
+						pRgb->fRgb[SL2_PC_G] = pfData[X].green;
+						pRgb->fRgb[SL2_PC_B] = pfData[X].blue;
+					}
+				}
+				break;	// FIT_RGBF
+			}
+			case FIT_RGBAF : {
+				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R32G32B32A32_SFLOAT ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
+				uint8_t * pui8Dst = Data();
+				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+					const FIRGBAF * pfData = reinterpret_cast<FIRGBAF *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+						CFormat::SL2_RGBA * pRgb = reinterpret_cast<CFormat::SL2_RGBA *>(pui8Dst) + (Y * ui32Width) + X;
+						pRgb->fRgba[SL2_PC_R] = pfData[X].red;
+						pRgb->fRgba[SL2_PC_G] = pfData[X].green;
+						pRgb->fRgba[SL2_PC_B] = pfData[X].blue;
+						pRgb->fRgba[SL2_PC_A] = pfData[X].alpha;
+					}
+				}
+				break;	// FIT_RGBAF
+			}
+			default : {}
+		};
+
+#undef FreeImage_GetScanLine
+
+		return SL2_E_SUCCESS;
+	}
+
+	/**
+	 * Loads a KTX1 file from memory.
+	 * 
+	 * \param _vData The file to load.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS CImage::LoadKtx1( const std::vector<uint8_t> &_vData ) {
+		CKtxTexture<ktxTexture1> kt1Tex;
+		::KTX_error_code ecErr = ::ktxTexture1_CreateFromMemory( _vData.data(), _vData.size(),
+			KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT,
+			kt1Tex.HandlePointer() );
+		if ( KTX_SUCCESS == ecErr && kt1Tex.Handle() ) {
+			if ( !AllocateTexture( CFormat::FindFormatDataByOgl( static_cast<SL2_KTX_INTERNAL_FORMAT>(kt1Tex.Handle()->glInternalformat) ),
+				kt1Tex.Handle()->baseWidth, kt1Tex.Handle()->baseHeight, kt1Tex.Handle()->baseDepth,
+				kt1Tex.Handle()->numLevels, kt1Tex.Handle()->numLayers, kt1Tex.Handle()->numFaces ) ) { return SL2_E_OUTOFMEMORY; }
+
+			if ( KTX_SUCCESS == ::ktxTexture_IterateLevelFaces( ktxTexture( kt1Tex.Handle() ), Ktx1ImageLoad, this ) ) {
+				return SL2_E_SUCCESS;
+			}
+
+		}
+		return SL2_E_INVALIDFILETYPE;
+	}
+
+	/**
+	 * Loads a KTX2 file from memory.
+	 * 
+	 * \param _vData The file to load.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS CImage::LoadKtx2( const std::vector<uint8_t> &_vData ) {
+		CKtxTexture<ktxTexture2> kt2Tex;
+		::KTX_error_code ecErr = ::ktxTexture2_CreateFromMemory( _vData.data(), _vData.size(),
+			KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT,
+			kt2Tex.HandlePointer() );
+		if ( KTX_SUCCESS == ecErr && kt2Tex.Handle() ) {
+			if ( ::ktxTexture2_NeedsTranscoding( (*kt2Tex.HandlePointer()) ) ) {
+				if ( KTX_SUCCESS != ::ktxTexture2_TranscodeBasis( (*kt2Tex.HandlePointer()), KTX_TTF_RGBA32, 0 ) ) {
+					return SL2_E_INVALIDDATA;
+				}
+			}
+			if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( static_cast<SL2_VKFORMAT>(kt2Tex.Handle()->vkFormat) ),
+				kt2Tex.Handle()->baseWidth, kt2Tex.Handle()->baseHeight, kt2Tex.Handle()->baseDepth,
+				kt2Tex.Handle()->numLevels, kt2Tex.Handle()->numLayers, kt2Tex.Handle()->numFaces ) ) { return SL2_E_OUTOFMEMORY; }
+
+			if ( KTX_SUCCESS == ::ktxTexture_IterateLevelFaces( ktxTexture( kt2Tex.Handle() ), Ktx1ImageLoad, this ) ) {
+				return SL2_E_SUCCESS;
+			}
+		}
+		return SL2_E_INVALIDFILETYPE;
+	}
+
+	/**
+	 * Callback to load each face's data from a KTX file.
+	 *
+	 * \param _iMipLevel Mipmap level, starting from 0.
+	 * \param _iFace Face index, usually 0, or 0-5 for cube maps.
+	 * \param _iWidth Width of the image.
+	 * \param _iHeight Height of the image.
+	 * \param _iDepth Depth of the image.
+	 * \param _ui64FaceLodSize Number of bytes to which _pvPixels points.
+	 * \param _pvPixels The actual texture data.
+	 * \param _pvUserdata User data passed to the callback for its own use.
+	 * \return Returns an error code to indicate failure or success.
+	 */
+	::KTX_error_code CImage::Ktx1ImageLoad( int _iMipLevel, int _iFace,
+		int _iWidth, int _iHeight, int _iDepth,
+		ktx_uint64_t _ui64FaceLodSize,
+		void * _pvPixels, void * _pvUserdata ) {
+
+		CImage * piImage = reinterpret_cast<CImage *>(_pvUserdata);
+		size_t sSrcSize = CFormat::GetFormatSize( piImage->Format(), _iWidth, _iHeight, _iDepth );
+		_ui64FaceLodSize /= piImage->ArraySize();
+		if ( _ui64FaceLodSize < sSrcSize || 0 == sSrcSize ) {
+			return ::KTX_FILE_READ_ERROR;
+		}
+		const uint8_t * pui8Src = reinterpret_cast<uint8_t *>(_pvPixels);
+		for ( size_t I = 0; I < piImage->ArraySize(); ++I ) {
+			uint8_t * pui8Dst = piImage->Data( _iMipLevel, 0, I, _iFace );
+			std::memcpy( pui8Dst, pui8Src + _ui64FaceLodSize * I, sSrcSize );
+		}
+		return ::KTX_SUCCESS;
 	}
 
 }	// namespace sl2

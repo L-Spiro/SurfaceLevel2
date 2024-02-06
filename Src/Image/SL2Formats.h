@@ -67,6 +67,26 @@
 namespace sl2 {
 
 	// == Enumerations.
+	// == Enumerations.
+	/** Errors. */
+	enum SL2_ERRORS : int16_t {
+		SL2_E_SUCCESS																= 0,							/**< No problem. */
+		SL2_E_OUTOFMEMORY															= -1,							/**< Out of memory. */
+		SL2_E_FILENOTFOUND															= -2,							/**< File was not found at the given path. */
+		SL2_E_INVALIDWRITEPERMISSIONS												= -3,							/**< Unable to write to a file. */
+		SL2_E_NODISKSPACE															= -4,							/**< Unable to write to a file (disk space). */
+		SL2_E_INVALIDFILETYPE														= -5,							/**< File exists but is not in the expected format. */
+		SL2_E_INVALIDCALL															= -6,							/**< Invalid call. */
+		SL2_E_INVALIDDATA															= -7,							/**< Invalid input data. */
+		SL2_E_INTERNALERROR															= -8,							/**< Internal error. */
+		SL2_E_FEATURENOTSUPPORTED													= -9,							/**< Feature not yet supported. */
+		SL2_E_PARTIALFAILURE														= -10,							/**< Within multiple tasks, one or more failed. */
+		SL2_E_BADVERSION															= -11,							/**< Unsupported version (of a file etc.) */
+		SL2_E_FILEOVERFLOW															= -12,							/**< The file exceeded the maximum size supported by the system. */
+		SL2_E_FILEWRITEERROR														= -13,							/**< An error occurred while writing the file. */
+		SL2_E_BADFORMAT																= -14,							/**< Bad data format. */
+	};
+
 	/**
 	 * glType values.  Table 8.2 of OpenGL 4.4.
 	 */
@@ -1272,6 +1292,47 @@ namespace sl2 {
 		typedef struct SL2_RGBA {
 			float																	fRgba[4];
 		} * LPSL2_RGBA, * const LPCSL2_RGBA;
+
+		/** An RGB color component. */
+		typedef struct SL2_RGB {
+			float																	fRgb[3];
+		} * LPSL2_RGB, * const LPCSL2_RGB;
+
+		/** An RGBA color component. */
+		typedef struct SL2_RGBA_UNORM {
+			uint8_t																	ui8Rgba[4];
+		} * LPSL2_RGBA_UNORM, * const LPCSL2_RGBA_UNORM;
+
+		/** An RGB color component. */
+		typedef struct SL2_RGB_UNORM {
+			uint8_t																	ui8Rgb[3];
+		} * LPSL2_RGB_UNORM, * const LPCSL2_RGB_UNORM;
+
+		/** An RGBA color component. */
+		typedef struct SL2_RGBA16_UNORM {
+			uint16_t																ui16Rgba[4];
+		} * LPSL2_RGBA16_UNORM, * const LPCSL2_RGBA16_UNORM;
+
+		/** An RGB color component. */
+		typedef struct SL2_RGB16_UNORM {
+			uint16_t																ui16Rgb[3];
+		} * LPSL2_RGB16_UNORM, * const LPCSL2_RGB16_UNORM;
+
+		/** An R5G6B5 color component. */
+		typedef struct SL2_R5G6B5_PACKED {
+			uint16_t																ui16R : 5;
+			uint16_t																ui16G : 6;
+			uint16_t																ui16B : 5;
+		} * LPSL2_R5G6B5_PACKED, * const LPCSL2_R5G6B5_PACKED;
+
+		/** An A1R5G5B5 color component. */
+		typedef struct SL2_A1R5G6B5_PACKED {
+			uint16_t																ui16R : 5;
+			uint16_t																ui16G : 5;
+			uint16_t																ui16B : 5;
+			uint16_t																ui16A : 1;
+		} * LPSL2_A1R5G6B5_PACKED, * const LPCSL2_A1R5G6B5_PACKED;
+
 
 		/** Options for creating DXT file images. */
 		typedef struct SL2_DXT_OPTIONS {
@@ -3690,8 +3751,8 @@ namespace sl2 {
 	 * \param _pvParms Unused.
 	 * \return Returns the size of the compressed data.
 	 */
-	inline uint32_t CFormat::GetCompressedSizeBc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t /*_ui32Depth*/, uint32_t _ui32Factor, const void * /*_pvParms*/ ) {
-		return (((_ui32Width + 3) >> 2) * ((_ui32Height + 3) >> 2) * _ui32Factor) >> 3;
+	inline uint32_t CFormat::GetCompressedSizeBc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Factor, const void * /*_pvParms*/ ) {
+		return ((((_ui32Width + 3) >> 2) * ((_ui32Height + 3) >> 2) * _ui32Factor) >> 3) * _ui32Depth;
 	}
 
 	/**
