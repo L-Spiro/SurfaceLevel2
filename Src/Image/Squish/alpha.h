@@ -31,9 +31,9 @@
 namespace squish {
 
 #ifdef SQUISH_USE_FLOATS
-void CompressAlphaDxt3( float const* rgba, int mask, void* block );
-void CompressAlphaDxt5( float const* rgba, int mask, void* block, int alphaIndex = 3 );
-void CompressAlphaDxt5Signed( float const* rgba, int mask, void* block, int alphaIndex = 3 );
+void CompressAlphaDxt3( double const* rgba, int mask, void* block );
+void CompressAlphaDxt5( double const* rgba, int mask, void* block, int alphaIndex = 3 );
+void CompressAlphaDxt5Signed( double const* rgba, int mask, void* block, int alphaIndex = 3 );
 #else
 void CompressAlphaDxt3( u8 const* rgba, int mask, void* block );
 void CompressAlphaDxt5( u8 const* rgba, int mask, void* block, int alphaIndex = 3 );

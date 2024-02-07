@@ -116,7 +116,7 @@ enum
 	perceived quality.
 */
 #ifdef SQUISH_USE_FLOATS
-void Compress( float const* rgba, void* block, int flags, const SquishConfig &config );
+void Compress( double const* rgba, void* block, int flags, const SquishConfig &config );
 #else
 void Compress( u8 const* rgba, void* block, int flags, const SquishConfig &config );
 #endif	// #ifdef SQUISH_USE_FLOATS
@@ -161,7 +161,7 @@ void Compress( u8 const* rgba, void* block, int flags, const SquishConfig &confi
 	perceived quality.
 */
 #ifdef SQUISH_USE_FLOATS
-void CompressMasked( float const* rgba, int mask, void* block, int flags, const SquishConfig &config );
+void CompressMasked( double const* rgba, int mask, void* block, int flags, const SquishConfig &config );
 #else
 void CompressMasked( u8 const* rgba, int mask, void* block, int flags, const SquishConfig &config );
 #endif	// #ifdef SQUISH_USE_FLOATS

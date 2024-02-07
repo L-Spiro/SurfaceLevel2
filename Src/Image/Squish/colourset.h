@@ -37,7 +37,7 @@ class ColorSet
 {
 public:
 #ifdef SQUISH_USE_FLOATS
-	ColorSet( float const* rgba, int mask, int flags, const SquishConfig &config );
+	ColorSet( double const* rgba, int mask, int flags, const SquishConfig &config );
 #else
 	ColorSet( u8 const* rgba, int mask, int flags, const SquishConfig &config );
 #endif	// #ifdef SQUISH_USE_FLOATS

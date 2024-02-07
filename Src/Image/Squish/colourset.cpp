@@ -28,7 +28,7 @@
 namespace squish {
 
 #ifdef SQUISH_USE_FLOATS
-ColorSet::ColorSet( float const* rgba, int mask, int flags, const SquishConfig &config )
+ColorSet::ColorSet( double const* rgba, int mask, int flags, const SquishConfig &config )
   : m_count( 0 ), 
 	m_transparent( false )
 {

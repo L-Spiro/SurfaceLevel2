@@ -137,6 +137,15 @@ namespace sl2 {
 		SL2_ERRORS											LoadFile( const std::vector<uint8_t> &_vData );
 
 		/**
+		 * Converts to another format.  _iDst holds the converted image.
+		 * 
+		 * \param _pkifFormat The format to which to convert.
+		 * \param _iDst Holds the converted image.
+		 * \return Returns an error code.
+		 **/
+		SL2_ERRORS											ConvertToFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, CImage &_iDst );
+
+		/**
 		 * Gets the final size of a byte buffer to be used as a texture plane.  The plane will be over-allocated by 8 bytes and then rounded up to the nearest 8 bytes.
 		 *	So if a 1-by-1 32-bit tecture is being allocated, 4 will be passed to _sSize, and 16 will be returned ((4+8) -> 16).
 		 * 

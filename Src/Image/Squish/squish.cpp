@@ -57,7 +57,7 @@ static int FixFlags( int flags )
 	return method | fit | metric | extra;
 }
 #ifdef SQUISH_USE_FLOATS
-void Compress( float const* rgba, void* block, int flags, const SquishConfig &config )
+void Compress( double const* rgba, void* block, int flags, const SquishConfig &config )
 #else
 void Compress( u8 const* rgba, void* block, int flags, const SquishConfig &config )
 #endif	// #ifdef SQUISH_USE_FLOATS
@@ -66,7 +66,7 @@ void Compress( u8 const* rgba, void* block, int flags, const SquishConfig &confi
 	CompressMasked( rgba, 0xffff, block, flags, config );
 }
 #ifdef SQUISH_USE_FLOATS
-void CompressMasked( float const* rgba, int mask, void* block, int flags, const SquishConfig &config )
+void CompressMasked( double const* rgba, int mask, void* block, int flags, const SquishConfig &config )
 #else
 void CompressMasked( u8 const* rgba, int mask, void* block, int flags, const SquishConfig &config )
 #endif	// #ifdef SQUISH_USE_FLOATS
@@ -199,8 +199,8 @@ void CompressImage( u8 const* rgba, int width, int height, void* blocks, int fla
 		{
 			// build the 4x4 block of pixels
 #ifdef SQUISH_USE_FLOATS
-			float sourceRgba[16*4];
-			float* targetPixel = sourceRgba;
+			double sourceRgba[16*4];
+			double* targetPixel = sourceRgba;
 #else
 			u8 sourceRgba[16*4];
 			u8* targetPixel = sourceRgba;
@@ -222,7 +222,7 @@ void CompressImage( u8 const* rgba, int width, int height, void* blocks, int fla
 						u8 const* sourcePixel = rgba + 4*( width*sy + sx );
 						for( int i = 0; i < 4; ++i ) {
 #ifdef SQUISH_USE_FLOATS
-							*targetPixel++ = (*sourcePixel++) * (1.0f / 255.0f);
+							*targetPixel++ = (*sourcePixel++) * (1.0 / 255.0);
 #else
 							*targetPixel++ = *sourcePixel++;
 #endif	// #ifdef SQUISH_USE_FLOATS

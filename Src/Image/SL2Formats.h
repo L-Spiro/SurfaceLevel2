@@ -49,7 +49,7 @@
 #define SL2_MAX_RGB9E5_MANTISSA														(SL2_RGB9E5_MANTISSA_VALUES - 1)
 
 /** RGB9_E5 max. */
-#define SL2_MAX_RGB9E5																(static_cast<float>(SL2_MAX_RGB9E5_MANTISSA) / SL2_RGB9E5_MANTISSA_VALUES * (1 << SL2_MAX_RGB9E5_EXP))
+#define SL2_MAX_RGB9E5																(static_cast<double>(SL2_MAX_RGB9E5_MANTISSA) / SL2_RGB9E5_MANTISSA_VALUES * (1 << SL2_MAX_RGB9E5_EXP))
 
 /** RGB9_E5 epsilon. */
 #define SL2_EPSILON_RGB9E5															((1.0 / SL2_RGB9E5_MANTISSA_VALUES) / (1 << SL2_RGB9E5_EXP_BIAS))
@@ -63,6 +63,11 @@
 /** Maximum number of threads to run concurrently for BC conversions. */
 #define SL2_BC_MAX_THREADS															16
 
+
+#pragma warning( push )
+
+// warning C4293: '>>' : shift count negative or too big, undefined behavior
+//#pragma warning( disable : 4293 )
 
 namespace sl2 {
 
@@ -91,6 +96,7 @@ namespace sl2 {
 	 * glType values.  Table 8.2 of OpenGL 4.4.
 	 */
 	enum SL2_KTX_TYPE : uint16_t {
+		SL2_KT_GL_INVALID															= 0,
 		SL2_KT_GL_BYTE																= 0x1400, /** GL_BYTE */
 		SL2_KT_GL_UNSIGNED_BYTE														= 0x1401, /** GL_UNSIGNED_BYTE */
 		SL2_KT_GL_SHORT																= 0x1402, /** GL_SHORT */
@@ -126,6 +132,7 @@ namespace sl2 {
 	 * glFormat values.  Table 8.3 of OpenGL 4.4.
 	 */
 	enum SL2_KTX_FORMAT : uint16_t {
+		SL2_KF_GL_INVALID															= 0,
 		SL2_KF_GL_RED																= 0x1903, /** GL_RED */
 		SL2_KF_GL_GREEN																= 0x1904, /** GL_GREEN */
 		SL2_KF_GL_BLUE																= 0x1905, /** GL_BLUE */
@@ -161,6 +168,7 @@ namespace sl2 {
 	 * glInternalFormat values.  Tables 8.12, 8.13, and 8.14 of OpenGL 4.4.
 	 */
 	enum SL2_KTX_INTERNAL_FORMAT : uint16_t {
+		SL2_KIF_GL_INVALID															= 0,
 		//
 		// 8 bits per component
 		//
@@ -489,6 +497,7 @@ namespace sl2 {
 	 * glBaseInternalFormat values.  Table 8.11 of OpenGL 4.4.
 	 */
 	enum SL2_KTX_BASE_INTERNAL_FORMAT : uint16_t {
+		SL2_KBIF_GL_INVALID															= 0,
 		SL2_KBIF_GL_RED																= 0x1903, /** GL_RED */
 		SL2_KBIF_GL_GREEN															= 0x1904, /** GL_GREEN */
 		SL2_KBIF_GL_BLUE															= 0x1905, /** GL_BLUE */
@@ -1224,11 +1233,11 @@ namespace sl2 {
 		/** The compression-size calculator. */
 		typedef uint32_t															(* PfCompSizeFunc)( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Factor, const void * _pvParms );
 
-		/** Function type for converting from any SL2_KTX_INTERNAL_FORMAT to RGBA32F. */
-		typedef bool																(* PfToRgba32F)( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms );
+		/** Function type for converting from any SL2_KTX_INTERNAL_FORMAT to RGBA64F. */
+		typedef bool																(* PfToRgba64F)( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms );
 
-		/** Function type for converting from RGBA32F to an SL2_KTX_INTERNAL_FORMATformat. */
-		typedef bool																(* PfFromRgba32F)( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms );
+		/** Function type for converting from RGBA64F to an SL2_KTX_INTERNAL_FORMATformat. */
+		typedef bool																(* PfFromRgba64F)( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms );
 
 		/** Internal format data. */
 		typedef struct SL2_KTX_INTERNAL_FORMAT_DATA {
@@ -1280,10 +1289,10 @@ namespace sl2 {
 			bool																	bPalette;
 			/** Function for getting its compressed size. */
 			PfCompSizeFunc															pfCompSizeFunc;
-			/** Function to convert to RGBA32F. */
-			PfToRgba32F																pfToRgba32F;
-			/** Function to convert from RGBA32F to the internal OpenGL/Vulkan format. */
-			PfFromRgba32F															pfFromRgba32F;
+			/** Function to convert to RGBA64F. */
+			PfToRgba64F																pfToRgba64F;
+			/** Function to convert from RGBA64F to the internal OpenGL/Vulkan format. */
+			PfFromRgba64F															pfFromRgba64F;
 			/** A custom parameter that can be passed to conversion functions. */
 			void *																	pvCustom;
 		} * LPSL2_KTX_INTERNAL_FORMAT_DATA, * const LPCSL2_KTX_INTERNAL_FORMAT_DATA;
@@ -1327,10 +1336,10 @@ namespace sl2 {
 
 		/** An A1R5G5B5 color component. */
 		typedef struct SL2_A1R5G6B5_PACKED {
+			uint16_t																ui16A : 1;
 			uint16_t																ui16R : 5;
 			uint16_t																ui16G : 5;
 			uint16_t																ui16B : 5;
-			uint16_t																ui16A : 1;
 		} * LPSL2_A1R5G6B5_PACKED, * const LPCSL2_A1R5G6B5_PACKED;
 
 
@@ -1551,7 +1560,10 @@ namespace sl2 {
 		 * \param _ui32Total Number of texels in a row.
 		 * \return Returns the number of bytes in a row of tightly packed texel data.
 		 */
-		static inline uint32_t SL2_FASTCALL											GetRowSize( SL2_VKFORMAT _vfFormat, uint32_t _ui32Total ) { return _ui32Total * GetFormatSize( _vfFormat ); }
+		static inline uint32_t SL2_FASTCALL											GetRowSize( SL2_VKFORMAT _vfFormat, uint32_t _ui32Total ) {
+			uint32_t ui32Row = _ui32Total * GetFormatSize( _vfFormat );
+			return SL2_ROUND_UP( ui32Row, 4UL );
+		}
 
 		/**
 		 * Gets the width of a row of texels in bytes.
@@ -1560,7 +1572,10 @@ namespace sl2 {
 		 * \param _ui32Total Number of texels in a row.
 		 * \return Returns the number of bytes in a row of tightly packed texel data.
 		 */
-		static inline uint32_t SL2_FASTCALL											GetRowSize( SL2_DXGI_FORMAT _dfFormat, uint32_t _ui32Total ) { return _ui32Total * GetFormatSize( _dfFormat ); }
+		static inline uint32_t SL2_FASTCALL											GetRowSize( SL2_DXGI_FORMAT _dfFormat, uint32_t _ui32Total ) {
+			uint32_t ui32Row = _ui32Total * GetFormatSize( _dfFormat );
+			return SL2_ROUND_UP( ui32Row, 4UL );
+		}
 
 		/**
 		 * Gets the width of a row of texels in bytes.
@@ -1569,7 +1584,10 @@ namespace sl2 {
 		 * \param _ui32Total Number of texels in a row.
 		 * \return Returns the number of bytes in a row of tightly packed texel data.
 		 */
-		static inline uint32_t SL2_FASTCALL											GetRowSize( SL2_KTX_INTERNAL_FORMAT _kifFormat, uint32_t _ui32Total ) { return _ui32Total * GetFormatSize( _kifFormat ); }
+		static inline uint32_t SL2_FASTCALL											GetRowSize( SL2_KTX_INTERNAL_FORMAT _kifFormat, uint32_t _ui32Total ) {
+			uint32_t ui32Row = _ui32Total * GetFormatSize( _kifFormat );
+			return SL2_ROUND_UP( ui32Row, 4UL );
+		}
 
 		/**
 		 * Gets the width of a row of texels in bytes.
@@ -1578,7 +1596,10 @@ namespace sl2 {
 		 * \param _ui32Total Number of texels in a row.
 		 * \return Returns the number of bytes in a row of tightly packed texel data.
 		 */
-		static inline uint32_t SL2_FASTCALL											GetRowSize( SL2_MTLPIXELFORMAT _mpfFormat, uint32_t _ui32Total ) { return _ui32Total * GetFormatSize( _mpfFormat ); }
+		static inline uint32_t SL2_FASTCALL											GetRowSize( SL2_MTLPIXELFORMAT _mpfFormat, uint32_t _ui32Total ) {
+			uint32_t ui32Row = _ui32Total * GetFormatSize( _mpfFormat );
+			return SL2_ROUND_UP( ui32Row, 4UL );
+		}
 
 
 	protected :
@@ -1586,9 +1607,9 @@ namespace sl2 {
 		/** A block of texels for DDS encoding. */
 		typedef union SL2_BLOCK {
 			struct SL2_COLOR {
-				float																fR, fG, fB, fA;
+				double																dR, dG, dB, dA;
 			}																		s;
-			float																	fValues[4];
+			double																	dValues[4];
 
 
 			// == Operators.
@@ -1634,32 +1655,32 @@ namespace sl2 {
 		 * Generic conversion of a single integer component to a float (normalized).
 		 *
 		 * \param _ui64Value The RGBA texel.
-		 * \param _fDefault The default value to return if there are no bits for the component within _ui64Value (_uBits is 0).
-		 * \return Returns the component extracted from _ui64Value and converted to a float.
+		 * \param _dDefault The default value to return if there are no bits for the component within _ui64Value (_uBits is 0).
+		 * \return Returns the component extracted from _ui64Value and converted to a double.
 		 */
 		template <unsigned _uBits, unsigned _uShift, unsigned _uSigned, unsigned _bSrgb>
-		static inline float 														StdIntComponentTo32F_Norm( uint64_t _ui64Value, float _fDefault ) {
+		static inline double 														StdIntComponentTo64F_Norm( uint64_t _ui64Value, double _dDefault ) {
 			if constexpr ( _uBits != 0 ) {
 				if constexpr ( _uSigned != 0 ) {
-					const uint64_t ui64Mask = (1ULL << _uBits) - 1ULL;
+					constexpr uint64_t ui64Mask = ~0ULL >> (64U - _uBits);
 					int64_t i64Texel = ((_ui64Value >> _uShift) & ui64Mask);
 					// Sign-extend.
-					i64Texel <<= 64ULL - _uBits;
-					i64Texel >>= 64ULL - _uBits;
+					i64Texel <<= 64U - _uBits;
+					i64Texel >>= 64U - _uBits;
 					// warning C4293: '<<': shift count negative or too big, undefined behavior
 					//	_uBits can't be 0 so this warning is invalid.
 					// warning C4723: potential divide by 0
 					//	_uBits can't be 0 so this warning is invalid.
-					float fFinal = CUtilities::Clamp<float>( i64Texel / static_cast<float>((1ULL << (_uBits - 1ULL)) - 1ULL), -1.0, 1.0 );
-					return _bSrgb ? CUtilities::SRgbToLinear( fFinal ) : fFinal;
+					double dFinal = CUtilities::Clamp<double>( i64Texel / static_cast<double>((1ULL << (_uBits - 1ULL)) - 1ULL), -1.0, 1.0 );
+					return _bSrgb ? CUtilities::SRgbToLinear( dFinal ) : dFinal;
 				}
 				else {
-					const uint64_t ui64Max = (1ULL << _uBits) - 1ULL;
-					float fFinal = ((_ui64Value >> _uShift) & ui64Max) / static_cast<float>(ui64Max);
-					return _bSrgb ? CUtilities::SRgbToLinear( fFinal ) : fFinal; 
+					constexpr uint64_t ui64Max = ~0ULL >> (64U - _uBits);
+					double dFinal = ((_ui64Value >> _uShift) & ui64Max) / static_cast<double>(ui64Max);
+					return _bSrgb ? CUtilities::SRgbToLinear( dFinal ) : dFinal;
 				}
 			}
-			else { return _fDefault; }
+			else { return _dDefault; }
 		}
 
 		/**
@@ -1667,58 +1688,58 @@ namespace sl2 {
 		 *	inside the uint64_t value are cleared and then overwritten, modifying only the bits that correspend to the texel component being
 		 *	updated.
 		 *
-		 * \param _fValue The value to convert.
+		 * \param _dValue The value to convert.
 		 * \param _ui64Value The RGBA texel to update.
 		 */
 		template <unsigned _uBits, unsigned _uShift, unsigned _uSigned, unsigned _bSrgb>
-		static inline void 															Std32FToIntComponent_Norm( float _fValue, uint64_t &_ui64Value ) {
+		static inline void 															Std64FToIntComponent_Norm( double _dValue, uint64_t &_ui64Value ) {
 			// Only do something if there are actual bits to modify.
 			if constexpr ( _uBits != 0 ) {
 				if constexpr ( _bSrgb != 0 ) {
-					_fValue = CUtilities::LinearToSRgb( _fValue );
+					_dValue = CUtilities::LinearToSRgb( _dValue );
 				}
 				// Clear the target bits.
 				const uint64_t ui64Mask = (1ULL << _uBits) - 1ULL;
 				_ui64Value = _ui64Value & ~(ui64Mask << _uShift);
 				if constexpr ( _uSigned != 0 ) {
-					int64_t i64Val = static_cast<int64_t>(std::round( CUtilities::Clamp( _fValue, -1.0f, 1.0f ) * static_cast<float>((1ULL << (_uBits - 1ULL)) - 1ULL) ));
+					int64_t i64Val = static_cast<int64_t>(std::round( CUtilities::Clamp( _dValue, -1.0, 1.0 ) * static_cast<double>((1ULL << (_uBits - 1ULL)) - 1ULL) ));
 					_ui64Value |= (i64Val & ui64Mask) << _uShift;
 				}
 				else {
-					uint64_t ui64Val = static_cast<uint64_t>(std::round( CUtilities::Clamp( _fValue, 0.0f, 1.0f ) * ui64Mask ));
+					uint64_t ui64Val = static_cast<uint64_t>(std::round( CUtilities::Clamp( _dValue, 0.0, 1.0 ) * ui64Mask ));
 					_ui64Value |= (ui64Val & ui64Mask) << _uShift;
 				}
 			}
 		}
 
 		/**
-		 * Generic conversion of a single integer component to a float (not normalized).
+		 * Generic conversion of a single integer component to a double (not normalized).
 		 *
 		 * \param _ui64Value The RGBA texel.
-		 * \param _fDefault The default value to return if there are no bits for the component within _ui64Value (_uBits is 0).
-		 * \return Returns the component extracted from _ui64Value and converted to a float.
+		 * \param _dDefault The default value to return if there are no bits for the component within _ui64Value (_uBits is 0).
+		 * \return Returns the component extracted from _ui64Value and converted to a double.
 		 */
 		template <unsigned _uBits, unsigned _uShift, unsigned _uSigned>
-		static inline float 														StdIntComponentTo32F( uint64_t _ui64Value, float _fDefault ) {
+		static inline double 														StdIntComponentTo64F( uint64_t _ui64Value, double _dDefault ) {
 			if constexpr ( _uBits != 0 ) {
 				if constexpr ( _uSigned != 0 ) {
-					const uint64_t ui64Mask = (1ULL << _uBits) - 1ULL;
+					constexpr uint64_t ui64Mask = ~0ULL >> (64U - _uBits);
 					int64_t i64Texel = ((_ui64Value >> _uShift) & ui64Mask);
 					// Sign-extend.
-					i64Texel <<= 64ULL - _uBits;
-					i64Texel >>= _uBits;
+					i64Texel <<= 64U - _uBits;
+					i64Texel >>= 64U - _uBits;
 					// warning C4293: '<<': shift count negative or too big, undefined behavior
 					//	_uBits can't be 0 so this warning is invalid.
 					// warning C4723: potential divide by 0
 					//	_uBits can't be 0 so this warning is invalid.
-					return static_cast<float>(i64Texel);
+					return static_cast<double>(i64Texel);
 				}
 				else {
-					const uint64_t ui64Max = (1ULL << _uBits) - 1ULL;
-					return static_cast<float>((_ui64Value >> _uShift) & ui64Max);
+					constexpr uint64_t ui64Max = ~0ULL >> (64U - _uBits);
+					return static_cast<double>((_ui64Value >> _uShift) & ui64Max);
 				}
 			}
-			else { return _fDefault; }
+			else { return _dDefault; }
 		}
 
 		/**
@@ -1726,22 +1747,22 @@ namespace sl2 {
 		 *	inside the uint64_t value are cleared and then overwritten, modifying only the bits that correspend to the texel component being
 		 *	updated.
 		 *
-		 * \param _fValue The value to convert.
+		 * \param _dValue The value to convert.
 		 * \param _ui64Value The RGBA texel to update.
 		 */
 		template <unsigned _uBits, unsigned _uShift, unsigned _uSigned>
-		static inline void 															Std32FToIntComponent( float _fValue, uint64_t &_ui64Value ) {
+		static inline void 															Std64FToIntComponent( double _dValue, uint64_t &_ui64Value ) {
 			// Only do something if there are actual bits to modify.
 			if constexpr ( _uBits != 0 ) {
 				// Clear the target bits.
-				const uint64_t ui64Mask = (1ULL << _uBits) - 1ULL;
+				constexpr uint64_t ui64Mask = ~0ULL >> (64U - _uBits);
 				_ui64Value = _ui64Value & ~(ui64Mask << _uShift);
 				if constexpr ( _uSigned != 0 ) {
-					int64_t i64Val = static_cast<int64_t>(std::round( CUtilities::Clamp( _fValue, -std::powf( 2.0f, _uBits - 1.0f ), std::powf( 2.0f, _uBits - 1.0f ) - 1.0f ) ));
+					int64_t i64Val = static_cast<int64_t>(std::round( CUtilities::Clamp( _dValue, -std::pow( 2.0, _uBits - 1.0 ), std::pow( 2.0, _uBits - 1.0 ) - 1.0 ) ));
 					_ui64Value |= (i64Val & ui64Mask) << _uShift;
 				}
 				else {
-					uint64_t ui64Val = static_cast<uint64_t>(std::round( CUtilities::Clamp( _fValue, 0.0f, std::powf( 2.0f, _uBits ) - 1.0f ) ));
+					uint64_t ui64Val = static_cast<uint64_t>(std::round( CUtilities::Clamp( _dValue, 0.0, std::pow( 2.0, _uBits ) - 1.0 ) ));
 					_ui64Value |= (ui64Val & ui64Mask) << _uShift;
 				}
 			}
@@ -1750,30 +1771,30 @@ namespace sl2 {
 		/**
 		 * Returns the maximum of 3 components.
 		 *
-		 * \param _fR The R component.
-		 * \param _fG The G component.
-		 * \param _fB The B component.
+		 * \param _dR The R component.
+		 * \param _dG The G component.
+		 * \param _dB The B component.
 		 * \return Returns the maximum of 3 components.
 		 */
-		static inline float 														Max( float _fR, float _fG, float _fB ) {
-			if ( _fR > _fG ) {
-				if ( _fR > _fB ) { return _fR; }
-				else { return _fB; }
+		static inline double 														Max( double _dR, double _dG, double _dB ) {
+			if ( _dR > _dG ) {
+				if ( _dR > _dB ) { return _dR; }
+				else { return _dB; }
 			}
 			else {
-				if ( _fG > _fB ) { return _fG; }
-				else { return _fB; }
+				if ( _dG > _dB ) { return _dG; }
+				else { return _dB; }
 			}
 		}
 
 		/**
 		 * Clamps a value within RGB9_E5 range
 		 *
-		 * \param _fVal The value to clamp.
-		 * \return Returns _fVal clamped between 0.0f and SL2_MAX_RGB9E5.
+		 * \param _dVal The value to clamp.
+		 * \return Returns _dVal clamped between 0.0f and SL2_MAX_RGB9E5.
 		 */
-		static inline float 														ClampRangeRgb9e5( float _fVal ) {
-			return CUtilities::Clamp( _fVal, 0.0f, SL2_MAX_RGB9E5 );
+		static inline double 														ClampRangeRgb9e5( double _dVal ) {
+			return CUtilities::Clamp( _dVal, 0.0, SL2_MAX_RGB9E5 );
 		}
 
 		/**
@@ -1874,47 +1895,47 @@ namespace sl2 {
 		static void 																Bc4Indices( uint64_t _ui64Block, uint8_t * _pui8Indices );
 
 		/**
-		 * Converts a single RGB9_E5 texel into an RGBA32F texel.
+		 * Converts a single RGB9_E5 texel into an RGBA64F texel.
 		 *
 		 * \param _ui32R The RGB9_E5 R component.
 		 * \param _ui32G The RGB9_E5 G component.
 		 * \param _ui32B The RGB9_E5 B component.
 		 * \param _ui32E The RGB9_E5 E component.
-		 * \param _pfDst The destination floats for decoding.
+		 * \param _pdDst The destination floats for decoding.
 		 */
-		static inline void 															DecodeRgb9_E5( uint32_t _ui32R, uint32_t _ui32G, uint32_t _ui32B, uint32_t _ui32E, float * _pfDst ) {
+		static inline void 															DecodeRgb9_E5( uint32_t _ui32R, uint32_t _ui32G, uint32_t _ui32B, uint32_t _ui32E, double * _pdDst ) {
 			int32_t i32Exp = _ui32E - SL2_RGB9E5_EXP_BIAS - SL2_RGB9E5_MANTISSA_BITS;
-			float fScale = std::powf( 2.0f, float( i32Exp ) );
+			double dScale = std::pow( 2.0, double( i32Exp ) );
 
-			_pfDst[SL2_PC_R] = _ui32R * fScale;
-			_pfDst[SL2_PC_G] = _ui32G * fScale;
-			_pfDst[SL2_PC_B] = _ui32B * fScale;
-			_pfDst[SL2_PC_A] = 1.0;
+			_pdDst[SL2_PC_R] = _ui32R * dScale;
+			_pdDst[SL2_PC_G] = _ui32G * dScale;
+			_pdDst[SL2_PC_B] = _ui32B * dScale;
+			_pdDst[SL2_PC_A] = 1.0;
 		}
 
 		/**
-		 * Converts a single RGBA32F texel to an RGB9_E5 texel.
+		 * Converts a single RGBA64F texel to an RGB9_E5 texel.
 		 *
 		 * \param _ui32Rgb9E5 The output texel encoded in a uint32_t value.
 		 * \param _pfSrc The source floats.
 		 */
-		static inline void 															EncodeRgb9_E5( uint32_t &_ui32Rgb9E5, const float * _pfSrc ) {
-			float fR = ClampRangeRgb9e5( _pfSrc[SL2_PC_R] );
-			float fG = ClampRangeRgb9e5( _pfSrc[SL2_PC_G] );
-			float fB = ClampRangeRgb9e5( _pfSrc[SL2_PC_B] );
-			float fMax = Max( fR, fG, fB );
-			int32_t i32ExpShared = static_cast<int32_t>(CUtilities::Max( -SL2_RGB9E5_EXP_BIAS - 1, FloorLog2( fMax ) ) + 1 + SL2_RGB9E5_EXP_BIAS);
-			float fDenom = std::powf( 2.0f, float( i32ExpShared - SL2_RGB9E5_EXP_BIAS - SL2_RGB9E5_MANTISSA_BITS ) );
+		static inline void 															EncodeRgb9_E5( uint32_t &_ui32Rgb9E5, const double * _pfSrc ) {
+			double dR = ClampRangeRgb9e5( _pfSrc[SL2_PC_R] );
+			double dG = ClampRangeRgb9e5( _pfSrc[SL2_PC_G] );
+			double dB = ClampRangeRgb9e5( _pfSrc[SL2_PC_B] );
+			double dMax = Max( dR, dG, dB );
+			int32_t i32ExpShared = static_cast<int32_t>(CUtilities::Max( -SL2_RGB9E5_EXP_BIAS - 1, FloorLog2( static_cast<float>(dMax) ) ) + 1 + SL2_RGB9E5_EXP_BIAS);
+			double fDenom = std::pow( 2.0, double( i32ExpShared - SL2_RGB9E5_EXP_BIAS - SL2_RGB9E5_MANTISSA_BITS ) );
 
-			int32_t i32MaxM = static_cast<int32_t>(std::floor( fMax / fDenom + 0.5f ));
+			int32_t i32MaxM = static_cast<int32_t>(std::floor( dMax / fDenom + 0.5 ));
 			if ( i32MaxM == SL2_MAX_RGB9E5_MANTISSA + 1 ) {
-				fDenom *= 2.0f;
+				fDenom *= 2.0;
 				++i32ExpShared;
 			}
 
-			int32_t i32Rm = static_cast<int32_t>(std::floor( fR / fDenom + 0.5f ));
-			int32_t i32Gm = static_cast<int32_t>(std::floor( fG / fDenom + 0.5f ));
-			int32_t i32Bm = static_cast<int32_t>(std::floor( fB / fDenom + 0.5f ));
+			int32_t i32Rm = static_cast<int32_t>(std::floor( dR / fDenom + 0.5 ));
+			int32_t i32Gm = static_cast<int32_t>(std::floor( dG / fDenom + 0.5 ));
+			int32_t i32Bm = static_cast<int32_t>(std::floor( dB / fDenom + 0.5 ));
 
 			struct SL2_RGB9E5 {
 				uint32_t ui32R : SL2_RGB9E5_MANTISSA_BITS;
@@ -1930,10 +1951,10 @@ namespace sl2 {
 		}
 
 		/**
-		 * Generic integer format -> RGBA32F conversion.
+		 * Generic integer format -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -1942,42 +1963,12 @@ namespace sl2 {
 		template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
 			unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 			unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
-		static bool 																StdIntToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																StdIntToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Generic RGBA32F -> integer format conversion.
+		 * Generic RGBA64F -> integer format conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
-		 * \param _pui8Dst Destination texels.
-		 * \param _ui32Width Width of the image.
-		 * \param _ui32Height Height of the image.
-		 * \param _ui32Depth Depth of the image.
-		 * \param _pvParms Optional parameters for the conversion.
-		 */
-		template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
-			unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
-			unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
-		static bool 																StdIntFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
-
-		/**
-		 * 128-bit integer format -> RGBA32F conversion.
-		 *
-		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
-		 * \param _ui32Width Width of the image.
-		 * \param _ui32Height Height of the image.
-		 * \param _ui32Depth Depth of the image.
-		 * \param _pvParms Optional parameters for the conversion.
-		 */
-		template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
-			unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
-			unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
-		static bool 																Int128ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
-
-		/**
-		 * RGBA32F -> 128-bit integer format conversion.
-		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -1987,13 +1978,73 @@ namespace sl2 {
 		template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
 			unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 			unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
-		static bool 																Int128FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																StdIntFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * float16 -> RGBA32F conversion.
+		 * 128-bit integer format -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
+			unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
+			unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
+		static bool 																Int128ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * RGBA64F -> 128-bit integer format conversion.
+		 *
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
+		 * \param _pui8Dst Destination texels.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
+			unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
+			unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
+		static bool 																Int128FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * 256-bit integer format -> RGBA64F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
+			unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
+			unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
+		static bool 																Int256ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * RGBA64F -> 256-bit integer format conversion.
+		 *
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
+		 * \param _pui8Dst Destination texels.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
+			unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
+			unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
+		static bool 																Int256FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * float16 -> RGBA64F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2002,12 +2053,12 @@ namespace sl2 {
 		template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
 			unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 			unsigned _uTexelSize>
-		static bool 																F16ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																F16ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * RGBA32F -> float16 conversion.
+		 * RGBA64F -> float16 conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2017,13 +2068,13 @@ namespace sl2 {
 		template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
 			unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 			unsigned _uTexelSize>
-		static bool 																F16FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																F16FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * float32 -> RGBA32F conversion.
+		 * float32 -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2032,12 +2083,12 @@ namespace sl2 {
 		template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
 			unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 			unsigned _uTexelSize>
-		static bool 																F32ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																F32ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * RGBA32F -> float32 conversion.
+		 * RGBA64F -> float32 conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2047,61 +2098,91 @@ namespace sl2 {
 		template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
 			unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 			unsigned _uTexelSize>
-		static bool 																F32FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																F32FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * R11G11B10F -> RGBA32F conversion.
+		 * float64 -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		static inline bool 															R11G11B10FToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
+			unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
+			unsigned _uTexelSize>
+		static bool 																F64ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * RGBA32F -> R11G11B10F conversion.
+		 * RGBA64F -> float64 conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		static inline bool 															R11G11B10FFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
+			unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
+			unsigned _uTexelSize>
+		static bool 																F64FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * RGB9E5 -> RGBA32F conversion.
+		 * R11G11B10F -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		static inline bool 															RGB9E5ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static inline bool 															R11G11B10FToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * RGBA32F -> RGB9E5 conversion.
+		 * RGBA64F -> R11G11B10F conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		static inline bool 															RGB9E5FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static inline bool 															R11G11B10FFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Luminance/alpha format -> RGBA32F conversion.
+		 * RGB9E5 -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		static inline bool 															RGB9E5ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * RGBA64F -> RGB9E5 conversion.
+		 *
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
+		 * \param _pui8Dst Destination texels.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		static inline bool 															RGB9E5FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * Luminance/alpha format -> RGBA64F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2110,12 +2191,12 @@ namespace sl2 {
 		template <unsigned _uLBits, unsigned _uABits,
 			unsigned _uLShift, unsigned _uAShift,
 			unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
-		static bool 																LumAlphaToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																LumAlphaToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Generic RGBA32F -> luminance/alpha format conversion.
+		 * Generic RGBA64F -> luminance/alpha format conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2125,13 +2206,13 @@ namespace sl2 {
 		template <unsigned _uLBits, unsigned _uABits,
 			unsigned _uLShift, unsigned _uAShift,
 			unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
-		static bool 																LumAlphaFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																LumAlphaFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Luminance/alpha (floating-point) format -> RGBA32F conversion.
+		 * Luminance/alpha (floating-point) format -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2140,12 +2221,12 @@ namespace sl2 {
 		template <unsigned _uLBits, unsigned _uABits,
 			unsigned _uLShift, unsigned _uAShift,
 			unsigned _uTexelSize>
-		static bool 																LumAlphaFToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																LumAlphaFToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Generic RGBA32F -> luminance/alpha (floating-point) format conversion.
+		 * Generic RGBA64F -> luminance/alpha (floating-point) format conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2155,13 +2236,13 @@ namespace sl2 {
 		template <unsigned _uLBits, unsigned _uABits,
 			unsigned _uLShift, unsigned _uAShift,
 			unsigned _uTexelSize>
-		static bool 																LumAlphaFFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																LumAlphaFFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Intensity format -> RGBA32F conversion.
+		 * Intensity format -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2169,12 +2250,12 @@ namespace sl2 {
 		 */
 		template <unsigned _uIBits,
 			unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bFloat>
-		static bool 																IntensityToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																IntensityToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Generic RGBA32F -> intensity format conversion.
+		 * Generic RGBA64F -> intensity format conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2183,13 +2264,13 @@ namespace sl2 {
 		 */
 		template <unsigned _uIBits,
 			unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bFloat>
-		static bool 																IntensityFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																IntensityFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Depth-16 -> RGBA32F conversion.
+		 * Depth-16 -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2198,9 +2279,9 @@ namespace sl2 {
 		static bool 																Depth16ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * RGBA32F -> Depth-16 conversion.
+		 * RGBA64F -> Depth-16 conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2210,10 +2291,10 @@ namespace sl2 {
 		static bool 																Depth16FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Depth-24 -> RGBA32F conversion.
+		 * Depth-24 -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2222,9 +2303,9 @@ namespace sl2 {
 		static bool 																Depth24ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * RGBA32F -> Depth-24 conversion.
+		 * RGBA64F -> Depth-24 conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2234,10 +2315,10 @@ namespace sl2 {
 		static bool 																Depth24FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Depth-32 -> RGBA32F conversion.
+		 * Depth-32 -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2246,9 +2327,9 @@ namespace sl2 {
 		static bool 																Depth32ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * RGBA32F -> Depth-32 conversion.
+		 * RGBA64F -> Depth-32 conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2258,10 +2339,10 @@ namespace sl2 {
 		static bool 																Depth32FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Depth-32F -> RGBA32F conversion.
+		 * Depth-32F -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2270,9 +2351,9 @@ namespace sl2 {
 		static bool 																Depth32FToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * RGBA32F -> Depth-32F conversion.
+		 * RGBA64F -> Depth-32F conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2282,10 +2363,10 @@ namespace sl2 {
 		static bool 																Depth32FFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Depth-24/Stencil-8 -> RGBA32F conversion.
+		 * Depth-24/Stencil-8 -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2294,9 +2375,9 @@ namespace sl2 {
 		static bool 																Depth24S8ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * RGBA32F -> Depth-24/Stencil-8 conversion.
+		 * RGBA64F -> Depth-24/Stencil-8 conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2306,10 +2387,10 @@ namespace sl2 {
 		static bool 																Depth24S8FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Depth-32F/Stencil-8 -> RGBA32F conversion.
+		 * Depth-32F/Stencil-8 -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2318,9 +2399,9 @@ namespace sl2 {
 		static bool 																Depth32FS8ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * RGBA32F -> Depth-32F/Stencil-8 conversion.
+		 * RGBA64F -> Depth-32F/Stencil-8 conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2330,22 +2411,22 @@ namespace sl2 {
 		static bool 																Depth32FS8FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Stencil-X -> RGBA32F conversion.
+		 * Stencil-X -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template<typename _tType, unsigned _uBits>
-		static bool 																StencilXToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																StencilXToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * RGBA32F -> Stencil-X conversion.
+		 * RGBA64F -> Stencil-X conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2353,7 +2434,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template<typename _tType, unsigned _uBits>
-		static bool 																StencilXFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																StencilXFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 
 
@@ -2373,10 +2454,10 @@ namespace sl2 {
 		static uint32_t																GetCompressedSizeBc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Factor, const void * _pvParms );
 
 		/**
-		 * DXT1 -> RGBA32F conversion.
+		 * DXT1 -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2386,9 +2467,9 @@ namespace sl2 {
 		static bool 																Dxt1ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Generic RGBA32F -> DXT1 conversion.
+		 * Generic RGBA64F -> DXT1 conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2399,10 +2480,10 @@ namespace sl2 {
 		static bool 																Dxt1FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * DXT2 -> RGBA32F conversion.
+		 * DXT2 -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2414,9 +2495,9 @@ namespace sl2 {
 		}
 
 		/**
-		 * Generic RGBA32F -> DXT2 conversion.
+		 * Generic RGBA64F -> DXT2 conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2427,10 +2508,10 @@ namespace sl2 {
 		static bool 				Dxt2FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * DXT3 -> RGBA32F conversion.
+		 * DXT3 -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2440,9 +2521,9 @@ namespace sl2 {
 		static bool 				Dxt3ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Generic RGBA32F -> DXT3 conversion.
+		 * Generic RGBA64F -> DXT3 conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2453,10 +2534,10 @@ namespace sl2 {
 		static bool 				Dxt3FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * DXT4 -> RGBA32F conversion.
+		 * DXT4 -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2468,9 +2549,9 @@ namespace sl2 {
 		}
 
 		/**
-		 * Generic RGBA32F -> DXT4 conversion.
+		 * Generic RGBA64F -> DXT4 conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2481,10 +2562,10 @@ namespace sl2 {
 		static bool 				Dxt4FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * DXT5 -> RGBA32F conversion.
+		 * DXT5 -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2494,9 +2575,9 @@ namespace sl2 {
 		static bool 				Dxt5ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Generic RGBA32F -> DXT5 conversion.
+		 * Generic RGBA64F -> DXT5 conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2507,10 +2588,10 @@ namespace sl2 {
 		static bool 				Dxt5FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * BC4U -> RGBA32F conversion.
+		 * BC4U -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2520,9 +2601,9 @@ namespace sl2 {
 		static bool 				Bc4uToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Generic RGBA32F -> BC4U conversion.
+		 * Generic RGBA64F -> BC4U conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2533,10 +2614,10 @@ namespace sl2 {
 		static bool 				Bc4uFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * BC4S -> RGBA32F conversion.
+		 * BC4S -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2546,9 +2627,9 @@ namespace sl2 {
 		static bool 				Bc4sToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Generic RGBA32F -> BC4S conversion.
+		 * Generic RGBA64F -> BC4S conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2559,10 +2640,10 @@ namespace sl2 {
 		static bool 				Bc4sFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * BC5U -> RGBA32F conversion.
+		 * BC5U -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2572,9 +2653,9 @@ namespace sl2 {
 		static bool 				Bc5uToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Generic RGBA32F -> BC5U conversion.
+		 * Generic RGBA64F -> BC5U conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2585,10 +2666,10 @@ namespace sl2 {
 		static bool 				Bc5uFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * BC5S -> RGBA32F conversion.
+		 * BC5S -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2598,9 +2679,9 @@ namespace sl2 {
 		static bool 				Bc5sToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Generic RGBA32F -> BC5S conversion.
+		 * Generic RGBA64F -> BC5S conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2611,10 +2692,10 @@ namespace sl2 {
 		static bool 				Bc5sFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * BC6H -> RGBA32F conversion.
+		 * BC6H -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2624,9 +2705,9 @@ namespace sl2 {
 		static bool 				Bc6hToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Generic RGBA32F -> BC6H conversion.
+		 * Generic RGBA64F -> BC6H conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2637,10 +2718,10 @@ namespace sl2 {
 		static bool 				Bc6hFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * BC7U -> RGBA32F conversion.
+		 * BC7U -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
 		 * \param _ui32Depth Depth of the image.
@@ -2650,9 +2731,9 @@ namespace sl2 {
 		static bool 				Bc7uToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
-		 * Generic RGBA32F -> BC7U conversion.
+		 * Generic RGBA64F -> BC7U conversion.
 		 *
-		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
 		 * \param _pui8Dst Destination texels.
 		 * \param _ui32Width Width of the image.
 		 * \param _ui32Height Height of the image.
@@ -2685,8 +2766,8 @@ namespace sl2 {
 	 * \return Returns true if this object is less than the given object.
 	 */
 	inline bool CFormat::SL2_BLOCK::operator < ( const SL2_BLOCK &_bOther ) const {
-		return fValues[0] < _bOther.fValues[0] && fValues[1] < _bOther.fValues[1] &&
-			fValues[2] < _bOther.fValues[2] && fValues[3] < _bOther.fValues[3];
+		return dValues[0] < _bOther.dValues[0] && dValues[1] < _bOther.dValues[1] &&
+			dValues[2] < _bOther.dValues[2] && dValues[3] < _bOther.dValues[3];
 	}
 
 	 /**
@@ -2696,8 +2777,8 @@ namespace sl2 {
 	 * \return Returns true if this object is equal to the given object.
 	 */
 	inline bool CFormat::SL2_BLOCK::operator == ( const SL2_BLOCK &_bOther ) const {
-		return fValues[0] == _bOther.fValues[0] && fValues[1] == _bOther.fValues[1] &&
-			fValues[2] == _bOther.fValues[2] && fValues[3] == _bOther.fValues[3];
+		return dValues[0] == _bOther.dValues[0] && dValues[1] == _bOther.dValues[1] &&
+			dValues[2] == _bOther.dValues[2] && dValues[3] == _bOther.dValues[3];
 	}
 
 	 /**
@@ -2707,8 +2788,8 @@ namespace sl2 {
 	 * \return Returns true if this object is not equal to the given object.
 	 */
 	inline bool CFormat::SL2_BLOCK::operator != ( const SL2_BLOCK &_bOther ) const {
-		return fValues[0] != _bOther.fValues[0] || fValues[1] != _bOther.fValues[1] ||
-			fValues[2] != _bOther.fValues[2] || fValues[3] != _bOther.fValues[3];
+		return dValues[0] != _bOther.dValues[0] || dValues[1] != _bOther.dValues[1] ||
+			dValues[2] != _bOther.dValues[2] || dValues[3] != _bOther.dValues[3];
 	}
 
 	// == Functions.
@@ -2739,7 +2820,8 @@ namespace sl2 {
 			if ( _pkifFormat->pfCompSizeFunc ) {
 				return _pkifFormat->pfCompSizeFunc( _ui32Width, _ui32Height, _ui32Depth, _pkifFormat->ui32BlockSizeInBits, _pkifFormat );
 			}
-			return (_pkifFormat->ui32BlockSizeInBits * _ui32Width * _ui32Height * _ui32Depth) >> 3;
+			uint32_t ui32Row = (_pkifFormat->ui32BlockSizeInBits * _ui32Width) >> 3;
+			return (SL2_ROUND_UP( ui32Row, 4ULL ) * _ui32Height * _ui32Depth);
 		}
 		return 0;
 	}
@@ -2918,10 +3000,10 @@ namespace sl2 {
 	}
 
 	/**
-	 * Generic integer format -> RGBA32F conversion.
+	 * Generic integer format -> RGBA64F conversion.
 	 *
 	 * \param _pui8Src Source texels.
-	 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
 	 * \param _ui32Depth Depth of the image.
@@ -2930,11 +3012,11 @@ namespace sl2 {
 	template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
-	bool CFormat::StdIntToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	bool CFormat::StdIntToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
-		const uint64_t ui64RowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
@@ -2942,12 +3024,12 @@ namespace sl2 {
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					SL2_RGBA32F & rgbaThis = reinterpret_cast<SL2_RGBA32F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA32F)]);
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
 					const uint64_t * pui64Src = reinterpret_cast<const uint64_t *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
-					rgbaThis.fTexel[SL2_PC_R] = _bNorm ? StdIntComponentTo32F_Norm<_uRBits, _uRShift, _bSigned, _bSrgb>( (*pui64Src), 0.0f ) : StdIntComponentTo32F<_uRBits, _uRShift, _bSigned>( (*pui64Src), 0.0f );
-					rgbaThis.fTexel[SL2_PC_G] = _bNorm ? StdIntComponentTo32F_Norm<_uGBits, _uGShift, _bSigned, _bSrgb>( (*pui64Src), 0.0f ) : StdIntComponentTo32F<_uGBits, _uGShift, _bSigned>( (*pui64Src), 0.0f );
-					rgbaThis.fTexel[SL2_PC_B] = _bNorm ? StdIntComponentTo32F_Norm<_uBBits, _uBShift, _bSigned, _bSrgb>( (*pui64Src), 0.0f ) : StdIntComponentTo32F<_uBBits, _uBShift, _bSigned>( (*pui64Src), 0.0f );
-					rgbaThis.fTexel[SL2_PC_A] = _bNorm ? StdIntComponentTo32F_Norm<_uABits, _uAShift, _bSigned, false>( (*pui64Src), 1.0f ) : StdIntComponentTo32F<_uABits, _uAShift, _bSigned>( (*pui64Src), 1.0f );
+					rgbaThis.dTexel[SL2_PC_R] = _bNorm ? StdIntComponentTo64F_Norm<_uRBits, _uRShift, _bSigned, _bSrgb>( (*pui64Src), 0.0 ) : StdIntComponentTo64F<_uRBits, _uRShift, _bSigned>( (*pui64Src), 0.0 );
+					rgbaThis.dTexel[SL2_PC_G] = _bNorm ? StdIntComponentTo64F_Norm<_uGBits, _uGShift, _bSigned, _bSrgb>( (*pui64Src), 0.0 ) : StdIntComponentTo64F<_uGBits, _uGShift, _bSigned>( (*pui64Src), 0.0 );
+					rgbaThis.dTexel[SL2_PC_B] = _bNorm ? StdIntComponentTo64F_Norm<_uBBits, _uBShift, _bSigned, _bSrgb>( (*pui64Src), 0.0 ) : StdIntComponentTo64F<_uBBits, _uBShift, _bSigned>( (*pui64Src), 0.0 );
+					rgbaThis.dTexel[SL2_PC_A] = _bNorm ? StdIntComponentTo64F_Norm<_uABits, _uAShift, _bSigned, false>( (*pui64Src), 1.0 ) : StdIntComponentTo64F<_uABits, _uAShift, _bSigned>( (*pui64Src), 1.0 );
 				}
 			}
 		}
@@ -2955,9 +3037,9 @@ namespace sl2 {
 	}
 
 	/**
-	 * Generic RGBA32F -> integer format conversion.
+	 * Generic RGBA64F -> integer format conversion.
 	 *
-	 * \param _pui8Src Source texels known to be in RGBA32F format.
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
 	 * \param _pui8Dst Destination texels.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
@@ -2967,11 +3049,11 @@ namespace sl2 {
 	template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
-	bool CFormat::StdIntFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	bool CFormat::StdIntFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
-		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
@@ -2979,16 +3061,16 @@ namespace sl2 {
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					const SL2_RGBA32F & rgbaThis = reinterpret_cast<const SL2_RGBA32F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA32F)]);
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 					uint64_t * pui64Dst = reinterpret_cast<uint64_t *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize]);
-					if constexpr ( _bNorm ) { Std32FToIntComponent_Norm<_uRBits, _uRShift, _bSigned, _bSrgb>( rgbaThis.fTexel[SL2_PC_R], (*pui64Dst) ); }
-					else { Std32FToIntComponent<_uRBits, _uRShift, _bSigned>( rgbaThis.fTexel[SL2_PC_R], (*pui64Dst) ); }
-					if constexpr ( _bNorm ) { Std32FToIntComponent_Norm<_uGBits, _uGShift, _bSigned, _bSrgb>( rgbaThis.fTexel[SL2_PC_G], (*pui64Dst) ); }
-					else { Std32FToIntComponent<_uGBits, _uGShift, _bSigned>( rgbaThis.fTexel[SL2_PC_G], (*pui64Dst) ); }
-					if constexpr ( _bNorm ) { Std32FToIntComponent_Norm<_uBBits, _uBShift, _bSigned, _bSrgb>( rgbaThis.fTexel[SL2_PC_B], (*pui64Dst) ); }
-					else { Std32FToIntComponent<_uBBits, _uBShift, _bSigned>( rgbaThis.fTexel[SL2_PC_B], (*pui64Dst) ); }
-					if constexpr ( _bNorm ) { Std32FToIntComponent_Norm<_uABits, _uAShift, _bSigned, false>( rgbaThis.fTexel[SL2_PC_A], (*pui64Dst) ); }
-					else { Std32FToIntComponent<_uABits, _uAShift, _bSigned>( rgbaThis.fTexel[SL2_PC_A], (*pui64Dst) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uRBits, _uRShift, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_R], (*pui64Dst) ); }
+					else { Std64FToIntComponent<_uRBits, _uRShift, _bSigned>( rgbaThis.dTexel[SL2_PC_R], (*pui64Dst) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uGBits, _uGShift, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_G], (*pui64Dst) ); }
+					else { Std64FToIntComponent<_uGBits, _uGShift, _bSigned>( rgbaThis.dTexel[SL2_PC_G], (*pui64Dst) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uBBits, _uBShift, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_B], (*pui64Dst) ); }
+					else { Std64FToIntComponent<_uBBits, _uBShift, _bSigned>( rgbaThis.dTexel[SL2_PC_B], (*pui64Dst) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uABits, _uAShift, _bSigned, false>( rgbaThis.dTexel[SL2_PC_A], (*pui64Dst) ); }
+					else { Std64FToIntComponent<_uABits, _uAShift, _bSigned>( rgbaThis.dTexel[SL2_PC_A], (*pui64Dst) ); }
 				}
 			}
 		}
@@ -2996,10 +3078,10 @@ namespace sl2 {
 	}
 
 	/**
-	 * 128-bit integer format -> RGBA32F conversion.
+	 * 128-bit integer format -> RGBA64F conversion.
 	 *
 	 * \param _pui8Src Source texels.
-	 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
 	 * \param _ui32Depth Depth of the image.
@@ -3008,11 +3090,11 @@ namespace sl2 {
 	template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
-	bool CFormat::Int128ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	bool CFormat::Int128ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
-		const uint64_t ui64RowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
@@ -3020,12 +3102,12 @@ namespace sl2 {
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					SL2_RGBA32F & rgbaThis = reinterpret_cast<SL2_RGBA32F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA32F)]);
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
 					const uint8_t * pui8Src = reinterpret_cast<const uint8_t *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
-					rgbaThis.fTexel[SL2_PC_R] = _bNorm ? StdIntComponentTo32F_Norm<_uRBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint64_t &>(pui8Src[_uRShift/8]), 0.0f ) : StdIntComponentTo32F<_uRBits, 0, _bSigned>( reinterpret_cast<const uint64_t &>(pui8Src[_uRShift/8]), 0.0f );
-					rgbaThis.fTexel[SL2_PC_G] = _bNorm ? StdIntComponentTo32F_Norm<_uGBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint64_t &>(pui8Src[_uGShift/8]), 0.0f ) : StdIntComponentTo32F<_uGBits, 0, _bSigned>( reinterpret_cast<const uint64_t &>(pui8Src[_uGShift/8]), 0.0f );
-					rgbaThis.fTexel[SL2_PC_B] = _bNorm ? StdIntComponentTo32F_Norm<_uBBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint64_t &>(pui8Src[_uBShift/8]), 0.0f ) : StdIntComponentTo32F<_uBBits, 0, _bSigned>( reinterpret_cast<const uint64_t &>(pui8Src[_uBShift/8]), 0.0f );
-					rgbaThis.fTexel[SL2_PC_A] = _bNorm ? StdIntComponentTo32F_Norm<_uABits, 0, _bSigned, false>( reinterpret_cast<const uint64_t &>(pui8Src[_uAShift/8]), 1.0f ) : StdIntComponentTo32F<_uABits, 0, _bSigned>( reinterpret_cast<const uint64_t &>(pui8Src[_uAShift/8]), 1.0f );
+					rgbaThis.dTexel[SL2_PC_R] = _bNorm ? StdIntComponentTo64F_Norm<_uRBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint32_t &>(pui8Src[_uRShift/8]), 0.0 ) : StdIntComponentTo64F<_uRBits, 0, _bSigned>( reinterpret_cast<const uint32_t &>(pui8Src[_uRShift/8]), 0.0 );
+					rgbaThis.dTexel[SL2_PC_G] = _bNorm ? StdIntComponentTo64F_Norm<_uGBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint32_t &>(pui8Src[_uGShift/8]), 0.0 ) : StdIntComponentTo64F<_uGBits, 0, _bSigned>( reinterpret_cast<const uint32_t &>(pui8Src[_uGShift/8]), 0.0 );
+					rgbaThis.dTexel[SL2_PC_B] = _bNorm ? StdIntComponentTo64F_Norm<_uBBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint32_t &>(pui8Src[_uBShift/8]), 0.0 ) : StdIntComponentTo64F<_uBBits, 0, _bSigned>( reinterpret_cast<const uint32_t &>(pui8Src[_uBShift/8]), 0.0 );
+					rgbaThis.dTexel[SL2_PC_A] = _bNorm ? StdIntComponentTo64F_Norm<_uABits, 0, _bSigned, false>( reinterpret_cast<const uint32_t &>(pui8Src[_uAShift/8]), 1.0 ) : StdIntComponentTo64F<_uABits, 0, _bSigned>( reinterpret_cast<const uint32_t &>(pui8Src[_uAShift/8]), 1.0 );
 				}
 			}
 		}
@@ -3033,9 +3115,9 @@ namespace sl2 {
 	}
 
 	/**
-	 * RGBA32F -> 128-bit integer format conversion.
+	 * RGBA64F -> 128-bit integer format conversion.
 	 *
-	 * \param _pui8Src Source texels known to be in RGBA32F format.
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
 	 * \param _pui8Dst Destination texels.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
@@ -3045,28 +3127,28 @@ namespace sl2 {
 	template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
-	bool CFormat::Int128FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	bool CFormat::Int128FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
-		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					const SL2_RGBA32F & rgbaThis = reinterpret_cast<const SL2_RGBA32F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA32F)]);
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 					uint8_t * pui8Dst = reinterpret_cast<uint8_t *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize]);
 
-					if constexpr ( _bNorm ) { Std32FToIntComponent_Norm<_uRBits, 0, _bSigned, _bSrgb>( rgbaThis.fTexel[SL2_PC_R], reinterpret_cast<uint64_t &>(pui8Dst[_uRShift/8]) ); }
-					else { Std32FToIntComponent<_uRBits, 0, _bSigned>( rgbaThis.fTexel[SL2_PC_R], reinterpret_cast<uint64_t &>(pui8Dst[_uRShift/8]) ); }
-					if constexpr ( _bNorm ) { Std32FToIntComponent_Norm<_uGBits, 0, _bSigned, _bSrgb>( rgbaThis.fTexel[SL2_PC_G], reinterpret_cast<uint64_t &>(pui8Dst[_uGShift/8]) ); }
-					else { Std32FToIntComponent<_uGBits, 0, _bSigned>( rgbaThis.fTexel[SL2_PC_G], reinterpret_cast<uint64_t &>(pui8Dst[_uGShift/8]) ); }
-					if constexpr ( _bNorm ) { Std32FToIntComponent_Norm<_uBBits, 0, _bSigned, _bSrgb>( rgbaThis.fTexel[SL2_PC_B], reinterpret_cast<uint64_t &>(pui8Dst[_uBShift/8]) ); }
-					else { Std32FToIntComponent<_uBBits, 0, _bSigned>( rgbaThis.fTexel[SL2_PC_B], reinterpret_cast<uint64_t &>(pui8Dst[_uBShift/8]) ); }
-					if constexpr ( _bNorm ) { Std32FToIntComponent_Norm<_uABits, 0, _bSigned, false>( rgbaThis.fTexel[SL2_PC_A], reinterpret_cast<uint64_t &>(pui8Dst[_uAShift/8]) ); }
-					else { Std32FToIntComponent<_uABits, 0, _bSigned>( rgbaThis.fTexel[SL2_PC_A], reinterpret_cast<uint64_t &>(pui8Dst[_uAShift/8]) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uRBits, 0, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_R], reinterpret_cast<uint64_t &>(pui8Dst[_uRShift>>3]) ); }
+					else { Std64FToIntComponent<_uRBits, 0, _bSigned>( rgbaThis.dTexel[SL2_PC_R], reinterpret_cast<uint64_t &>(pui8Dst[_uRShift>>3]) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uGBits, 0, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_G], reinterpret_cast<uint64_t &>(pui8Dst[_uGShift>>3]) ); }
+					else { Std64FToIntComponent<_uGBits, 0, _bSigned>( rgbaThis.dTexel[SL2_PC_G], reinterpret_cast<uint64_t &>(pui8Dst[_uGShift>>3]) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uBBits, 0, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_B], reinterpret_cast<uint64_t &>(pui8Dst[_uBShift>>3]) ); }
+					else { Std64FToIntComponent<_uBBits, 0, _bSigned>( rgbaThis.dTexel[SL2_PC_B], reinterpret_cast<uint64_t &>(pui8Dst[_uBShift>>3]) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uABits, 0, _bSigned, false>( rgbaThis.dTexel[SL2_PC_A], reinterpret_cast<uint64_t &>(pui8Dst[_uAShift>>3]) ); }
+					else { Std64FToIntComponent<_uABits, 0, _bSigned>( rgbaThis.dTexel[SL2_PC_A], reinterpret_cast<uint64_t &>(pui8Dst[_uAShift>>3]) ); }
 				}
 			}
 		}
@@ -3074,10 +3156,88 @@ namespace sl2 {
 	}
 
 	/**
-	 * float16 -> RGBA32F conversion.
+	 * 256-bit integer format -> RGBA64F conversion.
 	 *
 	 * \param _pui8Src Source texels.
-	 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
+		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
+		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
+	bool CFormat::Int256ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
+		};
+		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
+		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
+		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
+
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
+					const uint8_t * pui8Src = reinterpret_cast<const uint8_t *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
+					rgbaThis.dTexel[SL2_PC_R] = _bNorm ? StdIntComponentTo64F_Norm<_uRBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint64_t &>(pui8Src[_uRShift/8]), 0.0 ) : StdIntComponentTo64F<_uRBits, 0, _bSigned>( reinterpret_cast<const uint64_t &>(pui8Src[_uRShift/8]), 0.0 );
+					rgbaThis.dTexel[SL2_PC_G] = _bNorm ? StdIntComponentTo64F_Norm<_uGBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint64_t &>(pui8Src[_uGShift/8]), 0.0 ) : StdIntComponentTo64F<_uGBits, 0, _bSigned>( reinterpret_cast<const uint64_t &>(pui8Src[_uGShift/8]), 0.0 );
+					rgbaThis.dTexel[SL2_PC_B] = _bNorm ? StdIntComponentTo64F_Norm<_uBBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint64_t &>(pui8Src[_uBShift/8]), 0.0 ) : StdIntComponentTo64F<_uBBits, 0, _bSigned>( reinterpret_cast<const uint64_t &>(pui8Src[_uBShift/8]), 0.0 );
+					rgbaThis.dTexel[SL2_PC_A] = _bNorm ? StdIntComponentTo64F_Norm<_uABits, 0, _bSigned, false>( reinterpret_cast<const uint64_t &>(pui8Src[_uAShift/8]), 1.0 ) : StdIntComponentTo64F<_uABits, 0, _bSigned>( reinterpret_cast<const uint64_t &>(pui8Src[_uAShift/8]), 1.0 );
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * RGBA64F -> 256-bit integer format conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
+		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
+		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
+	bool CFormat::Int256FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
+		};
+		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
+		const uint64_t ui64RowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
+		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
+					uint8_t * pui8Dst = reinterpret_cast<uint8_t *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize]);
+
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uRBits, 0, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_R], reinterpret_cast<uint64_t &>(pui8Dst[_uRShift>>3]) ); }
+					else { Std64FToIntComponent<_uRBits, 0, _bSigned>( rgbaThis.dTexel[SL2_PC_R], reinterpret_cast<uint64_t &>(pui8Dst[_uRShift>>3]) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uGBits, 0, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_G], reinterpret_cast<uint64_t &>(pui8Dst[_uGShift>>3]) ); }
+					else { Std64FToIntComponent<_uGBits, 0, _bSigned>( rgbaThis.dTexel[SL2_PC_G], reinterpret_cast<uint64_t &>(pui8Dst[_uGShift>>3]) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uBBits, 0, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_B], reinterpret_cast<uint64_t &>(pui8Dst[_uBShift>>3]) ); }
+					else { Std64FToIntComponent<_uBBits, 0, _bSigned>( rgbaThis.dTexel[SL2_PC_B], reinterpret_cast<uint64_t &>(pui8Dst[_uBShift>>3]) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uABits, 0, _bSigned, false>( rgbaThis.dTexel[SL2_PC_A], reinterpret_cast<uint64_t &>(pui8Dst[_uAShift>>3]) ); }
+					else { Std64FToIntComponent<_uABits, 0, _bSigned>( rgbaThis.dTexel[SL2_PC_A], reinterpret_cast<uint64_t &>(pui8Dst[_uAShift>>3]) ); }
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * float16 -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
 	 * \param _ui32Depth Depth of the image.
@@ -3086,11 +3246,11 @@ namespace sl2 {
 	template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize>
-	bool CFormat::F16ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	bool CFormat::F16ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
-		const uint64_t ui64RowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
@@ -3098,12 +3258,12 @@ namespace sl2 {
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					SL2_RGBA32F & rgbaThis = reinterpret_cast<SL2_RGBA32F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA32F)]);
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
 					const sl2::CFloat16 * pf16Src = reinterpret_cast<const sl2::CFloat16 *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
-					rgbaThis.fTexel[SL2_PC_R] = _uRBits ? static_cast<float>(pf16Src[_uRShift/16].Value()) : 0.0f;
-					rgbaThis.fTexel[SL2_PC_G] = _uGBits ? static_cast<float>(pf16Src[_uGShift/16].Value()) : 0.0f;
-					rgbaThis.fTexel[SL2_PC_B] = _uBBits ? static_cast<float>(pf16Src[_uBShift/16].Value()) : 0.0f;
-					rgbaThis.fTexel[SL2_PC_A] = _uABits ? static_cast<float>(pf16Src[_uAShift/16].Value()) : 1.0f;
+					rgbaThis.dTexel[SL2_PC_R] = _uRBits ? static_cast<double>(pf16Src[_uRShift/16].Value()) : 0.0f;
+					rgbaThis.dTexel[SL2_PC_G] = _uGBits ? static_cast<double>(pf16Src[_uGShift/16].Value()) : 0.0f;
+					rgbaThis.dTexel[SL2_PC_B] = _uBBits ? static_cast<double>(pf16Src[_uBShift/16].Value()) : 0.0f;
+					rgbaThis.dTexel[SL2_PC_A] = _uABits ? static_cast<double>(pf16Src[_uAShift/16].Value()) : 1.0f;
 				}
 			}
 		}
@@ -3111,9 +3271,9 @@ namespace sl2 {
 	}
 
 	/**
-	 * RGBA32F -> float16 conversion.
+	 * RGBA64F -> float16 conversion.
 	 *
-	 * \param _pui8Src Source texels known to be in RGBA32F format.
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
 	 * \param _pui8Dst Destination texels.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
@@ -3123,23 +3283,23 @@ namespace sl2 {
 	template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize>
-	bool CFormat::F16FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	bool CFormat::F16FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
-		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					const SL2_RGBA32F & rgbaThis = reinterpret_cast<const SL2_RGBA32F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA32F)]);
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 					sl2::CFloat16 * pf16Dst = reinterpret_cast<sl2::CFloat16 *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize]);
-					if constexpr ( _uRBits ) { pf16Dst[_uRShift/16] = rgbaThis.fTexel[SL2_PC_R]; }
-					if constexpr ( _uGBits ) { pf16Dst[_uGShift/16] = rgbaThis.fTexel[SL2_PC_G]; }
-					if constexpr ( _uBBits ) { pf16Dst[_uBShift/16] = rgbaThis.fTexel[SL2_PC_B]; }
-					if constexpr ( _uABits ) { pf16Dst[_uAShift/16] = rgbaThis.fTexel[SL2_PC_A]; }
+					if constexpr ( _uRBits ) { pf16Dst[_uRShift/16] = rgbaThis.dTexel[SL2_PC_R]; }
+					if constexpr ( _uGBits ) { pf16Dst[_uGShift/16] = rgbaThis.dTexel[SL2_PC_G]; }
+					if constexpr ( _uBBits ) { pf16Dst[_uBShift/16] = rgbaThis.dTexel[SL2_PC_B]; }
+					if constexpr ( _uABits ) { pf16Dst[_uAShift/16] = rgbaThis.dTexel[SL2_PC_A]; }
 				}
 			}
 		}
@@ -3147,10 +3307,10 @@ namespace sl2 {
 	}
 
 	/**
-	 * float32 -> RGBA32F conversion.
+	 * float32 -> RGBA64F conversion.
 	 *
 	 * \param _pui8Src Source texels.
-	 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
 	 * \param _ui32Depth Depth of the image.
@@ -3159,11 +3319,11 @@ namespace sl2 {
 	template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize>
-	bool CFormat::F32ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	bool CFormat::F32ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
-		const uint64_t ui64RowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
@@ -3171,12 +3331,12 @@ namespace sl2 {
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					SL2_RGBA32F & rgbaThis = reinterpret_cast<SL2_RGBA32F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA32F)]);
-					const float * pf16Src = reinterpret_cast<const float *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
-					rgbaThis.fTexel[SL2_PC_R] = _uRBits ? pf16Src[_uRShift/32] : 0.0f;
-					rgbaThis.fTexel[SL2_PC_G] = _uGBits ? pf16Src[_uGShift/32] : 0.0f;
-					rgbaThis.fTexel[SL2_PC_B] = _uBBits ? pf16Src[_uBShift/32] : 0.0f;
-					rgbaThis.fTexel[SL2_PC_A] = _uABits ? pf16Src[_uAShift/32] : 1.0f;
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
+					const float * pf32Src = reinterpret_cast<const float *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
+					rgbaThis.dTexel[SL2_PC_R] = _uRBits ? pf32Src[_uRShift/32] : 0.0f;
+					rgbaThis.dTexel[SL2_PC_G] = _uGBits ? pf32Src[_uGShift/32] : 0.0f;
+					rgbaThis.dTexel[SL2_PC_B] = _uBBits ? pf32Src[_uBShift/32] : 0.0f;
+					rgbaThis.dTexel[SL2_PC_A] = _uABits ? pf32Src[_uAShift/32] : 1.0f;
 				}
 			}
 		}
@@ -3184,9 +3344,9 @@ namespace sl2 {
 	}
 
 	/**
-	 * RGBA32F -> float32 conversion.
+	 * RGBA64F -> float32 conversion.
 	 *
-	 * \param _pui8Src Source texels known to be in RGBA32F format.
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
 	 * \param _pui8Dst Destination texels.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
@@ -3196,23 +3356,23 @@ namespace sl2 {
 	template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize>
-	bool CFormat::F32FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	bool CFormat::F32FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
-		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					const SL2_RGBA32F & rgbaThis = reinterpret_cast<const SL2_RGBA32F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA32F)]);
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 					float * pf32Dst = reinterpret_cast<float *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize]);
-					if constexpr ( _uRBits ) { pf32Dst[_uRShift/32] = rgbaThis.fTexel[SL2_PC_R]; }
-					if constexpr ( _uGBits ) { pf32Dst[_uGShift/32] = rgbaThis.fTexel[SL2_PC_G]; }
-					if constexpr ( _uBBits ) { pf32Dst[_uBShift/32] = rgbaThis.fTexel[SL2_PC_B]; }
-					if constexpr ( _uABits ) { pf32Dst[_uAShift/32] = rgbaThis.fTexel[SL2_PC_A]; }
+					if constexpr ( _uRBits ) { pf32Dst[_uRShift/32] = static_cast<float>(rgbaThis.dTexel[SL2_PC_R]); }
+					if constexpr ( _uGBits ) { pf32Dst[_uGShift/32] = static_cast<float>(rgbaThis.dTexel[SL2_PC_G]); }
+					if constexpr ( _uBBits ) { pf32Dst[_uBShift/32] = static_cast<float>(rgbaThis.dTexel[SL2_PC_B]); }
+					if constexpr ( _uABits ) { pf32Dst[_uAShift/32] = static_cast<float>(rgbaThis.dTexel[SL2_PC_A]); }
 				}
 			}
 		}
@@ -3220,25 +3380,98 @@ namespace sl2 {
 	}
 
 	/**
-	 * R11G11B10F -> RGBA32F conversion.
+	 * float64 -> RGBA64F conversion.
 	 *
 	 * \param _pui8Src Source texels.
-	 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
 	 * \param _ui32Depth Depth of the image.
 	 * \param _pvParms Optional parameters for the conversion.
 	 */
-	inline bool CFormat::R11G11B10FToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
+		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
+		unsigned _uTexelSize>
+	bool CFormat::F64ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
+		};
+		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
+		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
+		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
+		
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
+					const double * pf64Src = reinterpret_cast<const double *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
+					rgbaThis.dTexel[SL2_PC_R] = _uRBits ? pf64Src[_uRShift/64] : 0.0f;
+					rgbaThis.dTexel[SL2_PC_G] = _uGBits ? pf64Src[_uGShift/64] : 0.0f;
+					rgbaThis.dTexel[SL2_PC_B] = _uBBits ? pf64Src[_uBShift/64] : 0.0f;
+					rgbaThis.dTexel[SL2_PC_A] = _uABits ? pf64Src[_uAShift/64] : 1.0f;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * RGBA64F -> float64 conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
+		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
+		unsigned _uTexelSize>
+	bool CFormat::F64FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
+		};
+		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
+		const uint64_t ui64RowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
+		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
+					double * pf64Dst = reinterpret_cast<double *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize]);
+					if constexpr ( _uRBits ) { pf64Dst[_uRShift/64] = static_cast<float>(rgbaThis.dTexel[SL2_PC_R]); }
+					if constexpr ( _uGBits ) { pf64Dst[_uGShift/64] = static_cast<float>(rgbaThis.dTexel[SL2_PC_G]); }
+					if constexpr ( _uBBits ) { pf64Dst[_uBShift/64] = static_cast<float>(rgbaThis.dTexel[SL2_PC_B]); }
+					if constexpr ( _uABits ) { pf64Dst[_uAShift/64] = static_cast<float>(rgbaThis.dTexel[SL2_PC_A]); }
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * R11G11B10F -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	inline bool CFormat::R11G11B10FToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
 		struct SL2_R11G11B10F {
 			uint32_t ui32R : 11;
 			uint32_t ui32G : 11;
 			uint32_t ui32B : 10;
 		};
-		const uint64_t ui64RowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( 4ULL * _ui32Width, 4ULL );
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
@@ -3246,13 +3479,13 @@ namespace sl2 {
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					SL2_RGBA32F & rgbaThis = reinterpret_cast<SL2_RGBA32F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA32F)]);
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
 					const SL2_R11G11B10F * prSrc = reinterpret_cast<const SL2_R11G11B10F *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*4ULL]);
 					sl2::CFloatX fTemp;
-					rgbaThis.fTexel[SL2_PC_R] = static_cast<float>(fTemp.CreateFromBits( prSrc->ui32R, SL2_FLOAT11 ).AsDouble());
-					rgbaThis.fTexel[SL2_PC_G] = static_cast<float>(fTemp.CreateFromBits( prSrc->ui32G, SL2_FLOAT11 ).AsDouble());
-					rgbaThis.fTexel[SL2_PC_B] = static_cast<float>(fTemp.CreateFromBits( prSrc->ui32B, SL2_FLOAT10 ).AsDouble());
-					rgbaThis.fTexel[SL2_PC_A] = 1.0f;
+					rgbaThis.dTexel[SL2_PC_R] = static_cast<double>(fTemp.CreateFromBits( prSrc->ui32R, SL2_FLOAT11 ).AsDouble());
+					rgbaThis.dTexel[SL2_PC_G] = static_cast<double>(fTemp.CreateFromBits( prSrc->ui32G, SL2_FLOAT11 ).AsDouble());
+					rgbaThis.dTexel[SL2_PC_B] = static_cast<double>(fTemp.CreateFromBits( prSrc->ui32B, SL2_FLOAT10 ).AsDouble());
+					rgbaThis.dTexel[SL2_PC_A] = 1.0;
 				}
 			}
 		}
@@ -3260,37 +3493,37 @@ namespace sl2 {
 	}
 
 	/**
-	 * RGBA32F -> R11G11B10F conversion.
+	 * RGBA64F -> R11G11B10F conversion.
 	 *
-	 * \param _pui8Src Source texels known to be in RGBA32F format.
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
 	 * \param _pui8Dst Destination texels.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
 	 * \param _ui32Depth Depth of the image.
 	 * \param _pvParms Optional parameters for the conversion.
 	 */
-	inline bool CFormat::R11G11B10FFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	inline bool CFormat::R11G11B10FFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
 		struct SL2_R11G11B10F {
 			uint32_t ui32R : 11;
 			uint32_t ui32G : 11;
 			uint32_t ui32B : 10;
 		};
-		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( 4ULL * _ui32Width, 4ULL );
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					const SL2_RGBA32F & rgbaThis = reinterpret_cast<const SL2_RGBA32F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA32F)]);
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 					SL2_R11G11B10F * prDst = reinterpret_cast<SL2_R11G11B10F *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*4ULL]);
 					sl2::CFloatX fTemp;
-					prDst->ui32R = fTemp.CreateFromDouble( rgbaThis.fTexel[SL2_PC_R], SL2_FLOAT11 ).AsUint64();
-					prDst->ui32G = fTemp.CreateFromDouble( rgbaThis.fTexel[SL2_PC_G], SL2_FLOAT11 ).AsUint64();
-					prDst->ui32B = fTemp.CreateFromDouble( rgbaThis.fTexel[SL2_PC_B], SL2_FLOAT10 ).AsUint64();
+					prDst->ui32R = fTemp.CreateFromDouble( rgbaThis.dTexel[SL2_PC_R], SL2_FLOAT11 ).AsUint64();
+					prDst->ui32G = fTemp.CreateFromDouble( rgbaThis.dTexel[SL2_PC_G], SL2_FLOAT11 ).AsUint64();
+					prDst->ui32B = fTemp.CreateFromDouble( rgbaThis.dTexel[SL2_PC_B], SL2_FLOAT10 ).AsUint64();
 				}
 			}
 		}
@@ -3298,18 +3531,18 @@ namespace sl2 {
 	}
 
 	/**
-	 * RGB9E5 -> RGBA32F conversion.
+	 * RGB9E5 -> RGBA64F conversion.
 	 *
 	 * \param _pui8Src Source texels.
-	 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
 	 * \param _ui32Depth Depth of the image.
 	 * \param _pvParms Optional parameters for the conversion.
 	 */
-	inline bool CFormat::RGB9E5ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	inline bool CFormat::RGB9E5ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
 		struct SL2_RGB9E5 {
 			uint32_t ui32R : SL2_RGB9E5_MANTISSA_BITS;
@@ -3317,7 +3550,7 @@ namespace sl2 {
 			uint32_t ui32B : SL2_RGB9E5_MANTISSA_BITS;
 			uint32_t ui32E : SL2_RGB9E5_EXPONENT_BITS;
 		};
-		const uint64_t ui64RowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( 4ULL * _ui32Width, 4ULL );
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
@@ -3325,9 +3558,9 @@ namespace sl2 {
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					SL2_RGBA32F & rgbaThis = reinterpret_cast<SL2_RGBA32F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA32F)]);
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
 					const SL2_RGB9E5 * prSrc = reinterpret_cast<const SL2_RGB9E5 *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*4ULL]);
-					DecodeRgb9_E5( prSrc->ui32R, prSrc->ui32G, prSrc->ui32B, prSrc->ui32E, rgbaThis.fTexel );
+					DecodeRgb9_E5( prSrc->ui32R, prSrc->ui32G, prSrc->ui32B, prSrc->ui32E, rgbaThis.dTexel );
 				}
 			}
 		}
@@ -3335,29 +3568,29 @@ namespace sl2 {
 	}
 
 	/**
-	 * RGBA32F -> RGB9E5 conversion.
+	 * RGBA64F -> RGB9E5 conversion.
 	 *
-	 * \param _pui8Src Source texels known to be in RGBA32F format.
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
 	 * \param _pui8Dst Destination texels.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
 	 * \param _ui32Depth Depth of the image.
 	 * \param _pvParms Optional parameters for the conversion.
 	 */
-	inline bool CFormat::RGB9E5FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	inline bool CFormat::RGB9E5FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
-		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( 4ULL * _ui32Width, 4ULL );
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					const SL2_RGBA32F & rgbaThis = reinterpret_cast<const SL2_RGBA32F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA32F)]);
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 					uint32_t * pui32Dst = reinterpret_cast<uint32_t *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*4ULL]);
-					EncodeRgb9_E5( (*pui32Dst), rgbaThis.fTexel );
+					EncodeRgb9_E5( (*pui32Dst), rgbaThis.dTexel );
 				}
 			}
 		}
@@ -3365,10 +3598,10 @@ namespace sl2 {
 	}
 
 	/**
-	 * Luminance/alpha format -> RGBA32F conversion.
+	 * Luminance/alpha format -> RGBA64F conversion.
 	 *
 	 * \param _pui8Src Source texels.
-	 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
 	 * \param _ui32Depth Depth of the image.
@@ -3377,11 +3610,11 @@ namespace sl2 {
 	template <unsigned _uLBits, unsigned _uABits,
 		unsigned _uLShift, unsigned _uAShift,
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
-	bool CFormat::LumAlphaToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	bool CFormat::LumAlphaToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
-		const uint64_t ui64RowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
@@ -3389,13 +3622,13 @@ namespace sl2 {
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					SL2_RGBA32F & rgbaThis = reinterpret_cast<SL2_RGBA32F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA32F)]);
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
 					const uint64_t * pui64Src = reinterpret_cast<const uint64_t *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
-					float fLum = _bNorm ? StdIntComponentTo32F_Norm<_uLBits, _uLShift, _bSigned, _bSrgb>( (*pui64Src), 0.0f ) : StdIntComponentTo32F<_uLBits, _uLShift, _bSigned>( (*pui64Src), 0.0f );
-					rgbaThis.fTexel[SL2_PC_R] = fLum / 1.0f;
-					rgbaThis.fTexel[SL2_PC_G] = fLum / 1.0f;
-					rgbaThis.fTexel[SL2_PC_B] = fLum / 1.0f;
-					rgbaThis.fTexel[SL2_PC_A] = _bNorm ? StdIntComponentTo32F_Norm<_uABits, _uAShift, _bSigned, false>( (*pui64Src), 1.0f ) : StdIntComponentTo32F<_uABits, _uAShift, _bSigned>( (*pui64Src), 1.0f );
+					double dLum = _bNorm ? StdIntComponentTo64F_Norm<_uLBits, _uLShift, _bSigned, _bSrgb>( (*pui64Src), 0.0 ) : StdIntComponentTo64F<_uLBits, _uLShift, _bSigned>( (*pui64Src), 0.0 );
+					rgbaThis.dTexel[SL2_PC_R] = dLum / 1.0;
+					rgbaThis.dTexel[SL2_PC_G] = dLum / 1.0;
+					rgbaThis.dTexel[SL2_PC_B] = dLum / 1.0;
+					rgbaThis.dTexel[SL2_PC_A] = _bNorm ? StdIntComponentTo64F_Norm<_uABits, _uAShift, _bSigned, false>( (*pui64Src), 1.0 ) : StdIntComponentTo64F<_uABits, _uAShift, _bSigned>( (*pui64Src), 1.0 );
 				}
 			}
 		}
@@ -3403,9 +3636,9 @@ namespace sl2 {
 	}
 
 	/**
-	 * Generic RGBA32F -> luminance/alpha format conversion.
+	 * Generic RGBA64F -> luminance/alpha format conversion.
 	 *
-	 * \param _pui8Src Source texels known to be in RGBA32F format.
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
 	 * \param _pui8Dst Destination texels.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
@@ -3415,40 +3648,41 @@ namespace sl2 {
 	template <unsigned _uLBits, unsigned _uABits,
 		unsigned _uLShift, unsigned _uAShift,
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
-	bool CFormat::LumAlphaFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	bool CFormat::LumAlphaFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
-		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					const SL2_RGBA32F & rgbaThis = reinterpret_cast<const SL2_RGBA32F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA32F)]);
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 					uint64_t * pui64Dst = reinterpret_cast<uint64_t *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize]);
 					
 					if ( _bNorm ) {
-						/*float fLum = rgbaThis.fTexel[SL2_PC_R] * SL2_R_WEIGHT +
-							rgbaThis.fTexel[SL2_PC_G] * SL2_G_WEIGHT +
-							rgbaThis.fTexel[SL2_PC_B] * SL2_B_WEIGHT;*/
-						// Values specified by OpenGL for luminance conversion.
+						/*double dLum = rgbaThis.dTexel[SL2_PC_R] * SL2_R_WEIGHT +
+							rgbaThis.dTexel[SL2_PC_G] * SL2_G_WEIGHT +
+							rgbaThis.dTexel[SL2_PC_B] * SL2_B_WEIGHT;*/
+						// Values specified by OpenGL for luminance conversion: SL2_LS_CIE_1931 (0.3086f 0.6094f 0.082f)
 						// https://www.opengl.org/archives/resources/code/samples/advanced/advanced97/notes/node140.html
-						float fLum = rgbaThis.fTexel[SL2_PC_R] * 0.3086f +
-							rgbaThis.fTexel[SL2_PC_G] * 0.6094f +
-							rgbaThis.fTexel[SL2_PC_B] * 0.082f;
-						Std32FToIntComponent_Norm<_uLBits, _uLShift, _bSigned, _bSrgb>( fLum, (*pui64Dst) );
+						// But the user gets to select the luminance factors.
+						double dLum = rgbaThis.dTexel[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].fRgb[0] +
+							rgbaThis.dTexel[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].fRgb[1] +
+							rgbaThis.dTexel[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].fRgb[2];
+						Std64FToIntComponent_Norm<_uLBits, _uLShift, _bSigned, _bSrgb>( dLum, (*pui64Dst) );
 
-						Std32FToIntComponent_Norm<_uABits, _uAShift, _bSigned, false>( rgbaThis.fTexel[SL2_PC_A], (*pui64Dst) );
+						Std64FToIntComponent_Norm<_uABits, _uAShift, _bSigned, false>( rgbaThis.dTexel[SL2_PC_A], (*pui64Dst) );
 					}
 					else {
 						// For integer formats, L is just a copy of R.
 						// https://www.khronos.org/registry/OpenGL/extensions/EXT/EXT_texture_integer.txt
-						float fLum = rgbaThis.fTexel[SL2_PC_R];
-						Std32FToIntComponent<_uLBits, _uLShift, _bSigned>( fLum, (*pui64Dst) );
+						double dLum = rgbaThis.dTexel[SL2_PC_R];
+						Std64FToIntComponent<_uLBits, _uLShift, _bSigned>( dLum, (*pui64Dst) );
 
-						Std32FToIntComponent<_uABits, _uAShift, _bSigned>( rgbaThis.fTexel[SL2_PC_A], (*pui64Dst) );
+						Std64FToIntComponent<_uABits, _uAShift, _bSigned>( rgbaThis.dTexel[SL2_PC_A], (*pui64Dst) );
 					}
 				}
 			}
@@ -3457,10 +3691,10 @@ namespace sl2 {
 	}
 
 	/**
-	 * Luminance/alpha (floating-point) format -> RGBA32F conversion.
+	 * Luminance/alpha (floating-point) format -> RGBA64F conversion.
 	 *
 	 * \param _pui8Src Source texels.
-	 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
 	 * \param _ui32Depth Depth of the image.
@@ -3469,11 +3703,11 @@ namespace sl2 {
 	template <unsigned _uLBits, unsigned _uABits,
 		unsigned _uLShift, unsigned _uAShift,
 		unsigned _uTexelSize>
-	bool CFormat::LumAlphaFToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	bool CFormat::LumAlphaFToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
-		const uint64_t ui64RowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
@@ -3481,30 +3715,30 @@ namespace sl2 {
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					SL2_RGBA32F & rgbaThis = reinterpret_cast<SL2_RGBA32F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA32F)]);
-					float fLum = 0.0f;
-					float fAlpha = 1.0;
-					if ( _uLBits == 16 ) {
-						const CFloat16 * pf16Src = reinterpret_cast<const CFloat16 *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize+(_uLShift/8)]);
-						fLum = static_cast<float>(*pf16Src);
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
+					double dLum = 0.0;
+					double dAlpha = 1.0;
+					if constexpr ( _uLBits == 16 ) {
+						const CFloat16 * pf16Src = reinterpret_cast<const CFloat16 *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize+(_uLShift>>3)]);
+						dLum = static_cast<double>(*pf16Src);
 					}
-					else if ( _uLBits == 32 ) {
-						const float * pf32Src = reinterpret_cast<const float *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize+(_uLShift/8)]);
-						fLum = (*pf32Src);
+					else if constexpr ( _uLBits == 32 ) {
+						const float * pf32Src = reinterpret_cast<const float *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize+(_uLShift>>3)]);
+						dLum = (*pf32Src);
 					}
-					if ( _uABits == 16 ) {
-						const CFloat16 * pf16Src = reinterpret_cast<const CFloat16 *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize+(_uAShift/8)]);
-						fAlpha = static_cast<float>(*pf16Src);
+					if constexpr ( _uABits == 16 ) {
+						const CFloat16 * pf16Src = reinterpret_cast<const CFloat16 *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize+(_uAShift>>3)]);
+						dAlpha = static_cast<double>(*pf16Src);
 					}
-					else if ( _uABits == 32 ) {
-						const float * pf32Src = reinterpret_cast<const float *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize+(_uAShift/8)]);
-						fAlpha = (*pf32Src);
+					else if constexpr ( _uABits == 32 ) {
+						const float * pf32Src = reinterpret_cast<const float *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize+(_uAShift>>3)]);
+						dAlpha = (*pf32Src);
 					}
 					
-					rgbaThis.fTexel[SL2_PC_R] = fLum / 1.0f;
-					rgbaThis.fTexel[SL2_PC_G] = fLum / 1.0f;
-					rgbaThis.fTexel[SL2_PC_B] = fLum / 1.0f;
-					rgbaThis.fTexel[SL2_PC_A] = fAlpha;
+					rgbaThis.dTexel[SL2_PC_R] = dLum / 1.0;
+					rgbaThis.dTexel[SL2_PC_G] = dLum / 1.0;
+					rgbaThis.dTexel[SL2_PC_B] = dLum / 1.0;
+					rgbaThis.dTexel[SL2_PC_A] = dAlpha;
 				}
 			}
 		}
@@ -3512,9 +3746,9 @@ namespace sl2 {
 	}
 
 	/**
-	 * Generic RGBA32F -> luminance/alpha (floating-point) format conversion.
+	 * Generic RGBA64F -> luminance/alpha (floating-point) format conversion.
 	 *
-	 * \param _pui8Src Source texels known to be in RGBA32F format.
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
 	 * \param _pui8Dst Destination texels.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
@@ -3524,44 +3758,45 @@ namespace sl2 {
 	template <unsigned _uLBits, unsigned _uABits,
 		unsigned _uLShift, unsigned _uAShift,
 		unsigned _uTexelSize>
-	bool CFormat::LumAlphaFFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	bool CFormat::LumAlphaFFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
-		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					const SL2_RGBA32F & rgbaThis = reinterpret_cast<const SL2_RGBA32F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA32F)]);
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 
-					/*float fLum = rgbaThis.fTexel[SL2_PC_R] * SL2_R_WEIGHT +
-						rgbaThis.fTexel[SL2_PC_G] * SL2_G_WEIGHT +
-						rgbaThis.fTexel[SL2_PC_B] * SL2_B_WEIGHT;*/
-					// Values specified by OpenGL for luminance conversion.
+					/*double dLum = rgbaThis.dTexel[SL2_PC_R] * SL2_R_WEIGHT +
+						rgbaThis.dTexel[SL2_PC_G] * SL2_G_WEIGHT +
+						rgbaThis.dTexel[SL2_PC_B] * SL2_B_WEIGHT;*/
+					// Values specified by OpenGL for luminance conversion: SL2_LS_CIE_1931 (0.3086f 0.6094f 0.082f)
 					// https://www.opengl.org/archives/resources/code/samples/advanced/advanced97/notes/node140.html
-					float fLum = rgbaThis.fTexel[SL2_PC_R] * 0.3086f +
-						rgbaThis.fTexel[SL2_PC_G] * 0.6094f +
-						rgbaThis.fTexel[SL2_PC_B] * 0.082f;
+					// But the user gets to select the luminance factors.
+					double dLum = rgbaThis.dTexel[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].fRgb[0] +
+						rgbaThis.dTexel[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].fRgb[1] +
+						rgbaThis.dTexel[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].fRgb[2];
 					
-					if ( _uLBits == 16 ) {
+					if constexpr ( _uLBits == 16 ) {
 						CFloat16 * pf16Dst = reinterpret_cast<CFloat16 *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize+(_uLShift/8)]);
-						(*pf16Dst) = fLum;
+						(*pf16Dst) = dLum;
 					}
-					else if ( _uLBits == 32 ) {
+					else if constexpr ( _uLBits == 32 ) {
 						float * pf32Dst = reinterpret_cast<float *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize+(_uLShift/8)]);
-						(*pf32Dst) = fLum;
+						(*pf32Dst) = static_cast<float>(dLum);
 					}
 
-					if ( _uABits == 16 ) {
+					if constexpr ( _uABits == 16 ) {
 						CFloat16 * pf16Dst = reinterpret_cast<CFloat16 *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize+(_uAShift/8)]);
-						(*pf16Dst) = rgbaThis.fTexel[SL2_PC_A];
+						(*pf16Dst) = rgbaThis.dTexel[SL2_PC_A];
 					}
-					else if ( _uABits == 32 ) {
+					else if constexpr ( _uABits == 32 ) {
 						float * pf32Dst = reinterpret_cast<float *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize+(_uAShift/8)]);
-						(*pf32Dst) = rgbaThis.fTexel[SL2_PC_A];
+						(*pf32Dst) = static_cast<float>(rgbaThis.dTexel[SL2_PC_A]);
 					}
 				}
 			}
@@ -3570,10 +3805,10 @@ namespace sl2 {
 	}
 
 	/**
-	 * Intensity format -> RGBA32F conversion.
+	 * Intensity format -> RGBA64F conversion.
 	 *
 	 * \param _pui8Src Source texels.
-	 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
 	 * \param _ui32Depth Depth of the image.
@@ -3581,11 +3816,11 @@ namespace sl2 {
 	 */
 	template <unsigned _uIBits,
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bFloat>
-	bool CFormat::IntensityToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	bool CFormat::IntensityToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
-		const uint64_t ui64RowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
@@ -3593,26 +3828,26 @@ namespace sl2 {
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					SL2_RGBA32F & rgbaThis = reinterpret_cast<SL2_RGBA32F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA32F)]);
-					float fInt = 0.0;
-					if ( _bFloat ) {
-						if ( _uIBits == 16 ) {
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
+					double dInt = 0.0;
+					if constexpr ( _bFloat ) {
+						if constexpr ( _uIBits == 16 ) {
 							const CFloat16 * pf16Src = reinterpret_cast<const CFloat16 *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
-							fInt = static_cast<float>(*pf16Src);
+							dInt = static_cast<double>(*pf16Src);
 						}
-						else if ( _uIBits == 32 ) {
+						else if constexpr ( _uIBits == 32 ) {
 							const float * pf32Src = reinterpret_cast<const float *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
-							fInt = (*pf32Src);
+							dInt = (*pf32Src);
 						}
 					}
 					else {
 						const uint64_t * pui64Src = reinterpret_cast<const uint64_t *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
-						fInt = _bNorm ? StdIntComponentTo32F_Norm<_uIBits, 0, _bSigned, false>( (*pui64Src), 0.0f ) : StdIntComponentTo32F<_uIBits, 0, _bSigned>( (*pui64Src), 0.0f );
+						dInt = _bNorm ? StdIntComponentTo64F_Norm<_uIBits, 0, _bSigned, false>( (*pui64Src), 0.0 ) : StdIntComponentTo64F<_uIBits, 0, _bSigned>( (*pui64Src), 0.0 );
 					}
-					rgbaThis.fTexel[SL2_PC_R] = fInt;
-					rgbaThis.fTexel[SL2_PC_G] = fInt;
-					rgbaThis.fTexel[SL2_PC_B] = fInt;
-					rgbaThis.fTexel[SL2_PC_A] = fInt;
+					rgbaThis.dTexel[SL2_PC_R] = dInt;
+					rgbaThis.dTexel[SL2_PC_G] = dInt;
+					rgbaThis.dTexel[SL2_PC_B] = dInt;
+					rgbaThis.dTexel[SL2_PC_A] = dInt;
 				}
 			}
 		}
@@ -3620,9 +3855,9 @@ namespace sl2 {
 	}
 
 	/**
-	 * Generic RGBA32F -> intensity format conversion.
+	 * Generic RGBA64F -> intensity format conversion.
 	 *
-	 * \param _pui8Src Source texels known to be in RGBA32F format.
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
 	 * \param _pui8Dst Destination texels.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
@@ -3631,40 +3866,40 @@ namespace sl2 {
 	 */
 	template <unsigned _uIBits,
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bFloat>
-	bool CFormat::IntensityFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	bool CFormat::IntensityFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
-		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					const SL2_RGBA32F & rgbaThis = reinterpret_cast<const SL2_RGBA32F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA32F)]);
-					float fInt = (rgbaThis.fTexel[SL2_PC_R] * 0.3086f +
-						rgbaThis.fTexel[SL2_PC_G] * 0.6094f +
-						rgbaThis.fTexel[SL2_PC_B] * 0.082f) * rgbaThis.fTexel[SL2_PC_A];
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
+					double dInt = (rgbaThis.dTexel[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].fRgb[0] +
+						rgbaThis.dTexel[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].fRgb[1] +
+						rgbaThis.dTexel[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].fRgb[2]) * rgbaThis.dTexel[SL2_PC_A];
 
-					if ( _bFloat ) {
-						if ( _uIBits == 16 ) {
+					if constexpr ( _bFloat ) {
+						if constexpr ( _uIBits == 16 ) {
 							CFloat16 * pf16Dst = reinterpret_cast<CFloat16 *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize]);
-							(*pf16Dst) = fInt;
+							(*pf16Dst) = dInt;
 						}
-						else if ( _uIBits == 32 ) {
+						else if constexpr ( _uIBits == 32 ) {
 							float * pf32Dst = reinterpret_cast<float *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize]);
-							(*pf32Dst) = fInt;
+							(*pf32Dst) = static_cast<float>(dInt);
 						}
 					}
 					else {
 						uint64_t * pui64Dst = reinterpret_cast<uint64_t *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize]);
 					
-						if ( _bNorm ) {
-							Std32FToIntComponent_Norm<_uIBits, 0, _bSigned, false>( fInt, (*pui64Dst) );
+						if constexpr ( _bNorm ) {
+							Std64FToIntComponent_Norm<_uIBits, 0, _bSigned, false>( dInt, (*pui64Dst) );
 						}
 						else {
-							Std32FToIntComponent<_uIBits, 0, _bSigned>( fInt, (*pui64Dst) );
+							Std64FToIntComponent<_uIBits, 0, _bSigned>( dInt, (*pui64Dst) );
 						}
 					}
 				}
@@ -3674,34 +3909,34 @@ namespace sl2 {
 	}
 
 	/**
-	 * Stencil-X -> RGBA32F conversion.
+	 * Stencil-X -> RGBA64F conversion.
 	 *
 	 * \param _pui8Src Source texels.
-	 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
 	 * \param _ui32Depth Depth of the image.
 	 * \param _pvParms Optional parameters for the conversion.
 	 */
 	template<typename _tType, unsigned _uBits>
-	bool CFormat::StencilXToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	bool CFormat::StencilXToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};
-		const uint64_t ui64RowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( sizeof( _tType ) * _ui32Width, 4ULL );
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
-		const float fNormFactor = (1 << _uBits) - 1.0f;
+		const double dNormFactor = (1 << _uBits) - 1.0;
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					SL2_RGBA32F & rgbaThis = reinterpret_cast<SL2_RGBA32F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA32F)]);
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
 					const _tType * prSrc = reinterpret_cast<const _tType *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(_tType)]);
-					rgbaThis.fTexel[SL2_PC_R] = 0.0f;
-					rgbaThis.fTexel[SL2_PC_G] = 0.0f;
-					rgbaThis.fTexel[SL2_PC_B] = 0.0f;
-					rgbaThis.fTexel[SL2_PC_A] = (*prSrc) / fNormFactor;
+					rgbaThis.dTexel[SL2_PC_R] = 0.0;
+					rgbaThis.dTexel[SL2_PC_G] = 0.0;
+					rgbaThis.dTexel[SL2_PC_B] = 0.0;
+					rgbaThis.dTexel[SL2_PC_A] = (*prSrc) / dNormFactor;
 				}
 			}
 		}
@@ -3709,9 +3944,9 @@ namespace sl2 {
 	}
 
 	/**
-	 * RGBA32F -> Stencil-X conversion.
+	 * RGBA64F -> Stencil-X conversion.
 	 *
-	 * \param _pui8Src Source texels known to be in RGBA32F format.
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
 	 * \param _pui8Dst Destination texels.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
@@ -3719,22 +3954,22 @@ namespace sl2 {
 	 * \param _pvParms Optional parameters for the conversion.
 	 */
 	template<typename _tType, unsigned _uBits>
-	bool CFormat::StencilXFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA32F {
-			float fTexel[4];
+	bool CFormat::StencilXFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+		struct SL2_RGBA64F {
+			double dTexel[4];
 		};		
-		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA32F ) * _ui32Width;
+		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( sizeof( _tType ) * _ui32Width, 4ULL );
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
-		const float fNormFactor = (1 << _uBits) - 0.5f;
+		const double dNormFactor = (1 << _uBits) - 0.5;
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
-					const SL2_RGBA32F & rgbaThis = reinterpret_cast<const SL2_RGBA32F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA32F)]);
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 					_tType * prDst = reinterpret_cast<_tType *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(_tType)]);
 					
-					(*prDst) = static_cast<_tType>(rgbaThis.fTexel[SL2_PC_A] * fNormFactor);
+					(*prDst) = static_cast<_tType>(rgbaThis.dTexel[SL2_PC_A] * dNormFactor);
 				}
 			}
 		}
@@ -3756,10 +3991,10 @@ namespace sl2 {
 	}
 
 	/**
-	 * DXT1 -> RGBA32F conversion.
+	 * DXT1 -> RGBA64F conversion.
 	 *
 	 * \param _pui8Src Source texels.
-	 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
 	 * \param _ui32Depth Depth of the image.
@@ -3807,9 +4042,9 @@ namespace sl2 {
 	}
 
 	/**
-	 * Generic RGBA32F -> DXT1 conversion.
+	 * Generic RGBA64F -> DXT1 conversion.
 	 *
-	 * \param _pui8Src Source texels known to be in RGBA32F format.
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
 	 * \param _pui8Dst Destination texels.
 	 * \param _ui32Width Width of the image.
 	 * \param _ui32Height Height of the image.
@@ -3920,9 +4155,9 @@ namespace sl2 {
 		// Number of blocks along the height.
 		uint32_t ui32TotalScanLines = (pdtdData->ui32Height + 3) >> 2;
 
-		uint32_t ui32SrcStride = CFormat::GetRowSize( SL2_VK_FORMAT_R32G32B32A32_SFLOAT, pdtdData->ui32Width );
+		uint32_t ui32SrcStride = CFormat::GetRowSize( SL2_VK_FORMAT_R64G64B64A64_SFLOAT, pdtdData->ui32Width );
 		const uint8_t * pui8Src = pdtdData->pui8Src;
-		pui8Src += (CFormat::GetFormatSize( SL2_VK_FORMAT_R32G32B32A32_SFLOAT, pdtdData->ui32Width, pdtdData->ui32Height, pdtdData->ui32SrcZ ));
+		pui8Src += (CFormat::GetFormatSize( SL2_VK_FORMAT_R64G64B64A64_SFLOAT, pdtdData->ui32Width, pdtdData->ui32Height, pdtdData->ui32SrcZ ));
 		pui8Src += (ui32SrcStride << 2) * pdtdData->ui32SrcY;
 
 		uint32_t ui32BlockSize = CFormat::DxtBlockSize( (*pdtdData->pkifdFormatData) );
@@ -3936,13 +4171,13 @@ namespace sl2 {
 			for ( uint32_t X = pdtdData->ui32SrcX; X < ui32Width; ++X ) {
 				uint32_t ui32SrcX = X << 4;							// 4 texels per block wide, 4 channels per texel.
 				// Get the 4-by-4 block.
-				//float fAlphaHigh = 0.0f, fAlphaLow = 1.0f;
+				//double fAlphaHigh = 0.0f, fAlphaLow = 1.0f;
 				for ( uint32_t J = 0; J < 4; ++J ) {				// Down the block height.
-					const float * pfThisRowStart = reinterpret_cast<const float *>(pui8Src + J * ui32SrcStride);
+					const double * pfThisRowStart = reinterpret_cast<const double *>(pui8Src + J * ui32SrcStride);
 					if ( J + (pdtdData->ui32SrcY << 2) >= pdtdData->ui32Height ) {
 						for ( uint32_t I = 0; I < 4; ++I ) {		// Along the block width.
 							for ( uint32_t C = 0; C < 4; ++C ) {	// For each channel in this texel.
-								bColors[J][I].fValues[C] = 0.0f;
+								bColors[J][I].dValues[C] = 0.0;
 							}
 						}
 					}
@@ -3952,18 +4187,18 @@ namespace sl2 {
 							// We are on a single texel now.  But it might be beyond the width of the image.
 							if ( I + (X << 2) >= pdtdData->ui32Width ) {
 								for ( uint32_t C = 0; C < 4; ++C ) {// For each channel in this texel.
-									bColors[J][I].fValues[C] = 0.0f;
+									bColors[J][I].dValues[C] = 0.0;
 								}
 							}
 							else {
-								const float * pfSrcTexel = pfThisRowStart + ui32SrcX + (I << 2);
+								const double * pfSrcTexel = pfThisRowStart + ui32SrcX + (I << 2);
 								// It is inside the image, so add it to an entry in the block.
-								bColors[J][I].s.fR = pfSrcTexel[SL2_PC_R];
-								bColors[J][I].s.fG = pfSrcTexel[SL2_PC_G];
-								bColors[J][I].s.fB = pfSrcTexel[SL2_PC_B];
-								bColors[J][I].s.fA = pfSrcTexel[SL2_PC_A];
-								/*fAlphaHigh = CStd::Max<float>( fAlphaHigh, bColors[J][I].s.fA );
-								fAlphaLow = CStd::Min<float>( fAlphaLow, bColors[J][I].s.fA );*/
+								bColors[J][I].s.dR = pfSrcTexel[SL2_PC_R];
+								bColors[J][I].s.dG = pfSrcTexel[SL2_PC_G];
+								bColors[J][I].s.dB = pfSrcTexel[SL2_PC_B];
+								bColors[J][I].s.dA = pfSrcTexel[SL2_PC_A];
+								/*fAlphaHigh = CStd::Max<double>( fAlphaHigh, bColors[J][I].s.fA );
+								fAlphaLow = CStd::Min<double>( fAlphaLow, bColors[J][I].s.fA );*/
 								ui32Mask |= 1 << ((J << 2) + I);
 							}
 						}
@@ -3980,13 +4215,13 @@ namespace sl2 {
 					(*pdtdData->pdoOptions).fAlphaThresh,
 				};
 #ifdef SQUISH_USE_FLOATS
-				float * pfBlock = bColors[0][0].fValues;
+				double * pdBlock = bColors[0][0].dValues;
 #else
 				squish::u8 u8Block[4][4][4];
 				for ( uint32_t Y = 0; Y < 4; ++Y ) {			// Block height.
 					for ( uint32_t X = 0; X < 4; ++X ) {		// Block width.
 						for ( uint32_t I = 0; I < 4; ++I ) {	// Colors.
-							u8Block[Y][X][I] = static_cast<squish::u8>(bColors[Y][X].fValues[I] * 255.0f);
+							u8Block[Y][X][I] = static_cast<squish::u8>(bColors[Y][X].dValues[I] * 255.0);
 						}
 					}
 				}
@@ -4002,10 +4237,10 @@ namespace sl2 {
 						// Premultiply the alpha in the block and fall through.
 						for ( uint32_t G = 0; G < 4; ++G ) {
 							for ( uint32_t H = 0; H < 4; ++H ) {
-								float fAlpha = bColors[G][H].s.fA;
-								bColors[G][H].s.fR *= fAlpha;
-								bColors[G][H].s.fG *= fAlpha;
-								bColors[G][H].s.fB *= fAlpha;
+								double dAlpha = bColors[G][H].s.fA;
+								bColors[G][H].s.fR *= dAlpha;
+								bColors[G][H].s.fG *= dAlpha;
+								bColors[G][H].s.fB *= dAlpha;
 							}
 						}
 					}
@@ -4017,10 +4252,10 @@ namespace sl2 {
 						// Premultiply the alpha in the block and fall through.
 						for ( uint32_t G = 0; G < 4; ++G ) {
 							for ( uint32_t H = 0; H < 4; ++H ) {
-								float fAlpha = bColors[G][H].s.fA;
-								bColors[G][H].s.fR *= fAlpha;
-								bColors[G][H].s.fG *= fAlpha;
-								bColors[G][H].s.fB *= fAlpha;
+								double dAlpha = bColors[G][H].s.fA;
+								bColors[G][H].s.dR *= dAlpha;
+								bColors[G][H].s.dG *= dAlpha;
+								bColors[G][H].s.dB *= dAlpha;
 							}
 						}
 					}
@@ -4072,15 +4307,15 @@ namespace sl2 {
 					// Apply sRGB (importantly done after pre-multiply of alpha.
 					for ( uint32_t G = 0; G < 4; ++G ) {
 						for ( uint32_t H = 0; H < 4; ++H ) {
-							bColors[G][H].s.fR = CUtilities::LinearToSRgb( bColors[G][H].s.fR );
-							bColors[G][H].s.fG = CUtilities::LinearToSRgb( bColors[G][H].s.fG );
-							bColors[G][H].s.fB = CUtilities::LinearToSRgb( bColors[G][H].s.fB );
+							bColors[G][H].s.dR = CUtilities::LinearToSRgb( bColors[G][H].s.dR );
+							bColors[G][H].s.dG = CUtilities::LinearToSRgb( bColors[G][H].s.dG );
+							bColors[G][H].s.dB = CUtilities::LinearToSRgb( bColors[G][H].s.dB );
 						}
 					}
 				}
 				squish::CompressMasked(
 #ifdef SQUISH_USE_FLOATS
-					pfBlock,
+					pdBlock,
 #else
 					reinterpret_cast<squish::u8 *>(u8Block),
 #endif	// #ifdef SQUISH_USE_FLOATS
@@ -4099,3 +4334,5 @@ namespace sl2 {
 	}
 
 }	// namespace sl2
+
+#pragma warning( pop )

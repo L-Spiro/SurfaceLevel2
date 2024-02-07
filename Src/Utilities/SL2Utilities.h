@@ -178,20 +178,20 @@ namespace sl2 {
 		static std::vector<std::string>						Tokenize( const std::string &_sString, std::string::value_type _vtDelimiter, bool _bAllowEmptyStrings );
 
 		/**
-		 * Converts a single float value from sRGB space to linear space.  Performs an accurate conversion.
+		 * Converts a single double value from sRGB space to linear space.  Performs an accurate conversion.
 		 *
-		 * \param _fVal The value to convert.
+		 * \param _dVal The value to convert.
 		 * \return Returns the converted value.
 		 */
-		static inline float __fastcall						SRgbToLinear( float _fVal );
+		static inline double __fastcall						SRgbToLinear( double _dVal );
 
 		/**
-		 * Converts a single float value from linear space to sRGB space.  Performs an accurate conversion.
+		 * Converts a single double value from linear space to sRGB space.  Performs an accurate conversion.
 		 *
-		 * \param _fVal The value to convert.
+		 * \param _dVal The value to convert.
 		 * \return Returns the converted value.
 		 */
-		static inline float __fastcall						LinearToSRgb( float _fVal );
+		static inline double __fastcall						LinearToSRgb( double _dVal );
 
 		/**
 		 * Minimum between 2 values.
@@ -239,27 +239,27 @@ namespace sl2 {
 	// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 	// == Functions.
 	/**
-	 * Converts a single float value from sRGB space to linear space.  Performs an accurate conversion.
+	 * Converts a single double value from sRGB space to linear space.  Performs an accurate conversion.
 	 *
-	 * \param _fVal The value to convert.
+	 * \param _dVal The value to convert.
 	 * \return Returns the converted value.
 	 */
-	inline float __fastcall CUtilities::SRgbToLinear( float _fVal ) {
-		return _fVal <= 0.04045f ?
-			_fVal * (1.0f / 12.92f) :
-			std::powf( (_fVal + 0.055f) * (1.0f / 1.055f), 2.4f );
+	inline double __fastcall CUtilities::SRgbToLinear( double _dVal ) {
+		return _dVal <= 0.04045 ?
+			_dVal * (1.0 / 12.92) :
+			std::pow( (_dVal + 0.055) * (1.0 / 1.055), 2.4 );
 	}
 
 	/**
-	 * Converts a single float value from linear space to sRGB space.  Performs an accurate conversion.
+	 * Converts a single double value from linear space to sRGB space.  Performs an accurate conversion.
 	 *
-	 * \param _fVal The value to convert.
+	 * \param _dVal The value to convert.
 	 * \return Returns the converted value.
 	 */
-	inline float __fastcall CUtilities::LinearToSRgb( float _fVal ) {
-		return _fVal <= 0.0031308f ?
-			_fVal * 12.92f :
-			1.055f * std::powf( _fVal, 1.0f / 2.4f ) - 0.055f;
+	inline double __fastcall CUtilities::LinearToSRgb( double _dVal ) {
+		return _dVal <= 0.0031308 ?
+			_dVal * 12.92 :
+			1.055 * std::pow( _dVal, 1.0 / 2.4 ) - 0.055;
 	}
 
 }	// namespace sl2

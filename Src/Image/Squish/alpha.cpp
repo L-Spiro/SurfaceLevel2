@@ -45,7 +45,7 @@ static int FloatToInt( float a, int limit )
 }
 
 #ifdef SQUISH_USE_FLOATS
-void CompressAlphaDxt3( float const* rgba, int mask, void* block )
+void CompressAlphaDxt3( double const* rgba, int mask, void* block )
 {
 	u8* bytes = reinterpret_cast< u8* >( block );
 	
@@ -54,8 +54,8 @@ void CompressAlphaDxt3( float const* rgba, int mask, void* block )
 	{
 		int iIndex = i << 3;
 		// quantise down to 4 bits
-		float alpha1 = rgba[iIndex + 3] * 15.0f;
-		float alpha2 = rgba[iIndex + 7] * 15.0f;
+		float alpha1 = static_cast<float>(rgba[iIndex + 3] * 15.0);
+		float alpha2 = static_cast<float>(rgba[iIndex + 7] * 15.0);
 		int quant1 = FloatToInt( alpha1, 15 );
 		int quant2 = FloatToInt( alpha2, 15 );
 		
@@ -135,7 +135,7 @@ static void FixRangeSigned( int& min, int& max, int steps )
 }
 
 #ifdef SQUISH_USE_FLOATS
-static int FitCodes( float const* rgba, int mask, u8 const* codes, u8* indices, int alphaIndex )
+static int FitCodes( double const* rgba, int mask, u8 const* codes, u8* indices, int alphaIndex )
 #else
 static int FitCodes( u8 const* rgba, int mask, u8 const* codes, u8* indices, int alphaIndex )
 #endif	// #ifdef SQUISH_USE_FLOATS
@@ -155,7 +155,7 @@ static int FitCodes( u8 const* rgba, int mask, u8 const* codes, u8* indices, int
 		
 		// find the least error and corresponding index
 #ifdef SQUISH_USE_FLOATS
-		int value = static_cast<int>(rgba[4*i+alphaIndex] * 255.0f);
+		int value = static_cast<int>(rgba[4*i+alphaIndex] * 255.0);
 #else
 		int value = rgba[4*i+alphaIndex];
 #endif	// #ifdef SQUISH_USE_FLOATS
@@ -185,7 +185,7 @@ static int FitCodes( u8 const* rgba, int mask, u8 const* codes, u8* indices, int
 }
 
 #ifdef SQUISH_USE_FLOATS
-static int FitCodesSigned( float const* rgba, int mask, i8 const* codes, u8* indices, int alphaIndex )
+static int FitCodesSigned( double const* rgba, int mask, i8 const* codes, u8* indices, int alphaIndex )
 #else
 static int FitCodesSigned( i8 const* rgba, int mask, i8 const* codes, u8* indices, int alphaIndex )
 #endif	// #ifdef SQUISH_USE_FLOATS
@@ -205,7 +205,7 @@ static int FitCodesSigned( i8 const* rgba, int mask, i8 const* codes, u8* indice
 		
 		// find the least error and corresponding index
 #ifdef SQUISH_USE_FLOATS
-		int value = static_cast<int>(Clamp( rgba[4*i+alphaIndex] * 127.0f, -127.0f, 127.0f ));
+		int value = static_cast<int>(Clamp( rgba[4*i+alphaIndex] * 127.0, -127.0, 127.0 ));
 #else
 		int value = Clamp( rgba[4*i+alphaIndex], -127, 127 );
 #endif	// #ifdef SQUISH_USE_FLOATS
@@ -323,7 +323,7 @@ static void WriteAlphaBlock7( int alpha0, int alpha1, u8 const* indices, void* b
 }
 
 #ifdef SQUISH_USE_FLOATS
-void CompressAlphaDxt5( float const* rgba, int mask, void* block, int alphaIndex )
+void CompressAlphaDxt5( double const* rgba, int mask, void* block, int alphaIndex )
 {
 	// get the range for 5-alpha and 7-alpha interpolation
 	int min5 = 255;
@@ -384,7 +384,7 @@ void CompressAlphaDxt5( float const* rgba, int mask, void* block, int alphaIndex
 		WriteAlphaBlock7( min7, max7, indices7, block );
 	}
 }
-void CompressAlphaDxt5Signed( float const* rgba, int mask, void* block, int alphaIndex ) {
+void CompressAlphaDxt5Signed( double const* rgba, int mask, void* block, int alphaIndex ) {
 	// get the range for 5-alpha and 7-alpha interpolation
 	int min5 = 127;
 	int max5 = -127;
