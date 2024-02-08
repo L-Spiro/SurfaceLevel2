@@ -62,12 +62,12 @@ ColorSet::ColorSet( double const* rgba, int mask, int flags, const SquishConfig 
 			// allocate a new point
 			if( j == i )
 			{
-				float x = rgba[iIndex];
-				float y = rgba[iIndex + 1];
-				float z = rgba[iIndex + 2];
+				float x = static_cast<float>(rgba[iIndex]);
+				float y = static_cast<float>(rgba[iIndex + 1]);
+				float z = static_cast<float>(rgba[iIndex + 2]);
 				
 				// ensure there is always non-zero weight even for zero alpha
-				float w = ((rgba[iIndex + 3] * 255.0f) + 1.0f) * (1.0f / 256.0f);
+				float w = static_cast<float>(((rgba[iIndex + 3] * 255.0) + 1.0) * (1.0 / 256.0));
 
 				// add the point
 				m_points[m_count] = Vec3( x, y, z );

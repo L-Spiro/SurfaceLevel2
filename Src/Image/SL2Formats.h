@@ -1699,7 +1699,7 @@ namespace sl2 {
 					_dValue = CUtilities::LinearToSRgb( _dValue );
 				}
 				// Clear the target bits.
-				const uint64_t ui64Mask = (1ULL << _uBits) - 1ULL;
+				constexpr uint64_t ui64Mask = ~0ULL >> (64U - _uBits);
 				_ui64Value = _ui64Value & ~(ui64Mask << _uShift);
 				if constexpr ( _uSigned != 0 ) {
 					int64_t i64Val = static_cast<int64_t>(std::round( CUtilities::Clamp( _dValue, -1.0, 1.0 ) * static_cast<double>((1ULL << (_uBits - 1ULL)) - 1ULL) ));
