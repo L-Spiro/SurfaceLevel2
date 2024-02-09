@@ -1308,6 +1308,16 @@ namespace sl2 {
 		} * LPSL2_RGB, * const LPCSL2_RGB;
 
 		/** An RGBA color component. */
+		typedef struct SL2_RGBA64F {
+			double																	dRgba[4];
+		} * LPSL2_RGBA64F, * const LPCSL2_RGBA64F;
+
+		/** An RGB color component. */
+		typedef struct SL2_RGB64F {
+			double																	fRgb[3];
+		} * LPSL2_RGB64F, * const LPCSL2_RGB64F;
+
+		/** An RGBA color component. */
 		typedef struct SL2_RGBA_UNORM {
 			uint8_t																	ui8Rgba[4];
 		} * LPSL2_RGBA_UNORM, * const LPCSL2_RGBA_UNORM;
@@ -1828,13 +1838,13 @@ namespace sl2 {
 		static uint32_t																DxtBlockSize( const SL2_KTX_INTERNAL_FORMAT_DATA &_ifdFormat );
 
 		/**
-		 * Converts a 16-bit R5G6B5 end point into an SL2_RGBA color value.
+		 * Converts a 16-bit R5G6B5 end point into an RGBA64F color value.
 		 *
 		 * \param _ui16Point The end point to convert.
-		 * \param _rRgba The output for the converted color.
+		 * \param _dPalette The output for the converted color.
 		 */
 		template <unsigned _bSrgb>
-		static inline void 															Rgb565ToRgbaF32( uint16_t _ui16Point, SL2_RGBA &_rRgba );
+		static inline void 															Rgb565ToRgbaF64( uint16_t _ui16Point, SL2_RGBA64F &_dPalette );
 
 		/**
 		 * Decodes a single block of DXT1.
@@ -1843,7 +1853,7 @@ namespace sl2 {
 		 * \param _prPalette The created palette (contains 4 entries).
 		 */
 		template <unsigned _bSrgb>
-		static void 																DecodeDXT1( uint64_t _ui64Block, SL2_RGBA * _prPalette );
+		static void 																DecodeDXT1( uint64_t _ui64Block, SL2_RGBA64F * _prPalette );
 
 		/**
 		 * Decodes a single block of DXT3.
@@ -1852,7 +1862,7 @@ namespace sl2 {
 		 * \param _prPalette The created palette (contains 4 entries).
 		 */
 		template <unsigned _bSrgb>
-		static void 																DecodeDXT3( uint64_t _ui64Block, SL2_RGBA * _prPalette );
+		static void 																DecodeDXT3( uint64_t _ui64Block, SL2_RGBA64F * _prPalette );
 
 		/**
 		 * Decodes a single block of DXT3 alpha.
@@ -2464,7 +2474,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb>
-		static bool 																Dxt1ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Dxt1ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Generic RGBA64F -> DXT1 conversion.
@@ -2477,7 +2487,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _ui8DefaultAlphaThresh, unsigned _bSrgb>
-		static bool 																Dxt1FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Dxt1FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * DXT2 -> RGBA64F conversion.
@@ -2490,8 +2500,8 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb>
-		static bool 				Dxt2ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr ) {
-			Dxt3ToRgba32F( _pui8Src, _pui8Dst, _ui32Width, _ui32Height, _ui32Depth, _pvParms );
+		static bool 																Dxt2ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr ) {
+			Dxt3ToRgba64F( _pui8Src, _pui8Dst, _ui32Width, _ui32Height, _ui32Depth, _pvParms );
 		}
 
 		/**
@@ -2505,7 +2515,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb>
-		static bool 				Dxt2FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 				Dxt2FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * DXT3 -> RGBA64F conversion.
@@ -2518,7 +2528,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb>
-		static bool 				Dxt3ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 				Dxt3ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Generic RGBA64F -> DXT3 conversion.
@@ -2827,13 +2837,13 @@ namespace sl2 {
 	}
 
 	/**
-	 * Converts a 16-bit R5G6B5 end point into an SL2_RGBA color value.
+	 * Converts a 16-bit R5G6B5 end point into an RGBA64F color value.
 	 *
 	 * \param _ui16Point The end point to convert.
-	 * \param _rRgba The output for the converted color.
+	 * \param _dPalette The output for the converted color.
 	 */
 	template <unsigned _bSrgb>
-	inline void CFormat::Rgb565ToRgbaF32( uint16_t _ui16Point, SL2_RGBA &_rRgba ) {
+	inline void CFormat::Rgb565ToRgbaF64( uint16_t _ui16Point, SL2_RGBA64F &_dPalette ) {
 		const uint32_t ui32Mask5 = (1 << 5) - 1;
 		const uint32_t ui32Mask6 = (1 << 6) - 1;
 		if ( m_bUseNVidiaDecode ) {
@@ -2841,21 +2851,21 @@ namespace sl2 {
 			uint32_t uiG = ((_ui16Point >> 5) & ui32Mask6);
 			uint32_t uiB = _ui16Point & ui32Mask5;
 
-			_rRgba.fRgba[SL2_PC_B] = ((3 * uiB * 22) / 8) / 255.0f;
-			_rRgba.fRgba[SL2_PC_G] = ((uiG << 2) | (uiG >> 4)) / 255.0f;
-			_rRgba.fRgba[SL2_PC_R] = ((3 * uiR * 22) / 8) / 255.0f;
+			_dPalette.dRgba[SL2_PC_B] = ((3 * uiB * 22) / 8) / 255.0;
+			_dPalette.dRgba[SL2_PC_G] = ((uiG << 2) | (uiG >> 4)) / 255.0;
+			_dPalette.dRgba[SL2_PC_R] = ((3 * uiR * 22) / 8) / 255.0;
 		}
 		else {
-			_rRgba.fRgba[SL2_PC_R] = (_ui16Point >> 11) / static_cast<float>(ui32Mask5);
-			_rRgba.fRgba[SL2_PC_G] = ((_ui16Point >> 5) & ui32Mask6) / static_cast<float>(ui32Mask6);
-			_rRgba.fRgba[SL2_PC_B] = (_ui16Point & ui32Mask5) / static_cast<float>(ui32Mask5);
+			_dPalette.dRgba[SL2_PC_R] = (_ui16Point >> 11) / static_cast<double>(ui32Mask5);
+			_dPalette.dRgba[SL2_PC_G] = ((_ui16Point >> 5) & ui32Mask6) / static_cast<double>(ui32Mask6);
+			_dPalette.dRgba[SL2_PC_B] = (_ui16Point & ui32Mask5) / static_cast<double>(ui32Mask5);
 		}
 		if constexpr ( _bSrgb != 0 ) {
-			_rRgba.fRgba[SL2_PC_B] = CUtilities::SRgbToLinear( _rRgba.fRgba[SL2_PC_B] );
-			_rRgba.fRgba[SL2_PC_G] = CUtilities::SRgbToLinear( _rRgba.fRgba[SL2_PC_G] );
-			_rRgba.fRgba[SL2_PC_R] = CUtilities::SRgbToLinear( _rRgba.fRgba[SL2_PC_R] );
+			_dPalette.dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( _dPalette.dRgba[SL2_PC_B] );
+			_dPalette.dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( _dPalette.dRgba[SL2_PC_G] );
+			_dPalette.dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( _dPalette.dRgba[SL2_PC_R] );
 		}
-		_rRgba.fRgba[SL2_PC_A] = 1.0f;
+		_dPalette.dRgba[SL2_PC_A] = 1.0;
 	}
 
 	/**
@@ -2865,11 +2875,11 @@ namespace sl2 {
 	 * \param _prPalette The created palette (contains 4 entries).
 	 */
 	template <unsigned _bSrgb>
-	void CFormat::DecodeDXT1( uint64_t _ui64Block, SL2_RGBA * _prPalette ) {
+	void CFormat::DecodeDXT1( uint64_t _ui64Block, SL2_RGBA64F * _prPalette ) {
 		uint16_t ui16Tmp0 = _ui64Block & 0xFFFF;
 		uint16_t ui16Tmp1 = (_ui64Block >> 16) & 0xFFFF;
-		Rgb565ToRgbaF32<false>( ui16Tmp0, _prPalette[0] );
-		Rgb565ToRgbaF32<false>( ui16Tmp1, _prPalette[1] );
+		Rgb565ToRgbaF64<false>( ui16Tmp0, _prPalette[0] );
+		Rgb565ToRgbaF64<false>( ui16Tmp1, _prPalette[1] );
 
 		if ( m_bUseNVidiaDecode ) {
 			const uint32_t ui32Mask5 = (1 << 5) - 1;
@@ -2879,64 +2889,64 @@ namespace sl2 {
 			uint32_t uiB1 = ui16Tmp1 & ui32Mask5;
 
 
-			uint32_t uiFullG0 = static_cast<uint32_t>(std::round( _prPalette[0].fRgba[SL2_PC_G] * 255.0f ));
-			uint32_t uiFullG1 = static_cast<uint32_t>(std::round( _prPalette[1].fRgba[SL2_PC_G] * 255.0f ));
+			uint32_t uiFullG0 = static_cast<uint32_t>(std::round( _prPalette[0].dRgba[SL2_PC_G] * 255.0 ));
+			uint32_t uiFullG1 = static_cast<uint32_t>(std::round( _prPalette[1].dRgba[SL2_PC_G] * 255.0 ));
 			int32_t iDiff = uiFullG1 - uiFullG0;
 
 
 			if ( ui16Tmp0 > ui16Tmp1 ) {
-				_prPalette[2].fRgba[SL2_PC_R] = (((2 * uiR0 + uiR1) * 22) / 8) / 255.0f;
-				_prPalette[2].fRgba[SL2_PC_G] = ((256 * uiFullG0 + iDiff / 4 + 128 + iDiff * 80) / 256) / 255.0f;
-				_prPalette[2].fRgba[SL2_PC_B] = (((2 * uiB0 + uiB1) * 22) / 8) / 255.0f;
-				_prPalette[2].fRgba[SL2_PC_A] = 1.0f;
+				_prPalette[2].dRgba[SL2_PC_R] = (((2 * uiR0 + uiR1) * 22) / 8) / 255.0;
+				_prPalette[2].dRgba[SL2_PC_G] = ((256 * uiFullG0 + iDiff / 4 + 128 + iDiff * 80) / 256) / 255.0;
+				_prPalette[2].dRgba[SL2_PC_B] = (((2 * uiB0 + uiB1) * 22) / 8) / 255.0;
+				_prPalette[2].dRgba[SL2_PC_A] = 1.0;
 
-				_prPalette[3].fRgba[SL2_PC_R] = (((2 * uiR1 + uiR0) * 22) / 8) / 255.0f;
-				_prPalette[3].fRgba[SL2_PC_G] = ((256 * uiFullG1 - iDiff / 4 + 128 - iDiff * 80) / 256) / 255.0f;
-				_prPalette[3].fRgba[SL2_PC_B] = (((2 * uiB1 + uiB0) * 22) / 8) / 255.0f;
-				_prPalette[3].fRgba[SL2_PC_A] = 1.0f;
+				_prPalette[3].dRgba[SL2_PC_R] = (((2 * uiR1 + uiR0) * 22) / 8) / 255.0;
+				_prPalette[3].dRgba[SL2_PC_G] = ((256 * uiFullG1 - iDiff / 4 + 128 - iDiff * 80) / 256) / 255.0;
+				_prPalette[3].dRgba[SL2_PC_B] = (((2 * uiB1 + uiB0) * 22) / 8) / 255.0;
+				_prPalette[3].dRgba[SL2_PC_A] = 1.0;
 			}
 			else {
-				_prPalette[2].fRgba[SL2_PC_R] = (((uiR0 + uiR1) * 33) / 8) / 255.0f;
-				_prPalette[2].fRgba[SL2_PC_G] = ((256 * uiFullG0 + iDiff / 4 + 128 + iDiff * 128) / 256) / 255.0f;
-				_prPalette[2].fRgba[SL2_PC_B] = (((uiB0 + uiB1) * 33) / 8) / 255.0f;
-				_prPalette[2].fRgba[SL2_PC_A] = 1.0f;
+				_prPalette[2].dRgba[SL2_PC_R] = (((uiR0 + uiR1) * 33) / 8) / 255.0;
+				_prPalette[2].dRgba[SL2_PC_G] = ((256 * uiFullG0 + iDiff / 4 + 128 + iDiff * 128) / 256) / 255.0;
+				_prPalette[2].dRgba[SL2_PC_B] = (((uiB0 + uiB1) * 33) / 8) / 255.0;
+				_prPalette[2].dRgba[SL2_PC_A] = 1.0;
 
-				_prPalette[3].fRgba[SL2_PC_R] = 0.0f;
-				_prPalette[3].fRgba[SL2_PC_G] = 0.0f;
-				_prPalette[3].fRgba[SL2_PC_B] = 0.0f;
-				_prPalette[3].fRgba[SL2_PC_A] = 0.0f;
+				_prPalette[3].dRgba[SL2_PC_R] = 0.0;
+				_prPalette[3].dRgba[SL2_PC_G] = 0.0;
+				_prPalette[3].dRgba[SL2_PC_B] = 0.0;
+				_prPalette[3].dRgba[SL2_PC_A] = 0.0;
 			}
 		}
 		else {
 
 			if ( ui16Tmp0 > ui16Tmp1 ) {
-				_prPalette[2].fRgba[SL2_PC_R] = (_prPalette[0].fRgba[SL2_PC_R] * 2.0f + _prPalette[1].fRgba[SL2_PC_R]) / 3.0f;
-				_prPalette[2].fRgba[SL2_PC_G] = (_prPalette[0].fRgba[SL2_PC_G] * 2.0f + _prPalette[1].fRgba[SL2_PC_G]) / 3.0f;
-				_prPalette[2].fRgba[SL2_PC_B] = (_prPalette[0].fRgba[SL2_PC_B] * 2.0f + _prPalette[1].fRgba[SL2_PC_B]) / 3.0f;
-				_prPalette[2].fRgba[SL2_PC_A] = 1.0f;
+				_prPalette[2].dRgba[SL2_PC_R] = (_prPalette[0].dRgba[SL2_PC_R] * 2.0f + _prPalette[1].dRgba[SL2_PC_R]) / 3.0f;
+				_prPalette[2].dRgba[SL2_PC_G] = (_prPalette[0].dRgba[SL2_PC_G] * 2.0f + _prPalette[1].dRgba[SL2_PC_G]) / 3.0f;
+				_prPalette[2].dRgba[SL2_PC_B] = (_prPalette[0].dRgba[SL2_PC_B] * 2.0f + _prPalette[1].dRgba[SL2_PC_B]) / 3.0f;
+				_prPalette[2].dRgba[SL2_PC_A] = 1.0;
 
-				_prPalette[3].fRgba[SL2_PC_R] = (_prPalette[0].fRgba[SL2_PC_R] + _prPalette[1].fRgba[SL2_PC_R] * 2.0f) / 3.0f;
-				_prPalette[3].fRgba[SL2_PC_G] = (_prPalette[0].fRgba[SL2_PC_G] + _prPalette[1].fRgba[SL2_PC_G] * 2.0f) / 3.0f;
-				_prPalette[3].fRgba[SL2_PC_B] = (_prPalette[0].fRgba[SL2_PC_B] + _prPalette[1].fRgba[SL2_PC_B] * 2.0f) / 3.0f;
-				_prPalette[3].fRgba[SL2_PC_A] = 1.0f;
+				_prPalette[3].dRgba[SL2_PC_R] = (_prPalette[0].dRgba[SL2_PC_R] + _prPalette[1].dRgba[SL2_PC_R] * 2.0f) / 3.0f;
+				_prPalette[3].dRgba[SL2_PC_G] = (_prPalette[0].dRgba[SL2_PC_G] + _prPalette[1].dRgba[SL2_PC_G] * 2.0f) / 3.0f;
+				_prPalette[3].dRgba[SL2_PC_B] = (_prPalette[0].dRgba[SL2_PC_B] + _prPalette[1].dRgba[SL2_PC_B] * 2.0f) / 3.0f;
+				_prPalette[3].dRgba[SL2_PC_A] = 1.0;
 			}
 			else {
-				_prPalette[2].fRgba[SL2_PC_R] = (_prPalette[0].fRgba[SL2_PC_R] + _prPalette[1].fRgba[SL2_PC_R]) * 0.5f;
-				_prPalette[2].fRgba[SL2_PC_G] = (_prPalette[0].fRgba[SL2_PC_G] + _prPalette[1].fRgba[SL2_PC_G]) * 0.5f;
-				_prPalette[2].fRgba[SL2_PC_B] = (_prPalette[0].fRgba[SL2_PC_B] + _prPalette[1].fRgba[SL2_PC_B]) * 0.5f;
-				_prPalette[2].fRgba[SL2_PC_A] = 1.0f;
+				_prPalette[2].dRgba[SL2_PC_R] = (_prPalette[0].dRgba[SL2_PC_R] + _prPalette[1].dRgba[SL2_PC_R]) * 0.5f;
+				_prPalette[2].dRgba[SL2_PC_G] = (_prPalette[0].dRgba[SL2_PC_G] + _prPalette[1].dRgba[SL2_PC_G]) * 0.5f;
+				_prPalette[2].dRgba[SL2_PC_B] = (_prPalette[0].dRgba[SL2_PC_B] + _prPalette[1].dRgba[SL2_PC_B]) * 0.5f;
+				_prPalette[2].dRgba[SL2_PC_A] = 1.0;
 
-				_prPalette[3].fRgba[SL2_PC_R] = 0.0f;
-				_prPalette[3].fRgba[SL2_PC_G] = 0.0f;
-				_prPalette[3].fRgba[SL2_PC_B] = 0.0f;
-				_prPalette[3].fRgba[SL2_PC_A] = 0.0f;
+				_prPalette[3].dRgba[SL2_PC_R] = 0.0;
+				_prPalette[3].dRgba[SL2_PC_G] = 0.0;
+				_prPalette[3].dRgba[SL2_PC_B] = 0.0;
+				_prPalette[3].dRgba[SL2_PC_A] = 0.0;
 			}
 		}
 		if constexpr ( _bSrgb != 0 ) {
 			for ( uint32_t I = 0; I < 4; ++I ) {
-				_prPalette[I].fRgba[SL2_PC_R] = CUtilities::SRgbToLinear( _prPalette[I].fRgba[SL2_PC_R] );
-				_prPalette[I].fRgba[SL2_PC_G] = CUtilities::SRgbToLinear( _prPalette[I].fRgba[SL2_PC_G] );
-				_prPalette[I].fRgba[SL2_PC_B] = CUtilities::SRgbToLinear( _prPalette[I].fRgba[SL2_PC_B] );
+				_prPalette[I].dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( _prPalette[I].dRgba[SL2_PC_R] );
+				_prPalette[I].dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( _prPalette[I].dRgba[SL2_PC_G] );
+				_prPalette[I].dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( _prPalette[I].dRgba[SL2_PC_B] );
 			}
 		}
 	}
@@ -2948,11 +2958,11 @@ namespace sl2 {
 	 * \param _prPalette The created palette (contains 4 entries).
 	 */
 	template <unsigned _bSrgb>
-	void CFormat::DecodeDXT3( uint64_t _ui64Block, SL2_RGBA * _prPalette ) {
+	void CFormat::DecodeDXT3( uint64_t _ui64Block, SL2_RGBA64F * _prPalette ) {
 		uint16_t ui16Tmp0 = _ui64Block & 0xFFFF;
 		uint16_t ui16Tmp1 = (_ui64Block >> 16) & 0xFFFF;
-		Rgb565ToRgbaF32<false>( ui16Tmp0, _prPalette[0] );
-		Rgb565ToRgbaF32<false>( ui16Tmp1, _prPalette[1] );
+		Rgb565ToRgbaF64<false>( ui16Tmp0, _prPalette[0] );
+		Rgb565ToRgbaF64<false>( ui16Tmp1, _prPalette[1] );
 
 		if ( m_bUseNVidiaDecode ) {
 			const uint32_t ui32Mask5 = (1 << 5) - 1;
@@ -2962,39 +2972,39 @@ namespace sl2 {
 			uint32_t uiB1 = ui16Tmp1 & ui32Mask5;
 
 
-			uint32_t uiFullG0 = static_cast<uint32_t>(std::round( _prPalette[0].fRgba[SL2_PC_G] * 255.0f ));
-			uint32_t uiFullG1 = static_cast<uint32_t>(std::round( _prPalette[1].fRgba[SL2_PC_G] * 255.0f ));
+			uint32_t uiFullG0 = static_cast<uint32_t>(std::round( _prPalette[0].dRgba[SL2_PC_G] * 255.0 ));
+			uint32_t uiFullG1 = static_cast<uint32_t>(std::round( _prPalette[1].dRgba[SL2_PC_G] * 255.0 ));
 			int32_t iDiff = uiFullG1 - uiFullG0;
 
 
-			_prPalette[2].fRgba[SL2_PC_R] = (((2 * uiR0 + uiR1) * 22) / 8) / 255.0f;
-			_prPalette[2].fRgba[SL2_PC_G] = ((256 * uiFullG0 + iDiff / 4 + 128 + iDiff * 80) / 256) / 255.0f;
-			_prPalette[2].fRgba[SL2_PC_B] = (((2 * uiB0 + uiB1) * 22) / 8) / 255.0f;
-			_prPalette[2].fRgba[SL2_PC_A] = 1.0f;
+			_prPalette[2].dRgba[SL2_PC_R] = (((2 * uiR0 + uiR1) * 22) / 8) / 255.0;
+			_prPalette[2].dRgba[SL2_PC_G] = ((256 * uiFullG0 + iDiff / 4 + 128 + iDiff * 80) / 256) / 255.0;
+			_prPalette[2].dRgba[SL2_PC_B] = (((2 * uiB0 + uiB1) * 22) / 8) / 255.0;
+			_prPalette[2].dRgba[SL2_PC_A] = 1.0;
 
-			_prPalette[3].fRgba[SL2_PC_R] = (((2 * uiR1 + uiR0) * 22) / 8) / 255.0f;
-			_prPalette[3].fRgba[SL2_PC_G] = ((256 * uiFullG1 - iDiff / 4 + 128 - iDiff * 80) / 256) / 255.0f;
-			_prPalette[3].fRgba[SL2_PC_B] = (((2 * uiB1 + uiB0) * 22) / 8) / 255.0f;
-			_prPalette[3].fRgba[SL2_PC_A] = 1.0f;
+			_prPalette[3].dRgba[SL2_PC_R] = (((2 * uiR1 + uiR0) * 22) / 8) / 255.0;
+			_prPalette[3].dRgba[SL2_PC_G] = ((256 * uiFullG1 - iDiff / 4 + 128 - iDiff * 80) / 256) / 255.0;
+			_prPalette[3].dRgba[SL2_PC_B] = (((2 * uiB1 + uiB0) * 22) / 8) / 255.0;
+			_prPalette[3].dRgba[SL2_PC_A] = 1.0;
 		}
 		else {
 
-			_prPalette[2].fRgba[SL2_PC_R] = (_prPalette[0].fRgba[SL2_PC_R] * 2.0f + _prPalette[1].fRgba[SL2_PC_R]) / 3.0f;
-			_prPalette[2].fRgba[SL2_PC_G] = (_prPalette[0].fRgba[SL2_PC_G] * 2.0f + _prPalette[1].fRgba[SL2_PC_G]) / 3.0f;
-			_prPalette[2].fRgba[SL2_PC_B] = (_prPalette[0].fRgba[SL2_PC_B] * 2.0f + _prPalette[1].fRgba[SL2_PC_B]) / 3.0f;
-			_prPalette[2].fRgba[SL2_PC_A] = 1.0f;
+			_prPalette[2].dRgba[SL2_PC_R] = (_prPalette[0].dRgba[SL2_PC_R] * 2.0 + _prPalette[1].dRgba[SL2_PC_R]) / 3.0;
+			_prPalette[2].dRgba[SL2_PC_G] = (_prPalette[0].dRgba[SL2_PC_G] * 2.0 + _prPalette[1].dRgba[SL2_PC_G]) / 3.0;
+			_prPalette[2].dRgba[SL2_PC_B] = (_prPalette[0].dRgba[SL2_PC_B] * 2.0 + _prPalette[1].dRgba[SL2_PC_B]) / 3.0;
+			_prPalette[2].dRgba[SL2_PC_A] = 1.0;
 
-			_prPalette[3].fRgba[SL2_PC_R] = (_prPalette[0].fRgba[SL2_PC_R] + _prPalette[1].fRgba[SL2_PC_R] * 2.0f) / 3.0f;
-			_prPalette[3].fRgba[SL2_PC_G] = (_prPalette[0].fRgba[SL2_PC_G] + _prPalette[1].fRgba[SL2_PC_G] * 2.0f) / 3.0f;
-			_prPalette[3].fRgba[SL2_PC_B] = (_prPalette[0].fRgba[SL2_PC_B] + _prPalette[1].fRgba[SL2_PC_B] * 2.0f) / 3.0f;
-			_prPalette[3].fRgba[SL2_PC_A] = 1.0f;
+			_prPalette[3].dRgba[SL2_PC_R] = (_prPalette[0].dRgba[SL2_PC_R] + _prPalette[1].dRgba[SL2_PC_R] * 2.0) / 3.0;
+			_prPalette[3].dRgba[SL2_PC_G] = (_prPalette[0].dRgba[SL2_PC_G] + _prPalette[1].dRgba[SL2_PC_G] * 2.0) / 3.0;
+			_prPalette[3].dRgba[SL2_PC_B] = (_prPalette[0].dRgba[SL2_PC_B] + _prPalette[1].dRgba[SL2_PC_B] * 2.0) / 3.0;
+			_prPalette[3].dRgba[SL2_PC_A] = 1.0;
 		}
 
 		if constexpr ( _bSrgb != 0 ) {
 			for ( uint32_t I = 0; I < 4; ++I ) {
-				_prPalette[I].fRgba[SL2_PC_R] = CUtilities::SRgbToLinear( _prPalette[I].fRgba[SL2_PC_R] );
-				_prPalette[I].fRgba[SL2_PC_G] = CUtilities::SRgbToLinear( _prPalette[I].fRgba[SL2_PC_G] );
-				_prPalette[I].fRgba[SL2_PC_B] = CUtilities::SRgbToLinear( _prPalette[I].fRgba[SL2_PC_B] );
+				_prPalette[I].dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( _prPalette[I].dRgba[SL2_PC_R] );
+				_prPalette[I].dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( _prPalette[I].dRgba[SL2_PC_G] );
+				_prPalette[I].dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( _prPalette[I].dRgba[SL2_PC_B] );
 			}
 		}
 	}
@@ -3013,9 +3023,6 @@ namespace sl2 {
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
 	bool CFormat::StdIntToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
@@ -3026,10 +3033,10 @@ namespace sl2 {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
 					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
 					const uint64_t * pui64Src = reinterpret_cast<const uint64_t *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
-					rgbaThis.dTexel[SL2_PC_R] = _bNorm ? StdIntComponentTo64F_Norm<_uRBits, _uRShift, _bSigned, _bSrgb>( (*pui64Src), 0.0 ) : StdIntComponentTo64F<_uRBits, _uRShift, _bSigned>( (*pui64Src), 0.0 );
-					rgbaThis.dTexel[SL2_PC_G] = _bNorm ? StdIntComponentTo64F_Norm<_uGBits, _uGShift, _bSigned, _bSrgb>( (*pui64Src), 0.0 ) : StdIntComponentTo64F<_uGBits, _uGShift, _bSigned>( (*pui64Src), 0.0 );
-					rgbaThis.dTexel[SL2_PC_B] = _bNorm ? StdIntComponentTo64F_Norm<_uBBits, _uBShift, _bSigned, _bSrgb>( (*pui64Src), 0.0 ) : StdIntComponentTo64F<_uBBits, _uBShift, _bSigned>( (*pui64Src), 0.0 );
-					rgbaThis.dTexel[SL2_PC_A] = _bNorm ? StdIntComponentTo64F_Norm<_uABits, _uAShift, _bSigned, false>( (*pui64Src), 1.0 ) : StdIntComponentTo64F<_uABits, _uAShift, _bSigned>( (*pui64Src), 1.0 );
+					rgbaThis.dRgba[SL2_PC_R] = _bNorm ? StdIntComponentTo64F_Norm<_uRBits, _uRShift, _bSigned, _bSrgb>( (*pui64Src), 0.0 ) : StdIntComponentTo64F<_uRBits, _uRShift, _bSigned>( (*pui64Src), 0.0 );
+					rgbaThis.dRgba[SL2_PC_G] = _bNorm ? StdIntComponentTo64F_Norm<_uGBits, _uGShift, _bSigned, _bSrgb>( (*pui64Src), 0.0 ) : StdIntComponentTo64F<_uGBits, _uGShift, _bSigned>( (*pui64Src), 0.0 );
+					rgbaThis.dRgba[SL2_PC_B] = _bNorm ? StdIntComponentTo64F_Norm<_uBBits, _uBShift, _bSigned, _bSrgb>( (*pui64Src), 0.0 ) : StdIntComponentTo64F<_uBBits, _uBShift, _bSigned>( (*pui64Src), 0.0 );
+					rgbaThis.dRgba[SL2_PC_A] = _bNorm ? StdIntComponentTo64F_Norm<_uABits, _uAShift, _bSigned, false>( (*pui64Src), 1.0 ) : StdIntComponentTo64F<_uABits, _uAShift, _bSigned>( (*pui64Src), 1.0 );
 				}
 			}
 		}
@@ -3051,7 +3058,7 @@ namespace sl2 {
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
 	bool CFormat::StdIntFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
 		struct SL2_RGBA64F {
-			double dTexel[4];
+			double dRgba[4];
 		};
 		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
@@ -3063,14 +3070,14 @@ namespace sl2 {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
 					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 					uint64_t * pui64Dst = reinterpret_cast<uint64_t *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize]);
-					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uRBits, _uRShift, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_R], (*pui64Dst) ); }
-					else { Std64FToIntComponent<_uRBits, _uRShift, _bSigned>( rgbaThis.dTexel[SL2_PC_R], (*pui64Dst) ); }
-					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uGBits, _uGShift, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_G], (*pui64Dst) ); }
-					else { Std64FToIntComponent<_uGBits, _uGShift, _bSigned>( rgbaThis.dTexel[SL2_PC_G], (*pui64Dst) ); }
-					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uBBits, _uBShift, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_B], (*pui64Dst) ); }
-					else { Std64FToIntComponent<_uBBits, _uBShift, _bSigned>( rgbaThis.dTexel[SL2_PC_B], (*pui64Dst) ); }
-					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uABits, _uAShift, _bSigned, false>( rgbaThis.dTexel[SL2_PC_A], (*pui64Dst) ); }
-					else { Std64FToIntComponent<_uABits, _uAShift, _bSigned>( rgbaThis.dTexel[SL2_PC_A], (*pui64Dst) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uRBits, _uRShift, _bSigned, _bSrgb>( rgbaThis.dRgba[SL2_PC_R], (*pui64Dst) ); }
+					else { Std64FToIntComponent<_uRBits, _uRShift, _bSigned>( rgbaThis.dRgba[SL2_PC_R], (*pui64Dst) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uGBits, _uGShift, _bSigned, _bSrgb>( rgbaThis.dRgba[SL2_PC_G], (*pui64Dst) ); }
+					else { Std64FToIntComponent<_uGBits, _uGShift, _bSigned>( rgbaThis.dRgba[SL2_PC_G], (*pui64Dst) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uBBits, _uBShift, _bSigned, _bSrgb>( rgbaThis.dRgba[SL2_PC_B], (*pui64Dst) ); }
+					else { Std64FToIntComponent<_uBBits, _uBShift, _bSigned>( rgbaThis.dRgba[SL2_PC_B], (*pui64Dst) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uABits, _uAShift, _bSigned, false>( rgbaThis.dRgba[SL2_PC_A], (*pui64Dst) ); }
+					else { Std64FToIntComponent<_uABits, _uAShift, _bSigned>( rgbaThis.dRgba[SL2_PC_A], (*pui64Dst) ); }
 				}
 			}
 		}
@@ -3091,9 +3098,6 @@ namespace sl2 {
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
 	bool CFormat::Int128ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
@@ -3104,10 +3108,10 @@ namespace sl2 {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
 					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
 					const uint8_t * pui8Src = reinterpret_cast<const uint8_t *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
-					rgbaThis.dTexel[SL2_PC_R] = _bNorm ? StdIntComponentTo64F_Norm<_uRBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint32_t &>(pui8Src[_uRShift/8]), 0.0 ) : StdIntComponentTo64F<_uRBits, 0, _bSigned>( reinterpret_cast<const uint32_t &>(pui8Src[_uRShift/8]), 0.0 );
-					rgbaThis.dTexel[SL2_PC_G] = _bNorm ? StdIntComponentTo64F_Norm<_uGBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint32_t &>(pui8Src[_uGShift/8]), 0.0 ) : StdIntComponentTo64F<_uGBits, 0, _bSigned>( reinterpret_cast<const uint32_t &>(pui8Src[_uGShift/8]), 0.0 );
-					rgbaThis.dTexel[SL2_PC_B] = _bNorm ? StdIntComponentTo64F_Norm<_uBBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint32_t &>(pui8Src[_uBShift/8]), 0.0 ) : StdIntComponentTo64F<_uBBits, 0, _bSigned>( reinterpret_cast<const uint32_t &>(pui8Src[_uBShift/8]), 0.0 );
-					rgbaThis.dTexel[SL2_PC_A] = _bNorm ? StdIntComponentTo64F_Norm<_uABits, 0, _bSigned, false>( reinterpret_cast<const uint32_t &>(pui8Src[_uAShift/8]), 1.0 ) : StdIntComponentTo64F<_uABits, 0, _bSigned>( reinterpret_cast<const uint32_t &>(pui8Src[_uAShift/8]), 1.0 );
+					rgbaThis.dRgba[SL2_PC_R] = _bNorm ? StdIntComponentTo64F_Norm<_uRBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint32_t &>(pui8Src[_uRShift/8]), 0.0 ) : StdIntComponentTo64F<_uRBits, 0, _bSigned>( reinterpret_cast<const uint32_t &>(pui8Src[_uRShift/8]), 0.0 );
+					rgbaThis.dRgba[SL2_PC_G] = _bNorm ? StdIntComponentTo64F_Norm<_uGBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint32_t &>(pui8Src[_uGShift/8]), 0.0 ) : StdIntComponentTo64F<_uGBits, 0, _bSigned>( reinterpret_cast<const uint32_t &>(pui8Src[_uGShift/8]), 0.0 );
+					rgbaThis.dRgba[SL2_PC_B] = _bNorm ? StdIntComponentTo64F_Norm<_uBBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint32_t &>(pui8Src[_uBShift/8]), 0.0 ) : StdIntComponentTo64F<_uBBits, 0, _bSigned>( reinterpret_cast<const uint32_t &>(pui8Src[_uBShift/8]), 0.0 );
+					rgbaThis.dRgba[SL2_PC_A] = _bNorm ? StdIntComponentTo64F_Norm<_uABits, 0, _bSigned, false>( reinterpret_cast<const uint32_t &>(pui8Src[_uAShift/8]), 1.0 ) : StdIntComponentTo64F<_uABits, 0, _bSigned>( reinterpret_cast<const uint32_t &>(pui8Src[_uAShift/8]), 1.0 );
 				}
 			}
 		}
@@ -3128,9 +3132,6 @@ namespace sl2 {
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
 	bool CFormat::Int128FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
@@ -3141,14 +3142,14 @@ namespace sl2 {
 					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 					uint8_t * pui8Dst = reinterpret_cast<uint8_t *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize]);
 
-					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uRBits, 0, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_R], reinterpret_cast<uint64_t &>(pui8Dst[_uRShift>>3]) ); }
-					else { Std64FToIntComponent<_uRBits, 0, _bSigned>( rgbaThis.dTexel[SL2_PC_R], reinterpret_cast<uint64_t &>(pui8Dst[_uRShift>>3]) ); }
-					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uGBits, 0, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_G], reinterpret_cast<uint64_t &>(pui8Dst[_uGShift>>3]) ); }
-					else { Std64FToIntComponent<_uGBits, 0, _bSigned>( rgbaThis.dTexel[SL2_PC_G], reinterpret_cast<uint64_t &>(pui8Dst[_uGShift>>3]) ); }
-					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uBBits, 0, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_B], reinterpret_cast<uint64_t &>(pui8Dst[_uBShift>>3]) ); }
-					else { Std64FToIntComponent<_uBBits, 0, _bSigned>( rgbaThis.dTexel[SL2_PC_B], reinterpret_cast<uint64_t &>(pui8Dst[_uBShift>>3]) ); }
-					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uABits, 0, _bSigned, false>( rgbaThis.dTexel[SL2_PC_A], reinterpret_cast<uint64_t &>(pui8Dst[_uAShift>>3]) ); }
-					else { Std64FToIntComponent<_uABits, 0, _bSigned>( rgbaThis.dTexel[SL2_PC_A], reinterpret_cast<uint64_t &>(pui8Dst[_uAShift>>3]) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uRBits, 0, _bSigned, _bSrgb>( rgbaThis.dRgba[SL2_PC_R], reinterpret_cast<uint64_t &>(pui8Dst[_uRShift>>3]) ); }
+					else { Std64FToIntComponent<_uRBits, 0, _bSigned>( rgbaThis.dRgba[SL2_PC_R], reinterpret_cast<uint64_t &>(pui8Dst[_uRShift>>3]) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uGBits, 0, _bSigned, _bSrgb>( rgbaThis.dRgba[SL2_PC_G], reinterpret_cast<uint64_t &>(pui8Dst[_uGShift>>3]) ); }
+					else { Std64FToIntComponent<_uGBits, 0, _bSigned>( rgbaThis.dRgba[SL2_PC_G], reinterpret_cast<uint64_t &>(pui8Dst[_uGShift>>3]) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uBBits, 0, _bSigned, _bSrgb>( rgbaThis.dRgba[SL2_PC_B], reinterpret_cast<uint64_t &>(pui8Dst[_uBShift>>3]) ); }
+					else { Std64FToIntComponent<_uBBits, 0, _bSigned>( rgbaThis.dRgba[SL2_PC_B], reinterpret_cast<uint64_t &>(pui8Dst[_uBShift>>3]) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uABits, 0, _bSigned, false>( rgbaThis.dRgba[SL2_PC_A], reinterpret_cast<uint64_t &>(pui8Dst[_uAShift>>3]) ); }
+					else { Std64FToIntComponent<_uABits, 0, _bSigned>( rgbaThis.dRgba[SL2_PC_A], reinterpret_cast<uint64_t &>(pui8Dst[_uAShift>>3]) ); }
 				}
 			}
 		}
@@ -3169,9 +3170,6 @@ namespace sl2 {
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
 	bool CFormat::Int256ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
@@ -3182,10 +3180,10 @@ namespace sl2 {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
 					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
 					const uint8_t * pui8Src = reinterpret_cast<const uint8_t *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
-					rgbaThis.dTexel[SL2_PC_R] = _bNorm ? StdIntComponentTo64F_Norm<_uRBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint64_t &>(pui8Src[_uRShift/8]), 0.0 ) : StdIntComponentTo64F<_uRBits, 0, _bSigned>( reinterpret_cast<const uint64_t &>(pui8Src[_uRShift/8]), 0.0 );
-					rgbaThis.dTexel[SL2_PC_G] = _bNorm ? StdIntComponentTo64F_Norm<_uGBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint64_t &>(pui8Src[_uGShift/8]), 0.0 ) : StdIntComponentTo64F<_uGBits, 0, _bSigned>( reinterpret_cast<const uint64_t &>(pui8Src[_uGShift/8]), 0.0 );
-					rgbaThis.dTexel[SL2_PC_B] = _bNorm ? StdIntComponentTo64F_Norm<_uBBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint64_t &>(pui8Src[_uBShift/8]), 0.0 ) : StdIntComponentTo64F<_uBBits, 0, _bSigned>( reinterpret_cast<const uint64_t &>(pui8Src[_uBShift/8]), 0.0 );
-					rgbaThis.dTexel[SL2_PC_A] = _bNorm ? StdIntComponentTo64F_Norm<_uABits, 0, _bSigned, false>( reinterpret_cast<const uint64_t &>(pui8Src[_uAShift/8]), 1.0 ) : StdIntComponentTo64F<_uABits, 0, _bSigned>( reinterpret_cast<const uint64_t &>(pui8Src[_uAShift/8]), 1.0 );
+					rgbaThis.dRgba[SL2_PC_R] = _bNorm ? StdIntComponentTo64F_Norm<_uRBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint64_t &>(pui8Src[_uRShift/8]), 0.0 ) : StdIntComponentTo64F<_uRBits, 0, _bSigned>( reinterpret_cast<const uint64_t &>(pui8Src[_uRShift/8]), 0.0 );
+					rgbaThis.dRgba[SL2_PC_G] = _bNorm ? StdIntComponentTo64F_Norm<_uGBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint64_t &>(pui8Src[_uGShift/8]), 0.0 ) : StdIntComponentTo64F<_uGBits, 0, _bSigned>( reinterpret_cast<const uint64_t &>(pui8Src[_uGShift/8]), 0.0 );
+					rgbaThis.dRgba[SL2_PC_B] = _bNorm ? StdIntComponentTo64F_Norm<_uBBits, 0, _bSigned, _bSrgb>( reinterpret_cast<const uint64_t &>(pui8Src[_uBShift/8]), 0.0 ) : StdIntComponentTo64F<_uBBits, 0, _bSigned>( reinterpret_cast<const uint64_t &>(pui8Src[_uBShift/8]), 0.0 );
+					rgbaThis.dRgba[SL2_PC_A] = _bNorm ? StdIntComponentTo64F_Norm<_uABits, 0, _bSigned, false>( reinterpret_cast<const uint64_t &>(pui8Src[_uAShift/8]), 1.0 ) : StdIntComponentTo64F<_uABits, 0, _bSigned>( reinterpret_cast<const uint64_t &>(pui8Src[_uAShift/8]), 1.0 );
 				}
 			}
 		}
@@ -3206,9 +3204,6 @@ namespace sl2 {
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
 	bool CFormat::Int256FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
@@ -3219,14 +3214,14 @@ namespace sl2 {
 					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 					uint8_t * pui8Dst = reinterpret_cast<uint8_t *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize]);
 
-					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uRBits, 0, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_R], reinterpret_cast<uint64_t &>(pui8Dst[_uRShift>>3]) ); }
-					else { Std64FToIntComponent<_uRBits, 0, _bSigned>( rgbaThis.dTexel[SL2_PC_R], reinterpret_cast<uint64_t &>(pui8Dst[_uRShift>>3]) ); }
-					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uGBits, 0, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_G], reinterpret_cast<uint64_t &>(pui8Dst[_uGShift>>3]) ); }
-					else { Std64FToIntComponent<_uGBits, 0, _bSigned>( rgbaThis.dTexel[SL2_PC_G], reinterpret_cast<uint64_t &>(pui8Dst[_uGShift>>3]) ); }
-					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uBBits, 0, _bSigned, _bSrgb>( rgbaThis.dTexel[SL2_PC_B], reinterpret_cast<uint64_t &>(pui8Dst[_uBShift>>3]) ); }
-					else { Std64FToIntComponent<_uBBits, 0, _bSigned>( rgbaThis.dTexel[SL2_PC_B], reinterpret_cast<uint64_t &>(pui8Dst[_uBShift>>3]) ); }
-					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uABits, 0, _bSigned, false>( rgbaThis.dTexel[SL2_PC_A], reinterpret_cast<uint64_t &>(pui8Dst[_uAShift>>3]) ); }
-					else { Std64FToIntComponent<_uABits, 0, _bSigned>( rgbaThis.dTexel[SL2_PC_A], reinterpret_cast<uint64_t &>(pui8Dst[_uAShift>>3]) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uRBits, 0, _bSigned, _bSrgb>( rgbaThis.dRgba[SL2_PC_R], reinterpret_cast<uint64_t &>(pui8Dst[_uRShift>>3]) ); }
+					else { Std64FToIntComponent<_uRBits, 0, _bSigned>( rgbaThis.dRgba[SL2_PC_R], reinterpret_cast<uint64_t &>(pui8Dst[_uRShift>>3]) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uGBits, 0, _bSigned, _bSrgb>( rgbaThis.dRgba[SL2_PC_G], reinterpret_cast<uint64_t &>(pui8Dst[_uGShift>>3]) ); }
+					else { Std64FToIntComponent<_uGBits, 0, _bSigned>( rgbaThis.dRgba[SL2_PC_G], reinterpret_cast<uint64_t &>(pui8Dst[_uGShift>>3]) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uBBits, 0, _bSigned, _bSrgb>( rgbaThis.dRgba[SL2_PC_B], reinterpret_cast<uint64_t &>(pui8Dst[_uBShift>>3]) ); }
+					else { Std64FToIntComponent<_uBBits, 0, _bSigned>( rgbaThis.dRgba[SL2_PC_B], reinterpret_cast<uint64_t &>(pui8Dst[_uBShift>>3]) ); }
+					if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uABits, 0, _bSigned, false>( rgbaThis.dRgba[SL2_PC_A], reinterpret_cast<uint64_t &>(pui8Dst[_uAShift>>3]) ); }
+					else { Std64FToIntComponent<_uABits, 0, _bSigned>( rgbaThis.dRgba[SL2_PC_A], reinterpret_cast<uint64_t &>(pui8Dst[_uAShift>>3]) ); }
 				}
 			}
 		}
@@ -3247,9 +3242,6 @@ namespace sl2 {
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize>
 	bool CFormat::F16ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
@@ -3260,10 +3252,10 @@ namespace sl2 {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
 					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
 					const sl2::CFloat16 * pf16Src = reinterpret_cast<const sl2::CFloat16 *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
-					rgbaThis.dTexel[SL2_PC_R] = _uRBits ? static_cast<double>(pf16Src[_uRShift/16].Value()) : 0.0f;
-					rgbaThis.dTexel[SL2_PC_G] = _uGBits ? static_cast<double>(pf16Src[_uGShift/16].Value()) : 0.0f;
-					rgbaThis.dTexel[SL2_PC_B] = _uBBits ? static_cast<double>(pf16Src[_uBShift/16].Value()) : 0.0f;
-					rgbaThis.dTexel[SL2_PC_A] = _uABits ? static_cast<double>(pf16Src[_uAShift/16].Value()) : 1.0f;
+					rgbaThis.dRgba[SL2_PC_R] = _uRBits ? static_cast<double>(pf16Src[_uRShift/16].Value()) : 0.0f;
+					rgbaThis.dRgba[SL2_PC_G] = _uGBits ? static_cast<double>(pf16Src[_uGShift/16].Value()) : 0.0f;
+					rgbaThis.dRgba[SL2_PC_B] = _uBBits ? static_cast<double>(pf16Src[_uBShift/16].Value()) : 0.0f;
+					rgbaThis.dRgba[SL2_PC_A] = _uABits ? static_cast<double>(pf16Src[_uAShift/16].Value()) : 1.0f;
 				}
 			}
 		}
@@ -3285,7 +3277,7 @@ namespace sl2 {
 		unsigned _uTexelSize>
 	bool CFormat::F16FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
 		struct SL2_RGBA64F {
-			double dTexel[4];
+			double dRgba[4];
 		};
 		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
@@ -3296,10 +3288,10 @@ namespace sl2 {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
 					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 					sl2::CFloat16 * pf16Dst = reinterpret_cast<sl2::CFloat16 *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize]);
-					if constexpr ( _uRBits ) { pf16Dst[_uRShift/16] = rgbaThis.dTexel[SL2_PC_R]; }
-					if constexpr ( _uGBits ) { pf16Dst[_uGShift/16] = rgbaThis.dTexel[SL2_PC_G]; }
-					if constexpr ( _uBBits ) { pf16Dst[_uBShift/16] = rgbaThis.dTexel[SL2_PC_B]; }
-					if constexpr ( _uABits ) { pf16Dst[_uAShift/16] = rgbaThis.dTexel[SL2_PC_A]; }
+					if constexpr ( _uRBits ) { pf16Dst[_uRShift/16] = rgbaThis.dRgba[SL2_PC_R]; }
+					if constexpr ( _uGBits ) { pf16Dst[_uGShift/16] = rgbaThis.dRgba[SL2_PC_G]; }
+					if constexpr ( _uBBits ) { pf16Dst[_uBShift/16] = rgbaThis.dRgba[SL2_PC_B]; }
+					if constexpr ( _uABits ) { pf16Dst[_uAShift/16] = rgbaThis.dRgba[SL2_PC_A]; }
 				}
 			}
 		}
@@ -3320,9 +3312,6 @@ namespace sl2 {
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize>
 	bool CFormat::F32ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
@@ -3333,10 +3322,10 @@ namespace sl2 {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
 					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
 					const float * pf32Src = reinterpret_cast<const float *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
-					rgbaThis.dTexel[SL2_PC_R] = _uRBits ? pf32Src[_uRShift/32] : 0.0f;
-					rgbaThis.dTexel[SL2_PC_G] = _uGBits ? pf32Src[_uGShift/32] : 0.0f;
-					rgbaThis.dTexel[SL2_PC_B] = _uBBits ? pf32Src[_uBShift/32] : 0.0f;
-					rgbaThis.dTexel[SL2_PC_A] = _uABits ? pf32Src[_uAShift/32] : 1.0f;
+					rgbaThis.dRgba[SL2_PC_R] = _uRBits ? pf32Src[_uRShift/32] : 0.0f;
+					rgbaThis.dRgba[SL2_PC_G] = _uGBits ? pf32Src[_uGShift/32] : 0.0f;
+					rgbaThis.dRgba[SL2_PC_B] = _uBBits ? pf32Src[_uBShift/32] : 0.0f;
+					rgbaThis.dRgba[SL2_PC_A] = _uABits ? pf32Src[_uAShift/32] : 1.0f;
 				}
 			}
 		}
@@ -3357,9 +3346,6 @@ namespace sl2 {
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize>
 	bool CFormat::F32FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
@@ -3369,10 +3355,10 @@ namespace sl2 {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
 					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 					float * pf32Dst = reinterpret_cast<float *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize]);
-					if constexpr ( _uRBits ) { pf32Dst[_uRShift/32] = static_cast<float>(rgbaThis.dTexel[SL2_PC_R]); }
-					if constexpr ( _uGBits ) { pf32Dst[_uGShift/32] = static_cast<float>(rgbaThis.dTexel[SL2_PC_G]); }
-					if constexpr ( _uBBits ) { pf32Dst[_uBShift/32] = static_cast<float>(rgbaThis.dTexel[SL2_PC_B]); }
-					if constexpr ( _uABits ) { pf32Dst[_uAShift/32] = static_cast<float>(rgbaThis.dTexel[SL2_PC_A]); }
+					if constexpr ( _uRBits ) { pf32Dst[_uRShift/32] = static_cast<float>(rgbaThis.dRgba[SL2_PC_R]); }
+					if constexpr ( _uGBits ) { pf32Dst[_uGShift/32] = static_cast<float>(rgbaThis.dRgba[SL2_PC_G]); }
+					if constexpr ( _uBBits ) { pf32Dst[_uBShift/32] = static_cast<float>(rgbaThis.dRgba[SL2_PC_B]); }
+					if constexpr ( _uABits ) { pf32Dst[_uAShift/32] = static_cast<float>(rgbaThis.dRgba[SL2_PC_A]); }
 				}
 			}
 		}
@@ -3393,9 +3379,6 @@ namespace sl2 {
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize>
 	bool CFormat::F64ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
@@ -3406,10 +3389,10 @@ namespace sl2 {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
 					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
 					const double * pf64Src = reinterpret_cast<const double *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
-					rgbaThis.dTexel[SL2_PC_R] = _uRBits ? pf64Src[_uRShift/64] : 0.0f;
-					rgbaThis.dTexel[SL2_PC_G] = _uGBits ? pf64Src[_uGShift/64] : 0.0f;
-					rgbaThis.dTexel[SL2_PC_B] = _uBBits ? pf64Src[_uBShift/64] : 0.0f;
-					rgbaThis.dTexel[SL2_PC_A] = _uABits ? pf64Src[_uAShift/64] : 1.0f;
+					rgbaThis.dRgba[SL2_PC_R] = _uRBits ? pf64Src[_uRShift/64] : 0.0f;
+					rgbaThis.dRgba[SL2_PC_G] = _uGBits ? pf64Src[_uGShift/64] : 0.0f;
+					rgbaThis.dRgba[SL2_PC_B] = _uBBits ? pf64Src[_uBShift/64] : 0.0f;
+					rgbaThis.dRgba[SL2_PC_A] = _uABits ? pf64Src[_uAShift/64] : 1.0f;
 				}
 			}
 		}
@@ -3430,9 +3413,6 @@ namespace sl2 {
 		unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 		unsigned _uTexelSize>
 	bool CFormat::F64FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
@@ -3442,10 +3422,10 @@ namespace sl2 {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
 					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 					double * pf64Dst = reinterpret_cast<double *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize]);
-					if constexpr ( _uRBits ) { pf64Dst[_uRShift/64] = static_cast<float>(rgbaThis.dTexel[SL2_PC_R]); }
-					if constexpr ( _uGBits ) { pf64Dst[_uGShift/64] = static_cast<float>(rgbaThis.dTexel[SL2_PC_G]); }
-					if constexpr ( _uBBits ) { pf64Dst[_uBShift/64] = static_cast<float>(rgbaThis.dTexel[SL2_PC_B]); }
-					if constexpr ( _uABits ) { pf64Dst[_uAShift/64] = static_cast<float>(rgbaThis.dTexel[SL2_PC_A]); }
+					if constexpr ( _uRBits ) { pf64Dst[_uRShift/64] = static_cast<float>(rgbaThis.dRgba[SL2_PC_R]); }
+					if constexpr ( _uGBits ) { pf64Dst[_uGShift/64] = static_cast<float>(rgbaThis.dRgba[SL2_PC_G]); }
+					if constexpr ( _uBBits ) { pf64Dst[_uBShift/64] = static_cast<float>(rgbaThis.dRgba[SL2_PC_B]); }
+					if constexpr ( _uABits ) { pf64Dst[_uAShift/64] = static_cast<float>(rgbaThis.dRgba[SL2_PC_A]); }
 				}
 			}
 		}
@@ -3463,9 +3443,6 @@ namespace sl2 {
 	 * \param _pvParms Optional parameters for the conversion.
 	 */
 	inline bool CFormat::R11G11B10FToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		struct SL2_R11G11B10F {
 			uint32_t ui32R : 11;
 			uint32_t ui32G : 11;
@@ -3482,10 +3459,10 @@ namespace sl2 {
 					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
 					const SL2_R11G11B10F * prSrc = reinterpret_cast<const SL2_R11G11B10F *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*4ULL]);
 					sl2::CFloatX fTemp;
-					rgbaThis.dTexel[SL2_PC_R] = static_cast<double>(fTemp.CreateFromBits( prSrc->ui32R, SL2_FLOAT11 ).AsDouble());
-					rgbaThis.dTexel[SL2_PC_G] = static_cast<double>(fTemp.CreateFromBits( prSrc->ui32G, SL2_FLOAT11 ).AsDouble());
-					rgbaThis.dTexel[SL2_PC_B] = static_cast<double>(fTemp.CreateFromBits( prSrc->ui32B, SL2_FLOAT10 ).AsDouble());
-					rgbaThis.dTexel[SL2_PC_A] = 1.0;
+					rgbaThis.dRgba[SL2_PC_R] = static_cast<double>(fTemp.CreateFromBits( prSrc->ui32R, SL2_FLOAT11 ).AsDouble());
+					rgbaThis.dRgba[SL2_PC_G] = static_cast<double>(fTemp.CreateFromBits( prSrc->ui32G, SL2_FLOAT11 ).AsDouble());
+					rgbaThis.dRgba[SL2_PC_B] = static_cast<double>(fTemp.CreateFromBits( prSrc->ui32B, SL2_FLOAT10 ).AsDouble());
+					rgbaThis.dRgba[SL2_PC_A] = 1.0;
 				}
 			}
 		}
@@ -3503,9 +3480,6 @@ namespace sl2 {
 	 * \param _pvParms Optional parameters for the conversion.
 	 */
 	inline bool CFormat::R11G11B10FFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		struct SL2_R11G11B10F {
 			uint32_t ui32R : 11;
 			uint32_t ui32G : 11;
@@ -3521,9 +3495,9 @@ namespace sl2 {
 					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 					SL2_R11G11B10F * prDst = reinterpret_cast<SL2_R11G11B10F *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*4ULL]);
 					sl2::CFloatX fTemp;
-					prDst->ui32R = fTemp.CreateFromDouble( rgbaThis.dTexel[SL2_PC_R], SL2_FLOAT11 ).AsUint64();
-					prDst->ui32G = fTemp.CreateFromDouble( rgbaThis.dTexel[SL2_PC_G], SL2_FLOAT11 ).AsUint64();
-					prDst->ui32B = fTemp.CreateFromDouble( rgbaThis.dTexel[SL2_PC_B], SL2_FLOAT10 ).AsUint64();
+					prDst->ui32R = fTemp.CreateFromDouble( rgbaThis.dRgba[SL2_PC_R], SL2_FLOAT11 ).AsUint64();
+					prDst->ui32G = fTemp.CreateFromDouble( rgbaThis.dRgba[SL2_PC_G], SL2_FLOAT11 ).AsUint64();
+					prDst->ui32B = fTemp.CreateFromDouble( rgbaThis.dRgba[SL2_PC_B], SL2_FLOAT10 ).AsUint64();
 				}
 			}
 		}
@@ -3541,9 +3515,6 @@ namespace sl2 {
 	 * \param _pvParms Optional parameters for the conversion.
 	 */
 	inline bool CFormat::RGB9E5ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		struct SL2_RGB9E5 {
 			uint32_t ui32R : SL2_RGB9E5_MANTISSA_BITS;
 			uint32_t ui32G : SL2_RGB9E5_MANTISSA_BITS;
@@ -3560,7 +3531,7 @@ namespace sl2 {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
 					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
 					const SL2_RGB9E5 * prSrc = reinterpret_cast<const SL2_RGB9E5 *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*4ULL]);
-					DecodeRgb9_E5( prSrc->ui32R, prSrc->ui32G, prSrc->ui32B, prSrc->ui32E, rgbaThis.dTexel );
+					DecodeRgb9_E5( prSrc->ui32R, prSrc->ui32G, prSrc->ui32B, prSrc->ui32E, rgbaThis.dRgba );
 				}
 			}
 		}
@@ -3578,9 +3549,6 @@ namespace sl2 {
 	 * \param _pvParms Optional parameters for the conversion.
 	 */
 	inline bool CFormat::RGB9E5FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( 4ULL * _ui32Width, 4ULL );
@@ -3590,7 +3558,7 @@ namespace sl2 {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
 					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 					uint32_t * pui32Dst = reinterpret_cast<uint32_t *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*4ULL]);
-					EncodeRgb9_E5( (*pui32Dst), rgbaThis.dTexel );
+					EncodeRgb9_E5( (*pui32Dst), rgbaThis.dRgba );
 				}
 			}
 		}
@@ -3611,9 +3579,6 @@ namespace sl2 {
 		unsigned _uLShift, unsigned _uAShift,
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
 	bool CFormat::LumAlphaToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
@@ -3625,10 +3590,10 @@ namespace sl2 {
 					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
 					const uint64_t * pui64Src = reinterpret_cast<const uint64_t *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
 					double dLum = _bNorm ? StdIntComponentTo64F_Norm<_uLBits, _uLShift, _bSigned, _bSrgb>( (*pui64Src), 0.0 ) : StdIntComponentTo64F<_uLBits, _uLShift, _bSigned>( (*pui64Src), 0.0 );
-					rgbaThis.dTexel[SL2_PC_R] = dLum / 1.0;
-					rgbaThis.dTexel[SL2_PC_G] = dLum / 1.0;
-					rgbaThis.dTexel[SL2_PC_B] = dLum / 1.0;
-					rgbaThis.dTexel[SL2_PC_A] = _bNorm ? StdIntComponentTo64F_Norm<_uABits, _uAShift, _bSigned, false>( (*pui64Src), 1.0 ) : StdIntComponentTo64F<_uABits, _uAShift, _bSigned>( (*pui64Src), 1.0 );
+					rgbaThis.dRgba[SL2_PC_R] = dLum / 1.0;
+					rgbaThis.dRgba[SL2_PC_G] = dLum / 1.0;
+					rgbaThis.dRgba[SL2_PC_B] = dLum / 1.0;
+					rgbaThis.dRgba[SL2_PC_A] = _bNorm ? StdIntComponentTo64F_Norm<_uABits, _uAShift, _bSigned, false>( (*pui64Src), 1.0 ) : StdIntComponentTo64F<_uABits, _uAShift, _bSigned>( (*pui64Src), 1.0 );
 				}
 			}
 		}
@@ -3649,9 +3614,6 @@ namespace sl2 {
 		unsigned _uLShift, unsigned _uAShift,
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
 	bool CFormat::LumAlphaFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
@@ -3663,26 +3625,26 @@ namespace sl2 {
 					uint64_t * pui64Dst = reinterpret_cast<uint64_t *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize]);
 					
 					if ( _bNorm ) {
-						/*double dLum = rgbaThis.dTexel[SL2_PC_R] * SL2_R_WEIGHT +
-							rgbaThis.dTexel[SL2_PC_G] * SL2_G_WEIGHT +
-							rgbaThis.dTexel[SL2_PC_B] * SL2_B_WEIGHT;*/
+						/*double dLum = rgbaThis.dRgba[SL2_PC_R] * SL2_R_WEIGHT +
+							rgbaThis.dRgba[SL2_PC_G] * SL2_G_WEIGHT +
+							rgbaThis.dRgba[SL2_PC_B] * SL2_B_WEIGHT;*/
 						// Values specified by OpenGL for luminance conversion: SL2_LS_CIE_1931 (0.3086f 0.6094f 0.082f)
 						// https://www.opengl.org/archives/resources/code/samples/advanced/advanced97/notes/node140.html
 						// But the user gets to select the luminance factors.
-						double dLum = rgbaThis.dTexel[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].fRgb[0] +
-							rgbaThis.dTexel[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].fRgb[1] +
-							rgbaThis.dTexel[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].fRgb[2];
+						double dLum = rgbaThis.dRgba[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].fRgb[0] +
+							rgbaThis.dRgba[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].fRgb[1] +
+							rgbaThis.dRgba[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].fRgb[2];
 						Std64FToIntComponent_Norm<_uLBits, _uLShift, _bSigned, _bSrgb>( dLum, (*pui64Dst) );
 
-						Std64FToIntComponent_Norm<_uABits, _uAShift, _bSigned, false>( rgbaThis.dTexel[SL2_PC_A], (*pui64Dst) );
+						Std64FToIntComponent_Norm<_uABits, _uAShift, _bSigned, false>( rgbaThis.dRgba[SL2_PC_A], (*pui64Dst) );
 					}
 					else {
 						// For integer formats, L is just a copy of R.
 						// https://www.khronos.org/registry/OpenGL/extensions/EXT/EXT_texture_integer.txt
-						double dLum = rgbaThis.dTexel[SL2_PC_R];
+						double dLum = rgbaThis.dRgba[SL2_PC_R];
 						Std64FToIntComponent<_uLBits, _uLShift, _bSigned>( dLum, (*pui64Dst) );
 
-						Std64FToIntComponent<_uABits, _uAShift, _bSigned>( rgbaThis.dTexel[SL2_PC_A], (*pui64Dst) );
+						Std64FToIntComponent<_uABits, _uAShift, _bSigned>( rgbaThis.dRgba[SL2_PC_A], (*pui64Dst) );
 					}
 				}
 			}
@@ -3704,9 +3666,6 @@ namespace sl2 {
 		unsigned _uLShift, unsigned _uAShift,
 		unsigned _uTexelSize>
 	bool CFormat::LumAlphaFToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
@@ -3735,10 +3694,10 @@ namespace sl2 {
 						dAlpha = (*pf32Src);
 					}
 					
-					rgbaThis.dTexel[SL2_PC_R] = dLum / 1.0;
-					rgbaThis.dTexel[SL2_PC_G] = dLum / 1.0;
-					rgbaThis.dTexel[SL2_PC_B] = dLum / 1.0;
-					rgbaThis.dTexel[SL2_PC_A] = dAlpha;
+					rgbaThis.dRgba[SL2_PC_R] = dLum / 1.0;
+					rgbaThis.dRgba[SL2_PC_G] = dLum / 1.0;
+					rgbaThis.dRgba[SL2_PC_B] = dLum / 1.0;
+					rgbaThis.dRgba[SL2_PC_A] = dAlpha;
 				}
 			}
 		}
@@ -3759,9 +3718,6 @@ namespace sl2 {
 		unsigned _uLShift, unsigned _uAShift,
 		unsigned _uTexelSize>
 	bool CFormat::LumAlphaFFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
@@ -3771,15 +3727,15 @@ namespace sl2 {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
 					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 
-					/*double dLum = rgbaThis.dTexel[SL2_PC_R] * SL2_R_WEIGHT +
-						rgbaThis.dTexel[SL2_PC_G] * SL2_G_WEIGHT +
-						rgbaThis.dTexel[SL2_PC_B] * SL2_B_WEIGHT;*/
+					/*double dLum = rgbaThis.dRgba[SL2_PC_R] * SL2_R_WEIGHT +
+						rgbaThis.dRgba[SL2_PC_G] * SL2_G_WEIGHT +
+						rgbaThis.dRgba[SL2_PC_B] * SL2_B_WEIGHT;*/
 					// Values specified by OpenGL for luminance conversion: SL2_LS_CIE_1931 (0.3086f 0.6094f 0.082f)
 					// https://www.opengl.org/archives/resources/code/samples/advanced/advanced97/notes/node140.html
 					// But the user gets to select the luminance factors.
-					double dLum = rgbaThis.dTexel[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].fRgb[0] +
-						rgbaThis.dTexel[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].fRgb[1] +
-						rgbaThis.dTexel[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].fRgb[2];
+					double dLum = rgbaThis.dRgba[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].fRgb[0] +
+						rgbaThis.dRgba[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].fRgb[1] +
+						rgbaThis.dRgba[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].fRgb[2];
 					
 					if constexpr ( _uLBits == 16 ) {
 						CFloat16 * pf16Dst = reinterpret_cast<CFloat16 *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize+(_uLShift/8)]);
@@ -3792,11 +3748,11 @@ namespace sl2 {
 
 					if constexpr ( _uABits == 16 ) {
 						CFloat16 * pf16Dst = reinterpret_cast<CFloat16 *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize+(_uAShift/8)]);
-						(*pf16Dst) = rgbaThis.dTexel[SL2_PC_A];
+						(*pf16Dst) = rgbaThis.dRgba[SL2_PC_A];
 					}
 					else if constexpr ( _uABits == 32 ) {
 						float * pf32Dst = reinterpret_cast<float *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize+(_uAShift/8)]);
-						(*pf32Dst) = static_cast<float>(rgbaThis.dTexel[SL2_PC_A]);
+						(*pf32Dst) = static_cast<float>(rgbaThis.dRgba[SL2_PC_A]);
 					}
 				}
 			}
@@ -3817,9 +3773,6 @@ namespace sl2 {
 	template <unsigned _uIBits,
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bFloat>
 	bool CFormat::IntensityToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
@@ -3844,10 +3797,10 @@ namespace sl2 {
 						const uint64_t * pui64Src = reinterpret_cast<const uint64_t *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*_uTexelSize]);
 						dInt = _bNorm ? StdIntComponentTo64F_Norm<_uIBits, 0, _bSigned, false>( (*pui64Src), 0.0 ) : StdIntComponentTo64F<_uIBits, 0, _bSigned>( (*pui64Src), 0.0 );
 					}
-					rgbaThis.dTexel[SL2_PC_R] = dInt;
-					rgbaThis.dTexel[SL2_PC_G] = dInt;
-					rgbaThis.dTexel[SL2_PC_B] = dInt;
-					rgbaThis.dTexel[SL2_PC_A] = dInt;
+					rgbaThis.dRgba[SL2_PC_R] = dInt;
+					rgbaThis.dRgba[SL2_PC_G] = dInt;
+					rgbaThis.dRgba[SL2_PC_B] = dInt;
+					rgbaThis.dRgba[SL2_PC_A] = dInt;
 				}
 			}
 		}
@@ -3867,9 +3820,6 @@ namespace sl2 {
 	template <unsigned _uIBits,
 		unsigned _uTexelSize, unsigned _bSigned, unsigned _bNorm, unsigned _bFloat>
 	bool CFormat::IntensityFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( _uTexelSize * _ui32Width, 4ULL );
@@ -3878,9 +3828,9 @@ namespace sl2 {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
 					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
-					double dInt = (rgbaThis.dTexel[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].fRgb[0] +
-						rgbaThis.dTexel[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].fRgb[1] +
-						rgbaThis.dTexel[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].fRgb[2]) * rgbaThis.dTexel[SL2_PC_A];
+					double dInt = (rgbaThis.dRgba[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].fRgb[0] +
+						rgbaThis.dRgba[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].fRgb[1] +
+						rgbaThis.dRgba[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].fRgb[2]) * rgbaThis.dRgba[SL2_PC_A];
 
 					if constexpr ( _bFloat ) {
 						if constexpr ( _uIBits == 16 ) {
@@ -3920,9 +3870,6 @@ namespace sl2 {
 	 */
 	template<typename _tType, unsigned _uBits>
 	bool CFormat::StencilXToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};
 		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
 		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( sizeof( _tType ) * _ui32Width, 4ULL );
@@ -3933,10 +3880,10 @@ namespace sl2 {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
 					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
 					const _tType * prSrc = reinterpret_cast<const _tType *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(_tType)]);
-					rgbaThis.dTexel[SL2_PC_R] = 0.0;
-					rgbaThis.dTexel[SL2_PC_G] = 0.0;
-					rgbaThis.dTexel[SL2_PC_B] = 0.0;
-					rgbaThis.dTexel[SL2_PC_A] = (*prSrc) / dNormFactor;
+					rgbaThis.dRgba[SL2_PC_R] = 0.0;
+					rgbaThis.dRgba[SL2_PC_G] = 0.0;
+					rgbaThis.dRgba[SL2_PC_B] = 0.0;
+					rgbaThis.dRgba[SL2_PC_A] = (*prSrc) / dNormFactor;
 				}
 			}
 		}
@@ -3955,9 +3902,6 @@ namespace sl2 {
 	 */
 	template<typename _tType, unsigned _uBits>
 	bool CFormat::StencilXFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		struct SL2_RGBA64F {
-			double dTexel[4];
-		};		
 		const uint64_t ui64SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
 		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
 		const uint64_t ui64RowSize = SL2_ROUND_UP( sizeof( _tType ) * _ui32Width, 4ULL );
@@ -3969,7 +3913,7 @@ namespace sl2 {
 					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
 					_tType * prDst = reinterpret_cast<_tType *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(_tType)]);
 					
-					(*prDst) = static_cast<_tType>(rgbaThis.dTexel[SL2_PC_A] * dNormFactor);
+					(*prDst) = static_cast<_tType>(rgbaThis.dRgba[SL2_PC_A] * dNormFactor);
 				}
 			}
 		}
@@ -4001,7 +3945,7 @@ namespace sl2 {
 	 * \param _pvParms Optional parameters for the conversion.
 	 */
 	template <unsigned _bSrgb>
-	bool CFormat::Dxt1ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+	bool CFormat::Dxt1ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
 		struct SL2_DXT1_BLOCK {
 			uint64_t ui64Rgb;
 		};
@@ -4011,28 +3955,25 @@ namespace sl2 {
 		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_DXT1_BLOCK );
 
 		uint32_t ui32DstSliceSize = _ui32Width * _ui32Height;
-		struct SL2_RGBA32 {
-			float fTexels[4];
-		};
-		SL2_RGBA32 * prgbaTexels = reinterpret_cast<SL2_RGBA32 *>(_pui8Dst);
-		SL2_RGBA fPaletteRgb[4];
+		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+		SL2_RGBA64F dPaletteRgb[4];
 		uint8_t ui8IndicesRgb[16];
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			for ( uint32_t Y = 0; Y < ui32BlocksH; ++Y ) {
 				for ( uint32_t X = 0; X < ui32BlocksW; ++X ) {
 					uint64_t ui64ThisBlock = pbbBlocks[Z*ui32SliceSize+Y*ui32BlocksW+X].ui64Rgb;
-					DecodeDXT1<_bSrgb>( ui64ThisBlock, fPaletteRgb );
+					DecodeDXT1<_bSrgb>( ui64ThisBlock, dPaletteRgb );
 					Dxt1Indices( ui64ThisBlock, ui8IndicesRgb );
 
 					for ( uint32_t I = 0; I < 16; ++I ) {
 						uint32_t ui32ThisX = X * 4 + I % 4;
 						uint32_t ui32ThisY = Y * 4 + I / 4;
 						if ( ui32ThisX < _ui32Width && ui32ThisY < _ui32Height ) {
-							SL2_RGBA32 * prgbaRow0 = &prgbaTexels[Z*ui32DstSliceSize+ui32ThisY*_ui32Width+ui32ThisX];
-							(*prgbaRow0).fTexels[0] = fPaletteRgb[ui8IndicesRgb[I]].fRgba[SL2_PC_R];
-							(*prgbaRow0).fTexels[1] = fPaletteRgb[ui8IndicesRgb[I]].fRgba[SL2_PC_G];
-							(*prgbaRow0).fTexels[2] = fPaletteRgb[ui8IndicesRgb[I]].fRgba[SL2_PC_B];
-							(*prgbaRow0).fTexels[3] = fPaletteRgb[ui8IndicesRgb[I]].fRgba[SL2_PC_A];
+							SL2_RGBA64F * prgbaRow0 = &prgbaTexels[Z*ui32DstSliceSize+ui32ThisY*_ui32Width+ui32ThisX];
+							(*prgbaRow0).dRgba[SL2_PC_R] = dPaletteRgb[ui8IndicesRgb[I]].dRgba[SL2_PC_R];
+							(*prgbaRow0).dRgba[SL2_PC_G] = dPaletteRgb[ui8IndicesRgb[I]].dRgba[SL2_PC_G];
+							(*prgbaRow0).dRgba[SL2_PC_B] = dPaletteRgb[ui8IndicesRgb[I]].dRgba[SL2_PC_B];
+							(*prgbaRow0).dRgba[SL2_PC_A] = dPaletteRgb[ui8IndicesRgb[I]].dRgba[SL2_PC_A];
 						}
 					}
 				}
@@ -4052,7 +3993,7 @@ namespace sl2 {
 	 * \param _pvParms Optional parameters for the conversion.
 	 */
 	template <unsigned _ui8DefaultAlphaThresh, unsigned _bSrgb>
-	bool CFormat::Dxt1FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+	bool CFormat::Dxt1FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
 		const SL2_KTX_INTERNAL_FORMAT_DATA * pifdData = reinterpret_cast<const SL2_KTX_INTERNAL_FORMAT_DATA *>(_pvParms);
 		SL2_DXT_OPTIONS doOptions;
 		if ( pifdData->pvCustom ) {
