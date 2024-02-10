@@ -1287,6 +1287,8 @@ namespace sl2 {
 			bool																	bCompressed;
 			/** Is it a palette type? */
 			bool																	bPalette;
+			/** Is it a floating-point or HDR format/non-integer? */
+			bool																	bFloatFormat;
 			/** Function for getting its compressed size. */
 			PfCompSizeFunc															pfCompSizeFunc;
 			/** Function to convert to RGBA64F. */

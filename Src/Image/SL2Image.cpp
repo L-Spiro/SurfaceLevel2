@@ -23,6 +23,7 @@
 namespace sl2 {
 
 	CImage::CImage() :
+		m_dGamma( 0.0 ),
 		m_sArraySize( 0 ),
 		m_sFaces( 0 ),
 		m_pkifFormat( nullptr ) {
@@ -44,9 +45,11 @@ namespace sl2 {
 		m_sArraySize = _iOther.m_sArraySize;
 		m_sFaces = _iOther.m_sFaces;
 		m_pkifFormat = _iOther.m_pkifFormat;
+		m_dGamma = _iOther.m_dGamma;
 		_iOther.m_sArraySize = 0;
 		_iOther.m_sFaces = 0;
 		_iOther.m_pkifFormat = nullptr;
+		_iOther.m_dGamma = 0.0;
 		return (*this);
 	}
 
@@ -100,10 +103,36 @@ namespace sl2 {
 	 **/
 	SL2_ERRORS CImage::ConvertToFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, CImage &_iDst ) {
 		if ( !_pkifFormat ) { return SL2_E_BADFORMAT; }
+		if ( !_pkifFormat->pfToRgba64F || !_pkifFormat->pfFromRgba64F ) { return SL2_E_BADFORMAT; }
+		CImage iTmp;
+		if ( !iTmp.AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), Width(), Height(), Depth(), Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
+		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*_pkifFormat);
+		for ( size_t M = 0; M < Mipmaps(); ++M ) {
+			for ( size_t A = 0; A < ArraySize(); ++A ) {
+				for ( size_t F = 0; F < Faces(); ++F ) {
+					if ( !_pkifFormat->pfToRgba64F( Data( M, 0, A, F ), iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), &ifdData ) ) {
+						return SL2_E_INTERNALERROR;
+					}
+				}
+			}
+		}
+		if ( _pkifFormat->vfVulkanFormat == SL2_VK_FORMAT_R64G64B64A64_SFLOAT ) {
+			// We already did the conversion.
+			_iDst = std::move( iTmp );
+			return SL2_E_SUCCESS;
+		}
 		_iDst.Reset();
 		if ( !_iDst.AllocateTexture( _pkifFormat, Width(), Height(), Depth(), Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
-
-
+		for ( size_t M = 0; M < Mipmaps(); ++M ) {
+			for ( size_t A = 0; A < ArraySize(); ++A ) {
+				for ( size_t F = 0; F < Faces(); ++F ) {
+					if ( !_pkifFormat->pfFromRgba64F( iTmp.Data( M, 0, A, F ), _iDst.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), &ifdData ) ) {
+						return SL2_E_INTERNALERROR;
+					}
+				}
+			}
+		}
+		return SL2_E_SUCCESS;
 	}
 
 	/**
@@ -113,21 +142,24 @@ namespace sl2 {
 	 * \param _ui32Width Width of the image base mipmap level.
 	 * \param _ui32Height Height of the image base mipmap level.
 	 * \param _ui32Depth Depth of the image base mipmap level.
-	 * \param _sMips Number of mipmaps.  Must be at least 1.  If 0, a fully mipmap chain is allocated.
+	 * \param _sMips Number of mipmaps.  Must be at least 1.  If 0, a full mipmap chain is allocated.
 	 * \param _sArray Number of array slices.  Must be at least 1.
 	 * \param _sFaces Number of faces.  Either 1 or 6.
 	 * \return Returns true if all mipmaps could be allocated and the texture size is valid (non-0) and a supported format.
 	 **/
 	bool CImage::AllocateTexture( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, size_t _sMips, size_t _sArray, size_t _sFaces ) {
+		if ( !_pkifFormat ) { return false; }
 		if ( !_sMips ) {
 			_sMips = CUtilities::Max( size_t( std::round( std::log2( _ui32Width ) ) ), size_t( std::round( std::log2( _ui32Height ) ) ) );
 			_sMips = CUtilities::Max( size_t( std::round( std::log2( _ui32Depth ) ) ), _sMips ) + 1;
 		}
 		if ( !_sMips ) { return false; }
+		
 
 		m_sArraySize = _sArray;
 		m_sFaces = _sFaces;
 		m_pkifFormat = _pkifFormat;
+		m_dGamma = _pkifFormat->bSrgb ? -2.2 : 0.0;
 		
 		size_t sSrcBaseSize = CFormat::GetFormatSize( _pkifFormat, _ui32Width, _ui32Height, _ui32Depth );
 		if ( !sSrcBaseSize ) { Reset(); return false; }
@@ -486,7 +518,7 @@ namespace sl2 {
 				kt1Tex.Handle()->baseWidth, kt1Tex.Handle()->baseHeight, kt1Tex.Handle()->baseDepth,
 				kt1Tex.Handle()->numLevels, kt1Tex.Handle()->numLayers, kt1Tex.Handle()->numFaces ) ) { return SL2_E_OUTOFMEMORY; }
 
-			if ( KTX_SUCCESS == ::ktxTexture_IterateLevelFaces( ktxTexture( kt1Tex.Handle() ), Ktx1ImageLoad, this ) ) {
+			if ( KTX_SUCCESS == ::ktxTexture_IterateLevelFaces( ktxTexture( kt1Tex.Handle() ), KtxImageLoad, this ) ) {
 				return SL2_E_SUCCESS;
 			}
 
@@ -515,7 +547,7 @@ namespace sl2 {
 				kt2Tex.Handle()->baseWidth, kt2Tex.Handle()->baseHeight, kt2Tex.Handle()->baseDepth,
 				kt2Tex.Handle()->numLevels, kt2Tex.Handle()->numLayers, kt2Tex.Handle()->numFaces ) ) { return SL2_E_OUTOFMEMORY; }
 
-			if ( KTX_SUCCESS == ::ktxTexture_IterateLevelFaces( ktxTexture( kt2Tex.Handle() ), Ktx1ImageLoad, this ) ) {
+			if ( KTX_SUCCESS == ::ktxTexture_IterateLevelFaces( ktxTexture( kt2Tex.Handle() ), KtxImageLoad, this ) ) {
 				return SL2_E_SUCCESS;
 			}
 		}
@@ -535,7 +567,7 @@ namespace sl2 {
 	 * \param _pvUserdata User data passed to the callback for its own use.
 	 * \return Returns an error code to indicate failure or success.
 	 */
-	::KTX_error_code CImage::Ktx1ImageLoad( int _iMipLevel, int _iFace,
+	::KTX_error_code CImage::KtxImageLoad( int _iMipLevel, int _iFace,
 		int _iWidth, int _iHeight, int _iDepth,
 		ktx_uint64_t _ui64FaceLodSize,
 		void * _pvPixels, void * _pvUserdata ) {

@@ -192,6 +192,7 @@ namespace sl2 {
 
 
 		// == Members.
+		double												m_dGamma;								/**< The gamma curve.  Negative values indicate the IEC 61966-2-1:1999 sRGB curve. */
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *		m_pkifFormat;							/**< The texture format. */
 		std::vector<std::unique_ptr<CSurface>>				m_vMipMaps;								/**< The array of mipmaps.  Index 0 is the base level. */
 		size_t												m_sArraySize;							/**< Number of slices in an array.  1 for flat 1D/2D images. */
@@ -206,7 +207,7 @@ namespace sl2 {
 		 * \param _ui32Width Width of the image base mipmap level.
 		 * \param _ui32Height Height of the image base mipmap level.
 		 * \param _ui32Depth Depth of the image base mipmap level.
-		 * \param _sMips Number of mipmaps.  Must be at least 1.  If 0, a fully mipmap chain is allocated.
+		 * \param _sMips Number of mipmaps.  Must be at least 1.  If 0, a full mipmap chain is allocated.
 		 * \param _sArray Number of array slices.  Must be at least 1.
 		 * \param _sFaces Number of faces.  Either 1 or 6.
 		 * \return Returns true if all mipmaps could be allocated and the texture size is valid (non-0) and a supported format.
@@ -250,7 +251,7 @@ namespace sl2 {
 		 * \param _pvUserdata User data passed to the callback for its own use.
 		 * \return Returns an error code to indicate failure or success.
 		 */
-		static ::KTX_error_code								Ktx1ImageLoad( int _iMipLevel, int _iFace,
+		static ::KTX_error_code								KtxImageLoad( int _iMipLevel, int _iFace,
 			int _iWidth, int _iHeight, int _iDepth,
 			ktx_uint64_t _ui64FaceLodSize,
 			void * _pvPixels, void * _pvUserdata );
