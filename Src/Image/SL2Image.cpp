@@ -103,7 +103,7 @@ namespace sl2 {
 	 **/
 	SL2_ERRORS CImage::ConvertToFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, CImage &_iDst ) {
 		if ( !_pkifFormat ) { return SL2_E_BADFORMAT; }
-		if ( !_pkifFormat->pfToRgba64F || !_pkifFormat->pfFromRgba64F ) { return SL2_E_BADFORMAT; }
+		if ( !_pkifFormat->pfToRgba64F ) { return SL2_E_BADFORMAT; }
 		CImage iTmp;
 		if ( !iTmp.AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), Width(), Height(), Depth(), Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
 		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*_pkifFormat);
@@ -113,6 +113,7 @@ namespace sl2 {
 					if ( !_pkifFormat->pfToRgba64F( Data( M, 0, A, F ), iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), &ifdData ) ) {
 						return SL2_E_INTERNALERROR;
 					}
+					BakeGamma( iTmp.Data( M, 0, A, F ), m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
 				}
 			}
 		}
@@ -121,6 +122,7 @@ namespace sl2 {
 			_iDst = std::move( iTmp );
 			return SL2_E_SUCCESS;
 		}
+		if ( !_pkifFormat->pfFromRgba64F ) { return SL2_E_BADFORMAT; }
 		_iDst.Reset();
 		if ( !_iDst.AllocateTexture( _pkifFormat, Width(), Height(), Depth(), Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
 		for ( size_t M = 0; M < Mipmaps(); ++M ) {
@@ -183,6 +185,66 @@ namespace sl2 {
 		}
 		
 		return true;
+	}
+
+	/**
+	 * Bakes the image special gamma into a given texture buffer.  The format must be RGBA64F.
+	 * 
+	 * \param _pui8Buffer The texture texels.
+	 * \param _dGamma The gamma to apply.
+	 * \param _ui32Width The width of the image.
+	 * \param _ui32Height The height of the image.
+	 * \param _ui32Depth The depth of the image.
+	 **/
+	void CImage::BakeGamma( uint8_t * _pui8Buffer, double _dGamma, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) {
+		if ( !_pui8Buffer ) { return; }
+		if ( _dGamma == 0.0 ) { return; }
+		CFormat::SL2_RGBA64F * prDst = reinterpret_cast<CFormat::SL2_RGBA64F *>(_pui8Buffer);
+		if ( _dGamma <= -1.0 ) {
+			// True sRGB -> Linear conversion.
+			for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+				uint32_t ui32Slice = _ui32Width * _ui32Height * D;
+				for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+					uint32_t ui32Row = _ui32Width * H;
+					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+						CFormat::SL2_RGBA64F * prThis = &prDst[ui32Slice+ui32Row+W];
+						prThis->dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( prThis->dRgba[SL2_PC_R] );
+						prThis->dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( prThis->dRgba[SL2_PC_G] );
+						prThis->dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( prThis->dRgba[SL2_PC_B] );
+					}
+				}
+			}
+		}
+		else if ( _dGamma < 0.0 ) {
+			// True Linear -> sRGB conversion.
+			for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+				uint32_t ui32Slice = _ui32Width * _ui32Height * D;
+				for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+					uint32_t ui32Row = _ui32Width * H;
+					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+						CFormat::SL2_RGBA64F * prThis = &prDst[ui32Slice+ui32Row+W];
+						prThis->dRgba[SL2_PC_R] = CUtilities::LinearToSRgb( prThis->dRgba[SL2_PC_R] );
+						prThis->dRgba[SL2_PC_G] = CUtilities::LinearToSRgb( prThis->dRgba[SL2_PC_G] );
+						prThis->dRgba[SL2_PC_B] = CUtilities::LinearToSRgb( prThis->dRgba[SL2_PC_B] );
+					}
+				}
+			}
+		}
+		else {
+			// Custom gamma curve.
+			for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+				uint32_t ui32Slice = _ui32Width * _ui32Height * D;
+				for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+					uint32_t ui32Row = _ui32Width * H;
+					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+						CFormat::SL2_RGBA64F * prThis = &prDst[ui32Slice+ui32Row+W];
+						prThis->dRgba[SL2_PC_R] = std::pow( prThis->dRgba[SL2_PC_R], _dGamma );
+						prThis->dRgba[SL2_PC_G] = std::pow( prThis->dRgba[SL2_PC_G], _dGamma );
+						prThis->dRgba[SL2_PC_B] = std::pow( prThis->dRgba[SL2_PC_B], _dGamma );
+					}
+				}
+			}
+		}
 	}
 
 	/**

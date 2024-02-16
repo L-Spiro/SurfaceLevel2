@@ -215,6 +215,17 @@ namespace sl2 {
 		bool												AllocateTexture( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, size_t _sMips = 1, size_t _sArray = 1, size_t _sFaces = 1 );
 
 		/**
+		 * Bakes the image special gamma into a given texture buffer.  The format must be RGBA64F.
+		 * 
+		 * \param _pui8Buffer The texture texels.
+		 * \param _dGamma The gamma to apply.
+		 * \param _ui32Width The width of the image.
+		 * \param _ui32Height The height of the image.
+		 * \param _ui32Depth The depth of the image.
+		 **/
+		void												BakeGamma( uint8_t * _pui8Buffer, double _dGamma, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth );
+
+		/**
 		 * Loads using the FreeImage library.
 		 * 
 		 * \param _vData The file to load.
