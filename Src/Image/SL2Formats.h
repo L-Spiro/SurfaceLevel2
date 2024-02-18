@@ -63,6 +63,12 @@
 /** Maximum number of threads to run concurrently for BC conversions. */
 #define SL2_BC_MAX_THREADS															16
 
+/** Makes a texture-compression flag. */
+#define SL2_MAKE_COMP_FLAG( VAL )													uint32_t( VAL ) << 8
+
+/** Gets a texture-compression flag. */
+#define SL2_GET_COMP_FLAG( VAL )													(((VAL) >> 8) & 0xF)
+
 
 #pragma warning( push )
 
@@ -1199,6 +1205,18 @@ namespace sl2 {
 	};
 
 	/**
+	 * Compression scheme.
+	 */
+	enum SL2_COMPRESSION_SCHEME {
+		SL2_CS_BC																	= 1,																/**< Block compression. */
+		SL2_CS_ASTC																	= 2,																/**< Adaptive scalable texture compression. */
+		SL2_CS_PVRTC																= 3,																/**< PowerVR Texture Compression. */
+		SL2_CS_ETC																	= 4,																/**< Ericsson Texture Compression. */
+		SL2_CS_FXT																	= 5,																/**< 3dfx Interactive fixed-rate block-based texture compression. */
+		SL2_CS_ATC																	= 6,																/**< AMD Texture Compression. */
+	};
+
+	/**
 	 * Component order.
 	 */
 	enum SL2_PIXEL_COMPONENTS {
@@ -1291,6 +1309,22 @@ namespace sl2 {
 			bool																	bFloatFormat;
 			/** Function for getting its compressed size. */
 			PfCompSizeFunc															pfCompSizeFunc;
+			/** R bit count. */
+			uint8_t																	ui8RBits;
+			/** G bit count. */
+			uint8_t																	ui8GBits;
+			/** B bit count. */
+			uint8_t																	ui8BBits;
+			/** A bit count. */
+			uint8_t																	ui8ABits;
+			/** R shift count. */
+			uint8_t																	ui8RShift;
+			/** G shift count. */
+			uint8_t																	ui8GShift;
+			/** B shift count. */
+			uint8_t																	ui8BShift;
+			/** A shift count. */
+			uint8_t																	ui8AShift;
 			/** Function to convert to RGBA64F. */
 			PfToRgba64F																pfToRgba64F;
 			/** Function to convert from RGBA64F to the internal OpenGL/Vulkan format. */
@@ -1401,7 +1435,7 @@ namespace sl2 {
 
 		/** Luma coefficients. */
 		struct SL2_LUMA {
-			float																	fRgb[3];						/**< The luma coefficients. */
+			double																	dRgb[3];						/**< The luma coefficients. */
 		};
 
 
@@ -1573,8 +1607,7 @@ namespace sl2 {
 		 * \return Returns the number of bytes in a row of tightly packed texel data.
 		 */
 		static inline uint32_t SL2_FASTCALL											GetRowSize( SL2_VKFORMAT _vfFormat, uint32_t _ui32Total ) {
-			uint32_t ui32Row = _ui32Total * GetFormatSize( _vfFormat );
-			return SL2_ROUND_UP( ui32Row, 4UL );
+			return GetFormatSize( _vfFormat, _ui32Total, 1, 1 );
 		}
 
 		/**
@@ -1585,8 +1618,7 @@ namespace sl2 {
 		 * \return Returns the number of bytes in a row of tightly packed texel data.
 		 */
 		static inline uint32_t SL2_FASTCALL											GetRowSize( SL2_DXGI_FORMAT _dfFormat, uint32_t _ui32Total ) {
-			uint32_t ui32Row = _ui32Total * GetFormatSize( _dfFormat );
-			return SL2_ROUND_UP( ui32Row, 4UL );
+			return GetFormatSize( _dfFormat, _ui32Total, 1, 1 );
 		}
 
 		/**
@@ -1597,8 +1629,7 @@ namespace sl2 {
 		 * \return Returns the number of bytes in a row of tightly packed texel data.
 		 */
 		static inline uint32_t SL2_FASTCALL											GetRowSize( SL2_KTX_INTERNAL_FORMAT _kifFormat, uint32_t _ui32Total ) {
-			uint32_t ui32Row = _ui32Total * GetFormatSize( _kifFormat );
-			return SL2_ROUND_UP( ui32Row, 4UL );
+			return GetFormatSize( _kifFormat, _ui32Total, 1, 1 );
 		}
 
 		/**
@@ -1609,9 +1640,38 @@ namespace sl2 {
 		 * \return Returns the number of bytes in a row of tightly packed texel data.
 		 */
 		static inline uint32_t SL2_FASTCALL											GetRowSize( SL2_MTLPIXELFORMAT _mpfFormat, uint32_t _ui32Total ) {
-			uint32_t ui32Row = _ui32Total * GetFormatSize( _mpfFormat );
-			return SL2_ROUND_UP( ui32Row, 4UL );
+			return GetFormatSize( _mpfFormat, _ui32Total, 1, 1 );
 		}
+
+		/**
+		 * Given a set of formats, finds the one among them that is the best fit for the given format.
+		 * 
+		 * \param _pkifFormat The input format.
+		 * \param _ppkifFormats The array of formats.
+		 * \param _sTotal The total number of formats to which _pkifFormats points.
+		 * \param _pfScore AN optional pointer to a float that can receive the score for the return format.
+		 * \return Returns the format among _pkifFormats that best fits _pkifFormat.  Can return nullptr in case of error.
+		 **/
+		static const SL2_KTX_INTERNAL_FORMAT_DATA *									FindBestFormat( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat,
+			const SL2_KTX_INTERNAL_FORMAT_DATA ** _ppkifFormats, size_t _sTotal, float * _pfScore = nullptr );
+
+		/**
+		 * Gets the score for how well _pkifTest matches _pkifFormat as a possible conversion target format.  IE how well _pkifFormat can be converted to _pkifTest.
+		 * 
+		 * \param _pkifFormat The source format.
+		 * \param _pkifTest The potential destination format.
+		 * \return Returns a score indicating how well _pkifFormat can be converted to _pkifTest.  Higher is better.
+		 **/
+		static float																ScoreFormat( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat,
+			const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifTest );
+
+		/**
+		 * Gets the number of channels on the given format.
+		 * 
+		 * \param _pkifFormat The format whose channel count is to be obtained.
+		 * \return Returns the number of channels on _pkifFormat.
+		 **/
+		static uint32_t																CountChannels( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat );
 
 
 	protected :
@@ -1744,11 +1804,15 @@ namespace sl2 {
 					//	_uBits can't be 0 so this warning is invalid.
 					// warning C4723: potential divide by 0
 					//	_uBits can't be 0 so this warning is invalid.
-					return static_cast<double>(i64Texel);
+					return static_cast<double>(i64Texel) / (ui64Mask >> 1);
 				}
 				else {
 					constexpr uint64_t ui64Max = ~0ULL >> (64U - _uBits);
-					return static_cast<double>((_ui64Value >> _uShift) & ui64Max);
+					uint64_t ui64Multiplicand = ui64Max;
+					if constexpr ( _uBits > DBL_MANT_DIG ) {
+						ui64Multiplicand = ~((1ULL << (_uBits - DBL_MANT_DIG)) - 1ULL);
+					}
+					return static_cast<double>((_ui64Value >> _uShift) & ui64Multiplicand) / ui64Multiplicand;
 				}
 			}
 			else { return _dDefault; }
@@ -1770,11 +1834,16 @@ namespace sl2 {
 				constexpr uint64_t ui64Mask = ~0ULL >> (64U - _uBits);
 				_ui64Value = _ui64Value & ~(ui64Mask << _uShift);
 				if constexpr ( _uSigned != 0 ) {
-					int64_t i64Val = static_cast<int64_t>(std::round( CUtilities::Clamp( _dValue, -std::pow( 2.0, _uBits - 1.0 ), std::pow( 2.0, _uBits - 1.0 ) - 1.0 ) ));
+					const double dPow = std::pow( 2.0, _uBits - 1.0 );
+					int64_t i64Val = static_cast<int64_t>(std::round( CUtilities::Clamp( _dValue * (ui64Mask >> 1), -dPow, dPow - 1.0 ) ));
 					_ui64Value |= (i64Val & ui64Mask) << _uShift;
 				}
 				else {
-					uint64_t ui64Val = static_cast<uint64_t>(std::round( CUtilities::Clamp( _dValue, 0.0, std::pow( 2.0, _uBits ) - 1.0 ) ));
+					uint64_t ui64Multiplicand = ui64Mask;
+					if constexpr ( _uBits > DBL_MANT_DIG ) {
+						ui64Multiplicand = ~((1ULL << (_uBits - DBL_MANT_DIG)) - 1ULL);
+					}
+					uint64_t ui64Val =  CUtilities::Clamp( static_cast<uint64_t>(std::round( _dValue * ui64Multiplicand )), 0ULL, ui64Mask );
 					_ui64Value |= (ui64Val & ui64Mask) << _uShift;
 				}
 			}
@@ -3633,9 +3702,9 @@ namespace sl2 {
 						// Values specified by OpenGL for luminance conversion: SL2_LS_CIE_1931 (0.3086f 0.6094f 0.082f)
 						// https://www.opengl.org/archives/resources/code/samples/advanced/advanced97/notes/node140.html
 						// But the user gets to select the luminance factors.
-						double dLum = rgbaThis.dRgba[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].fRgb[0] +
-							rgbaThis.dRgba[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].fRgb[1] +
-							rgbaThis.dRgba[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].fRgb[2];
+						double dLum = rgbaThis.dRgba[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].dRgb[0] +
+							rgbaThis.dRgba[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].dRgb[1] +
+							rgbaThis.dRgba[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].dRgb[2];
 						Std64FToIntComponent_Norm<_uLBits, _uLShift, _bSigned, _bSrgb>( dLum, (*pui64Dst) );
 
 						Std64FToIntComponent_Norm<_uABits, _uAShift, _bSigned, false>( rgbaThis.dRgba[SL2_PC_A], (*pui64Dst) );
@@ -3735,9 +3804,9 @@ namespace sl2 {
 					// Values specified by OpenGL for luminance conversion: SL2_LS_CIE_1931 (0.3086f 0.6094f 0.082f)
 					// https://www.opengl.org/archives/resources/code/samples/advanced/advanced97/notes/node140.html
 					// But the user gets to select the luminance factors.
-					double dLum = rgbaThis.dRgba[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].fRgb[0] +
-						rgbaThis.dRgba[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].fRgb[1] +
-						rgbaThis.dRgba[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].fRgb[2];
+					double dLum = rgbaThis.dRgba[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].dRgb[0] +
+						rgbaThis.dRgba[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].dRgb[1] +
+						rgbaThis.dRgba[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].dRgb[2];
 					
 					if constexpr ( _uLBits == 16 ) {
 						CFloat16 * pf16Dst = reinterpret_cast<CFloat16 *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize+(_uLShift/8)]);
@@ -3830,9 +3899,9 @@ namespace sl2 {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
 					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
-					double dInt = (rgbaThis.dRgba[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].fRgb[0] +
-						rgbaThis.dRgba[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].fRgb[1] +
-						rgbaThis.dRgba[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].fRgb[2]) * rgbaThis.dRgba[SL2_PC_A];
+					double dInt = (rgbaThis.dRgba[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].dRgb[0] +
+						rgbaThis.dRgba[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].dRgb[1] +
+						rgbaThis.dRgba[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].dRgb[2]) * rgbaThis.dRgba[SL2_PC_A];
 
 					if constexpr ( _bFloat ) {
 						if constexpr ( _uIBits == 16 ) {
@@ -4003,9 +4072,9 @@ namespace sl2 {
 		}
 		else {
 			doOptions.fAlphaThresh = _ui8DefaultAlphaThresh / 255.0f;
-			doOptions.fRedWeight = m_lLumaCoeffs[m_lsCurStandard].fRgb[0];
-			doOptions.fGreenWeight = m_lLumaCoeffs[m_lsCurStandard].fRgb[1];
-			doOptions.fBlueWeight = m_lLumaCoeffs[m_lsCurStandard].fRgb[2];
+			doOptions.fRedWeight = static_cast<float>(m_lLumaCoeffs[m_lsCurStandard].dRgb[0]);
+			doOptions.fGreenWeight = static_cast<float>(m_lLumaCoeffs[m_lsCurStandard].dRgb[1]);
+			doOptions.fBlueWeight = static_cast<float>(m_lLumaCoeffs[m_lsCurStandard].dRgb[2]);
 		}
 
 		// Create X number of threads as we go along the blocks.

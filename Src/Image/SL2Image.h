@@ -44,6 +44,71 @@ namespace sl2 {
 		~CImage();
 
 
+		// == Types.
+		/** Wraps a FreeImage file. */
+		struct SL2_FREE_IMAGE {
+			SL2_FREE_IMAGE() :
+				pmMemory( ::FreeImage_OpenMemory() ) {
+			}
+			SL2_FREE_IMAGE( const std::vector<uint8_t> &_vData ) :
+				pmMemory( ::FreeImage_OpenMemory( const_cast<uint8_t *>(_vData.data()), DWORD( _vData.size() ) ) ) {
+			}
+			~SL2_FREE_IMAGE() {
+				::FreeImage_CloseMemory( pmMemory );
+				pmMemory = nullptr;
+			}
+
+
+			// == Members.
+			FIMEMORY *										pmMemory;
+		};
+
+		/** Wraps FreeImage_LoadFromMemory(). */
+		struct SL2_FREEIMAGE_LOAD_FROM_MEMORY {
+			SL2_FREEIMAGE_LOAD_FROM_MEMORY( SL2_FREE_IMAGE &_fiImage ) :
+				pbBitmap( ::FreeImage_LoadFromMemory( ::FreeImage_GetFileTypeFromMemory( _fiImage.pmMemory, 0 ), _fiImage.pmMemory, 0 ) ) {
+			}
+			~SL2_FREEIMAGE_LOAD_FROM_MEMORY() {
+				::FreeImage_Unload( pbBitmap );
+				pbBitmap = nullptr;
+			}
+
+
+			// == Members.
+			FIBITMAP *										pbBitmap;
+		};
+
+		/** Wraps FreeImage_Allocate(). */
+		struct SL2_FREEIMAGE_ALLOCATE {
+			SL2_FREEIMAGE_ALLOCATE( int _iWidth, int _iHeight, int _iBpp, unsigned _uRedMask FI_DEFAULT(0), unsigned _uGreenMask FI_DEFAULT(0), unsigned _uBlueMask FI_DEFAULT(0) ) :
+				pbBitmap( ::FreeImage_Allocate( _iWidth, _iHeight, _iBpp, _uRedMask, _uGreenMask, _uBlueMask ) ) {
+			}
+			~SL2_FREEIMAGE_ALLOCATE() {
+				::FreeImage_Unload( pbBitmap );
+				pbBitmap = nullptr;
+			}
+
+
+			// == Members.
+			FIBITMAP *										pbBitmap;
+		};
+
+		/** Wraps FreeImage_AllocateT(). */
+		struct SL2_FREEIMAGE_ALLOCATET {
+			SL2_FREEIMAGE_ALLOCATET( FREE_IMAGE_TYPE _fitType, int _iWidth, int _iHeight, int _iBpp, unsigned _uRedMask FI_DEFAULT(0), unsigned _uGreenMask FI_DEFAULT(0), unsigned _uBlueMask FI_DEFAULT(0) ) :
+				pbBitmap( ::FreeImage_AllocateT( _fitType, _iWidth, _iHeight, _iBpp, _uRedMask, _uGreenMask, _uBlueMask ) ) {
+			}
+			~SL2_FREEIMAGE_ALLOCATET() {
+				::FreeImage_Unload( pbBitmap );
+				pbBitmap = nullptr;
+			}
+
+
+			// == Members.
+			FIBITMAP *										pbBitmap;
+		};
+
+
 		// == Operators.
 		/**
 		 * Move operator.
@@ -146,6 +211,55 @@ namespace sl2 {
 		SL2_ERRORS											ConvertToFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, CImage &_iDst );
 
 		/**
+		 * Converts a single texture to a given format.
+		 * 
+		 * \param _pkifFormat The format to which to convert.
+		 * \param _sMip The mipmap level to convert.
+		 * \param _sArray The array to convert.
+		 * \param _sFace The face to convert.
+		 * \param _vDst The destination buffer.
+		 * \param _bInvertY If true, the destination is inverted vertically.
+		 * \return Returns an error code.
+		 **/
+		SL2_ERRORS											ConvertToFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat,
+			size_t _sMip, size_t _sArray, size_t _sFace, std::vector<uint8_t> &_vDst, bool _bInvertY = false );
+
+		/**
+		 * Converts a single texture to a given format.
+		 * 
+		 * \param _pkifFormat The format to which to convert.
+		 * \param _sMip The mipmap level to convert.
+		 * \param _sArray The array to convert.
+		 * \param _sFace The face to convert.
+		 * \param _pui8Dst The destination buffer.
+		 * \param _bInvertY If true, the destination is inverted vertically.
+		 * \return Returns an error code.
+		 **/
+		SL2_ERRORS											ConvertToFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat,
+			size_t _sMip, size_t _sArray, size_t _sFace, uint8_t * _pui8Dst, bool _bInvertY = false );
+
+		/**
+		 * Gets a constant reference to the image's mipmaps.
+		 * 
+		 * \return Returns a constant reference to the image's mipmaps.
+		 **/
+		const std::vector<std::unique_ptr<CSurface>> &		GetMipmaps() const { return m_vMipMaps; }
+
+		/**
+		 * Gets the user-supplied gamma value.
+		 * 
+		 * \return Returns the user-supplied gamma value.
+		 **/
+		inline double										Gamma() const { return m_dGamma; }
+
+		/**
+		 * Sets the user-supplied gamma value.
+		 * 
+		 * \param _dGamma The user-supplied gamma.
+		 **/
+		inline void											SetGamma( double _dGamma ) { m_dGamma = _dGamma; }
+
+		/**
 		 * Gets the final size of a byte buffer to be used as a texture plane.  The plane will be over-allocated by 8 bytes and then rounded up to the nearest 8 bytes.
 		 *	So if a 1-by-1 32-bit tecture is being allocated, 4 will be passed to _sSize, and 16 will be returned ((4+8) -> 16).
 		 * 
@@ -158,39 +272,6 @@ namespace sl2 {
 
 
 	protected :
-		// == Types.
-		/** Wraps a FreeImage file. */
-		struct SL2_FREE_IMAGE {
-			SL2_FREE_IMAGE( const std::vector<uint8_t> &_vData ) :
-				pmMemory( ::FreeImage_OpenMemory( const_cast<uint8_t *>(_vData.data()), DWORD( _vData.size() ) ) ) {
-			}
-			~SL2_FREE_IMAGE() {
-				::FreeImage_CloseMemory( pmMemory );
-				pmMemory = nullptr;
-			}
-
-
-			// == Members.
-			FIMEMORY *										pmMemory;
-		};
-
-		/** Wraps FreeImage_LoadFromMemory(). */
-		struct SL2_FREEIMAGE_LOAD_FROM_MEMORY {
-			SL2_FREEIMAGE_LOAD_FROM_MEMORY( SL2_FREE_IMAGE &_fiImage ) :
-				pbBitmap( ::FreeImage_LoadFromMemory( ::FreeImage_GetFileTypeFromMemory( _fiImage.pmMemory, 0 ), _fiImage.pmMemory, 0 ) ) {
-			}
-			~SL2_FREEIMAGE_LOAD_FROM_MEMORY() {
-				::FreeImage_Unload( pbBitmap );
-				pbBitmap = nullptr;
-			}
-
-
-			// == Members.
-			FIBITMAP *										pbBitmap;
-		};
-
-
-
 		// == Members.
 		double												m_dGamma;								/**< The gamma curve.  Negative values indicate the IEC 61966-2-1:1999 sRGB curve. */
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *		m_pkifFormat;							/**< The texture format. */
@@ -349,6 +430,7 @@ namespace sl2 {
 	 * \return Returns the adjusted size of the texture plane to actually be allocated.
 	 **/
 	inline size_t CImage::GetActualPlaneSize( size_t _sSize ) {
+		if ( !_sSize ) { return 0; }
 		return ((_sSize + sizeof( uint64_t )) + (sizeof( uint64_t ) - 1)) & ~(sizeof( uint64_t ) - 1);
 	}
 

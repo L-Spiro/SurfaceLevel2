@@ -102,15 +102,30 @@ namespace sl2 {
 	 * \return Returns an error code.
 	 **/
 	SL2_ERRORS CImage::ConvertToFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, CImage &_iDst ) {
-		if ( !_pkifFormat ) { return SL2_E_BADFORMAT; }
-		if ( !_pkifFormat->pfToRgba64F ) { return SL2_E_BADFORMAT; }
 		CImage iTmp;
+		if ( !_pkifFormat || !Format() ) { return SL2_E_BADFORMAT; }
+
+		if ( (m_dGamma == 0.0 || m_dGamma == 1.0) &&
+			((_pkifFormat->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED && _pkifFormat->vfVulkanFormat == Format()->vfVulkanFormat) ||
+			(_pkifFormat->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN && _pkifFormat->dfDxFormat == Format()->dfDxFormat) ||
+			(_pkifFormat->mfMetalFormat != SL2_MTLPixelFormatInvalid && _pkifFormat->mfMetalFormat == Format()->mfMetalFormat) ||
+			(_pkifFormat->kifInternalFormat != SL2_KIF_GL_INVALID && _pkifFormat->kifInternalFormat == Format()->kifInternalFormat)) ) {
+			// No format conversion needed.  Just copy the buffers.
+			if ( !iTmp.AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), Width(), Height(), Depth(), Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
+			for ( size_t M = 0; M < Mipmaps(); ++M ) {
+				std::memcpy( iTmp.Data( M, 0, 0, 0 ), Data( M, 0, 0, 0 ), m_vMipMaps[M]->size() );
+			}
+			return SL2_E_SUCCESS;
+		}
+
+		if ( !Format()->pfToRgba64F ) { return SL2_E_BADFORMAT; }
+		
 		if ( !iTmp.AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), Width(), Height(), Depth(), Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
-		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*_pkifFormat);
+		
 		for ( size_t M = 0; M < Mipmaps(); ++M ) {
 			for ( size_t A = 0; A < ArraySize(); ++A ) {
 				for ( size_t F = 0; F < Faces(); ++F ) {
-					if ( !_pkifFormat->pfToRgba64F( Data( M, 0, A, F ), iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), &ifdData ) ) {
+					if ( !Format()->pfToRgba64F( Data( M, 0, A, F ), iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), Format() ) ) {
 						return SL2_E_INTERNALERROR;
 					}
 					BakeGamma( iTmp.Data( M, 0, A, F ), m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
@@ -125,6 +140,7 @@ namespace sl2 {
 		if ( !_pkifFormat->pfFromRgba64F ) { return SL2_E_BADFORMAT; }
 		_iDst.Reset();
 		if ( !_iDst.AllocateTexture( _pkifFormat, Width(), Height(), Depth(), Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
+		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*_pkifFormat);
 		for ( size_t M = 0; M < Mipmaps(); ++M ) {
 			for ( size_t A = 0; A < ArraySize(); ++A ) {
 				for ( size_t F = 0; F < Faces(); ++F ) {
@@ -133,6 +149,96 @@ namespace sl2 {
 					}
 				}
 			}
+		}
+		return SL2_E_SUCCESS;
+	}
+
+	/**
+	 * Converts a single texture to a given format.
+	 * 
+	 * \param _pkifFormat The format to which to convert.
+	 * \param _sMip The mipmap level to convert.
+	 * \param _sArray The array to convert.
+	 * \param _sFace The face to convert.
+	 * \param _vDst The destination buffer.
+	 * \param _bInvertY If true, the destination is inverted vertically.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS CImage::ConvertToFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat,
+		size_t _sMip, size_t _sArray, size_t _sFace, std::vector<uint8_t> &_vDst, bool _bInvertY ) {
+		if ( !_pkifFormat || !Format() ) { return SL2_E_BADFORMAT; }
+		if ( _sMip >= m_vMipMaps.size() ) { return SL2_E_INVALIDCALL; }
+
+		size_t sBaseSize = CFormat::GetFormatSize( _pkifFormat, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
+		sBaseSize = GetActualPlaneSize( sBaseSize );
+		try {
+			_vDst.resize( sBaseSize );
+		}
+		catch ( ... ) { SL2_E_OUTOFMEMORY; }
+		return ConvertToFormat( _pkifFormat, _sMip, _sArray, _sFace, _vDst.data(), _bInvertY );
+	}
+
+	/**
+	 * Converts a single texture to a given format.
+	 * 
+	 * \param _pkifFormat The format to which to convert.
+	 * \param _sMip The mipmap level to convert.
+	 * \param _sArray The array to convert.
+	 * \param _sFace The face to convert.
+	 * \param _pui8Dst The destination buffer.
+	 * \param _bInvertY If true, the destination is inverted vertically.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS CImage::ConvertToFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat,
+		size_t _sMip, size_t _sArray, size_t _sFace, uint8_t * _pui8Dst, bool _bInvertY ) {
+		if ( !_pkifFormat || !Format() ) { return SL2_E_BADFORMAT; }
+		if ( _sMip >= m_vMipMaps.size() ) { return SL2_E_INVALIDCALL; }
+
+		size_t sBaseSize = CFormat::GetFormatSize( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
+		if ( (m_dGamma == 0.0 || m_dGamma == 1.0) &&
+			!_bInvertY &&
+			((_pkifFormat->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED && _pkifFormat->vfVulkanFormat == Format()->vfVulkanFormat) ||
+			(_pkifFormat->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN && _pkifFormat->dfDxFormat == Format()->dfDxFormat) ||
+			(_pkifFormat->mfMetalFormat != SL2_MTLPixelFormatInvalid && _pkifFormat->mfMetalFormat == Format()->mfMetalFormat) ||
+			(_pkifFormat->kifInternalFormat != SL2_KIF_GL_INVALID && _pkifFormat->kifInternalFormat == Format()->kifInternalFormat)) ) {
+			// No format conversion needed.  Just copy the buffers.
+			for ( size_t M = 0; M < Mipmaps(); ++M ) {
+				std::memcpy( _pui8Dst, Data( M, 0, _sArray, _sFace ), sBaseSize );
+			}
+			return SL2_E_SUCCESS;
+		}
+
+		sBaseSize = GetActualPlaneSize( sBaseSize );
+		if ( !sBaseSize ) { return SL2_E_BADFORMAT; }
+		std::vector<uint8_t> vTmp;
+		try {
+			vTmp.resize( sBaseSize );
+		}
+		catch ( ... ) {
+			return SL2_E_OUTOFMEMORY;
+		}
+
+		if ( !Format()->pfToRgba64F( Data( _sMip, 0, _sArray, _sFace ), vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), Format() ) ) {
+			return SL2_E_INTERNALERROR;
+		}
+		BakeGamma( vTmp.data(), m_dGamma, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
+
+		if ( _bInvertY ) {
+			size_t sRowWidth = CFormat::GetFormatSize( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), m_vMipMaps[_sMip]->Width(), 1, 1 );
+			std::vector<uint8_t> vRow;
+			try {
+				vRow.resize( sRowWidth );
+			}
+			catch ( ... ) { return SL2_E_OUTOFMEMORY; }
+			for ( auto I = m_vMipMaps[_sMip]->Height() >> 1; I--; ) {
+				std::memcpy( vRow.data(), vTmp.data() + sRowWidth * I, sRowWidth );
+				std::memcpy( vTmp.data() + sRowWidth * I, vTmp.data() + sRowWidth * (m_vMipMaps[_sMip]->Height() - I - 1), sRowWidth );
+				std::memcpy( vTmp.data() + sRowWidth * (m_vMipMaps[_sMip]->Height() - I - 1), vRow.data(), sRowWidth );
+			}
+		}
+		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*_pkifFormat);
+		if ( !_pkifFormat->pfFromRgba64F( vTmp.data(), _pui8Dst, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), &ifdData ) ) {
+			return SL2_E_INTERNALERROR;
 		}
 		return SL2_E_SUCCESS;
 	}
@@ -161,7 +267,7 @@ namespace sl2 {
 		m_sArraySize = _sArray;
 		m_sFaces = _sFaces;
 		m_pkifFormat = _pkifFormat;
-		m_dGamma = _pkifFormat->bSrgb ? -2.2 : 0.0;
+		m_dGamma = 0.0;
 		
 		size_t sSrcBaseSize = CFormat::GetFormatSize( _pkifFormat, _ui32Width, _ui32Height, _ui32Depth );
 		if ( !sSrcBaseSize ) { Reset(); return false; }
@@ -198,24 +304,9 @@ namespace sl2 {
 	 **/
 	void CImage::BakeGamma( uint8_t * _pui8Buffer, double _dGamma, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) {
 		if ( !_pui8Buffer ) { return; }
-		if ( _dGamma == 0.0 ) { return; }
+		if ( _dGamma == 0.0 || _dGamma == 1.0 ) { return; }
 		CFormat::SL2_RGBA64F * prDst = reinterpret_cast<CFormat::SL2_RGBA64F *>(_pui8Buffer);
 		if ( _dGamma <= -1.0 ) {
-			// True sRGB -> Linear conversion.
-			for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
-				uint32_t ui32Slice = _ui32Width * _ui32Height * D;
-				for ( uint32_t H = 0; H < _ui32Height; ++H ) {
-					uint32_t ui32Row = _ui32Width * H;
-					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
-						CFormat::SL2_RGBA64F * prThis = &prDst[ui32Slice+ui32Row+W];
-						prThis->dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( prThis->dRgba[SL2_PC_R] );
-						prThis->dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( prThis->dRgba[SL2_PC_G] );
-						prThis->dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( prThis->dRgba[SL2_PC_B] );
-					}
-				}
-			}
-		}
-		else if ( _dGamma < 0.0 ) {
 			// True Linear -> sRGB conversion.
 			for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
 				uint32_t ui32Slice = _ui32Width * _ui32Height * D;
@@ -230,8 +321,24 @@ namespace sl2 {
 				}
 			}
 		}
+		else if ( _dGamma < 0.0 ) {
+			// True sRGB -> Linear conversion.
+			for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+				uint32_t ui32Slice = _ui32Width * _ui32Height * D;
+				for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+					uint32_t ui32Row = _ui32Width * H;
+					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+						CFormat::SL2_RGBA64F * prThis = &prDst[ui32Slice+ui32Row+W];
+						prThis->dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( prThis->dRgba[SL2_PC_R] );
+						prThis->dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( prThis->dRgba[SL2_PC_G] );
+						prThis->dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( prThis->dRgba[SL2_PC_B] );
+					}
+				}
+			}
+		}
 		else {
 			// Custom gamma curve.
+			_dGamma = 1.0 / _dGamma;
 			for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
 				uint32_t ui32Slice = _ui32Width * _ui32Height * D;
 				for ( uint32_t H = 0; H < _ui32Height; ++H ) {
