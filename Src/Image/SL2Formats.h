@@ -1602,6 +1602,17 @@ namespace sl2 {
 		/**
 		 * Gets the width of a row of texels in bytes.
 		 *
+		 * \param _pkifFormat Format of the texel data.
+		 * \param _ui32Total Number of texels in a row.
+		 * \return Returns the number of bytes in a row of tightly packed texel data.
+		 */
+		static inline uint32_t SL2_FASTCALL											GetRowSize( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32Total ) {
+			return GetFormatSize( _pkifFormat, _ui32Total, 1, 1 );
+		}
+
+		/**
+		 * Gets the width of a row of texels in bytes.
+		 *
 		 * \param _vfFormat Format of the texel data.
 		 * \param _ui32Total Number of texels in a row.
 		 * \return Returns the number of bytes in a row of tightly packed texel data.
@@ -1641,6 +1652,31 @@ namespace sl2 {
 		 */
 		static inline uint32_t SL2_FASTCALL											GetRowSize( SL2_MTLPIXELFORMAT _mpfFormat, uint32_t _ui32Total ) {
 			return GetFormatSize( _mpfFormat, _ui32Total, 1, 1 );
+		}
+
+		/**
+		 * Sets the luma coefficient based off one of the existing standards.
+		 * 
+		 * \param _lsLuma The luma standard to apply.
+		 **/
+		static void																	SetLuma( SL2_LUMA_STANDARDS _lsLuma ) {
+			if ( _lsLuma < SL2_LS_TOTAL ) {
+				m_lsCurStandard = _lsLuma;
+				m_lCurCoeffs = m_lLumaCoeffs[m_lsCurStandard];
+			}
+		}
+
+		/**
+		 * Sets the luma coefficient based off one of the existing standards.
+		 * 
+		 * \param _dR The luma red component to apply.
+		 * \param _dG The luma green component to apply.
+		 * \param _dB The luma blue component to apply.
+		 **/
+		static void																	SetLuma( double _dR, double _dG, double _dB ) {
+			m_lCurCoeffs.dRgb[0] = _dR;
+			m_lCurCoeffs.dRgb[1] = _dG;
+			m_lCurCoeffs.dRgb[2] = _dB;
 		}
 
 		/**
@@ -1720,6 +1756,9 @@ namespace sl2 {
 		static const SL2_LUMA														m_lLumaCoeffs[SL2_LS_TOTAL];
 		/** The current luma coefficients. */
 		static SL2_LUMA_STANDARDS													m_lsCurStandard;
+		/** The current luma coefficients. */
+		static SL2_LUMA																m_lCurCoeffs;
+		
 
 
 		// == Functions.
@@ -1810,7 +1849,8 @@ namespace sl2 {
 					constexpr uint64_t ui64Max = ~0ULL >> (64U - _uBits);
 					uint64_t ui64Multiplicand = ui64Max;
 					if constexpr ( _uBits > DBL_MANT_DIG ) {
-						ui64Multiplicand = ~((1ULL << (_uBits - DBL_MANT_DIG)) - 1ULL);
+						ui64Multiplicand >>= 1;
+						_ui64Value >>= 1;
 					}
 					return static_cast<double>((_ui64Value >> _uShift) & ui64Multiplicand) / ui64Multiplicand;
 				}
@@ -1841,9 +1881,12 @@ namespace sl2 {
 				else {
 					uint64_t ui64Multiplicand = ui64Mask;
 					if constexpr ( _uBits > DBL_MANT_DIG ) {
-						ui64Multiplicand = ~((1ULL << (_uBits - DBL_MANT_DIG)) - 1ULL);
+						ui64Multiplicand >>= 1;
 					}
 					uint64_t ui64Val =  CUtilities::Clamp( static_cast<uint64_t>(std::round( _dValue * ui64Multiplicand )), 0ULL, ui64Mask );
+					if constexpr ( _uBits > DBL_MANT_DIG ) {
+						ui64Val <<= 1;
+					}
 					_ui64Value |= (ui64Val & ui64Mask) << _uShift;
 				}
 			}
@@ -3702,9 +3745,9 @@ namespace sl2 {
 						// Values specified by OpenGL for luminance conversion: SL2_LS_CIE_1931 (0.3086f 0.6094f 0.082f)
 						// https://www.opengl.org/archives/resources/code/samples/advanced/advanced97/notes/node140.html
 						// But the user gets to select the luminance factors.
-						double dLum = rgbaThis.dRgba[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].dRgb[0] +
-							rgbaThis.dRgba[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].dRgb[1] +
-							rgbaThis.dRgba[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].dRgb[2];
+						double dLum = rgbaThis.dRgba[SL2_PC_R] * m_lCurCoeffs.dRgb[0] +
+							rgbaThis.dRgba[SL2_PC_G] * m_lCurCoeffs.dRgb[1] +
+							rgbaThis.dRgba[SL2_PC_B] * m_lCurCoeffs.dRgb[2];
 						Std64FToIntComponent_Norm<_uLBits, _uLShift, _bSigned, _bSrgb>( dLum, (*pui64Dst) );
 
 						Std64FToIntComponent_Norm<_uABits, _uAShift, _bSigned, false>( rgbaThis.dRgba[SL2_PC_A], (*pui64Dst) );
@@ -3804,9 +3847,9 @@ namespace sl2 {
 					// Values specified by OpenGL for luminance conversion: SL2_LS_CIE_1931 (0.3086f 0.6094f 0.082f)
 					// https://www.opengl.org/archives/resources/code/samples/advanced/advanced97/notes/node140.html
 					// But the user gets to select the luminance factors.
-					double dLum = rgbaThis.dRgba[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].dRgb[0] +
-						rgbaThis.dRgba[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].dRgb[1] +
-						rgbaThis.dRgba[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].dRgb[2];
+					double dLum = rgbaThis.dRgba[SL2_PC_R] * m_lCurCoeffs.dRgb[0] +
+						rgbaThis.dRgba[SL2_PC_G] * m_lCurCoeffs.dRgb[1] +
+						rgbaThis.dRgba[SL2_PC_B] * m_lCurCoeffs.dRgb[2];
 					
 					if constexpr ( _uLBits == 16 ) {
 						CFloat16 * pf16Dst = reinterpret_cast<CFloat16 *>(&_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*_uTexelSize+(_uLShift/8)]);
@@ -3899,9 +3942,9 @@ namespace sl2 {
 			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
 				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
 					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_RGBA64F)]);
-					double dInt = (rgbaThis.dRgba[SL2_PC_R] * m_lLumaCoeffs[m_lsCurStandard].dRgb[0] +
-						rgbaThis.dRgba[SL2_PC_G] * m_lLumaCoeffs[m_lsCurStandard].dRgb[1] +
-						rgbaThis.dRgba[SL2_PC_B] * m_lLumaCoeffs[m_lsCurStandard].dRgb[2]) * rgbaThis.dRgba[SL2_PC_A];
+					double dInt = (rgbaThis.dRgba[SL2_PC_R] * m_lCurCoeffs.dRgb[0] +
+						rgbaThis.dRgba[SL2_PC_G] * m_lCurCoeffs.dRgb[1] +
+						rgbaThis.dRgba[SL2_PC_B] * m_lCurCoeffs.dRgb[2]) * rgbaThis.dRgba[SL2_PC_A];
 
 					if constexpr ( _bFloat ) {
 						if constexpr ( _uIBits == 16 ) {
@@ -4072,9 +4115,9 @@ namespace sl2 {
 		}
 		else {
 			doOptions.fAlphaThresh = _ui8DefaultAlphaThresh / 255.0f;
-			doOptions.fRedWeight = static_cast<float>(m_lLumaCoeffs[m_lsCurStandard].dRgb[0]);
-			doOptions.fGreenWeight = static_cast<float>(m_lLumaCoeffs[m_lsCurStandard].dRgb[1]);
-			doOptions.fBlueWeight = static_cast<float>(m_lLumaCoeffs[m_lsCurStandard].dRgb[2]);
+			doOptions.fRedWeight = static_cast<float>(m_lCurCoeffs.dRgb[0]);
+			doOptions.fGreenWeight = static_cast<float>(m_lCurCoeffs.dRgb[1]);
+			doOptions.fBlueWeight = static_cast<float>(m_lCurCoeffs.dRgb[2]);
 		}
 
 		// Create X number of threads as we go along the blocks.

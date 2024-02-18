@@ -22,7 +22,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 #define SL2_ERRORT( TXT, CODE )					sl2::PrintError( reinterpret_cast<const char16_t *>(TXT), (CODE) );						\
 												if ( oOptions.bPause ) { ::system( "pause" ); }	                                        \
                                                 ::FreeImage_DeInitialise();                                                             \
-												return (CODE)
+												return int( CODE )
 #define SL2_ERROR( CODE )						SL2_ERRORT( nullptr, (CODE) )
 
 #define SL2_CHECK( TOTAL, NAME )                 _iArgC >= (TOTAL) && std::wcscmp( &(*_wcpArgV)[1], L ## #NAME ) == 0
@@ -395,14 +395,29 @@ namespace sl2 {
             CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8_UNORM ),
             CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8A8_UNORM ),
             CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16G16B16_UNORM ),
-            CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16G16B16A16_UNORM )
+            CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16G16B16A16_UNORM ),
+
+            CFormat::FindFormatDataByOgl( SL2_KIF_GL_LUMINANCE8 ),
+            CFormat::FindFormatDataByOgl( SL2_KIF_GL_LUMINANCE16 ),
+            //CFormat::FindFormatDataByOgl( SL2_KIF_GL_LUMINANCE8_ALPHA8 ),
+            //CFormat::FindFormatDataByOgl( SL2_KIF_GL_LUMINANCE16_ALPHA16 ),
         };
         const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * pkifdUseMe = CFormat::FindBestFormat( _iImage.Format(), pkifdFormats, SL2_ELEMENTS( pkifdFormats ) );
         if ( !pkifdUseMe ) {
             return SL2_E_BADFORMAT;
         }
         FREE_IMAGE_TYPE fitType = FIT_BITMAP;
-        if ( pkifdUseMe->ui32BlockSizeInBits == 16 * 3 ) {
+        if ( pkifdUseMe->kifInternalFormat == SL2_KIF_GL_LUMINANCE8 ) {
+        }
+        else if ( pkifdUseMe->kifInternalFormat == SL2_KIF_GL_LUMINANCE16 ) {
+            fitType = FIT_UINT16;
+        }
+        else if ( pkifdUseMe->kifInternalFormat == SL2_KIF_GL_LUMINANCE8_ALPHA8 ) {
+        }
+        else if ( pkifdUseMe->kifInternalFormat == SL2_KIF_GL_LUMINANCE16_ALPHA16 ) {
+            fitType = FIT_RGBA16;
+        }
+        else if ( pkifdUseMe->ui32BlockSizeInBits == 16 * 3 ) {
             fitType = FIT_RGB16;
         }
         else if ( pkifdUseMe->ui32BlockSizeInBits == 16 * 4 ) {
@@ -416,7 +431,7 @@ namespace sl2 {
         if ( eError != SL2_E_SUCCESS ) { return eError; }
 
 
-        uint32_t ui32Pitch = CFormat::GetRowSize( pkifdUseMe->vfVulkanFormat, _iImage.GetMipmaps()[_sMip]->Width() );
+        uint32_t ui32Pitch = CFormat::GetRowSize( pkifdUseMe, _iImage.GetMipmaps()[_sMip]->Width() );
         uint32_t ui32Slice = uint32_t( ui32Pitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
         for ( uint32_t H = 0; H < _iImage.GetMipmaps()[_sMip]->Height(); ++H ) {
             BYTE * pui8Bits = ::FreeImage_GetScanLine( fiImage.pbBitmap, int( H ) );
@@ -424,6 +439,24 @@ namespace sl2 {
             switch ( fitType ) {
                 case FIT_BITMAP : {
                     switch ( pkifdUseMe->ui32BlockSizeInBits ) {
+                        case 8 * 1 : {
+                            for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
+                                uint8_t * prgbDst = pui8Bits + X;
+                                const uint8_t * pui8This = pui8Src + X;
+                                (*prgbDst) = (*pui8This);
+                            }
+                            break;
+                        }
+                        case 8 * 2 : {
+                            for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
+                                uint16_t * prgbDst = reinterpret_cast<uint16_t *>(pui8Bits) + X;
+                                const uint16_t * prgbSrc = reinterpret_cast<uint16_t *>(pui8Src) + X;
+                                /*prgbDst->red = (*prgbSrc) & 0xFF;
+                                prgbDst->alpha = (*prgbSrc) >> 8;*/
+                                (*prgbDst) = (*prgbSrc);
+                            }
+                            break;
+                        }
                         case 8 * 3 : {
                             for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
                                 RGBTRIPLE * prgbDst = reinterpret_cast<RGBTRIPLE *>(pui8Bits) + X;
@@ -445,6 +478,14 @@ namespace sl2 {
                             }
                             break;
                         }
+                    }
+                    break;
+                }
+                case FIT_UINT16 : {
+                    for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
+                        uint16_t * prgbDst = reinterpret_cast<uint16_t *>(pui8Bits) + X;
+                        const uint16_t * prgbSrc = reinterpret_cast<uint16_t *>(pui8Src) + X;
+                        (*prgbDst) = (*prgbSrc);
                     }
                     break;
                 }

@@ -374,6 +374,11 @@ namespace sl2 {
 	/** The current luma coefficients. */
 	SL2_LUMA_STANDARDS CFormat::m_lsCurStandard = SL2_LS_REC_709;
 
+	/** The current luma coefficients. */
+	CFormat::SL2_LUMA CFormat::m_lCurCoeffs = {
+		m_lLumaCoeffs[SL2_LS_REC_709]
+	};
+
 
 	// == Functions.
 	/**
