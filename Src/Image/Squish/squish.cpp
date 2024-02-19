@@ -219,10 +219,14 @@ void CompressImage( u8 const* rgba, int width, int height, void* blocks, int fla
 					if( sx < width && sy < height )
 					{
 						// copy the rgba value
+#ifdef SQUISH_USE_FLOATS
+						double const* sourcePixel = reinterpret_cast<const double *>(rgba + 32*( width*sy + sx ));
+#else
 						u8 const* sourcePixel = rgba + 4*( width*sy + sx );
+#endif	// #ifdef SQUISH_USE_FLOATS
 						for( int i = 0; i < 4; ++i ) {
 #ifdef SQUISH_USE_FLOATS
-							*targetPixel++ = (*sourcePixel++) * (1.0 / 255.0);
+							*targetPixel++ = (*sourcePixel++);
 #else
 							*targetPixel++ = *sourcePixel++;
 #endif	// #ifdef SQUISH_USE_FLOATS

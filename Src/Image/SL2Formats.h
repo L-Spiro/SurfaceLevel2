@@ -12,6 +12,7 @@
 #include "../Utilities/SL2Float16.h"
 #include "../Utilities/SL2FloatX.h"
 #include "../Utilities/SL2Utilities.h"
+#include "ISPC/ispc_texcomp.h"
 #include "Squish/squish.h"
 #include <atomic>
 #include <cstdint>
@@ -3034,20 +3035,20 @@ namespace sl2 {
 		else {
 
 			if ( ui16Tmp0 > ui16Tmp1 ) {
-				_prPalette[2].dRgba[SL2_PC_R] = (_prPalette[0].dRgba[SL2_PC_R] * 2.0f + _prPalette[1].dRgba[SL2_PC_R]) / 3.0f;
-				_prPalette[2].dRgba[SL2_PC_G] = (_prPalette[0].dRgba[SL2_PC_G] * 2.0f + _prPalette[1].dRgba[SL2_PC_G]) / 3.0f;
-				_prPalette[2].dRgba[SL2_PC_B] = (_prPalette[0].dRgba[SL2_PC_B] * 2.0f + _prPalette[1].dRgba[SL2_PC_B]) / 3.0f;
+				_prPalette[2].dRgba[SL2_PC_R] = (_prPalette[0].dRgba[SL2_PC_R] * 2.0 + _prPalette[1].dRgba[SL2_PC_R]) / 3.0;
+				_prPalette[2].dRgba[SL2_PC_G] = (_prPalette[0].dRgba[SL2_PC_G] * 2.0 + _prPalette[1].dRgba[SL2_PC_G]) / 3.0;
+				_prPalette[2].dRgba[SL2_PC_B] = (_prPalette[0].dRgba[SL2_PC_B] * 2.0 + _prPalette[1].dRgba[SL2_PC_B]) / 3.0;
 				_prPalette[2].dRgba[SL2_PC_A] = 1.0;
 
-				_prPalette[3].dRgba[SL2_PC_R] = (_prPalette[0].dRgba[SL2_PC_R] + _prPalette[1].dRgba[SL2_PC_R] * 2.0f) / 3.0f;
-				_prPalette[3].dRgba[SL2_PC_G] = (_prPalette[0].dRgba[SL2_PC_G] + _prPalette[1].dRgba[SL2_PC_G] * 2.0f) / 3.0f;
-				_prPalette[3].dRgba[SL2_PC_B] = (_prPalette[0].dRgba[SL2_PC_B] + _prPalette[1].dRgba[SL2_PC_B] * 2.0f) / 3.0f;
+				_prPalette[3].dRgba[SL2_PC_R] = (_prPalette[0].dRgba[SL2_PC_R] + _prPalette[1].dRgba[SL2_PC_R] * 2.0) / 3.0;
+				_prPalette[3].dRgba[SL2_PC_G] = (_prPalette[0].dRgba[SL2_PC_G] + _prPalette[1].dRgba[SL2_PC_G] * 2.0) / 3.0;
+				_prPalette[3].dRgba[SL2_PC_B] = (_prPalette[0].dRgba[SL2_PC_B] + _prPalette[1].dRgba[SL2_PC_B] * 2.0) / 3.0;
 				_prPalette[3].dRgba[SL2_PC_A] = 1.0;
 			}
 			else {
-				_prPalette[2].dRgba[SL2_PC_R] = (_prPalette[0].dRgba[SL2_PC_R] + _prPalette[1].dRgba[SL2_PC_R]) * 0.5f;
-				_prPalette[2].dRgba[SL2_PC_G] = (_prPalette[0].dRgba[SL2_PC_G] + _prPalette[1].dRgba[SL2_PC_G]) * 0.5f;
-				_prPalette[2].dRgba[SL2_PC_B] = (_prPalette[0].dRgba[SL2_PC_B] + _prPalette[1].dRgba[SL2_PC_B]) * 0.5f;
+				_prPalette[2].dRgba[SL2_PC_R] = (_prPalette[0].dRgba[SL2_PC_R] + _prPalette[1].dRgba[SL2_PC_R]) * 0.5;
+				_prPalette[2].dRgba[SL2_PC_G] = (_prPalette[0].dRgba[SL2_PC_G] + _prPalette[1].dRgba[SL2_PC_G]) * 0.5;
+				_prPalette[2].dRgba[SL2_PC_B] = (_prPalette[0].dRgba[SL2_PC_B] + _prPalette[1].dRgba[SL2_PC_B]) * 0.5;
 				_prPalette[2].dRgba[SL2_PC_A] = 1.0;
 
 				_prPalette[3].dRgba[SL2_PC_R] = 0.0;
@@ -4066,7 +4067,7 @@ namespace sl2 {
 		const SL2_DXT1_BLOCK * pbbBlocks = reinterpret_cast<const SL2_DXT1_BLOCK *>(_pui8Src);
 		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
 		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
-		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_DXT1_BLOCK );
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH;
 
 		uint32_t ui32DstSliceSize = _ui32Width * _ui32Height;
 		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
@@ -4076,6 +4077,9 @@ namespace sl2 {
 			for ( uint32_t Y = 0; Y < ui32BlocksH; ++Y ) {
 				for ( uint32_t X = 0; X < ui32BlocksW; ++X ) {
 					uint64_t ui64ThisBlock = pbbBlocks[Z*ui32SliceSize+Y*ui32BlocksW+X].ui64Rgb;
+					if ( ui64ThisBlock ) {
+						volatile int gjhg =0;
+					}
 					DecodeDXT1<_bSrgb>( ui64ThisBlock, dPaletteRgb );
 					Dxt1Indices( ui64ThisBlock, ui8IndicesRgb );
 
@@ -4108,6 +4112,42 @@ namespace sl2 {
 	 */
 	template <unsigned _ui8DefaultAlphaThresh, unsigned _bSrgb>
 	bool CFormat::Dxt1FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_DXT1_BLOCK {
+			uint64_t ui64Rgb;
+		};
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_DXT1_BLOCK );
+		uint32_t ui32SrcPitch = SL2_ROUND_UP( _ui32Width * sizeof( SL2_RGBA64F ), 4 );
+		uint32_t ui32SrcSlice = ui32SrcPitch * _ui32Height;
+
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			if ( 1 ) {
+				squish::SquishConfig scConfig;
+				scConfig.fRedWeight = static_cast<float>(m_lCurCoeffs.dRgb[0]);
+				scConfig.fGreenWeight = static_cast<float>(m_lCurCoeffs.dRgb[1]);
+				scConfig.fBlueWeight = static_cast<float>(m_lCurCoeffs.dRgb[2]);
+				scConfig.fAlphaCutoff = 0.0f;
+				squish::CompressImage( _pui8Src, _ui32Width, _ui32Height, _pui8Dst,
+					squish::kDxt1 |
+					squish::kColorMetricPerceptual | squish::kColorIterativeClusterFit | squish::kWeightColorByAlpha, scConfig );
+			}
+			else {
+
+				::rgba_surface rsSurface;
+				rsSurface.ptr = const_cast<uint8_t *>(_pui8Src);
+				rsSurface.width = _ui32Width;
+				rsSurface.height = _ui32Height;
+				rsSurface.stride = ui32SrcPitch;
+
+				::CompressBlocksBC1( &rsSurface, _pui8Dst );
+			}
+
+			_pui8Dst += ui32SliceSize;
+			_pui8Src += ui32SrcSlice;
+		}
+
+#if 0
 		const SL2_KTX_INTERNAL_FORMAT_DATA * pifdData = reinterpret_cast<const SL2_KTX_INTERNAL_FORMAT_DATA *>(_pvParms);
 		SL2_DXT_OPTIONS doOptions;
 		if ( pifdData->pvCustom ) {
@@ -4191,6 +4231,7 @@ namespace sl2 {
 				tThreads[I].release();
 			}
 		}
+#endif	// #if 0
 		return true;
 	}
 

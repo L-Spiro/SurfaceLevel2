@@ -36,7 +36,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 catch ( ... ) { SL2_ERROR( sl2::SL2_E_OUTOFMEMORY ); }
                 SL2_ADV( 2 );
             }
-            if ( SL2_CHECK( 2, outfile ) ) {
+            if ( SL2_CHECK( 2, outfile ) || SL2_CHECK( 2, out_file ) ) {
                 // Make sure the output list has 1 fewer entries than the input list.
 				if ( oOptions.vOutputs.size() >= oOptions.vInputs.size() ) {
 					// Too many outputs have already been submitted.
@@ -83,6 +83,38 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     oOptions.vOutputs.push_back( sSrc );
                 }
                 catch ( ... ) { SL2_ERROR( sl2::SL2_E_OUTOFMEMORY ); }
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 4, weight ) ) {
+                sl2::CFormat::SetLuma( ::_wtof( _wcpArgV[1] ), ::_wtof( _wcpArgV[2] ), ::_wtof( _wcpArgV[3] ) );
+                SL2_ADV( 4 );
+            }
+            if ( SL2_CHECK( 2, luma ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"REC_709" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"REC709" ) == 0 ) {
+                    sl2::CFormat::SetLuma( sl2::SL2_LS_REC_709 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"REC_2020" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"REC2020" ) == 0 ) {
+                    sl2::CFormat::SetLuma( sl2::SL2_LS_REC_2020 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"SMPTC" ) == 0 ) {
+                    sl2::CFormat::SetLuma( sl2::SL2_LS_SMPTC );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"REC_601" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"REC601" ) == 0 ) {
+                    sl2::CFormat::SetLuma( sl2::SL2_LS_REC_601 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"CIE_1931" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"CIE1931" ) == 0 ) {
+                    sl2::CFormat::SetLuma( sl2::SL2_LS_CIE_1931 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"NTSC_1953" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"NTSC1953" ) == 0 ) {
+                    sl2::CFormat::SetLuma( sl2::SL2_LS_NTSC_1953 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"EBU_TECH_3213" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"EBUTECH3213" ) == 0 ) {
+                    sl2::CFormat::SetLuma( sl2::SL2_LS_EBU_TECH_3213 );
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"luma\": \"{}\".",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
                 SL2_ADV( 2 );
             }
             if ( SL2_CHECK( 2, gamma ) || SL2_CHECK( 2, g ) ) {

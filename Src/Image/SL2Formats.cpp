@@ -553,10 +553,12 @@ namespace sl2 {
 		if ( _pkifFormat->ui8BBits < _pkifTest->ui8BBits ) { fScore += 0.25f; }
 		if ( _pkifFormat->ui8ABits < _pkifTest->ui8ABits ) { fScore += 0.25f; }
 
-		if ( _pkifFormat->ui8RShift == _pkifTest->ui8RShift ) { fScore += 1.0f; }
-		if ( _pkifFormat->ui8GShift == _pkifTest->ui8GShift ) { fScore += 1.0f; }
-		if ( _pkifFormat->ui8BShift == _pkifTest->ui8BShift ) { fScore += 1.0f; }
-		if ( _pkifFormat->ui8AShift == _pkifTest->ui8AShift ) { fScore += 1.0f; }
+		if ( !_pkifFormat->bCompressed ) {
+			if ( _pkifFormat->ui8RShift == _pkifTest->ui8RShift ) { fScore += 1.0f; }
+			if ( _pkifFormat->ui8GShift == _pkifTest->ui8GShift ) { fScore += 1.0f; }
+			if ( _pkifFormat->ui8BShift == _pkifTest->ui8BShift ) { fScore += 1.0f; }
+			if ( _pkifFormat->ui8AShift == _pkifTest->ui8AShift ) { fScore += 1.0f; }
+		}
 
 		if ( CountChannels( _pkifFormat ) == CountChannels( _pkifTest ) ) { fScore += 1.0f; }
 		if ( SL2_GET_COMP_FLAG( _pkifFormat->ui32Flags ) == SL2_GET_COMP_FLAG( _pkifTest->ui32Flags ) ) { fScore += 1.0f; }

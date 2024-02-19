@@ -97,6 +97,12 @@
     <Filter Include="Source Files\Image\KTX-Software\lib\basisu\transcoder">
       <UniqueIdentifier>{3f462277-9222-4f6f-bf69-11580078685a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Image\ISPC">
+      <UniqueIdentifier>{2bd07d23-f809-4436-97fe-6c5530f120c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Image\ISPC">
+      <UniqueIdentifier>{76c5e28f-083d-46c5-ab1a-05ee2776fd23}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\SL2SurfaceLevel2.h">
@@ -267,6 +273,9 @@
     <ClInclude Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_uastc.h">
       <Filter>Header Files\Image\KTX-Software\lib\basisu\transcoder</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Image\ISPC\ispc_texcomp.h">
+      <Filter>Header Files\Image\ISPC</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\SL2SurfaceLevel2.cpp">
@@ -398,6 +407,12 @@
     <ClCompile Include="Src\Files\SL2FileBase.cpp">
       <Filter>Source Files\Files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Image\ISPC\ispc_texcomp.cpp">
+      <Filter>Source Files\Image\ISPC</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\ISPC\ispc_texcomp_astc.cpp">
+      <Filter>Source Files\Image\ISPC</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Image\KTX-Software\lib\texture_funcs.inl">
@@ -439,5 +454,13 @@
     <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_pvrtc2_alpha_33.inc">
       <Filter>Header Files\Image\KTX-Software\lib\basisu\transcoder</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="Src\Image\ISPC\kernel.ispc">
+      <Filter>Source Files\Image\ISPC</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Src\Image\ISPC\kernel_astc.ispc">
+      <Filter>Source Files\Image\ISPC</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

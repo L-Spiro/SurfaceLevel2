@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="Src\Files\SL2FileBase.h" />
     <ClInclude Include="Src\Files\SL2StdFile.h" />
+    <ClInclude Include="Src\Image\ISPC\ispc_texcomp.h" />
     <ClInclude Include="Src\Image\KTX-Software\include\ktx.h" />
     <ClInclude Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu.h" />
     <ClInclude Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_containers.h" />
@@ -79,6 +80,8 @@
   <ItemGroup>
     <ClCompile Include="Src\Files\SL2FileBase.cpp" />
     <ClCompile Include="Src\Files\SL2StdFile.cpp" />
+    <ClCompile Include="Src\Image\ISPC\ispc_texcomp.cpp" />
+    <ClCompile Include="Src\Image\ISPC\ispc_texcomp_astc.cpp" />
     <ClCompile Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>
@@ -135,6 +138,28 @@
     <ClCompile Include="Src\Utilities\SL2Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <CustomBuild Include="Src\Image\ISPC\kernel.ispc">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="Src\Image\ISPC\kernel_astc.ispc">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+    </CustomBuild>
     <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_astc.inc" />
     <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_astc_0_255.inc" />
     <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_atc_55.inc" />
