@@ -103,6 +103,12 @@
     <Filter Include="Source Files\Image\ISPC">
       <UniqueIdentifier>{76c5e28f-083d-46c5-ab1a-05ee2776fd23}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Time">
+      <UniqueIdentifier>{7a9c1c01-90fd-4175-ac57-afe5ab4b7999}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Time">
+      <UniqueIdentifier>{e238a008-4fb5-444c-b6f4-72819d34ba54}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\SL2SurfaceLevel2.h">
@@ -276,6 +282,9 @@
     <ClInclude Include="Src\Image\ISPC\ispc_texcomp.h">
       <Filter>Header Files\Image\ISPC</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Time\SL2Clock.h">
+      <Filter>Header Files\Time</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\SL2SurfaceLevel2.cpp">
@@ -412,6 +421,9 @@
     </ClCompile>
     <ClCompile Include="Src\Image\ISPC\ispc_texcomp_astc.cpp">
       <Filter>Source Files\Image\ISPC</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Time\SL2Clock.cpp">
+      <Filter>Source Files\Time</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

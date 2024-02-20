@@ -1203,6 +1203,21 @@ namespace sl2 {
 		SL2_MTLPixelFormatRGBA8Unorm_sRGB	= 71,	// Indicates a format with 4 8-bit normalized unsigned integer channels, with sRGB-Linear conversion.
 		SL2_MTLPixelFormatStencil8	= 253,	// Indicates a single-channel 8-bit stencil format.
 		SL2_MTLPixelFormatX32_Stencil8	= 261,	// Indicates an 8-bit stencil format.
+
+		SL2_MTLPixelFormatBC1_RGBA	= 130,	// Compressed format with two 16-bit color components and one 32-bit descriptor component.
+		SL2_MTLPixelFormatBC1_RGBA_sRGB	= 131,	// Compressed format with two 16-bit color components and one 32-bit descriptor component, with conversion between sRGB and linear space.
+		SL2_MTLPixelFormatBC2_RGBA	= 132,	// Compressed format with two 64-bit chunks. The first chunk contains two 8-bit alpha components and one 48-bit descriptor component. The second chunk contains two 16-bit color components and one 32-bit descriptor component.
+		SL2_MTLPixelFormatBC2_RGBA_sRGB	= 133,	// Compressed format with two 64-bit chunks, with conversion between sRGB and linear space. The first chunk contains two 8-bit alpha components and one 48-bit descriptor component. The second chunk contains two 16-bit color components and one 32-bit descriptor component.
+		SL2_MTLPixelFormatBC3_RGBA	= 134,	// Compressed format with two 64-bit chunks. The first chunk contains two 8-bit alpha components and one 48-bit descriptor component. The second chunk contains two 16-bit color components and one 32-bit descriptor component.
+		SL2_MTLPixelFormatBC3_RGBA_sRGB	= 135,	// Compressed format with two 64-bit chunks, with conversion between sRGB and linear space. The first chunk contains two 8-bit alpha components and one 48-bit descriptor component. The second chunk contains two 16-bit color components and one 32-bit descriptor component.
+		SL2_MTLPixelFormatBC4_RUnorm	= 140,	// Compressed format with one normalized unsigned integer component.
+		SL2_MTLPixelFormatBC4_RSnorm	= 141,	// Compressed format with one normalized signed integer component.
+		SL2_MTLPixelFormatBC5_RGUnorm	= 142,	// Compressed format with two normalized unsigned integer components.
+		SL2_MTLPixelFormatBC5_RGSnorm	= 143,	// Compressed format with two normalized signed integer components.
+		SL2_MTLPixelFormatBC6H_RGBFloat	= 150,	// Compressed format with four floating-point components.
+		SL2_MTLPixelFormatBC6H_RGBUfloat	= 151,	// Compressed format with four unsigned floating-point components.
+		SL2_MTLPixelFormatBC7_RGBAUnorm = 152,	// Compressed format with four normalized unsigned integer components.
+		SL2_MTLPixelFormatBC7_RGBAUnorm_sRGB = 153,	// Compressed format with four normalized unsigned integer components, with conversion between sRGB and linear space.
 	};
 
 	/**
@@ -1441,6 +1456,11 @@ namespace sl2 {
 
 
 		// == Functions.
+		/**
+		 * Initializes settings.
+		 **/
+		static void																	Init();
+
 		/**
 		 * Finds format data given its Vulkan format identifier.
 		 * 
@@ -1681,6 +1701,22 @@ namespace sl2 {
 		}
 
 		/**
+		 * Sets the performance level, 0-5, with 0 being the slowest and 5 being the fastest.
+		 * 
+		 * \param _ui32Level The performance level. 0 = Very Slow, 5 = Ultra Fast.
+		 **/
+		static void																	SetPerfLevel( uint32_t _ui32Level ) { m_ui32Perf = _ui32Level; }
+
+		/**
+		 * Applies settings based on the current value of m_ui32Perf.
+		 * 
+		 * \param _bAlpha Determines whether the current texture has an alpha channel.
+		 * \param _ui32AstcBlockX The ASTC X block size.
+		 * \param _ui32AstcBlockY The ASTC Y block size.
+		 **/
+		static void																	ApplySettings( bool _bAlpha, uint32_t _ui32AstcBlockX, uint32_t _ui32AstcBlockY );
+
+		/**
 		 * Given a set of formats, finds the one among them that is the best fit for the given format.
 		 * 
 		 * \param _pkifFormat The input format.
@@ -1709,6 +1745,22 @@ namespace sl2 {
 		 * \return Returns the number of channels on _pkifFormat.
 		 **/
 		static uint32_t																CountChannels( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat );
+
+		/**
+		 * Expands an RGBA64F texture to a size divisible by some number of pixels.
+		 * 
+		 * \param _pui8Src The source texture to expand.
+		 * \param _ui32W The width of the source texture.  Contains the width of the final texture upon return.
+		 * \param _ui32H The height of the source texture.  Contains the width of the final texture upon return.
+		 * \param _ui32D The depth of the source texture.  Contains the width of the final texture upon return.
+		 * \param _vOutput The output vector to contain the expanded image, with border colors replicated to the added edges.
+		 * \param _ui32X The X multiplicant.
+		 * \param _ui32Y The Y multiplicant.
+		 * \param _ui32Z The Z multiplicant.
+		 * \return Returns true if the new texture could be allocated.
+		 **/
+		static bool																	ExpandTexture( const uint8_t * _pui8Src, uint32_t &_ui32W, uint32_t &_ui32H, uint32_t &_ui32D,
+			std::vector<uint8_t> &_vOutput, uint32_t _ui32X, uint32_t _ui32Y, uint32_t _ui32Z );
 
 
 	protected :
@@ -1759,6 +1811,18 @@ namespace sl2 {
 		static SL2_LUMA_STANDARDS													m_lsCurStandard;
 		/** The current luma coefficients. */
 		static SL2_LUMA																m_lCurCoeffs;
+		/** BC7 settings. */
+		static ::bc7_enc_settings													m_besBc7Settings;
+		/** BC6H settings. */
+		static ::bc6h_enc_settings													m_besBc6hSettings;
+		/** ETC settings. */
+		static ::etc_enc_settings													m_eesEtsSettings;
+		/** ASTC settings. */
+		static ::astc_enc_settings													m_aesAstcSettings;
+		/** Squish settings. */
+		static uint32_t																m_ui32SquishFlags;
+		/** Performance value. 0 = Very Slow, 1 = Slow, 2 = Basic, 3 = Fast, 4 = Very Fast. 5 = Ultra Fast. */
+		static uint32_t																m_ui32Perf;
 		
 
 
@@ -4077,9 +4141,6 @@ namespace sl2 {
 			for ( uint32_t Y = 0; Y < ui32BlocksH; ++Y ) {
 				for ( uint32_t X = 0; X < ui32BlocksW; ++X ) {
 					uint64_t ui64ThisBlock = pbbBlocks[Z*ui32SliceSize+Y*ui32BlocksW+X].ui64Rgb;
-					if ( ui64ThisBlock ) {
-						volatile int gjhg =0;
-					}
 					DecodeDXT1<_bSrgb>( ui64ThisBlock, dPaletteRgb );
 					Dxt1Indices( ui64ThisBlock, ui8IndicesRgb );
 
@@ -4121,26 +4182,38 @@ namespace sl2 {
 		uint32_t ui32SrcPitch = SL2_ROUND_UP( _ui32Width * sizeof( SL2_RGBA64F ), 4 );
 		uint32_t ui32SrcSlice = ui32SrcPitch * _ui32Height;
 
+		std::vector<uint8_t> vResized;
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
-			if ( 1 ) {
-				squish::SquishConfig scConfig;
-				scConfig.fRedWeight = static_cast<float>(m_lCurCoeffs.dRgb[0]);
-				scConfig.fGreenWeight = static_cast<float>(m_lCurCoeffs.dRgb[1]);
-				scConfig.fBlueWeight = static_cast<float>(m_lCurCoeffs.dRgb[2]);
-				scConfig.fAlphaCutoff = 0.0f;
-				squish::CompressImage( _pui8Src, _ui32Width, _ui32Height, _pui8Dst,
-					squish::kDxt1 |
-					squish::kColorMetricPerceptual | squish::kColorIterativeClusterFit | squish::kWeightColorByAlpha, scConfig );
-			}
-			else {
-
+			if constexpr ( _ui8DefaultAlphaThresh == 0 ) {
 				::rgba_surface rsSurface;
 				rsSurface.ptr = const_cast<uint8_t *>(_pui8Src);
 				rsSurface.width = _ui32Width;
 				rsSurface.height = _ui32Height;
 				rsSurface.stride = ui32SrcPitch;
+				if ( (_ui32Width % 4) || (_ui32Height % 4) ) {
+					uint32_t ui32X = _ui32Width;
+					uint32_t ui32Y = _ui32Height;
+					uint32_t ui32Z = 1;
+					if ( !ExpandTexture( _pui8Src, ui32X, ui32Y, ui32Z,
+						vResized, 4, 4, 1 ) ) { return false; }
+
+					rsSurface.ptr = vResized.data();
+					rsSurface.width = ui32X;
+					rsSurface.height = ui32Y;
+					rsSurface.stride = _ui32Width * sizeof( SL2_RGBA64F );
+				}
 
 				::CompressBlocksBC1( &rsSurface, _pui8Dst );
+			}
+			else {
+				squish::SquishConfig scConfig;
+				scConfig.fRedWeight = static_cast<float>(m_lCurCoeffs.dRgb[0]);
+				scConfig.fGreenWeight = static_cast<float>(m_lCurCoeffs.dRgb[1]);
+				scConfig.fBlueWeight = static_cast<float>(m_lCurCoeffs.dRgb[2]);
+				scConfig.fAlphaCutoff = _ui8DefaultAlphaThresh / 255.0f;
+				squish::CompressImage( _pui8Src, _ui32Width, _ui32Height, _pui8Dst,
+					squish::kDxt1 |
+					m_ui32SquishFlags, scConfig );
 			}
 
 			_pui8Dst += ui32SliceSize;

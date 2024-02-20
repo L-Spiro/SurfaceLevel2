@@ -9,6 +9,7 @@
 #include "SL2SurfaceLevel2.h"
 #include "Files/SL2StdFile.h"
 #include "Image/SL2Image.h"
+#include "Time/SL2Clock.h"
 
 #include <format>
 #include <iostream>
@@ -17,6 +18,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
     --_iArgC;
     std::u16string sThisDir = sl2::CFileBase::GetFilePath( reinterpret_cast<const char16_t *>((*_wcpArgV++)) );
     ::FreeImage_Initialise();
+    sl2::CFormat::Init();
     sl2::SL2_OPTIONS oOptions;
 
 #define SL2_ERRORT( TXT, CODE )					sl2::PrintError( reinterpret_cast<const char16_t *>(TXT), (CODE) );						\
@@ -259,6 +261,30 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 }
                 SL2_ADV( 2 );
             }
+            if ( SL2_CHECK( 1, quality_highest ) || SL2_CHECK( 1, very_slow ) ) {
+                sl2::CFormat::SetPerfLevel( 0 );
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, quality_production ) || SL2_CHECK( 1, slow ) ) {
+                sl2::CFormat::SetPerfLevel( 1 );
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, quality_normal ) || SL2_CHECK( 1, basic ) ) {
+                sl2::CFormat::SetPerfLevel( 2 );
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, fast ) ) {
+                sl2::CFormat::SetPerfLevel( 3 );
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, quick ) || SL2_CHECK( 1, veryfast ) ) {
+                sl2::CFormat::SetPerfLevel( 4 );
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, ultrafast ) ) {
+                sl2::CFormat::SetPerfLevel( 5 );
+                SL2_ADV( 1 );
+            }
         }
 
 
@@ -282,8 +308,18 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         if ( !oOptions.pkifdFinalFormat ) {
             oOptions.pkifdFinalFormat = iImage.Format();
         }
+        sl2::CFormat::ApplySettings( oOptions.pkifdFinalFormat->ui8ABits != 0, oOptions.pkifdFinalFormat->ui32BlockWidth, oOptions.pkifdFinalFormat->ui32BlockHeight );
         sl2::CImage iConverted;
+        sl2::CClock cClock;
         iImage.ConvertToFormat( oOptions.pkifdFinalFormat, iConverted );
+
+        uint64_t ui64Time = cClock.GetRealTick() - cClock.GetStartTick();
+        char szPrintfMe[512];
+		::sprintf_s( szPrintfMe, "Total time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
+		::OutputDebugStringA( szPrintfMe );
+		if ( oOptions.bShowTime ) {
+			::printf( "Total time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
+		}
 
 
         if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"png" ) == 0 ) {

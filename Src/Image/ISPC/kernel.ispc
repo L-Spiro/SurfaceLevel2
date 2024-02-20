@@ -140,9 +140,9 @@ inline void load_block_interleaved(float block[48], uniform rgba_surface* unifor
             uniform int index = ((yy * 4 + y) * src->stride);// + xx * 16 + x;
 		    uniform double* uniform src_ptr = (double*)(&src->ptr[index]);
 
-		    block[16 * 0 + y * 4 + x] = gather_double( src_ptr, (xx * 16 + x * 4) + 0 ) * 255.0;
-		    block[16 * 1 + y * 4 + x] = gather_double( src_ptr, (xx * 16 + x * 4) + 1 ) * 255.0;
-		    block[16 * 2 + y * 4 + x] = gather_double( src_ptr, (xx * 16 + x * 4) + 2 ) * 255.0;
+		    block[16 * 0 + y * 4 + x] = round( gather_double( src_ptr, (xx * 16 + x * 4) + 0 ) * 255.0 );
+		    block[16 * 1 + y * 4 + x] = round( gather_double( src_ptr, (xx * 16 + x * 4) + 1 ) * 255.0 );
+		    block[16 * 2 + y * 4 + x] = round( gather_double( src_ptr, (xx * 16 + x * 4) + 2 ) * 255.0 );
             
             /*
             uniform unsigned int32* uniform src_ptr = (unsigned int32*)&src->ptr[(yy * 4 + y)*src->stride];
@@ -697,8 +697,8 @@ inline void CompressBlockBC5(uniform rgba_surface src[], int xx, uniform int yy,
 
 export void CompressBlocksBC1_ispc(uniform rgba_surface src[], uniform uint8 dst[])
 {	
-	for (uniform int yy = 0; yy<(src->height+3)/4; yy++)
-	foreach (xx = 0 ... (src->width+3)/4)
+	for (uniform int yy = 0; yy<src->height/4; yy++)
+	foreach (xx = 0 ... src->width/4)
 	{
 		CompressBlockBC1(src, xx, yy, dst);
 	}
