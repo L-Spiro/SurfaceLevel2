@@ -21,6 +21,14 @@
   <ItemGroup>
     <ClInclude Include="Src\Files\SL2FileBase.h" />
     <ClInclude Include="Src\Files\SL2StdFile.h" />
+    <ClInclude Include="Src\Image\detex\bits.h" />
+    <ClInclude Include="Src\Image\detex\bptc-tables.h" />
+    <ClInclude Include="Src\Image\detex\detex.h" />
+    <ClInclude Include="Src\Image\detex\file-info.h" />
+    <ClInclude Include="Src\Image\detex\half-float.h" />
+    <ClInclude Include="Src\Image\detex\hdr.h" />
+    <ClInclude Include="Src\Image\detex\misc.h" />
+    <ClInclude Include="Src\Image\ETCPACK\etcpack.h" />
     <ClInclude Include="Src\Image\ISPC\ispc_texcomp.h" />
     <ClInclude Include="Src\Image\KTX-Software\include\ktx.h" />
     <ClInclude Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu.h" />
@@ -81,6 +89,23 @@
   <ItemGroup>
     <ClCompile Include="Src\Files\SL2FileBase.cpp" />
     <ClCompile Include="Src\Files\SL2StdFile.cpp" />
+    <ClCompile Include="Src\Image\detex\bits.c" />
+    <ClCompile Include="Src\Image\detex\bptc-tables.c" />
+    <ClCompile Include="Src\Image\detex\clamp.c" />
+    <ClCompile Include="Src\Image\detex\convert.c" />
+    <ClCompile Include="Src\Image\detex\decompress-bc.c" />
+    <ClCompile Include="Src\Image\detex\decompress-bptc-float.c" />
+    <ClCompile Include="Src\Image\detex\decompress-bptc.c" />
+    <ClCompile Include="Src\Image\detex\decompress-eac.c" />
+    <ClCompile Include="Src\Image\detex\decompress-etc.c" />
+    <ClCompile Include="Src\Image\detex\decompress-rgtc.c" />
+    <ClCompile Include="Src\Image\detex\division-tables.c" />
+    <ClCompile Include="Src\Image\detex\dt-texture.c" />
+    <ClCompile Include="Src\Image\detex\half-float.c" />
+    <ClCompile Include="Src\Image\detex\hdr.c" />
+    <ClCompile Include="Src\Image\detex\misc.c" />
+    <ClCompile Include="Src\Image\ETCPACK\etcdec_.cxx" />
+    <ClCompile Include="Src\Image\ETCPACK\etcpack.cxx" />
     <ClCompile Include="Src\Image\ISPC\ispc_texcomp.cpp" />
     <ClCompile Include="Src\Image\ISPC\ispc_texcomp_astc.cpp" />
     <ClCompile Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder.cpp">

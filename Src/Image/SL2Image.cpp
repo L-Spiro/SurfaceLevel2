@@ -26,7 +26,12 @@ namespace sl2 {
 		m_dGamma( 0.0 ),
 		m_sArraySize( 0 ),
 		m_sFaces( 0 ),
-		m_pkifFormat( nullptr ) {
+		m_pkifFormat( nullptr ),
+		m_bIsPreMultiplied( false ),
+		m_bNeedsPreMultiply( false ),
+		m_bFlipX( false ),
+		m_bFlipY( false ), 
+		m_bFlipZ( false ) {
 	}
 	CImage::~CImage() {
 		Reset();
@@ -46,10 +51,20 @@ namespace sl2 {
 		m_sFaces = _iOther.m_sFaces;
 		m_pkifFormat = _iOther.m_pkifFormat;
 		m_dGamma = _iOther.m_dGamma;
+		m_bIsPreMultiplied = _iOther.m_bIsPreMultiplied;
+		m_bNeedsPreMultiply = _iOther.m_bNeedsPreMultiply;
+		m_bFlipX = _iOther.m_bFlipX;
+		m_bFlipY = _iOther.m_bFlipZ;
+		m_bFlipZ = _iOther.m_bFlipY;
 		_iOther.m_sArraySize = 0;
 		_iOther.m_sFaces = 0;
 		_iOther.m_pkifFormat = nullptr;
 		_iOther.m_dGamma = 0.0;
+		_iOther.m_bIsPreMultiplied = false;
+		_iOther.m_bNeedsPreMultiply = false;
+		_iOther.m_bFlipX = false;
+		_iOther.m_bFlipY = false;
+		_iOther.m_bFlipZ = false;
 		return (*this);
 	}
 
@@ -60,8 +75,17 @@ namespace sl2 {
 	void CImage::Reset() {
 		m_sArraySize = 0;
 		m_sFaces = 0;
+		for ( auto I = m_vMipMaps.size(); I--; ) {
+			m_vMipMaps[I]->clear();
+			m_vMipMaps[I].reset();
+		}
 		m_vMipMaps = std::vector<std::unique_ptr<CSurface>>();
 		m_pkifFormat = nullptr;
+		m_bIsPreMultiplied = false;
+		m_bNeedsPreMultiply = false;
+		m_bFlipX = false;
+		m_bFlipY = false;
+		m_bFlipZ = false;
 	}
 
 	/**
@@ -106,14 +130,18 @@ namespace sl2 {
 		if ( !_pkifFormat || !Format() ) { return SL2_E_BADFORMAT; }
 
 		if ( (m_dGamma == 0.0 || m_dGamma == 1.0) &&
+			!(!m_bIsPreMultiplied && m_bNeedsPreMultiply) &&
+			!m_bFlipX && !m_bFlipY && !m_bFlipZ &&
 			((_pkifFormat->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED && _pkifFormat->vfVulkanFormat == Format()->vfVulkanFormat) ||
 			(_pkifFormat->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN && _pkifFormat->dfDxFormat == Format()->dfDxFormat) ||
 			(_pkifFormat->mfMetalFormat != SL2_MTLPixelFormatInvalid && _pkifFormat->mfMetalFormat == Format()->mfMetalFormat) ||
-			(_pkifFormat->kifInternalFormat != SL2_KIF_GL_INVALID && _pkifFormat->kifInternalFormat == Format()->kifInternalFormat)) ) {
+			((_pkifFormat->kifInternalFormat != SL2_KIF_GL_INVALID && _pkifFormat->kifInternalFormat == Format()->kifInternalFormat &&
+				_pkifFormat->kbifBaseInternalFormat != SL2_KBIF_GL_INVALID && _pkifFormat->kbifBaseInternalFormat == Format()->kbifBaseInternalFormat &&
+				_pkifFormat->ktType != SL2_KT_GL_INVALID && _pkifFormat->ktType == Format()->ktType))) ) {
 			// No format conversion needed.  Just copy the buffers.
-			if ( !iTmp.AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), Width(), Height(), Depth(), Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
+			if ( !_iDst.AllocateTexture( _pkifFormat, Width(), Height(), Depth(), Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
 			for ( size_t M = 0; M < Mipmaps(); ++M ) {
-				std::memcpy( iTmp.Data( M, 0, 0, 0 ), Data( M, 0, 0, 0 ), m_vMipMaps[M]->size() );
+				std::memcpy( _iDst.Data( M, 0, 0, 0 ), Data( M, 0, 0, 0 ), m_vMipMaps[M]->size() );
 			}
 			return SL2_E_SUCCESS;
 		}
@@ -129,6 +157,19 @@ namespace sl2 {
 						return SL2_E_INTERNALERROR;
 					}
 					BakeGamma( iTmp.Data( M, 0, A, F ), m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					if ( !m_bIsPreMultiplied && m_bNeedsPreMultiply ) {
+						CFormat::ApplyPreMultiply( iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+						iTmp.m_bIsPreMultiplied = true;
+					}
+					if ( m_bFlipX ) {
+						CFormat::FlipX( iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					}
+					if ( m_bFlipY ) {
+						CFormat::FlipY( iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					}
+					if ( m_bFlipZ ) {
+						CFormat::FlipZ( iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					}
 				}
 			}
 		}
@@ -197,14 +238,17 @@ namespace sl2 {
 		size_t sBaseSize = CFormat::GetFormatSize( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
 		if ( (m_dGamma == 0.0 || m_dGamma == 1.0) &&
 			!_bInvertY &&
+			!m_bFlipX && !m_bFlipY && !m_bFlipZ &&
+			!(!m_bIsPreMultiplied && m_bNeedsPreMultiply) &&
 			((_pkifFormat->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED && _pkifFormat->vfVulkanFormat == Format()->vfVulkanFormat) ||
 			(_pkifFormat->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN && _pkifFormat->dfDxFormat == Format()->dfDxFormat) ||
 			(_pkifFormat->mfMetalFormat != SL2_MTLPixelFormatInvalid && _pkifFormat->mfMetalFormat == Format()->mfMetalFormat) ||
-			(_pkifFormat->kifInternalFormat != SL2_KIF_GL_INVALID && _pkifFormat->kifInternalFormat == Format()->kifInternalFormat)) ) {
+			((_pkifFormat->kifInternalFormat != SL2_KIF_GL_INVALID && _pkifFormat->kifInternalFormat == Format()->kifInternalFormat &&
+				_pkifFormat->kbifBaseInternalFormat != SL2_KBIF_GL_INVALID && _pkifFormat->kbifBaseInternalFormat == Format()->kbifBaseInternalFormat &&
+				_pkifFormat->ktType != SL2_KT_GL_INVALID && _pkifFormat->ktType == Format()->ktType))) ) {
 			// No format conversion needed.  Just copy the buffers.
-			for ( size_t M = 0; M < Mipmaps(); ++M ) {
-				std::memcpy( _pui8Dst, Data( M, 0, _sArray, _sFace ), sBaseSize );
-			}
+			sBaseSize = CFormat::GetFormatSize( _pkifFormat, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
+			std::memcpy( _pui8Dst, Data( _sMip, 0, _sArray, _sFace ), sBaseSize );
 			return SL2_E_SUCCESS;
 		}
 
@@ -222,20 +266,20 @@ namespace sl2 {
 			return SL2_E_INTERNALERROR;
 		}
 		BakeGamma( vTmp.data(), m_dGamma, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
-
-		if ( _bInvertY ) {
-			size_t sRowWidth = CFormat::GetFormatSize( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), m_vMipMaps[_sMip]->Width(), 1, 1 );
-			std::vector<uint8_t> vRow;
-			try {
-				vRow.resize( sRowWidth );
-			}
-			catch ( ... ) { return SL2_E_OUTOFMEMORY; }
-			for ( auto I = m_vMipMaps[_sMip]->Height() >> 1; I--; ) {
-				std::memcpy( vRow.data(), vTmp.data() + sRowWidth * I, sRowWidth );
-				std::memcpy( vTmp.data() + sRowWidth * I, vTmp.data() + sRowWidth * (m_vMipMaps[_sMip]->Height() - I - 1), sRowWidth );
-				std::memcpy( vTmp.data() + sRowWidth * (m_vMipMaps[_sMip]->Height() - I - 1), vRow.data(), sRowWidth );
-			}
+		if ( !m_bIsPreMultiplied && m_bNeedsPreMultiply ) {
+			CFormat::ApplyPreMultiply( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
 		}
+
+		if ( m_bFlipX ) {
+			CFormat::FlipX( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
+		}
+		if ( _bInvertY != m_bFlipY ) {
+			CFormat::FlipY( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
+		}
+		if ( m_bFlipZ ) {
+			CFormat::FlipZ( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
+		}
+
 		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*_pkifFormat);
 		if ( !_pkifFormat->pfFromRgba64F( vTmp.data(), _pui8Dst, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), &ifdData ) ) {
 			return SL2_E_INTERNALERROR;
@@ -378,6 +422,11 @@ namespace sl2 {
 
 		FREE_IMAGE_TYPE fitType = ::FreeImage_GetImageType( flfmData.pbBitmap );
 
+		if ( (::FreeImage_GetICCProfile( flfmData.pbBitmap )->flags &
+			FIICC_COLOR_IS_CMYK) == FIICC_COLOR_IS_CMYK ) {
+			return SL2_E_SUCCESS;
+		}
+
 		switch ( fitType ) {
 			case FIT_BITMAP : {
 				switch ( ::FreeImage_GetBPP( flfmData.pbBitmap ) ) {
@@ -385,6 +434,7 @@ namespace sl2 {
 						if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8A8_UNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
 						uint8_t * pui8Dst = Data();
 						const RGBQUAD * prgbqPal = ::FreeImage_GetPalette( flfmData.pbBitmap );
+						uint32_t ui32Pitch = SL2_ROUND_UP( ui32Width * sizeof( CFormat::SL2_RGBA_UNORM ), 4 );
 						if ( prgbqPal ) {
 							for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 								const uint8_t * pui8Data = ::FreeImage_GetScanLine( flfmData.pbBitmap, Y );
@@ -394,7 +444,7 @@ namespace sl2 {
 									if ( iTransIndex != -1 ) {
 										bAlpha = (iTransIndex == ui8Bit) ? 0 : 255;
 									}
-									CFormat::SL2_RGBA_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA_UNORM *>(pui8Dst) + (Y * ui32Width) + X;
+									CFormat::SL2_RGBA_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA_UNORM *>(pui8Dst + ui32Pitch * Y) + X;
 									pRgb->ui8Rgba[SL2_PC_R] = prgbqPal[ui8Bit].rgbRed;
 									pRgb->ui8Rgba[SL2_PC_G] = prgbqPal[ui8Bit].rgbGreen;
 									pRgb->ui8Rgba[SL2_PC_B] = prgbqPal[ui8Bit].rgbBlue;
@@ -409,6 +459,7 @@ namespace sl2 {
 						if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8A8_UNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
 						uint8_t * pui8Dst = Data();
 						const RGBQUAD * prgbqPal = ::FreeImage_GetPalette( flfmData.pbBitmap );
+						uint32_t ui32Pitch = SL2_ROUND_UP( ui32Width * sizeof( CFormat::SL2_RGBA_UNORM ), 4 );
 						if ( prgbqPal ) {
 							for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 								const uint8_t * pui8Data = ::FreeImage_GetScanLine( flfmData.pbBitmap, Y );
@@ -418,7 +469,7 @@ namespace sl2 {
 									if ( iTransIndex != -1 ) {
 										bAlpha = (iTransIndex == ui8Bit) ? 0 : 255;
 									}
-									CFormat::SL2_RGBA_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA_UNORM *>(pui8Dst) + (Y * ui32Width) + X;
+									CFormat::SL2_RGBA_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA_UNORM *>(pui8Dst + ui32Pitch * Y) + X;
 									pRgb->ui8Rgba[SL2_PC_R] = prgbqPal[ui8Bit].rgbRed;
 									pRgb->ui8Rgba[SL2_PC_G] = prgbqPal[ui8Bit].rgbGreen;
 									pRgb->ui8Rgba[SL2_PC_B] = prgbqPal[ui8Bit].rgbBlue;
@@ -433,6 +484,7 @@ namespace sl2 {
 						if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8A8_UNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
 						uint8_t * pui8Dst = Data();
 						const RGBQUAD * prgbqPal = ::FreeImage_GetPalette( flfmData.pbBitmap );
+						uint32_t ui32Pitch = SL2_ROUND_UP( ui32Width * sizeof( CFormat::SL2_RGBA_UNORM ), 4 );
 						if ( prgbqPal ) {
 							for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 								const uint8_t * pui8Data = ::FreeImage_GetScanLine( flfmData.pbBitmap, Y );
@@ -442,7 +494,7 @@ namespace sl2 {
 									if ( iTransIndex != -1 ) {
 										bAlpha = (iTransIndex == ui8Bit) ? 0 : 255;
 									}
-									CFormat::SL2_RGBA_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA_UNORM *>(pui8Dst) + (Y * ui32Width) + X;
+									CFormat::SL2_RGBA_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA_UNORM *>(pui8Dst + ui32Pitch * Y) + X;
 									pRgb->ui8Rgba[SL2_PC_R] = prgbqPal[ui8Bit].rgbRed;
 									pRgb->ui8Rgba[SL2_PC_G] = prgbqPal[ui8Bit].rgbGreen;
 									pRgb->ui8Rgba[SL2_PC_B] = prgbqPal[ui8Bit].rgbBlue;
@@ -459,13 +511,14 @@ namespace sl2 {
 						unsigned uRedMask = ::FreeImage_GetRedMask( flfmData.pbBitmap );
 						unsigned uGreenMask = ::FreeImage_GetGreenMask( flfmData.pbBitmap );
 						unsigned uBlueMask = ::FreeImage_GetBlueMask( flfmData.pbBitmap );
+						uint32_t ui32Pitch = SL2_ROUND_UP( ui32Width * sizeof( uint16_t ), 4 );
 						if ( (uRedMask == FI16_565_RED_MASK) && (uGreenMask == FI16_565_GREEN_MASK) && (uBlueMask == FI16_565_BLUE_MASK) ) {
 							if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R5G6B5_UNORM_PACK16 ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
 							uint8_t * pui8Dst = Data();
 							for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 								const uint16_t * pui16Data = reinterpret_cast<uint16_t *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
 								for ( uint32_t X = 0; X < ui32Width; ++X ) {
-									CFormat::SL2_R5G6B5_PACKED * pRgb = reinterpret_cast<CFormat::SL2_R5G6B5_PACKED *>(pui8Dst) + (Y * ui32Width) + X;
+									CFormat::SL2_R5G6B5_PACKED * pRgb = reinterpret_cast<CFormat::SL2_R5G6B5_PACKED *>(pui8Dst + ui32Pitch * Y) + X;
 									pRgb->ui16R = (pui16Data[X] & FI16_565_RED_MASK) >> FI16_565_RED_SHIFT;
 									pRgb->ui16G = (pui16Data[X] & FI16_565_GREEN_MASK) >> FI16_565_GREEN_SHIFT;
 									pRgb->ui16B = (pui16Data[X] & FI16_565_BLUE_MASK) >> FI16_565_BLUE_SHIFT;
@@ -478,7 +531,7 @@ namespace sl2 {
 							for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 								const uint16_t * pui16Data = reinterpret_cast<uint16_t *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
 								for ( uint32_t X = 0; X < ui32Width; ++X ) {
-									CFormat::SL2_A1R5G6B5_PACKED * pRgba = reinterpret_cast<CFormat::SL2_A1R5G6B5_PACKED *>(pui8Dst) + (Y * ui32Width) + X;
+									CFormat::SL2_A1R5G6B5_PACKED * pRgba = reinterpret_cast<CFormat::SL2_A1R5G6B5_PACKED *>(pui8Dst + ui32Pitch * Y) + X;
 									pRgba->ui16R = (pui16Data[X] & FI16_555_RED_MASK) >> FI16_555_RED_SHIFT;
 									pRgba->ui16G = (pui16Data[X] & FI16_555_GREEN_MASK) >> FI16_555_GREEN_SHIFT;
 									pRgba->ui16B = (pui16Data[X] & FI16_555_BLUE_MASK) >> FI16_555_BLUE_SHIFT;
@@ -491,10 +544,11 @@ namespace sl2 {
 					case 24 : {
 						if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8_UNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
 						uint8_t * pui8Dst = Data();
+						uint32_t ui32Pitch = SL2_ROUND_UP( ui32Width * sizeof( CFormat::SL2_RGB_UNORM ), 4 );
 						for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 							const RGBTRIPLE * prgbtData = reinterpret_cast<RGBTRIPLE *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
 							for ( uint32_t X = 0; X < ui32Width; ++X ) {
-								CFormat::SL2_RGB_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGB_UNORM *>(pui8Dst) + (Y * ui32Width) + X;
+								CFormat::SL2_RGB_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGB_UNORM *>(pui8Dst + ui32Pitch * Y) + X;
 								pRgb->ui8Rgb[SL2_PC_R] = prgbtData[X].rgbtRed;
 								pRgb->ui8Rgb[SL2_PC_G] = prgbtData[X].rgbtGreen;
 								pRgb->ui8Rgb[SL2_PC_B] = prgbtData[X].rgbtBlue;
@@ -505,10 +559,11 @@ namespace sl2 {
 					case 32 : {
 						if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8A8_UNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
 						uint8_t * pui8Dst = Data();
+						uint32_t ui32Pitch = SL2_ROUND_UP( ui32Width * sizeof( CFormat::SL2_RGBA_UNORM ), 4 );
 						for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 							const RGBQUAD * prgbqData = reinterpret_cast<RGBQUAD *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
 							for ( uint32_t X = 0; X < ui32Width; ++X ) {
-								CFormat::SL2_RGBA_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA_UNORM *>(pui8Dst) + (Y * ui32Width) + X;
+								CFormat::SL2_RGBA_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA_UNORM *>(pui8Dst + ui32Pitch * Y) + X;
 								pRgb->ui8Rgba[SL2_PC_R] = prgbqData[X].rgbRed;
 								pRgb->ui8Rgba[SL2_PC_G] = prgbqData[X].rgbGreen;
 								pRgb->ui8Rgba[SL2_PC_B] = prgbqData[X].rgbBlue;
@@ -523,10 +578,11 @@ namespace sl2 {
 			case FIT_UINT16 : {
 				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16_UNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
 				uint8_t * pui8Dst = Data();
+				uint32_t ui32Pitch = SL2_ROUND_UP( ui32Width * sizeof( uint16_t ), 4 );
 				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 					const uint16_t * pui16Data = reinterpret_cast<uint16_t *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
 					for ( uint32_t X = 0; X < ui32Width; ++X ) {
-						uint16_t * pRgb = reinterpret_cast<uint16_t *>(pui8Dst) + (Y * ui32Width) + X;
+						uint16_t * pRgb = reinterpret_cast<uint16_t *>(pui8Dst + ui32Pitch * Y) + X;
 						pRgb[0] = pui16Data[X];
 					}
 				}
@@ -535,10 +591,11 @@ namespace sl2 {
 			case FIT_INT16 : {
 				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16_SNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
 				uint8_t * pui8Dst = Data();
+				uint32_t ui32Pitch = SL2_ROUND_UP( ui32Width * sizeof( uint16_t ), 4 );
 				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 					const int16_t * pi16Data = reinterpret_cast<int16_t *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
 					for ( uint32_t X = 0; X < ui32Width; ++X ) {
-						int16_t * pRgb = reinterpret_cast<int16_t *>(pui8Dst) + (Y * ui32Width) + X;
+						int16_t * pRgb = reinterpret_cast<int16_t *>(pui8Dst + ui32Pitch * Y) + X;
 						pRgb[0] = pi16Data[X];
 					}
 				}
@@ -547,10 +604,11 @@ namespace sl2 {
 			case FIT_UINT32 : {
 				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R32_UINT ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
 				uint8_t * pui8Dst = Data();
+				uint32_t ui32Pitch = SL2_ROUND_UP( ui32Width * sizeof( uint32_t ), 4 );
 				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 					const uint32_t * pui32Data = reinterpret_cast<uint32_t *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
 					for ( uint32_t X = 0; X < ui32Width; ++X ) {
-						uint32_t * pRgb = reinterpret_cast<uint32_t *>(pui8Dst) + (Y * ui32Width) + X;
+						uint32_t * pRgb = reinterpret_cast<uint32_t *>(pui8Dst + ui32Pitch * Y) + X;
 						pRgb[0] = pui32Data[X];
 					}
 				}
@@ -559,10 +617,11 @@ namespace sl2 {
 			case FIT_INT32 : {
 				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R32_SINT ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
 				uint8_t * pui8Dst = Data();
+				uint32_t ui32Pitch = SL2_ROUND_UP( ui32Width * sizeof( uint32_t ), 4 );
 				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 					const int32_t * pi32Data = reinterpret_cast<int32_t *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
 					for ( uint32_t X = 0; X < ui32Width; ++X ) {
-						int32_t * pRgb = reinterpret_cast<int32_t *>(pui8Dst) + (Y * ui32Width) + X;
+						int32_t * pRgb = reinterpret_cast<int32_t *>(pui8Dst + ui32Pitch * Y) + X;
 						pRgb[0] = pi32Data[X];
 					}
 				}
@@ -571,11 +630,12 @@ namespace sl2 {
 			case FIT_FLOAT : {
 				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R32_SFLOAT ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
 				uint8_t * pui8Dst = Data();
+				uint32_t ui32Pitch = SL2_ROUND_UP( ui32Width * sizeof( float ), 4 );
 				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 					const float * pfData = reinterpret_cast<float *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
 					for ( uint32_t X = 0; X < ui32Width; ++X ) {
 						float fBit = pfData[X];
-						float * pRgb = reinterpret_cast<float *>(pui8Dst) + (Y * ui32Width) + X;
+						float * pRgb = reinterpret_cast<float *>(pui8Dst + ui32Pitch * Y) + X;
 						pRgb[0] = fBit;
 					}
 				}
@@ -584,10 +644,11 @@ namespace sl2 {
 			case FIT_DOUBLE : {
 				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64_SFLOAT ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
 				uint8_t * pui8Dst = Data();
+				uint32_t ui32Pitch = SL2_ROUND_UP( ui32Width * sizeof( double ), 4 );
 				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 					const double * pdData = reinterpret_cast<double *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
 					for ( uint32_t X = 0; X < ui32Width; ++X ) {
-						double * pRgb = reinterpret_cast<double *>(pui8Dst) + (Y * ui32Width) + X;
+						double * pRgb = reinterpret_cast<double *>(pui8Dst + ui32Pitch) + X;
 						pRgb[0] = pdData[X];
 					}
 				}
@@ -596,10 +657,11 @@ namespace sl2 {
 			case FIT_COMPLEX : {
 				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64_SFLOAT ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
 				uint8_t * pui8Dst = Data();
+				uint32_t ui32Pitch = SL2_ROUND_UP( ui32Width * sizeof( FICOMPLEX ), 4 );
 				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 					const FICOMPLEX * pfData = reinterpret_cast<FICOMPLEX *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
 					for ( uint32_t X = 0; X < ui32Width; ++X ) {
-						FICOMPLEX * pRgb = reinterpret_cast<FICOMPLEX *>(pui8Dst) + (Y * ui32Width) + X;
+						FICOMPLEX * pRgb = reinterpret_cast<FICOMPLEX *>(pui8Dst + ui32Pitch * Y) + X;
 						(*pRgb) = pfData[X];
 					}
 				}
@@ -608,10 +670,11 @@ namespace sl2 {
 			case FIT_RGB16 : {
 				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16G16B16_UNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
 				uint8_t * pui8Dst = Data();
+				uint32_t ui32Pitch = SL2_ROUND_UP( ui32Width * sizeof( CFormat::SL2_RGB16_UNORM ), 4 );
 				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 					const FIRGB16 * pfrgb16Data = reinterpret_cast<FIRGB16 *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
 					for ( uint32_t X = 0; X < ui32Width; ++X ) {
-						CFormat::SL2_RGB16_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGB16_UNORM *>(pui8Dst) + (Y * ui32Width) + X;
+						CFormat::SL2_RGB16_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGB16_UNORM *>(pui8Dst + ui32Pitch * Y) + X;
 						pRgb->ui16Rgb[SL2_PC_R] = pfrgb16Data[X].red;
 						pRgb->ui16Rgb[SL2_PC_G] = pfrgb16Data[X].green;
 						pRgb->ui16Rgb[SL2_PC_B] = pfrgb16Data[X].blue;
@@ -622,10 +685,11 @@ namespace sl2 {
 			case FIT_RGBA16 : {
 				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16G16B16A16_UNORM ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
 				uint8_t * pui8Dst = Data();
+				uint32_t ui32Pitch = SL2_ROUND_UP( ui32Width * sizeof( CFormat::SL2_RGB16_UNORM ), 4 );
 				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 					const FIRGBA16 * pfrgba16Data = reinterpret_cast<FIRGBA16 *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
 					for ( uint32_t X = 0; X < ui32Width; ++X ) {
-						CFormat::SL2_RGBA16_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA16_UNORM *>(pui8Dst) + (Y * ui32Width) + X;
+						CFormat::SL2_RGBA16_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA16_UNORM *>(pui8Dst + ui32Pitch * Y) + X;
 						pRgb->ui16Rgba[SL2_PC_R] = pfrgba16Data[X].red;
 						pRgb->ui16Rgba[SL2_PC_G] = pfrgba16Data[X].green;
 						pRgb->ui16Rgba[SL2_PC_B] = pfrgba16Data[X].blue;
@@ -636,11 +700,12 @@ namespace sl2 {
 			}
 			case FIT_RGBF : {
 				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R32G32B32_SFLOAT ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
-				uint8_t * pui8Dst = Data(); 
+				uint8_t * pui8Dst = Data();
+				uint32_t ui32Pitch = SL2_ROUND_UP( ui32Width * sizeof( CFormat::SL2_RGB ), 4 );
 				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 					const FIRGBF * pfData = reinterpret_cast<FIRGBF *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
 					for ( uint32_t X = 0; X < ui32Width; ++X ) {
-						CFormat::SL2_RGB * pRgb = reinterpret_cast<CFormat::SL2_RGB *>(pui8Dst) + (Y * ui32Width) + X;
+						CFormat::SL2_RGB * pRgb = reinterpret_cast<CFormat::SL2_RGB *>(pui8Dst + ui32Pitch * Y) + X;
 						pRgb->fRgb[SL2_PC_R] = pfData[X].red;
 						pRgb->fRgb[SL2_PC_G] = pfData[X].green;
 						pRgb->fRgb[SL2_PC_B] = pfData[X].blue;
@@ -651,10 +716,11 @@ namespace sl2 {
 			case FIT_RGBAF : {
 				if ( !AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R32G32B32A32_SFLOAT ), ui32Width, ui32Height, ui32Depth ) ) { return SL2_E_OUTOFMEMORY; }
 				uint8_t * pui8Dst = Data();
+				uint32_t ui32Pitch = SL2_ROUND_UP( ui32Width * sizeof( CFormat::SL2_RGB ), 4 );
 				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 					const FIRGBAF * pfData = reinterpret_cast<FIRGBAF *>(::FreeImage_GetScanLine( flfmData.pbBitmap, Y ));
 					for ( uint32_t X = 0; X < ui32Width; ++X ) {
-						CFormat::SL2_RGBA * pRgb = reinterpret_cast<CFormat::SL2_RGBA *>(pui8Dst) + (Y * ui32Width) + X;
+						CFormat::SL2_RGBA * pRgb = reinterpret_cast<CFormat::SL2_RGBA *>(pui8Dst + ui32Pitch * Y) + X;
 						pRgb->fRgba[SL2_PC_R] = pfData[X].red;
 						pRgb->fRgba[SL2_PC_G] = pfData[X].green;
 						pRgb->fRgba[SL2_PC_B] = pfData[X].blue;

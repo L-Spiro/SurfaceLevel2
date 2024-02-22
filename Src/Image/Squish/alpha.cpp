@@ -397,7 +397,7 @@ void CompressAlphaDxt5Signed( double const* rgba, int mask, void* block, int alp
 		if( ( mask & bit ) == 0 ) { continue; }
 
 		// incorporate into the min/max
-		int value = static_cast<int>(rgba[4*i+alphaIndex] * 127.0f);
+		int value = static_cast<int>(rgba[4*i+alphaIndex] * 127.0);
 		if( value < min7 ) { min7 = value; }
 		if( value > max7 ) { max7 = value; }
 		if( value != -127 && value < min5 ) { min5 = value; }

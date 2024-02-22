@@ -8,6 +8,7 @@
 
 #include "SL2SurfaceLevel2.h"
 #include "Files/SL2StdFile.h"
+#include "Image/detex/misc.h"
 #include "Image/SL2Image.h"
 #include "Time/SL2Clock.h"
 
@@ -24,6 +25,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 #define SL2_ERRORT( TXT, CODE )					sl2::PrintError( reinterpret_cast<const char16_t *>(TXT), (CODE) );						\
 												if ( oOptions.bPause ) { ::system( "pause" ); }	                                        \
                                                 ::FreeImage_DeInitialise();                                                             \
+                                                ::detexFreeErrorMessage();                                                              \
 												return int( CODE )
 #define SL2_ERROR( CODE )						SL2_ERRORT( nullptr, (CODE) )
 
@@ -114,7 +116,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     sl2::CFormat::SetLuma( sl2::SL2_LS_EBU_TECH_3213 );
                 }
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"luma\": \"{}\".",
+                    SL2_ERRORT( std::format( L"Invalid \"luma\": \"{}\". Must be REC_709, REC_2020, SMPTC, REC_601, CIE_1931, NTSC_1953, or EBU_TECH_3213.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 SL2_ADV( 2 );
@@ -141,6 +143,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
             }
             if ( SL2_CHECK( 1, dxt2 ) ) {
                 oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGBA_S3TC_DXT3_EXT );
+                oOptions.bNeedsPreMultiply = true;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, dxt3 ) || SL2_CHECK( 1, bc2 ) ) {
@@ -149,6 +152,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
             }
             if ( SL2_CHECK( 1, dxt4 ) ) {
                 oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGBA_S3TC_DXT5_EXT );
+                oOptions.bNeedsPreMultiply = true;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, dxt5 ) || SL2_CHECK( 1, bc3 ) ) {
@@ -285,6 +289,19 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 sl2::CFormat::SetPerfLevel( 5 );
                 SL2_ADV( 1 );
             }
+            if ( SL2_CHECK( 2, luma ) ) {
+                double dVal = ::_wtof( _wcpArgV[1] );
+                if ( dVal < 0.0 || dVal > 255 ) {
+                    SL2_ERRORT( std::format( L"Invalid \"alpha_threshold\": \"{}\". Must be between 0 and 255.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                sl2::CFormat::SetAlphaCutoff( uint8_t( std::round( dVal ) ) );
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 1, premultiply_alpha ) || SL2_CHECK( 1, premult_alpha ) ) {
+                oOptions.bNeedsPreMultiply = true;
+                SL2_ADV( 1 );
+            }
         }
 
 
@@ -298,11 +315,13 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
     const sl2::CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * pkifdFormat = oOptions.pkifdFinalFormat;
     for ( size_t I = 0; I < oOptions.vInputs.size(); ++I ) {
         sl2::CImage iImage;
+        
         sl2::SL2_ERRORS eError = iImage.LoadFile( oOptions.vInputs[I].c_str() );
         if ( eError != sl2::SL2_E_SUCCESS ) {
             SL2_ERRORT( std::format( L"Failed to load file: \"{}\".",
                reinterpret_cast<const wchar_t *>(oOptions.vInputs[I].c_str()) ).c_str(), eError );
         }
+        iImage.SetNeedsPreMultiply( oOptions.bNeedsPreMultiply );
         iImage.SetGamma( oOptions.dGamma );
         oOptions.pkifdFinalFormat = pkifdFormat;
         if ( !oOptions.pkifdFinalFormat ) {
@@ -314,7 +333,8 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         iImage.ConvertToFormat( oOptions.pkifdFinalFormat, iConverted );
 
         uint64_t ui64Time = cClock.GetRealTick() - cClock.GetStartTick();
-        char szPrintfMe[512];
+        iImage.Reset();
+        char szPrintfMe[128];
 		::sprintf_s( szPrintfMe, "Total time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
 		::OutputDebugStringA( szPrintfMe );
 		if ( oOptions.bShowTime ) {

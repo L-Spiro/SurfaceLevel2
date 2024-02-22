@@ -24,6 +24,7 @@ namespace sl2 {
 		std::vector<std::u16string>										vOutputs;												/**< The output files. */
 		const sl2::CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *				pkifdFinalFormat = nullptr;								/**< Actual final format.  If not manually specified, vfAutoFormat is used. */
 		double															dGamma = 0.0;											/**< User-supplied gamma. */
+		bool															bNeedsPreMultiply = false;								/**< Does the target format, or user request, demand pre-multiplied alpha? */
 		bool															bPause = false;											/**< If true, the program pauses before closing the command window. */
 		bool															bShowTime = true;										/**< If true, the time taken to perform the conversion is printed. */
 	};

@@ -137,7 +137,7 @@ inline void load_block_interleaved(float block[48], uniform rgba_surface* unifor
         else
         {
 
-            uniform int index = ((yy * 4 + y) * src->stride);// + xx * 16 + x;
+            uniform int index = ((yy * 4 + y) * src->stride);
 		    uniform double* uniform src_ptr = (double*)(&src->ptr[index]);
 
 		    block[16 * 0 + y * 4 + x] = round( gather_double( src_ptr, (xx * 16 + x * 4) + 0 ) * 255.0 );
@@ -161,6 +161,15 @@ inline void load_block_interleaved_rgba(float block[64], uniform rgba_surface* u
 	for (uniform int y=0; y<4; y++)
 	for (uniform int x=0; x<4; x++)
 	{
+        uniform int index = ((yy * 4 + y) * src->stride);
+		uniform double* uniform src_ptr = (double*)(&src->ptr[index]);
+
+		block[16 * 0 + y * 4 + x] = round( gather_double( src_ptr, (xx * 16 + x * 4) + 0 ) * 255.0 );
+		block[16 * 1 + y * 4 + x] = round( gather_double( src_ptr, (xx * 16 + x * 4) + 1 ) * 255.0 );
+		block[16 * 2 + y * 4 + x] = round( gather_double( src_ptr, (xx * 16 + x * 4) + 2 ) * 255.0 );
+        block[16 * 3 + y * 4 + x] = round( gather_double( src_ptr, (xx * 16 + x * 4) + 3 ) * 255.0 );
+
+        /*
 		uniform unsigned int32* uniform src_ptr = (unsigned int32*)&src->ptr[(yy*4+y)*src->stride];
 		unsigned int32 rgba = gather_uint(src_ptr, xx*4+x);
 
@@ -168,6 +177,7 @@ inline void load_block_interleaved_rgba(float block[64], uniform rgba_surface* u
 		block[16*1+y*4+x] = (int)((rgba>> 8)&255);
 		block[16*2+y*4+x] = (int)((rgba>>16)&255);
 		block[16*3+y*4+x] = (int)((rgba>>24)&255);
+        */
 	}
 }
 
@@ -176,6 +186,25 @@ inline void load_block_interleaved_16bit(float block[48], uniform rgba_surface* 
     for (uniform int y = 0; y<4; y++)
     for (uniform int x = 0; x<4; x++)
     {
+        /*
+        uniform int index = ((yy * 4 + y) * src->stride);
+		uniform double* uniform src_ptr = (double*)(&src->ptr[index]);
+
+        varying float16 xr = (float16)gather_double( src_ptr, (xx * 16 + x * 4) + 0 );
+        varying float16 xg = (float16)gather_double( src_ptr, (xx * 16 + x * 4) + 1 );
+        varying float16 xb = (float16)gather_double( src_ptr, (xx * 16 + x * 4) + 2 );
+
+        uniform int16 * ixr = (int16 *)&xr;
+        uniform int16 * ixg = (int16 *)&xg;
+        uniform int16 * ixb = (int16 *)&xb;
+
+		block[16 * 0 + y * 4 + x] = (*ixr);
+		block[16 * 1 + y * 4 + x] = (*ixg);
+		block[16 * 2 + y * 4 + x] = (*ixb);
+        block[16 * 3 + y * 4 + x] = 0;
+        */
+
+        
         uniform unsigned int32* uniform src_ptr_r = (unsigned int32*)&src->ptr[(yy * 4 + y)*src->stride + 0];
         uniform unsigned int32* uniform src_ptr_g = (unsigned int32*)&src->ptr[(yy * 4 + y)*src->stride + 2];
         uniform unsigned int32* uniform src_ptr_b = (unsigned int32*)&src->ptr[(yy * 4 + y)*src->stride + 4];
@@ -187,6 +216,7 @@ inline void load_block_interleaved_16bit(float block[48], uniform rgba_surface* 
         block[16 * 1 + y * 4 + x] = (int)(xg & 0xFFFF);
         block[16 * 2 + y * 4 + x] = (int)(xb & 0xFFFF);
         block[16 * 3 + y * 4 + x] = 0;
+        
     }
 }
 
@@ -194,13 +224,24 @@ inline void load_block_r_8bit(float block[16], uniform rgba_surface* uniform src
 {
 	for (uniform int y=0; y<4; y++)
 	{
-		uniform unsigned int32* uniform src_ptr = (unsigned int32*)&src->ptr[(yy*4+y)*src->stride];
+
+        uniform int index = ((yy * 4 + y) * src->stride);
+		uniform double* uniform src_ptr = (double*)(&src->ptr[index]);
+
+		block[y*4+0] = round( gather_double( src_ptr, (xx * 16) + 0 ) * 255.0 );
+		block[y*4+1] = round( gather_double( src_ptr, (xx * 16) + 4 ) * 255.0 );
+		block[y*4+2] = round( gather_double( src_ptr, (xx * 16) + 8 ) * 255.0 );
+        block[y*4+3] = round( gather_double( src_ptr, (xx * 16) + 12 ) * 255.0 );
+		
+        /*
+        uniform unsigned int32* uniform src_ptr = (unsigned int32*)&src->ptr[(yy*4+y)*src->stride];
 		unsigned int32 rrrr = gather_uint(src_ptr, xx);
 
 		block[y*4+0] = (int)((rrrr>> 0)&255);
 		block[y*4+1] = (int)((rrrr>> 8)&255);
 		block[y*4+2] = (int)((rrrr>>16)&255);
 		block[y*4+3] = (int)((rrrr>>24)&255);
+        */
 	}
 }
 
@@ -208,6 +249,22 @@ inline void load_block_interleaved_rg_8bit(float block[32], uniform rgba_surface
 {
 	for (uniform int y=0; y<4; y++)
 	{
+        
+        uniform int index = ((yy * 4 + y) * src->stride);
+		uniform double* uniform src_ptr = (double*)(&src->ptr[index]);
+
+        // R
+		block[16*0+y*4+0] = round( gather_double( src_ptr, (xx * 16) + 0 ) * 255.0 );
+		block[16*0+y*4+1] = round( gather_double( src_ptr, (xx * 16) + 4 ) * 255.0 );
+		block[16*0+y*4+2] = round( gather_double( src_ptr, (xx * 16) + 8 ) * 255.0 );
+        block[16*0+y*4+3] = round( gather_double( src_ptr, (xx * 16) + 12 ) * 255.0 );
+        // G
+        block[16*1+y*4+0] = round( gather_double( src_ptr, (xx * 16) + 1 ) * 255.0 );
+		block[16*1+y*4+1] = round( gather_double( src_ptr, (xx * 16) + 5 ) * 255.0 );
+		block[16*1+y*4+2] = round( gather_double( src_ptr, (xx * 16) + 9 ) * 255.0 );
+        block[16*1+y*4+3] = round( gather_double( src_ptr, (xx * 16) + 13 ) * 255.0 );
+
+        /*
 		uniform unsigned int32* uniform src_ptr = (unsigned int32*)&src->ptr[(yy*4+y)*src->stride];
 		unsigned int32 rgrg0 = gather_uint(src_ptr, xx * 2 + 0);
         unsigned int32 rgrg1 = gather_uint(src_ptr, xx * 2 + 1);
@@ -222,6 +279,28 @@ inline void load_block_interleaved_rg_8bit(float block[32], uniform rgba_surface
 		block[16*1+y*4+1] = (int)((rgrg0>>24)&255);
 		block[16*1+y*4+2] = (int)((rgrg1>> 8)&255);
 		block[16*1+y*4+3] = (int)((rgrg1>>24)&255);
+        */
+	}
+}
+
+inline void load_block_interleaved_rg_8bit_latc(float block[32], uniform rgba_surface* uniform src, int xx, uniform int yy)
+{
+	for (uniform int y=0; y<4; y++)
+	{
+        
+        uniform int index = ((yy * 4 + y) * src->stride);
+		uniform double* uniform src_ptr = (double*)(&src->ptr[index]);
+        
+        // R
+		block[16*0+y*4+0] = round( gather_double( src_ptr, (xx * 16) + 0 ) * 255.0 );
+		block[16*0+y*4+1] = round( gather_double( src_ptr, (xx * 16) + 4 ) * 255.0 );
+		block[16*0+y*4+2] = round( gather_double( src_ptr, (xx * 16) + 8 ) * 255.0 );
+        block[16*0+y*4+3] = round( gather_double( src_ptr, (xx * 16) + 12 ) * 255.0 );
+        // A
+        block[16*1+y*4+0] = round( gather_double( src_ptr, (xx * 16) + 3 ) * 255.0 );
+		block[16*1+y*4+1] = round( gather_double( src_ptr, (xx * 16) + 7 ) * 255.0 );
+		block[16*1+y*4+2] = round( gather_double( src_ptr, (xx * 16) + 11 ) * 255.0 );
+        block[16*1+y*4+3] = round( gather_double( src_ptr, (xx * 16) + 15 ) * 255.0 );
 	}
 }
 
@@ -695,6 +774,19 @@ inline void CompressBlockBC5(uniform rgba_surface src[], int xx, uniform int yy,
 	store_data(dst, src->width, xx, yy, data, 4);
 }
 
+inline void CompressBlockBC5_LATC(uniform rgba_surface src[], int xx, uniform int yy, uniform uint8 dst[])
+{
+	float block[32];
+    uint32 data[4];
+
+	load_block_interleaved_rg_8bit_latc(block, src, xx, yy);
+	
+    CompressBlockBC3_alpha(block, data);
+    CompressBlockBC3_alpha(&block[16], &data[2]);
+
+	store_data(dst, src->width, xx, yy, data, 4);
+}
+
 export void CompressBlocksBC1_ispc(uniform rgba_surface src[], uniform uint8 dst[])
 {	
 	for (uniform int yy = 0; yy<src->height/4; yy++)
@@ -728,6 +820,15 @@ export void CompressBlocksBC5_ispc(uniform rgba_surface src[], uniform uint8 dst
 	foreach (xx = 0 ... src->width/4)
 	{
 		CompressBlockBC5(src, xx, yy, dst);
+	}
+}
+
+export void CompressBlocksBC5_LATC_ispc(uniform rgba_surface src[], uniform uint8 dst[])
+{
+	for (uniform int yy = 0; yy<src->height/4; yy++)
+	foreach (xx = 0 ... src->width/4)
+	{
+		CompressBlockBC5_LATC(src, xx, yy, dst);
 	}
 }
 

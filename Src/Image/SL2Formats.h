@@ -12,6 +12,8 @@
 #include "../Utilities/SL2Float16.h"
 #include "../Utilities/SL2FloatX.h"
 #include "../Utilities/SL2Utilities.h"
+#include "detex/detex.h"
+#include "ETCPACK/etcpack.h"
 #include "ISPC/ispc_texcomp.h"
 #include "Squish/squish.h"
 #include <atomic>
@@ -69,6 +71,12 @@
 
 /** Gets a texture-compression flag. */
 #define SL2_GET_COMP_FLAG( VAL )													(((VAL) >> 8) & 0xF)
+
+/** Makes a premultiply flag. */
+#define SL2_MAKE_PREMULT_FLAG														(1 << 16)
+
+/** Gets a premultiply flag. */
+#define SL2_GET_PREMULT_FLAG( VAL )													(((VAL) >> 16) & 0x1)
 
 
 #pragma warning( push )
@@ -1708,6 +1716,13 @@ namespace sl2 {
 		static void																	SetPerfLevel( uint32_t _ui32Level ) { m_ui32Perf = _ui32Level; }
 
 		/**
+		 * Sets the alpha cut-off.
+		 * 
+		 * \param _ui8Alpha The threshold to set.
+		 **/
+		static void																	SetAlphaCutoff( uint8_t _ui8Alpha ) { m_ui8AlphaThresh = _ui8Alpha; }
+
+		/**
 		 * Applies settings based on the current value of m_ui32Perf.
 		 * 
 		 * \param _bAlpha Determines whether the current texture has an alpha channel.
@@ -1761,6 +1776,153 @@ namespace sl2 {
 		 **/
 		static bool																	ExpandTexture( const uint8_t * _pui8Src, uint32_t &_ui32W, uint32_t &_ui32H, uint32_t &_ui32D,
 			std::vector<uint8_t> &_vOutput, uint32_t _ui32X, uint32_t _ui32Y, uint32_t _ui32Z );
+
+		/**
+		 * Copies an RGBA64F texture.
+		 * 
+		 * \param _pui8Src The source texture to copy.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 * \param _vOutput The output vector to contain the copied image.
+		 * \return Returns true if the new texture could be allocated.
+		 **/
+		static bool																	CopyTexture( const uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D,
+			std::vector<uint8_t> &_vOutput );
+
+		/**
+		 * Applies a given gamma curve an RGBA64F texture.
+		 * 
+		 * \param _pui8Src The source texture to expand.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 * \param _dGamma The gamma to apply to the source texture.
+		 **/
+		static void																	ApplyGamma( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D,
+			double _dGamma );
+
+		/**
+		 * Pre-multiply the alpha values in the given RGBA64F texture.
+		 * 
+		 * \param _pui8Src The source texture.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 **/
+		static void																	ApplyPreMultiply( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D );
+
+		/**
+		 * Flips an RGBA64F texture vertically.
+		 * 
+		 * \param _pui8Src The source texture.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 **/
+		static void																	FlipY( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D );
+
+		/**
+		 * Flips an RGBA64F texture horizontally.
+		 * 
+		 * \param _pui8Src The source texture.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 **/
+		static void																	FlipX( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D );
+
+		/**
+		 * Flips an RGBA64F texture depth.
+		 * 
+		 * \param _pui8Src The source texture.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 **/
+		static void																	FlipZ( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D );
+
+		/**
+		 * Converts an RGBA64F texture from CYMK to RGB.
+		 * 
+		 * \param _pui8Src The source texture.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 **/
+		static void																	CymkToRgb( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D );
+
+		/**
+		 * Converts a single RGBA64F value to Lab.  Value is already in linear space and normalized.
+		 * 
+		 * \param _rgbVal The value to convert.
+		 * \return Returns the converted Lab color.
+		 **/
+		static SL2_RGBA64F															ToLab( const SL2_RGBA64F &_rgbVal );
+
+		/**
+		 * Converts an RGBA64F texture to Lab colors.
+		 * 
+		 * \param _pui8Src The source texture.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 **/
+		static void																	ToLab( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D );
+
+		/**
+		 * Gathers luminance into the R channel of the given RGBA64F texture.
+		 * 
+		 * \param _pui8Src The source texture.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 **/
+		static void																	LumaToR( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D );
+
+		/**
+		 * Converts an RGBA64F texture to RGBA16F in-place.
+		 * 
+		 * \param _pui8Src The source texture.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 **/
+		static void																	ToF16( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D );
+
+		/**
+		 * Converts an RGBA64F texture to RGB8 in-place.
+		 * 
+		 * \param _pui8Src The source texture.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 **/
+		static void																	ToRGB8( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D );
+
+		/**
+		 * Converts an RGBA64F texture to RGBA8 in-place.
+		 * 
+		 * \param _pui8Src The source texture.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 **/
+		static void																	ToRGBA8( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D );
+
+		/**
+		 * Converts an RGBA64F texture to RGB8 and A8 in-place (RGB8) and as a copy (A8).
+		 * 
+		 * \param _pui8Src The source texture.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 * \param _vAlpha Holds the alpha channel on output.
+		 * \param _i32Thresh The alpha threshhold for punch-through formats.
+		 * \return Returns true if the alpha channel was able to be allocated.
+		 **/
+		static bool																	ToRGB8A8( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D,
+			std::vector<uint8_t> &_vAlpha, int32_t _i32Thresh = -0 );
 
 
 	protected :
@@ -1823,6 +1985,8 @@ namespace sl2 {
 		static uint32_t																m_ui32SquishFlags;
 		/** Performance value. 0 = Very Slow, 1 = Slow, 2 = Basic, 3 = Fast, 4 = Very Fast. 5 = Ultra Fast. */
 		static uint32_t																m_ui32Perf;
+		/** Alpha cut-off. */
+		static uint8_t																m_ui8AlphaThresh;
 		
 
 
@@ -2047,25 +2211,25 @@ namespace sl2 {
 		 * Decodes a single block of DXT3 alpha.
 		 *
 		 * \param _ui64Block The block to decode.
-		 * \param _pfPalette The created palette (contains 16 entries).
+		 * \param _pdPalette The created palette (contains 16 entries).
 		 */
-		static void 																DecodeDXT3_Alpha( uint64_t _ui64Block, float * _pfPalette );
+		static void 																DecodeDXT3_Alpha( uint64_t _ui64Block, double * _pdPalette );
 
 		/**
 		 * Decodes a single block of BC4U.
 		 *
 		 * \param _ui64Block The block to decode.
-		 * \param _pfPalette The created palette (contains 8 entries).
+		 * \param _pdPalette The created palette (contains 8 entries).
 		 */
-		static void 																DecodeBC4U( uint64_t _ui64Block, float * _pfPalette );
+		static void 																DecodeBC4U( uint64_t _ui64Block, double * _pdPalette );
 
 		/**
 		 * Decodes a single block of BC4S.
 		 *
 		 * \param _ui64Block The block to decode.
-		 * \param _pfPalette The created palette (contains 8 entries).
+		 * \param _pdPalette The created palette (contains 8 entries).
 		 */
-		static void 																DecodeBC4S( uint64_t _ui64Block, float * _pfPalette );
+		static void 																DecodeBC4S( uint64_t _ui64Block, double * _pdPalette );
 
 		/**
 		 * Gets the indices from a DXT1 block. 
@@ -2680,7 +2844,7 @@ namespace sl2 {
 		 */
 		template <unsigned _bSrgb>
 		static bool 																Dxt2ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr ) {
-			Dxt3ToRgba64F( _pui8Src, _pui8Dst, _ui32Width, _ui32Height, _ui32Depth, _pvParms );
+			return Dxt3ToRgba64F<_bSrgb>( _pui8Src, _pui8Dst, _ui32Width, _ui32Height, _ui32Depth, _pvParms );
 		}
 
 		/**
@@ -2694,7 +2858,9 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb>
-		static bool 				Dxt2FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Dxt2FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr ) {
+			return Dxt3FromRgba64F<_bSrgb>( _pui8Src, _pui8Dst, _ui32Width, _ui32Height, _ui32Depth, _pvParms );
+		}
 
 		/**
 		 * DXT3 -> RGBA64F conversion.
@@ -2707,7 +2873,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb>
-		static bool 				Dxt3ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Dxt3ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Generic RGBA64F -> DXT3 conversion.
@@ -2720,7 +2886,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb>
-		static bool 				Dxt3FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Dxt3FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * DXT4 -> RGBA64F conversion.
@@ -2733,8 +2899,8 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb>
-		static bool 				Dxt4ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr ) {
-			Dxt5ToRgba32F( _pui8Src, _pui8Dst, _ui32Width, _ui32Height, _ui32Depth, _pvParms );
+		static bool 																Dxt4ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr ) {
+			return Dxt5ToRgba64F<_bSrgb>( _pui8Src, _pui8Dst, _ui32Width, _ui32Height, _ui32Depth, _pvParms );
 		}
 
 		/**
@@ -2748,7 +2914,9 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb>
-		static bool 				Dxt4FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Dxt4FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr ) {
+			return Dxt5FromRgba64F<_bSrgb>( _pui8Src, _pui8Dst, _ui32Width, _ui32Height, _ui32Depth, _pvParms );
+		}
 
 		/**
 		 * DXT5 -> RGBA64F conversion.
@@ -2761,7 +2929,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb>
-		static bool 				Dxt5ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Dxt5ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Generic RGBA64F -> DXT5 conversion.
@@ -2774,7 +2942,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb>
-		static bool 				Dxt5FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Dxt5FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * BC4U -> RGBA64F conversion.
@@ -2787,7 +2955,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb, unsigned _bLum>
-		static bool 				Bc4uToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Bc4uToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Generic RGBA64F -> BC4U conversion.
@@ -2800,7 +2968,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb, unsigned _bLum>
-		static bool 				Bc4uFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Bc4uFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * BC4S -> RGBA64F conversion.
@@ -2813,7 +2981,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb, unsigned _bLum>
-		static bool 				Bc4sToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Bc4sToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Generic RGBA64F -> BC4S conversion.
@@ -2826,7 +2994,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb, unsigned _bLum>
-		static bool 				Bc4sFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Bc4sFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * BC5U -> RGBA64F conversion.
@@ -2839,7 +3007,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb, unsigned _bLumAlpha>
-		static bool 				Bc5uToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Bc5uToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Generic RGBA64F -> BC5U conversion.
@@ -2852,7 +3020,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb, unsigned _bLumAlpha>
-		static bool 				Bc5uFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Bc5uFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * BC5S -> RGBA64F conversion.
@@ -2865,7 +3033,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb, unsigned _bLumAlpha>
-		static bool 				Bc5sToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Bc5sToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Generic RGBA64F -> BC5S conversion.
@@ -2878,7 +3046,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb, unsigned _bLumAlpha>
-		static bool 				Bc5sFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Bc5sFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * BC6H -> RGBA64F conversion.
@@ -2891,7 +3059,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb>
-		static bool 				Bc6hToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Bc6hToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Generic RGBA64F -> BC6H conversion.
@@ -2904,7 +3072,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb>
-		static bool 				Bc6hFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Bc6hFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * BC7U -> RGBA64F conversion.
@@ -2917,7 +3085,7 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb>
-		static bool 				Bc7uToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Bc7uToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Generic RGBA64F -> BC7U conversion.
@@ -2930,16 +3098,184 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		template <unsigned _bSrgb>
-		static bool 				Bc7uFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Bc7uFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
+		// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		// ETC* FORMATS
+		// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		/**
+		 * Returns the total size of a compressed image given a factor and its width and height.
+		 *
+		 * \param _ui32Width Width in pixels.
+		 * \param _ui32Height Height in pixels.
+		 * \param _ui32Depth Unused.
+		 * \param _ui32Factor Multiplier.
+		 * \param _pvParms Unused.
+		 * \return Returns the size of the compressed data.
+		 */
+		static uint32_t																GetCompressedSizeEtc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Factor, const void * _pvParms );
+
+		/**
+		 * ETC1 -> RGBA64F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		static bool 																Etc1ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * Generic RGBA64F -> ETC1 conversion.
+		 *
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
+		 * \param _pui8Dst Destination texels.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		static bool 																Etc1FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * ETC2 -> RGBA64F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _bSrgb>
+		static bool 																Etc2ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * Generic RGBA64F -> ETC2 conversion.
+		 *
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
+		 * \param _pui8Dst Destination texels.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _bSrgb>
+		static bool 																Etc2FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * ETC2 EAC -> RGBA64F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _bSrgb>
+		static bool 																Etc2EacToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * Generic RGBA64F -> ETC2 EAC conversion.
+		 *
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
+		 * \param _pui8Dst Destination texels.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _bSrgb>
+		static bool 																Etc2EacFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * ETC2 A1 -> RGBA64F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _bSrgb>
+		static bool 																Etc2A1ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * Generic RGBA64F -> ETC2 A1 conversion.
+		 *
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
+		 * \param _pui8Dst Destination texels.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _bSrgb>
+		static bool 																Etc2A1FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * R11 EAC -> RGBA64F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _bSrgb, unsigned _bSigned>
+		static bool 				R11EacToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * Generic RGBA64F -> R11 EAC conversion.
+		 *
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
+		 * \param _pui8Dst Destination texels.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _bSrgb, unsigned _bSigned>
+		static bool 				R11EacFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * RG11 EAC -> RGBA64F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _bSrgb, unsigned _bSigned>
+		static bool 				RG11EacToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * Generic RGBA64F -> RG11 EAC conversion.
+		 *
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
+		 * \param _pui8Dst Destination texels.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _bSrgb, unsigned _bSigned>
+		static bool 				RG11EacFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 		/**
 		 * Thread function for converting a block of texels to DXTn formats.
 		 *
 		 * \param _lpParameter The thread information, stored as a pointer to a SL2_DXT_THREAD_DATA structure.
 		 * \return Returns 0.
 		 */
-		template <unsigned _bSrgb>
-		static uint32_t				DxtThread( void * _lpParameter );
+		//template <unsigned _bSrgb>
+		//static uint32_t				DxtThread( void * _lpParameter );
 	};
 	
 
@@ -3072,22 +3408,22 @@ namespace sl2 {
 			uint32_t uiFullG1 = static_cast<uint32_t>(std::round( _prPalette[1].dRgba[SL2_PC_G] * 255.0 ));
 			int32_t iDiff = uiFullG1 - uiFullG0;
 
-
+			int32_t iDiffO4 = iDiff / 4;
 			if ( ui16Tmp0 > ui16Tmp1 ) {
-				_prPalette[2].dRgba[SL2_PC_R] = (((2 * uiR0 + uiR1) * 22) / 8) / 255.0;
-				_prPalette[2].dRgba[SL2_PC_G] = ((256 * uiFullG0 + iDiff / 4 + 128 + iDiff * 80) / 256) / 255.0;
-				_prPalette[2].dRgba[SL2_PC_B] = (((2 * uiB0 + uiB1) * 22) / 8) / 255.0;
+				_prPalette[2].dRgba[SL2_PC_R] = (((2 * uiR0 + uiR1) * 22) >> 3) / 255.0;
+				_prPalette[2].dRgba[SL2_PC_G] = ((256 * uiFullG0 + iDiffO4 + 128 + iDiff * 80) / 256) / 255.0;
+				_prPalette[2].dRgba[SL2_PC_B] = (((2 * uiB0 + uiB1) * 22) >> 3) / 255.0;
 				_prPalette[2].dRgba[SL2_PC_A] = 1.0;
 
-				_prPalette[3].dRgba[SL2_PC_R] = (((2 * uiR1 + uiR0) * 22) / 8) / 255.0;
-				_prPalette[3].dRgba[SL2_PC_G] = ((256 * uiFullG1 - iDiff / 4 + 128 - iDiff * 80) / 256) / 255.0;
-				_prPalette[3].dRgba[SL2_PC_B] = (((2 * uiB1 + uiB0) * 22) / 8) / 255.0;
+				_prPalette[3].dRgba[SL2_PC_R] = (((2 * uiR1 + uiR0) * 22) >> 3) / 255.0;
+				_prPalette[3].dRgba[SL2_PC_G] = ((256 * uiFullG1 - iDiffO4 + 128 - iDiff * 80) / 256) / 255.0;
+				_prPalette[3].dRgba[SL2_PC_B] = (((2 * uiB1 + uiB0) * 22) >> 3) / 255.0;
 				_prPalette[3].dRgba[SL2_PC_A] = 1.0;
 			}
 			else {
-				_prPalette[2].dRgba[SL2_PC_R] = (((uiR0 + uiR1) * 33) / 8) / 255.0;
-				_prPalette[2].dRgba[SL2_PC_G] = ((256 * uiFullG0 + iDiff / 4 + 128 + iDiff * 128) / 256) / 255.0;
-				_prPalette[2].dRgba[SL2_PC_B] = (((uiB0 + uiB1) * 33) / 8) / 255.0;
+				_prPalette[2].dRgba[SL2_PC_R] = (((uiR0 + uiR1) * 33) >> 3) / 255.0;
+				_prPalette[2].dRgba[SL2_PC_G] = ((256 * uiFullG0 + iDiffO4 + 128 + iDiff * 128) / 256) / 255.0;
+				_prPalette[2].dRgba[SL2_PC_B] = (((uiB0 + uiB1) * 33) >> 3) / 255.0;
 				_prPalette[2].dRgba[SL2_PC_A] = 1.0;
 
 				_prPalette[3].dRgba[SL2_PC_R] = 0.0;
@@ -3154,16 +3490,16 @@ namespace sl2 {
 			uint32_t uiFullG0 = static_cast<uint32_t>(std::round( _prPalette[0].dRgba[SL2_PC_G] * 255.0 ));
 			uint32_t uiFullG1 = static_cast<uint32_t>(std::round( _prPalette[1].dRgba[SL2_PC_G] * 255.0 ));
 			int32_t iDiff = uiFullG1 - uiFullG0;
+			int32_t iDiffO4 = iDiff / 4;
 
-
-			_prPalette[2].dRgba[SL2_PC_R] = (((2 * uiR0 + uiR1) * 22) / 8) / 255.0;
-			_prPalette[2].dRgba[SL2_PC_G] = ((256 * uiFullG0 + iDiff / 4 + 128 + iDiff * 80) / 256) / 255.0;
-			_prPalette[2].dRgba[SL2_PC_B] = (((2 * uiB0 + uiB1) * 22) / 8) / 255.0;
+			_prPalette[2].dRgba[SL2_PC_R] = (((2 * uiR0 + uiR1) * 22) >> 3) / 255.0;
+			_prPalette[2].dRgba[SL2_PC_G] = ((256 * uiFullG0 + iDiffO4 + 128 + iDiff * 80) / 256) / 255.0;
+			_prPalette[2].dRgba[SL2_PC_B] = (((2 * uiB0 + uiB1) * 22) >> 3) / 255.0;
 			_prPalette[2].dRgba[SL2_PC_A] = 1.0;
 
-			_prPalette[3].dRgba[SL2_PC_R] = (((2 * uiR1 + uiR0) * 22) / 8) / 255.0;
-			_prPalette[3].dRgba[SL2_PC_G] = ((256 * uiFullG1 - iDiff / 4 + 128 - iDiff * 80) / 256) / 255.0;
-			_prPalette[3].dRgba[SL2_PC_B] = (((2 * uiB1 + uiB0) * 22) / 8) / 255.0;
+			_prPalette[3].dRgba[SL2_PC_R] = (((2 * uiR1 + uiR0) * 22) >> 3) / 255.0;
+			_prPalette[3].dRgba[SL2_PC_G] = ((256 * uiFullG1 - iDiffO4 + 128 - iDiff * 80) / 256) / 255.0;
+			_prPalette[3].dRgba[SL2_PC_B] = (((2 * uiB1 + uiB0) * 22) >> 3) / 255.0;
 			_prPalette[3].dRgba[SL2_PC_A] = 1.0;
 		}
 		else {
@@ -4184,24 +4520,29 @@ namespace sl2 {
 
 		std::vector<uint8_t> vResized;
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
-			if constexpr ( _ui8DefaultAlphaThresh == 0 ) {
-				::rgba_surface rsSurface;
-				rsSurface.ptr = const_cast<uint8_t *>(_pui8Src);
-				rsSurface.width = _ui32Width;
-				rsSurface.height = _ui32Height;
-				rsSurface.stride = ui32SrcPitch;
-				if ( (_ui32Width % 4) || (_ui32Height % 4) ) {
-					uint32_t ui32X = _ui32Width;
-					uint32_t ui32Y = _ui32Height;
-					uint32_t ui32Z = 1;
-					if ( !ExpandTexture( _pui8Src, ui32X, ui32Y, ui32Z,
-						vResized, 4, 4, 1 ) ) { return false; }
-
-					rsSurface.ptr = vResized.data();
-					rsSurface.width = ui32X;
-					rsSurface.height = ui32Y;
-					rsSurface.stride = _ui32Width * sizeof( SL2_RGBA64F );
+			const uint8_t * pui8Src = _pui8Src;
+			uint32_t ui32X = _ui32Width;
+			uint32_t ui32Y = _ui32Height;
+			uint32_t ui32Z = 1;
+			if ( (_ui32Width % 4) || (_ui32Height % 4) ) {
+				if ( !ExpandTexture( _pui8Src, ui32X, ui32Y, ui32Z,
+					vResized, 4, 4, 1 ) ) { return false; }
+				pui8Src = vResized.data();
+			}
+			if constexpr ( _bSrgb ) {
+				if ( pui8Src != vResized.data() ) {
+					if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; };
 				}
+				ApplyGamma( vResized.data(), ui32X, ui32Y, 1, -2.2 );
+				pui8Src = vResized.data();
+			}
+
+			if constexpr ( !_ui8DefaultAlphaThresh ) {
+				::rgba_surface rsSurface;
+				rsSurface.ptr = const_cast<uint8_t *>(pui8Src);
+				rsSurface.width = ui32X;
+				rsSurface.height = ui32Y;
+				rsSurface.stride = ui32X * sizeof( SL2_RGBA64F );
 
 				::CompressBlocksBC1( &rsSurface, _pui8Dst );
 			}
@@ -4210,8 +4551,9 @@ namespace sl2 {
 				scConfig.fRedWeight = static_cast<float>(m_lCurCoeffs.dRgb[0]);
 				scConfig.fGreenWeight = static_cast<float>(m_lCurCoeffs.dRgb[1]);
 				scConfig.fBlueWeight = static_cast<float>(m_lCurCoeffs.dRgb[2]);
-				scConfig.fAlphaCutoff = _ui8DefaultAlphaThresh / 255.0f;
-				squish::CompressImage( _pui8Src, _ui32Width, _ui32Height, _pui8Dst,
+				scConfig.fAlphaCutoff = m_ui8AlphaThresh / 255.0f;
+				
+				squish::CompressImage( pui8Src, ui32X, ui32Y, _pui8Dst,
 					squish::kDxt1 |
 					m_ui32SquishFlags, scConfig );
 			}
@@ -4309,199 +4651,1312 @@ namespace sl2 {
 	}
 
 	/**
-	 * Thread function for converting a block of texels to DXTn formats.
+	 * DXT3 -> RGBA64F conversion.
 	 *
-	 * \param _lpParameter The thread information, stored as a pointer to a SL2_DXT_THREAD_DATA structure.
-	 * \return Returns 0.
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
 	 */
 	template <unsigned _bSrgb>
-	uint32_t CFormat::DxtThread( void * _lpParameter ) {
-		SL2_DXT_THREAD_DATA * pdtdData = static_cast<SL2_DXT_THREAD_DATA *>(_lpParameter);
+	bool CFormat::Dxt3ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_DXT3_BLOCK {
+			uint64_t ui64Alpha;
+			uint64_t ui64Rgb;
+		};
+		const SL2_DXT3_BLOCK * pbbBlocks = reinterpret_cast<const SL2_DXT3_BLOCK *>(_pui8Src);
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_DXT3_BLOCK );
 
+		uint32_t ui32DstSliceSize = _ui32Width * _ui32Height;
 
-		SL2_BLOCK bColors[4][4];
-		uint32_t ui32Width = (pdtdData->ui32Width + 3) >> 2;
-		// Number of blocks along the height.
-		uint32_t ui32TotalScanLines = (pdtdData->ui32Height + 3) >> 2;
+		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+		SL2_RGBA64F fPaletteRgb[4];
+		double dAlphaPalette[16];
+		uint8_t ui8IndicesRgb[16];
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < ui32BlocksH; ++Y ) {
+				for ( uint32_t X = 0; X < ui32BlocksW; ++X ) {
+					uint64_t ui64ThisBlock = pbbBlocks[Z*ui32SliceSize+Y*ui32BlocksW+X].ui64Rgb;
+					DecodeDXT3<_bSrgb>( ui64ThisBlock, fPaletteRgb );
+					Dxt1Indices( ui64ThisBlock, ui8IndicesRgb );
 
-		uint32_t ui32SrcStride = CFormat::GetRowSize( SL2_VK_FORMAT_R64G64B64A64_SFLOAT, pdtdData->ui32Width );
-		const uint8_t * pui8Src = pdtdData->pui8Src;
-		pui8Src += (CFormat::GetFormatSize( SL2_VK_FORMAT_R64G64B64A64_SFLOAT, pdtdData->ui32Width, pdtdData->ui32Height, pdtdData->ui32SrcZ ));
-		pui8Src += (ui32SrcStride << 2) * pdtdData->ui32SrcY;
+					DecodeDXT3_Alpha( pbbBlocks[Z*ui32SliceSize+Y*ui32BlocksW+X].ui64Alpha, dAlphaPalette );
 
-		uint32_t ui32BlockSize = CFormat::DxtBlockSize( (*pdtdData->pkifdFormatData) );
-
-		// Do SL2_DXT_ROWS rows at a time.
-		uint32_t ui32Mask = 0;
-		for ( uint32_t K = 0; K < SL2_DXT_ROWS; ++K ) {
-			if ( pdtdData->ui32SrcY >= ui32TotalScanLines ) { break; }
-			SL2_PREFETCH_LINE( pui8Src + (K + 1) * ui32SrcStride );
-
-			for ( uint32_t X = pdtdData->ui32SrcX; X < ui32Width; ++X ) {
-				uint32_t ui32SrcX = X << 4;							// 4 texels per block wide, 4 channels per texel.
-				// Get the 4-by-4 block.
-				//double fAlphaHigh = 0.0f, fAlphaLow = 1.0f;
-				for ( uint32_t J = 0; J < 4; ++J ) {				// Down the block height.
-					const double * pfThisRowStart = reinterpret_cast<const double *>(pui8Src + J * ui32SrcStride);
-					if ( J + (pdtdData->ui32SrcY << 2) >= pdtdData->ui32Height ) {
-						for ( uint32_t I = 0; I < 4; ++I ) {		// Along the block width.
-							for ( uint32_t C = 0; C < 4; ++C ) {	// For each channel in this texel.
-								bColors[J][I].dValues[C] = 0.0;
-							}
-						}
-					}
-					else {
-						// The row is valid.
-						for ( uint32_t I = 0; I < 4; ++I ) {		// Along the block width.
-							// We are on a single texel now.  But it might be beyond the width of the image.
-							if ( I + (X << 2) >= pdtdData->ui32Width ) {
-								for ( uint32_t C = 0; C < 4; ++C ) {// For each channel in this texel.
-									bColors[J][I].dValues[C] = 0.0;
-								}
-							}
-							else {
-								const double * pfSrcTexel = pfThisRowStart + ui32SrcX + (I << 2);
-								// It is inside the image, so add it to an entry in the block.
-								bColors[J][I].s.dR = pfSrcTexel[SL2_PC_R];
-								bColors[J][I].s.dG = pfSrcTexel[SL2_PC_G];
-								bColors[J][I].s.dB = pfSrcTexel[SL2_PC_B];
-								bColors[J][I].s.dA = pfSrcTexel[SL2_PC_A];
-								/*fAlphaHigh = CStd::Max<double>( fAlphaHigh, bColors[J][I].s.fA );
-								fAlphaLow = CStd::Min<double>( fAlphaLow, bColors[J][I].s.fA );*/
-								ui32Mask |= 1 << ((J << 2) + I);
-							}
+					for ( uint32_t I = 0; I < 16; ++I ) {
+						uint32_t ui32ThisX = X * 4 + I % 4;
+						uint32_t ui32ThisY = Y * 4 + I / 4;
+						if ( ui32ThisX < _ui32Width && ui32ThisY < _ui32Height ) {
+							SL2_RGBA64F * prgbaRow0 = &prgbaTexels[Z*ui32DstSliceSize+ui32ThisY*_ui32Width+ui32ThisX];
+							(*prgbaRow0).dRgba[SL2_PC_R] = fPaletteRgb[ui8IndicesRgb[I]].dRgba[SL2_PC_R];
+							(*prgbaRow0).dRgba[SL2_PC_G] = fPaletteRgb[ui8IndicesRgb[I]].dRgba[SL2_PC_G];
+							(*prgbaRow0).dRgba[SL2_PC_B] = fPaletteRgb[ui8IndicesRgb[I]].dRgba[SL2_PC_B];
+							(*prgbaRow0).dRgba[SL2_PC_A] = dAlphaPalette[I];
 						}
 					}
 				}
-
-				// The local block is filled.  Send it to the filter to determine the best high and low colors to use.
-				int iFlags = squish::kColorMetricPerceptual | squish::kColorIterativeClusterFit | squish::kWeightColorByAlpha;
-				
-				squish::SquishConfig scConfig = {
-					(*pdtdData->pdoOptions).fRedWeight,
-					(*pdtdData->pdoOptions).fGreenWeight,
-					(*pdtdData->pdoOptions).fBlueWeight,
-					(*pdtdData->pdoOptions).fAlphaThresh,
-				};
-#ifdef SQUISH_USE_FLOATS
-				double * pdBlock = bColors[0][0].dValues;
-#else
-				squish::u8 u8Block[4][4][4];
-				for ( uint32_t Y = 0; Y < 4; ++Y ) {			// Block height.
-					for ( uint32_t X = 0; X < 4; ++X ) {		// Block width.
-						for ( uint32_t I = 0; I < 4; ++I ) {	// Colors.
-							u8Block[Y][X][I] = static_cast<squish::u8>(bColors[Y][X].dValues[I] * 255.0);
-						}
-					}
-				}
-#endif	// #ifdef SQUISH_USE_FLOATS
-
-#if 0
-				switch ( pdtdData->pfFormat ) {
-					case SL2_PF_DXT1 : {
-						iFlags |= squish::kDxt1;
-						break;
-					}
-					case SL2_PF_DXT2 : {
-						// Premultiply the alpha in the block and fall through.
-						for ( uint32_t G = 0; G < 4; ++G ) {
-							for ( uint32_t H = 0; H < 4; ++H ) {
-								double dAlpha = bColors[G][H].s.fA;
-								bColors[G][H].s.fR *= dAlpha;
-								bColors[G][H].s.fG *= dAlpha;
-								bColors[G][H].s.fB *= dAlpha;
-							}
-						}
-					}
-					case SL2_PF_DXT3 : {
-						iFlags |= squish::kDxt3;
-						break;
-					}
-					case SL2_PF_DXT4 : {
-						// Premultiply the alpha in the block and fall through.
-						for ( uint32_t G = 0; G < 4; ++G ) {
-							for ( uint32_t H = 0; H < 4; ++H ) {
-								double dAlpha = bColors[G][H].s.fA;
-								bColors[G][H].s.dR *= dAlpha;
-								bColors[G][H].s.dG *= dAlpha;
-								bColors[G][H].s.dB *= dAlpha;
-							}
-						}
-					}
-					case SL2_PF_DXT5 : {
-						iFlags |= squish::kDxt5;
-						break;
-					}
-					case SL2_PF_BC4S : {
-						iFlags |= squish::kSigned;
-						// Fall through.
-					}
-					case SL2_PF_BC4 : {
-						iFlags |= squish::kBc4;
-						if ( pdtdData->bLatc ) {
-							// Only channel R is used for color, so update channel R with the combined weights of every RGB channel.
-							for ( uint32_t G = 0; G < 4; ++G ) {
-								for ( uint32_t H = 0; H < 4; ++H ) {
-									bColors[G][H].s.fR = bColors[G][H].s.fR * pdtdData->pdoOptions->fRedWeight +
-										bColors[G][H].s.fG * pdtdData->pdoOptions->fGreenWeight +
-										bColors[G][H].s.fB * pdtdData->pdoOptions->fBlueWeight;
-								}
-							}
-						}
-						break;
-					}
-					case SL2_PF_BC5S : {
-						iFlags |= squish::kSigned;
-						// Fall through.
-					}
-					case SL2_PF_BC5 : {
-						iFlags |= squish::kBc5;
-						if ( pdtdData->bLatc ) {
-							iFlags |= squish::kBc5IsLatc2;
-							// Only channel R is used for color, so update channel R with the combined weights of every RGB channel.
-							for ( uint32_t G = 0; G < 4; ++G ) {
-								for ( uint32_t H = 0; H < 4; ++H ) {
-									bColors[G][H].s.fR = bColors[G][H].s.fR * pdtdData->pdoOptions->fRedWeight +
-										bColors[G][H].s.fG * pdtdData->pdoOptions->fGreenWeight +
-										bColors[G][H].s.fB * pdtdData->pdoOptions->fBlueWeight;
-								}
-							}
-						}
-						break;
-					}
-					default : {}
-				}
-#endif// 0
-				if ( _bSrgb != 0 ) {
-					// Apply sRGB (importantly done after pre-multiply of alpha.
-					for ( uint32_t G = 0; G < 4; ++G ) {
-						for ( uint32_t H = 0; H < 4; ++H ) {
-							bColors[G][H].s.dR = CUtilities::LinearToSRgb( bColors[G][H].s.dR );
-							bColors[G][H].s.dG = CUtilities::LinearToSRgb( bColors[G][H].s.dG );
-							bColors[G][H].s.dB = CUtilities::LinearToSRgb( bColors[G][H].s.dB );
-						}
-					}
-				}
-				squish::CompressMasked(
-#ifdef SQUISH_USE_FLOATS
-					pdBlock,
-#else
-					reinterpret_cast<squish::u8 *>(u8Block),
-#endif	// #ifdef SQUISH_USE_FLOATS
-					ui32Mask,
-					pdtdData->pui8Dest, iFlags, scConfig );
-
-				pdtdData->pui8Dest += ui32BlockSize;
 			}
-			pui8Src += (ui32SrcStride << 2);
-			++pdtdData->ui32SrcY;
 		}
-
-		pdtdData->bDone = true;
-		pdtdData->eEvent.Signal();
-		return 0;
+		return true;
 	}
 
+	/**
+	 * Generic RGBA64F -> DXT3 conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb>
+	bool CFormat::Dxt3FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_DXT1_BLOCK {
+			uint64_t ui64Rgb0;
+			uint64_t ui64Rgb1;
+		};
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_DXT1_BLOCK );
+		uint32_t ui32SrcPitch = SL2_ROUND_UP( _ui32Width * sizeof( SL2_RGBA64F ), 4 );
+		uint32_t ui32SrcSlice = ui32SrcPitch * _ui32Height;
+
+		std::vector<uint8_t> vResized;
+		squish::SquishConfig scConfig;
+		scConfig.fRedWeight = static_cast<float>(m_lCurCoeffs.dRgb[0]);
+		scConfig.fGreenWeight = static_cast<float>(m_lCurCoeffs.dRgb[1]);
+		scConfig.fBlueWeight = static_cast<float>(m_lCurCoeffs.dRgb[2]);
+		scConfig.fAlphaCutoff = 0.0f;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			
+			uint32_t ui32X = _ui32Width;
+			uint32_t ui32Y = _ui32Height;
+			uint32_t ui32Z = 1;
+			const uint8_t * pui8Src = _pui8Src;
+			
+			if constexpr ( _bSrgb ) {
+				if ( pui8Src != vResized.data() ) {
+					if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; };
+				}
+				ApplyGamma( vResized.data(), ui32X, ui32Y, 1, -2.2 );
+				pui8Src = vResized.data();
+			}
+				
+			squish::CompressImage( pui8Src, ui32X, ui32Y, _pui8Dst,
+				squish::kDxt3 |
+				m_ui32SquishFlags, scConfig );
+
+			_pui8Dst += ui32SliceSize;
+			_pui8Src += ui32SrcSlice;
+		}
+		return true;
+	}
+
+	/**
+	 * DXT5 -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb>
+	bool CFormat::Dxt5ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_DXT5_BLOCK {
+			uint64_t ui64Alpha;
+			uint64_t ui64Rgb;
+		};
+		const SL2_DXT5_BLOCK * pbbBlocks = reinterpret_cast<const SL2_DXT5_BLOCK *>(_pui8Src);
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_DXT5_BLOCK );
+		
+		uint32_t ui32DstSliceSize = _ui32Width * _ui32Height;
+
+		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+		SL2_RGBA64F fPaletteRgb[4];
+		double dAlphaPalette[8];
+		uint8_t ui8IndicesRgb[16];
+		uint8_t ui8IndicesA[16];
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < ui32BlocksH; ++Y ) {
+				for ( uint32_t X = 0; X < ui32BlocksW; ++X ) {
+					uint64_t ui64ThisBlock = pbbBlocks[Z*ui32SliceSize+Y*ui32BlocksW+X].ui64Rgb;
+					DecodeDXT3<_bSrgb>( ui64ThisBlock, fPaletteRgb );
+					Dxt1Indices( ui64ThisBlock, ui8IndicesRgb );
+
+					ui64ThisBlock = pbbBlocks[Z*ui32SliceSize+Y*ui32BlocksW+X].ui64Alpha;
+					DecodeBC4U( ui64ThisBlock, dAlphaPalette );
+					Bc4Indices( ui64ThisBlock, ui8IndicesA );
+
+					for ( uint32_t I = 0; I < 16; ++I ) {
+						uint32_t ui32ThisX = X * 4 + I % 4;
+						uint32_t ui32ThisY = Y * 4 + I / 4;
+						if ( ui32ThisX < _ui32Width && ui32ThisY < _ui32Height ) {
+							SL2_RGBA64F * prgbaRow0 = &prgbaTexels[Z*ui32DstSliceSize+ui32ThisY*_ui32Width+ui32ThisX];
+							(*prgbaRow0).dRgba[SL2_PC_R] = fPaletteRgb[ui8IndicesRgb[I]].dRgba[SL2_PC_R];
+							(*prgbaRow0).dRgba[SL2_PC_G] = fPaletteRgb[ui8IndicesRgb[I]].dRgba[SL2_PC_G];
+							(*prgbaRow0).dRgba[SL2_PC_B] = fPaletteRgb[ui8IndicesRgb[I]].dRgba[SL2_PC_B];
+							(*prgbaRow0).dRgba[SL2_PC_A] = dAlphaPalette[ui8IndicesA[I]];
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Generic RGBA64F -> DXT5 conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb>
+	bool CFormat::Dxt5FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_DXT5_BLOCK {
+			uint64_t ui64Alpha;
+			uint64_t ui64Rgb;
+		};
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_DXT5_BLOCK );
+		uint32_t ui32SrcPitch = SL2_ROUND_UP( _ui32Width * sizeof( SL2_RGBA64F ), 4 );
+		uint32_t ui32SrcSlice = ui32SrcPitch * _ui32Height;
+
+		std::vector<uint8_t> vResized;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			const uint8_t * pui8Src = _pui8Src;
+			uint32_t ui32X = _ui32Width;
+			uint32_t ui32Y = _ui32Height;
+			uint32_t ui32Z = 1;
+			if ( (_ui32Width % 4) || (_ui32Height % 4) ) {
+				if ( !ExpandTexture( _pui8Src, ui32X, ui32Y, ui32Z,
+					vResized, 4, 4, 1 ) ) { return false; }
+				pui8Src = vResized.data();
+			}
+			if constexpr ( _bSrgb ) {
+				if ( pui8Src != vResized.data() ) {
+					if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; };
+				}
+				ApplyGamma( vResized.data(), ui32X, ui32Y, 1, -2.2 );
+				pui8Src = vResized.data();
+			}
+
+			if ( !((_ui32Width % 4) || (_ui32Height % 4)) ) {
+				::rgba_surface rsSurface;
+				rsSurface.ptr = const_cast<uint8_t *>(pui8Src);
+				rsSurface.width = ui32X;
+				rsSurface.height = ui32Y;
+				rsSurface.stride = ui32X * sizeof( SL2_RGBA64F );
+
+				::CompressBlocksBC3( &rsSurface, _pui8Dst );
+			}
+			else {
+				squish::SquishConfig scConfig;
+				scConfig.fRedWeight = static_cast<float>(m_lCurCoeffs.dRgb[0]);
+				scConfig.fGreenWeight = static_cast<float>(m_lCurCoeffs.dRgb[1]);
+				scConfig.fBlueWeight = static_cast<float>(m_lCurCoeffs.dRgb[2]);
+				scConfig.fAlphaCutoff = 0.0f;
+				
+				squish::CompressImage( pui8Src, ui32X, ui32Y, _pui8Dst,
+					squish::kDxt5 |
+					m_ui32SquishFlags, scConfig );
+			}
+
+			_pui8Dst += ui32SliceSize;
+			_pui8Src += ui32SrcSlice;
+		}
+		return true;
+	}
+
+	/**
+	 * BC4U -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb, unsigned _bLum>
+	bool CFormat::Bc4uToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		const uint64_t * pui64Blocks = reinterpret_cast<const uint64_t *>(_pui8Src);
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+		double dPalette[8];
+		uint8_t ui8Indices[16];
+		// Size per slice.
+		uint32_t ui32SrcSliceSize = ui32BlocksW * ui32BlocksH;
+		uint32_t ui32SliceSize = _ui32Width * _ui32Height;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < ui32BlocksH; ++Y ) {
+				for ( uint32_t X = 0; X < ui32BlocksW; ++X ) {
+					uint64_t ui64ThisBlock = pui64Blocks[Z*ui32SrcSliceSize+Y*ui32BlocksW+X];
+					DecodeBC4U( ui64ThisBlock, dPalette );
+					Bc4Indices( ui64ThisBlock, ui8Indices );
+					for ( uint32_t I = 0; I < 16; ++I ) {
+						uint32_t ui32ThisX = X * 4 + I % 4;
+						uint32_t ui32ThisY = Y * 4 + I / 4;
+						if ( ui32ThisX < _ui32Width && ui32ThisY < _ui32Height ) {
+							SL2_RGBA64F * prgbaRow0 = &prgbaTexels[Z*ui32SliceSize+ui32ThisY*_ui32Width+ui32ThisX];
+							(*prgbaRow0).dRgba[SL2_PC_R] = dPalette[ui8Indices[I]];
+							(*prgbaRow0).dRgba[SL2_PC_G] = _bLum ? dPalette[ui8Indices[I]] : 0.0;
+							(*prgbaRow0).dRgba[SL2_PC_B] = _bLum ? dPalette[ui8Indices[I]] : 0.0;
+							(*prgbaRow0).dRgba[SL2_PC_A] = 1.0;
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Generic RGBA64F -> BC4U conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb, unsigned _bLum>
+	bool CFormat::Bc4uFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_BC4_BLOCK {
+			uint64_t ui64Rgb;
+		};
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_BC4_BLOCK );
+		uint32_t ui32SrcPitch = SL2_ROUND_UP( _ui32Width * sizeof( SL2_RGBA64F ), 4 );
+		uint32_t ui32SrcSlice = ui32SrcPitch * _ui32Height;
+
+		std::vector<uint8_t> vResized;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			const uint8_t * pui8Src = _pui8Src;
+			uint32_t ui32X = _ui32Width;
+			uint32_t ui32Y = _ui32Height;
+			uint32_t ui32Z = 1;
+			if ( (_ui32Width % 4) || (_ui32Height % 4) ) {
+				if ( !ExpandTexture( _pui8Src, ui32X, ui32Y, ui32Z,
+					vResized, 4, 4, 1 ) ) { return false; }
+				pui8Src = vResized.data();
+			}
+			if constexpr ( _bLum ) {
+				if ( pui8Src != vResized.data() ) {
+					if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; };
+				}
+				LumaToR( vResized.data(), ui32X, ui32Y, 1 );
+				pui8Src = vResized.data();
+			}
+			if constexpr ( _bSrgb ) {
+				if ( pui8Src != vResized.data() ) {
+					if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; };
+				}
+				ApplyGamma( vResized.data(), ui32X, ui32Y, 1, -2.2 );
+				pui8Src = vResized.data();
+			}
+
+			if ( !((_ui32Width % 4) || (_ui32Height % 4)) ) {
+				::rgba_surface rsSurface;
+				rsSurface.ptr = const_cast<uint8_t *>(pui8Src);
+				rsSurface.width = ui32X;
+				rsSurface.height = ui32Y;
+				rsSurface.stride = ui32X * sizeof( SL2_RGBA64F );
+
+				::CompressBlocksBC4( &rsSurface, _pui8Dst );
+			}
+			else {
+				squish::SquishConfig scConfig;
+				scConfig.fRedWeight = static_cast<float>(m_lCurCoeffs.dRgb[0]);
+				scConfig.fGreenWeight = static_cast<float>(m_lCurCoeffs.dRgb[1]);
+				scConfig.fBlueWeight = static_cast<float>(m_lCurCoeffs.dRgb[2]);
+				scConfig.fAlphaCutoff = 0.0f;
+				
+				squish::CompressImage( pui8Src, _ui32Width, _ui32Height, _pui8Dst,
+					squish::kBc4 |
+					m_ui32SquishFlags, scConfig );
+			}
+
+			_pui8Dst += ui32SliceSize;
+			_pui8Src += ui32SrcSlice;
+		}
+		return true;
+	}
+
+	/**
+	 * BC4S -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb, unsigned _bLum>
+	bool CFormat::Bc4sToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		const uint64_t * pui64Blocks = reinterpret_cast<const uint64_t *>(_pui8Src);
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+
+		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+		double dPalette[8];
+		uint8_t ui8Indices[16];
+		// Size per slice.
+		uint32_t ui32SrcSliceSize = ui32BlocksW * ui32BlocksH;
+		uint32_t ui32SliceSize = _ui32Width * _ui32Height;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < ui32BlocksH; ++Y ) {
+				for ( uint32_t X = 0; X < ui32BlocksW; ++X ) {
+					uint64_t ui64ThisBlock = pui64Blocks[Z*ui32SrcSliceSize+Y*ui32BlocksW+X];
+					DecodeBC4S( ui64ThisBlock, dPalette );
+					Bc4Indices( ui64ThisBlock, ui8Indices );
+					for ( uint32_t I = 0; I < 16; ++I ) {
+						uint32_t ui32ThisX = X * 4 + I % 4;
+						uint32_t ui32ThisY = Y * 4 + I / 4;
+						if ( ui32ThisX < _ui32Width && ui32ThisY < _ui32Height ) {
+							SL2_RGBA64F * prgbaRow0 = &prgbaTexels[Z*ui32SliceSize+ui32ThisY*_ui32Width+ui32ThisX];
+							(*prgbaRow0).dRgba[SL2_PC_R] = dPalette[ui8Indices[I]];
+							(*prgbaRow0).dRgba[SL2_PC_G] = _bLum ? dPalette[ui8Indices[I]] : 0.0;
+							(*prgbaRow0).dRgba[SL2_PC_B] = _bLum ? dPalette[ui8Indices[I]] : 0.0;
+							(*prgbaRow0).dRgba[SL2_PC_A] = 1.0;
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Generic RGBA64F -> BC4S conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb, unsigned _bLum>
+	bool CFormat::Bc4sFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_BC4_BLOCK {
+			uint64_t ui64Rgb;
+		};
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_BC4_BLOCK );
+		uint32_t ui32SrcPitch = SL2_ROUND_UP( _ui32Width * sizeof( SL2_RGBA64F ), 4 );
+		uint32_t ui32SrcSlice = ui32SrcPitch * _ui32Height;
+
+		std::vector<uint8_t> vResized;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			const uint8_t * pui8Src = _pui8Src;
+			uint32_t ui32X = _ui32Width;
+			uint32_t ui32Y = _ui32Height;
+			uint32_t ui32Z = 1;
+			
+			if constexpr ( _bLum ) {
+				if ( pui8Src != vResized.data() ) {
+					if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; };
+				}
+				LumaToR( vResized.data(), ui32X, ui32Y, 1 );
+				pui8Src = vResized.data();
+			}
+			if constexpr ( _bSrgb ) {
+				if ( pui8Src != vResized.data() ) {
+					if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; };
+				}
+				ApplyGamma( vResized.data(), ui32X, ui32Y, 1, -2.2 );
+				pui8Src = vResized.data();
+			}
+
+			squish::SquishConfig scConfig;
+			scConfig.fRedWeight = static_cast<float>(m_lCurCoeffs.dRgb[0]);
+			scConfig.fGreenWeight = static_cast<float>(m_lCurCoeffs.dRgb[1]);
+			scConfig.fBlueWeight = static_cast<float>(m_lCurCoeffs.dRgb[2]);
+			scConfig.fAlphaCutoff = 0.0f;
+				
+			squish::CompressImage( pui8Src, ui32X, ui32Y, _pui8Dst,
+				squish::kBc4 | squish::kSigned |
+				m_ui32SquishFlags, scConfig );
+
+			_pui8Dst += ui32SliceSize;
+			_pui8Src += ui32SrcSlice;
+		}
+		return true;
+	}
+
+	/**
+	 * BC5U -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb, unsigned _bLumAlpha>
+	bool CFormat::Bc5uToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_BC5_BLOCK {
+			uint64_t ui64Red;
+			uint64_t ui64Green;
+		};
+		const SL2_BC5_BLOCK * pbbBlocks = reinterpret_cast<const SL2_BC5_BLOCK *>(_pui8Src);
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		
+		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+		double dPaletteR[8];
+		uint8_t ui8IndicesR[16];
+		double dPaletteG[8];
+		uint8_t ui8IndicesG[16];
+		// Size per slice.
+		uint32_t ui32SrcSliceSize = ui32BlocksW * ui32BlocksH;
+		uint32_t ui32SliceSize = _ui32Width * _ui32Height;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < ui32BlocksH; ++Y ) {
+				for ( uint32_t X = 0; X < ui32BlocksW; ++X ) {
+					uint64_t ui64ThisBlock = pbbBlocks[Z*ui32SrcSliceSize+Y*ui32BlocksW+X].ui64Red;
+					DecodeBC4U( ui64ThisBlock, dPaletteR );
+					Bc4Indices( ui64ThisBlock, ui8IndicesR );
+
+					ui64ThisBlock = pbbBlocks[Z*ui32SrcSliceSize+Y*ui32BlocksW+X].ui64Green;
+					DecodeBC4U( ui64ThisBlock, dPaletteG );
+					Bc4Indices( ui64ThisBlock, ui8IndicesG );
+					for ( uint32_t I = 0; I < 16; ++I ) {
+						uint32_t ui32ThisX = X * 4 + I % 4;
+						uint32_t ui32ThisY = Y * 4 + I / 4;
+						if ( ui32ThisX < _ui32Width && ui32ThisY < _ui32Height ) {
+							SL2_RGBA64F * prgbaRow0 = &prgbaTexels[Z*ui32SliceSize+ui32ThisY*_ui32Width+ui32ThisX];
+							if constexpr ( _bLumAlpha ) {
+								(*prgbaRow0).dRgba[SL2_PC_R] = dPaletteR[ui8IndicesR[I]];
+								(*prgbaRow0).dRgba[SL2_PC_G] = (*prgbaRow0).dRgba[SL2_PC_R];
+								(*prgbaRow0).dRgba[SL2_PC_B] = (*prgbaRow0).dRgba[SL2_PC_R];
+								(*prgbaRow0).dRgba[SL2_PC_A] = dPaletteG[ui8IndicesG[I]];
+							}
+							else {
+								(*prgbaRow0).dRgba[SL2_PC_R] = dPaletteR[ui8IndicesR[I]];
+								(*prgbaRow0).dRgba[SL2_PC_G] = dPaletteG[ui8IndicesG[I]];
+								(*prgbaRow0).dRgba[SL2_PC_B] = 0.0;
+								(*prgbaRow0).dRgba[SL2_PC_A] = 1.0;
+							}
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Generic RGBA64F -> BC5U conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb, unsigned _bLumAlpha>
+	bool CFormat::Bc5uFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_BC5_BLOCK {
+			uint64_t ui64Rgb;
+		};
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_BC5_BLOCK );
+		uint32_t ui32SrcPitch = SL2_ROUND_UP( _ui32Width * sizeof( SL2_RGBA64F ), 4 );
+		uint32_t ui32SrcSlice = ui32SrcPitch * _ui32Height;
+
+		std::vector<uint8_t> vResized;
+		int iFlags = squish::kBc5;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			const uint8_t * pui8Src = _pui8Src;
+			uint32_t ui32X = _ui32Width;
+			uint32_t ui32Y = _ui32Height;
+			uint32_t ui32Z = 1;
+			if ( (_ui32Width % 4) || (_ui32Height % 4) ) {
+				if ( !ExpandTexture( _pui8Src, ui32X, ui32Y, ui32Z,
+					vResized, 4, 4, 1 ) ) { return false; }
+				pui8Src = vResized.data();
+			}
+			if constexpr ( _bLumAlpha ) {
+				if ( pui8Src != vResized.data() ) {
+					if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; };
+				}
+				LumaToR( vResized.data(), ui32X, ui32Y, 1 );
+				pui8Src = vResized.data();
+				iFlags |= squish::kBc5IsLatc2;
+			}
+			if constexpr ( _bSrgb ) {
+				if ( pui8Src != vResized.data() ) {
+					if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; };
+				}
+				ApplyGamma( vResized.data(), ui32X, ui32Y, 1, -2.2 );
+				pui8Src = vResized.data();
+			}
+
+			if ( !((_ui32Width % 4) || (_ui32Height % 4)) ) {
+				::rgba_surface rsSurface;
+				rsSurface.ptr = const_cast<uint8_t *>(pui8Src);
+				rsSurface.width = ui32X;
+				rsSurface.height = ui32Y;
+				rsSurface.stride = ui32X * sizeof( SL2_RGBA64F );
+
+				if constexpr ( _bLumAlpha ) {
+					::CompressBlocksBC5_LATC( &rsSurface, _pui8Dst );
+				}
+				else {
+					::CompressBlocksBC5( &rsSurface, _pui8Dst );
+				}
+			}
+			else {
+				squish::SquishConfig scConfig;
+				scConfig.fRedWeight = static_cast<float>(m_lCurCoeffs.dRgb[0]);
+				scConfig.fGreenWeight = static_cast<float>(m_lCurCoeffs.dRgb[1]);
+				scConfig.fBlueWeight = static_cast<float>(m_lCurCoeffs.dRgb[2]);
+				scConfig.fAlphaCutoff = 0.0f;
+				
+				squish::CompressImage( pui8Src, _ui32Width, _ui32Height, _pui8Dst,
+					iFlags |
+					m_ui32SquishFlags, scConfig );
+			}
+
+			_pui8Dst += ui32SliceSize;
+			_pui8Src += ui32SrcSlice;
+		}
+		return true;
+	}
+
+	/**
+	 * BC5S -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb, unsigned _bLumAlpha>
+	bool CFormat::Bc5sToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_BC5_BLOCK {
+			uint64_t ui64Red;
+			uint64_t ui64Green;
+		};
+		const SL2_BC5_BLOCK * pbbBlocks = reinterpret_cast<const SL2_BC5_BLOCK *>(_pui8Src);
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		
+		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+		double dPaletteR[8];
+		uint8_t ui8IndicesR[16];
+		double dPaletteG[8];
+		uint8_t ui8IndicesG[16];
+		// Size per slice.
+		uint32_t ui32SrcSliceSize = ui32BlocksW * ui32BlocksH;
+		uint32_t ui32SliceSize = _ui32Width * _ui32Height;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < ui32BlocksH; ++Y ) {
+				for ( uint32_t X = 0; X < ui32BlocksW; ++X ) {
+					uint64_t ui64ThisBlock = pbbBlocks[Z*ui32SrcSliceSize+Y*ui32BlocksW+X].ui64Red;
+					DecodeBC4S( ui64ThisBlock, dPaletteR );
+					Bc4Indices( ui64ThisBlock, ui8IndicesR );
+
+					ui64ThisBlock = pbbBlocks[Z*ui32SrcSliceSize+Y*ui32BlocksW+X].ui64Green;
+					DecodeBC4S( ui64ThisBlock, dPaletteG );
+					Bc4Indices( ui64ThisBlock, ui8IndicesG );
+					for ( uint32_t I = 0; I < 16; ++I ) {
+						uint32_t ui32ThisX = X * 4 + I % 4;
+						uint32_t ui32ThisY = Y * 4 + I / 4;
+						if ( ui32ThisX < _ui32Width && ui32ThisY < _ui32Height ) {
+							SL2_RGBA64F * prgbaRow0 = &prgbaTexels[Z*ui32SliceSize+ui32ThisY*_ui32Width+ui32ThisX];
+							if ( _bLumAlpha ) {
+								(*prgbaRow0).dRgba[SL2_PC_R] = dPaletteR[ui8IndicesR[I]];
+								(*prgbaRow0).dRgba[SL2_PC_G] = (*prgbaRow0).dRgba[SL2_PC_R];
+								(*prgbaRow0).dRgba[SL2_PC_B] = (*prgbaRow0).dRgba[SL2_PC_R];
+								(*prgbaRow0).dRgba[SL2_PC_A] = dPaletteG[ui8IndicesG[I]];
+							}
+							else {
+								(*prgbaRow0).dRgba[SL2_PC_R] = dPaletteR[ui8IndicesR[I]];
+								(*prgbaRow0).dRgba[SL2_PC_G] = dPaletteG[ui8IndicesG[I]];
+								(*prgbaRow0).dRgba[SL2_PC_B] = 0.0;
+								(*prgbaRow0).dRgba[SL2_PC_A] = 1.0;
+							}
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Generic RGBA64F -> BC5S conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb, unsigned _bLumAlpha>
+	bool CFormat::Bc5sFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_BC5_BLOCK {
+			uint64_t ui64Red;
+			uint64_t ui64Green;
+		};
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_BC5_BLOCK );
+		uint32_t ui32SrcPitch = SL2_ROUND_UP( _ui32Width * sizeof( SL2_RGBA64F ), 4 );
+		uint32_t ui32SrcSlice = ui32SrcPitch * _ui32Height;
+
+		std::vector<uint8_t> vResized;
+		int iFlags = squish::kBc5 | squish::kSigned;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			const uint8_t * pui8Src = _pui8Src;
+			uint32_t ui32X = _ui32Width;
+			uint32_t ui32Y = _ui32Height;
+			uint32_t ui32Z = 1;
+
+			if constexpr ( _bLumAlpha ) {
+				if ( pui8Src != vResized.data() ) {
+					if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; };
+				}
+				LumaToR( vResized.data(), ui32X, ui32Y, 1 );
+				pui8Src = vResized.data();
+				iFlags |= squish::kBc5IsLatc2;
+			}
+			if constexpr ( _bSrgb ) {
+				if ( pui8Src != vResized.data() ) {
+					if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; };
+				}
+				ApplyGamma( vResized.data(), ui32X, ui32Y, 1, -2.2 );
+				pui8Src = vResized.data();
+			}
+
+			squish::SquishConfig scConfig;
+			scConfig.fRedWeight = static_cast<float>(m_lCurCoeffs.dRgb[0]);
+			scConfig.fGreenWeight = static_cast<float>(m_lCurCoeffs.dRgb[1]);
+			scConfig.fBlueWeight = static_cast<float>(m_lCurCoeffs.dRgb[2]);
+			scConfig.fAlphaCutoff = 0.0f;
+				
+			squish::CompressImage( pui8Src, ui32X, ui32Y, _pui8Dst,
+				iFlags |
+				m_ui32SquishFlags, scConfig );
+
+			_pui8Dst += ui32SliceSize;
+			_pui8Src += ui32SrcSlice;
+		}
+		return true;
+	}
+
+	/**
+	 * BC6H -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb>
+	bool CFormat::Bc6hToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_BC6_BLOCK {
+			uint64_t ui64Block0;
+			uint64_t ui64Block1;
+		};
+		const SL2_BC6_BLOCK * pbbBlocks = reinterpret_cast<const SL2_BC6_BLOCK *>(_pui8Src);
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH;
+
+		uint32_t ui32DstSliceSize = _ui32Width * _ui32Height;
+		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+		CFloat16 fPaletteRgbF16[16*4];
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < ui32BlocksH; ++Y ) {
+				for ( uint32_t X = 0; X < ui32BlocksW; ++X ) {
+					::detexDecompressBlockBPTC_FLOAT( reinterpret_cast<const uint8_t *>(&pbbBlocks[Z*ui32SliceSize+Y*ui32BlocksW+X]), DETEX_MODE_MASK_ALL_MODES_BPTC_FLOAT,
+						0, reinterpret_cast<uint8_t *>(fPaletteRgbF16) );
+
+					for ( uint32_t I = 0; I < 16; ++I ) {
+						uint32_t ui32ThisX = X * 4 + I % 4;
+						uint32_t ui32ThisY = Y * 4 + I / 4;
+						if ( ui32ThisX < _ui32Width && ui32ThisY < _ui32Height ) {
+							SL2_RGBA64F * prgbaRow0 = &prgbaTexels[Z*ui32DstSliceSize+ui32ThisY*_ui32Width+ui32ThisX];
+							(*prgbaRow0).dRgba[SL2_PC_R] = fPaletteRgbF16[I*4+SL2_PC_R];
+							(*prgbaRow0).dRgba[SL2_PC_G] = fPaletteRgbF16[I*4+SL2_PC_G];
+							(*prgbaRow0).dRgba[SL2_PC_B] = fPaletteRgbF16[I*4+SL2_PC_B];
+							(*prgbaRow0).dRgba[SL2_PC_A] = 1.0;
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Generic RGBA64F -> BC6H conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb>
+	bool CFormat::Bc6hFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_BC6H_BLOCK {
+			uint64_t ui64Pixel0;
+			uint64_t ui64Pixel1;
+		};
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_BC6H_BLOCK );
+		uint32_t ui32SrcPitch = SL2_ROUND_UP( _ui32Width * sizeof( SL2_RGBA64F ), 4 );
+		uint32_t ui32SrcSlice = ui32SrcPitch * _ui32Height;
+
+		std::vector<uint8_t> vResized;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			const uint8_t * pui8Src = _pui8Src;
+			uint32_t ui32X = _ui32Width;
+			uint32_t ui32Y = _ui32Height;
+			uint32_t ui32Z = 1;
+			if ( (_ui32Width % 4) || (_ui32Height % 4) ) {
+				if ( !ExpandTexture( _pui8Src, ui32X, ui32Y, ui32Z,
+					vResized, 4, 4, 1 ) ) { return false; }
+				pui8Src = vResized.data();
+			}
+			if constexpr ( _bSrgb ) {
+				if ( pui8Src != vResized.data() ) {
+					if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; };
+				}
+				ApplyGamma( vResized.data(), ui32X, ui32Y, 1, -2.2 );
+				pui8Src = vResized.data();
+			}
+
+			if ( pui8Src != vResized.data() ) {
+				if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; };
+			}
+			ToF16( vResized.data(), ui32X, ui32Y, 1 );
+			pui8Src = vResized.data();
+
+			::rgba_surface rsSurface;
+			rsSurface.ptr = const_cast<uint8_t *>(pui8Src);
+			rsSurface.width = ui32X;
+			rsSurface.height = ui32Y;
+			rsSurface.stride = ui32X * sizeof( CFloat16 ) * 4;
+			::CompressBlocksBC6H( &rsSurface, _pui8Dst, &m_besBc6hSettings );
+
+			_pui8Dst += ui32SliceSize;
+			_pui8Src += ui32SrcSlice;
+		}
+		return true;
+	}
+
+	/**
+	 * BC7U -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb>
+	bool CFormat::Bc7uToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_BC7_BLOCK {
+			uint64_t ui64Block0;
+			uint64_t ui64Block1;
+		};
+		const SL2_BC7_BLOCK * pbbBlocks = reinterpret_cast<const SL2_BC7_BLOCK *>(_pui8Src);
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH;
+
+		uint32_t ui32DstSliceSize = _ui32Width * _ui32Height;
+		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+		uint8_t fPaletteRgbUi8[16*4];
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < ui32BlocksH; ++Y ) {
+				for ( uint32_t X = 0; X < ui32BlocksW; ++X ) {
+					::detexDecompressBlockBPTC( reinterpret_cast<const uint8_t *>(&pbbBlocks[Z*ui32SliceSize+Y*ui32BlocksW+X]), DETEX_MODE_MASK_ALL_MODES_BPTC,
+						0, reinterpret_cast<uint8_t *>(fPaletteRgbUi8) );
+
+					for ( uint32_t I = 0; I < 16; ++I ) {
+						uint32_t ui32ThisX = X * 4 + I % 4;
+						uint32_t ui32ThisY = Y * 4 + I / 4;
+						if ( ui32ThisX < _ui32Width && ui32ThisY < _ui32Height ) {
+							SL2_RGBA64F * prgbaRow0 = &prgbaTexels[Z*ui32DstSliceSize+ui32ThisY*_ui32Width+ui32ThisX];
+							(*prgbaRow0).dRgba[0] = _bSrgb ? CUtilities::SRgbToLinear( fPaletteRgbUi8[I*4+SL2_PC_R] / 255.0 ) : fPaletteRgbUi8[I*4+SL2_PC_R] / 255.0;
+							(*prgbaRow0).dRgba[1] = _bSrgb ? CUtilities::SRgbToLinear( fPaletteRgbUi8[I*4+SL2_PC_G] / 255.0 ) : fPaletteRgbUi8[I*4+SL2_PC_G] / 255.0;
+							(*prgbaRow0).dRgba[2] = _bSrgb ? CUtilities::SRgbToLinear( fPaletteRgbUi8[I*4+SL2_PC_B] / 255.0 ) : fPaletteRgbUi8[I*4+SL2_PC_B] / 255.0;
+							(*prgbaRow0).dRgba[3] = fPaletteRgbUi8[I*4+SL2_PC_A] / 255.0;
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Generic RGBA64F -> BC7U conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb>
+	bool CFormat::Bc7uFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_BC7_BLOCK {
+			uint64_t ui64Block0;
+			uint64_t ui64Block1;
+		};
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_BC7_BLOCK );
+		uint32_t ui32SrcPitch = SL2_ROUND_UP( _ui32Width * sizeof( SL2_RGBA64F ), 4 );
+		uint32_t ui32SrcSlice = ui32SrcPitch * _ui32Height;
+
+		std::vector<uint8_t> vResized;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			const uint8_t * pui8Src = _pui8Src;
+			uint32_t ui32X = _ui32Width;
+			uint32_t ui32Y = _ui32Height;
+			uint32_t ui32Z = 1;
+			if ( (_ui32Width % 4) || (_ui32Height % 4) ) {
+				if ( !ExpandTexture( _pui8Src, ui32X, ui32Y, ui32Z,
+					vResized, 4, 4, 1 ) ) { return false; }
+				pui8Src = vResized.data();
+			}
+			if constexpr ( _bSrgb ) {
+				if ( pui8Src != vResized.data() ) {
+					if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; };
+				}
+				ApplyGamma( vResized.data(), ui32X, ui32Y, 1, -2.2 );
+				pui8Src = vResized.data();
+			}
+
+			::rgba_surface rsSurface;
+			rsSurface.ptr = const_cast<uint8_t *>(pui8Src);
+			rsSurface.width = ui32X;
+			rsSurface.height = ui32Y;
+			rsSurface.stride = ui32X * sizeof( SL2_RGBA64F );
+			::CompressBlocksBC7( &rsSurface, _pui8Dst, &m_besBc7Settings );
+
+			_pui8Dst += ui32SliceSize;
+			_pui8Src += ui32SrcSlice;
+		}
+		return true;
+	}
+
+	/**
+	 * Returns the total size of a compressed image given a factor and its width and height.
+	 *
+	 * \param _ui32Width Width in pixels.
+	 * \param _ui32Height Height in pixels.
+	 * \param _ui32Depth Unused.
+	 * \param _ui32Factor Multiplier.
+	 * \param _pvParms Unused.
+	 * \return Returns the size of the compressed data.
+	 */
+	inline uint32_t CFormat::GetCompressedSizeEtc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Factor, const void * /*_pvParms*/ ) {
+		return ((((_ui32Width + 3) >> 2) * ((_ui32Height + 3) >> 2) * _ui32Factor) >> 3) * _ui32Depth;
+	}
+
+	/**
+	 * ETC2 -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb>
+	bool CFormat::Etc2ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_ETC2_BLOCK {
+			uint64_t ui64Block0;
+		};
+		const SL2_ETC2_BLOCK * pbbBlocks = reinterpret_cast<const SL2_ETC2_BLOCK *>(_pui8Src);
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH;
+
+		uint32_t ui32DstSliceSize = _ui32Width * _ui32Height;
+
+		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+		uint8_t fPaletteRgbUi8[16*4];
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < ui32BlocksH; ++Y ) {
+				for ( uint32_t X = 0; X < ui32BlocksW; ++X ) {
+					::detexDecompressBlockETC2( reinterpret_cast<const uint8_t *>(&pbbBlocks[Z*ui32SliceSize+Y*ui32BlocksW+X]),
+						DETEX_MODE_MASK_ALL_MODES_ETC2,
+						0, reinterpret_cast<uint8_t *>(fPaletteRgbUi8) );
+
+					for ( uint32_t I = 0; I < 16; ++I ) {
+						uint32_t ui32ThisX = X * 4 + I % 4;
+						uint32_t ui32ThisY = Y * 4 + I / 4;
+						if ( ui32ThisX < _ui32Width && ui32ThisY < _ui32Height ) {
+							SL2_RGBA64F * prgbaRow0 = &prgbaTexels[Z*ui32DstSliceSize+ui32ThisY*_ui32Width+ui32ThisX];
+							(*prgbaRow0).dRgba[SL2_PC_R] = fPaletteRgbUi8[I*4+SL2_PC_R] / 255.0;
+							(*prgbaRow0).dRgba[SL2_PC_G] = fPaletteRgbUi8[I*4+SL2_PC_G] / 255.0;
+							(*prgbaRow0).dRgba[SL2_PC_B] = fPaletteRgbUi8[I*4+SL2_PC_B] / 255.0;
+							(*prgbaRow0).dRgba[SL2_PC_A] = 1.0;
+							if constexpr ( _bSrgb ) {
+								(*prgbaRow0).dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_R] );
+								(*prgbaRow0).dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_G] );
+								(*prgbaRow0).dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_B] );
+							}
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Generic RGBA64F -> ETC2 conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb>
+	bool CFormat::Etc2FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		::readCompressParams();
+		format = ETC2PACKAGE_RGB_NO_MIPMAPS;
+
+		struct SL2_ETC2_BLOCK {
+			uint64_t ui64Block0;
+		};
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_ETC2_BLOCK );
+		uint32_t ui32SrcPitch = SL2_ROUND_UP( _ui32Width * sizeof( SL2_RGBA64F ), 4 );
+		uint32_t ui32SrcSlice = ui32SrcPitch * _ui32Height;
+
+		std::vector<uint8_t> vResized, vScratch;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			const uint8_t * pui8Src = _pui8Src;
+			uint32_t ui32X = _ui32Width;
+			uint32_t ui32Y = _ui32Height;
+			uint32_t ui32Z = 1;
+			if ( (_ui32Width % 4) || (_ui32Height % 4) ) {
+				if ( !ExpandTexture( _pui8Src, ui32X, ui32Y, ui32Z,
+					vResized, 4, 4, 1 ) ) { return false; }
+				pui8Src = vResized.data();
+			}
+			if constexpr ( _bSrgb ) {
+				if ( pui8Src != vResized.data() ) {
+					if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; };
+				}
+				ApplyGamma( vResized.data(), ui32X, ui32Y, 1, -2.2 );
+				pui8Src = vResized.data();
+			}
+			if ( pui8Src != vResized.data() ) {
+				if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; };
+				pui8Src = vResized.data();
+			}
+			if ( !vScratch.size() ) {
+				if ( !CopyTexture( pui8Src, ui32X, ui32Y, 1, vScratch ) ) { return false; }
+			}
+			ToRGB8( vResized.data(), ui32X, ui32Y, 1 );
+
+			for ( uint32_t H = 0; H < ui32BlocksH; ++H ) {
+				for ( uint32_t W = 0; W < ui32BlocksW; ++W ) {
+					uint32_t ui32Block1, ui32Block2;
+					::compressBlockETC2ExhaustivePerceptual( const_cast< uint8 *>(pui8Src), vScratch.data(),
+						ui32X, ui32Y, W << 2, H << 2, ui32Block1, ui32Block2 );
+					uint64_t & ui64Dst = reinterpret_cast<uint64_t *>(_pui8Dst)[H*ui32BlocksW+W];
+					ui64Dst = ::_byteswap_ulong( ui32Block1 ) | (static_cast<uint64_t>(::_byteswap_ulong( ui32Block2 )) << 32ULL);
+				}
+			}
+
+			_pui8Dst += ui32SliceSize;
+			_pui8Src += ui32SrcSlice;
+		}
+		return true;
+	}
+
+	/**
+	 * ETC2 EAC -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb>
+	bool CFormat::Etc2EacToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_ETC2_BLOCK {
+			uint64_t ui64Block0;
+			uint64_t ui64Block1;
+		};
+		const SL2_ETC2_BLOCK * pbbBlocks = reinterpret_cast<const SL2_ETC2_BLOCK *>(_pui8Src);
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH;
+
+		uint32_t ui32DstSliceSize = _ui32Width * _ui32Height;
+		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+		uint8_t fPaletteRgbUi8[16*4];
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < ui32BlocksH; ++Y ) {
+				for ( uint32_t X = 0; X < ui32BlocksW; ++X ) {
+					::detexDecompressBlockETC2_EAC( reinterpret_cast<const uint8_t *>(&pbbBlocks[Z*ui32SliceSize+Y*ui32BlocksW+X]),
+						DETEX_MODE_MASK_ALL_MODES_ETC2,
+						0, reinterpret_cast<uint8_t *>(fPaletteRgbUi8) );
+
+					for ( uint32_t I = 0; I < 16; ++I ) {
+						uint32_t ui32ThisX = X * 4 + I % 4;
+						uint32_t ui32ThisY = Y * 4 + I / 4;
+						if ( ui32ThisX < _ui32Width && ui32ThisY < _ui32Height ) {
+							SL2_RGBA64F * prgbaRow0 = &prgbaTexels[Z*ui32DstSliceSize+ui32ThisY*_ui32Width+ui32ThisX];
+							(*prgbaRow0).dRgba[SL2_PC_R] = fPaletteRgbUi8[I*4+SL2_PC_R] / 255.0;
+							(*prgbaRow0).dRgba[SL2_PC_G] = fPaletteRgbUi8[I*4+SL2_PC_G] / 255.0;
+							(*prgbaRow0).dRgba[SL2_PC_B] = fPaletteRgbUi8[I*4+SL2_PC_B] / 255.0;
+							(*prgbaRow0).dRgba[SL2_PC_A] = fPaletteRgbUi8[I*4+SL2_PC_A] / 255.0;
+							if constexpr ( _bSrgb ) {
+								(*prgbaRow0).dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_R] );
+								(*prgbaRow0).dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_G] );
+								(*prgbaRow0).dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_B] );
+							}
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Generic RGBA64F -> ETC2 EAC conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb>
+	bool CFormat::Etc2EacFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		format = ETC2PACKAGE_RGBA_NO_MIPMAPS;
+		::readCompressParams();
+		::setupAlphaTableAndValtab();
+
+		struct SL2_ETC_EAC {
+			uint64_t ui64Block1;
+			uint64_t ui64Block2;
+		};
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_ETC_EAC );
+		uint32_t ui32SrcPitch = SL2_ROUND_UP( _ui32Width * sizeof( SL2_RGBA64F ), 4 );
+		uint32_t ui32SrcSlice = ui32SrcPitch * _ui32Height;
+
+		std::vector<uint8_t> vResized, vScratch, vAlpha;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			SL2_ETC_EAC * peeDst = reinterpret_cast<SL2_ETC_EAC *>(_pui8Dst);
+
+			const uint8_t * pui8Src = _pui8Src;
+			uint32_t ui32X = _ui32Width;
+			uint32_t ui32Y = _ui32Height;
+			uint32_t ui32Z = 1;
+			if ( (_ui32Width % 4) || (_ui32Height % 4) ) {
+				if ( !ExpandTexture( _pui8Src, ui32X, ui32Y, ui32Z,
+					vResized, 4, 4, 1 ) ) { return false; }
+				pui8Src = vResized.data();
+			}
+			if constexpr ( _bSrgb ) {
+				if ( pui8Src != vResized.data() ) {
+					if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; }
+				}
+				ApplyGamma( vResized.data(), ui32X, ui32Y, 1, -2.2 );
+				pui8Src = vResized.data();
+			}
+			if ( pui8Src != vResized.data() ) {
+				if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; }
+				pui8Src = vResized.data();
+			}
+			if ( !vScratch.size() ) {
+				if ( !CopyTexture( pui8Src, ui32X, ui32Y, 1, vScratch ) ) { return false; }
+			}
+			if ( !ToRGB8A8( vResized.data(), ui32X, ui32Y, 1, vAlpha ) ) { return false; }
+
+			for ( uint32_t H = 0; H < ui32BlocksH; ++H ) {
+				for ( uint32_t W = 0; W < ui32BlocksW; ++W ) {
+					SL2_ETC_EAC & eeDst = peeDst[H*ui32BlocksW+W];
+					uint32_t ui32Block1, ui32Block2;
+					::compressBlockETC2ExhaustivePerceptual( const_cast< uint8 *>(pui8Src), vScratch.data(),
+						ui32X, ui32Y, W << 2, H << 2, ui32Block1, ui32Block2 );
+					eeDst.ui64Block2 = ::_byteswap_ulong( ui32Block1 ) | (static_cast<uint64_t>(::_byteswap_ulong( ui32Block2 )) << 32ULL);
+					::compressBlockAlphaSlow( vAlpha.data(), W << 2, H << 2, ui32X, ui32Y, reinterpret_cast<uint8 *>(&eeDst.ui64Block1) );
+				}
+			}
+
+			_pui8Dst += ui32SliceSize;
+			_pui8Src += ui32SrcSlice;
+		}
+		return true;
+	}
+
+	/**
+	 * ETC2 A1 -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb>
+	bool CFormat::Etc2A1ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_ETC2A1_BLOCK {
+			uint64_t ui64Block0;
+		};
+		const SL2_ETC2A1_BLOCK * pbbBlocks = reinterpret_cast<const SL2_ETC2A1_BLOCK *>(_pui8Src);
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH;
+
+		uint32_t ui32DstSliceSize = _ui32Width * _ui32Height;
+		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+		uint8_t fPaletteRgbUi8[16*4];
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < ui32BlocksH; ++Y ) {
+				for ( uint32_t X = 0; X < ui32BlocksW; ++X ) {
+					::detexDecompressBlockETC2_PUNCHTHROUGH( reinterpret_cast<const uint8_t *>(&pbbBlocks[Z*ui32SliceSize+Y*ui32BlocksW+X]),
+						DETEX_MODE_MASK_ALL_MODES_ETC2_PUNCHTHROUGH,
+						0, reinterpret_cast<uint8_t *>(fPaletteRgbUi8) );
+
+					for ( uint32_t I = 0; I < 16; ++I ) {
+						uint32_t ui32ThisX = X * 4 + I % 4;
+						uint32_t ui32ThisY = Y * 4 + I / 4;
+						if ( ui32ThisX < _ui32Width && ui32ThisY < _ui32Height ) {
+							SL2_RGBA64F * prgbaRow0 = &prgbaTexels[Z*ui32DstSliceSize+ui32ThisY*_ui32Width+ui32ThisX];
+							(*prgbaRow0).dRgba[SL2_PC_R] = fPaletteRgbUi8[I*4+SL2_PC_R] / 255.0;
+							(*prgbaRow0).dRgba[SL2_PC_G] = fPaletteRgbUi8[I*4+SL2_PC_G] / 255.0;
+							(*prgbaRow0).dRgba[SL2_PC_B] = fPaletteRgbUi8[I*4+SL2_PC_B] / 255.0;
+							(*prgbaRow0).dRgba[SL2_PC_A] = fPaletteRgbUi8[I*4+SL2_PC_A] / 255.0;
+							if constexpr ( _bSrgb ) {
+								(*prgbaRow0).dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_R] );
+								(*prgbaRow0).dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_G] );
+								(*prgbaRow0).dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_B] );
+							}
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Generic RGBA64F -> ETC2 A1 conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSrgb>
+	bool CFormat::Etc2A1FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		format = ETC2PACKAGE_RGBA1_NO_MIPMAPS;
+		//::readCompressParams();
+		//::setupAlphaTableAndValtab();
+
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( uint64_t );
+		uint32_t ui32SrcPitch = SL2_ROUND_UP( _ui32Width * sizeof( SL2_RGBA64F ), 4 );
+		uint32_t ui32SrcSlice = ui32SrcPitch * _ui32Height;
+
+		std::vector<uint8_t> vResized, vScratch, vAlpha;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			uint64_t * pui64Dst = reinterpret_cast<uint64_t *>(_pui8Dst);
+			const uint8_t * pui8Src = _pui8Src;
+			uint32_t ui32X = _ui32Width;
+			uint32_t ui32Y = _ui32Height;
+			uint32_t ui32Z = 1;
+			if ( (_ui32Width % 4) || (_ui32Height % 4) ) {
+				if ( !ExpandTexture( _pui8Src, ui32X, ui32Y, ui32Z,
+					vResized, 4, 4, 1 ) ) { return false; }
+				pui8Src = vResized.data();
+			}
+			if constexpr ( _bSrgb ) {
+				if ( pui8Src != vResized.data() ) {
+					if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; }
+				}
+				ApplyGamma( vResized.data(), ui32X, ui32Y, 1, -2.2 );
+				pui8Src = vResized.data();
+			}
+			if ( pui8Src != vResized.data() ) {
+				if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; }
+				pui8Src = vResized.data();
+			}
+			if ( !vScratch.size() ) {
+				if ( !CopyTexture( pui8Src, ui32X, ui32Y, 1, vScratch ) ) { return false; }
+			}
+			if ( !ToRGB8A8( vResized.data(), ui32X, ui32Y, 1, vAlpha, m_ui8AlphaThresh ) ) { return false; }
+
+			for ( uint32_t H = 0; H < ui32BlocksH; ++H ) {
+				for ( uint32_t W = 0; W < ui32BlocksW; ++W ) {
+					uint32_t ui32Block1, ui32Block2;
+					::compressBlockETC2Fast( const_cast< uint8 *>(pui8Src), vAlpha.data(),
+						vScratch.data(),
+						ui32X, ui32Y, W << 2, H << 2, ui32Block1, ui32Block2 );
+					uint64_t & ui64Dst = pui64Dst[H*ui32BlocksW+W];
+					ui64Dst = ::_byteswap_ulong( ui32Block1 ) | (static_cast<uint64_t>(::_byteswap_ulong( ui32Block2 )) << 32ULL);
+				}
+			}
+
+			_pui8Dst += ui32SliceSize;
+			_pui8Src += ui32SrcSlice;
+		}
+		return true;
+	}
+	
 }	// namespace sl2
 
 #pragma warning( pop )

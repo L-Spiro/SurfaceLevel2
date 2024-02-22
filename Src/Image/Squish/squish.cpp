@@ -190,7 +190,7 @@ void CompressImage( u8 const* rgba, int width, int height, void* blocks, int fla
 
 	// initialise the block output
 	u8* targetBlock = reinterpret_cast< u8* >( blocks );
-	int bytesPerBlock = ( ( flags & kDxt1 ) != 0 ) ? 8 : 16;
+	int bytesPerBlock = ( (flags & kDxt1) != 0 || (flags & kBc4) != 0 ) ? 8 : 16;
 
 	// loop over blocks
 	for( int y = 0; y < height; y += 4 )
