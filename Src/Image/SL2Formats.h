@@ -1060,6 +1060,9 @@ namespace sl2 {
 		SL2_MTLPixelFormatBGRG422	= 241,	// Indicates a red-green horizontally subsampled format.
 		SL2_MTLPixelFormatDepth32Float	= 252,	// Indicates a 32-bit format that is suitable for depth stencils.
 		SL2_MTLPixelFormatDepth32Float_Stencil8	= 260,	// Indicates a 24-bit depth and 8-bit stencil floating-point format.
+		SL2_MTLPixelFormatDepth16Unorm = 250,	// A pixel format with a 16-bit normalized unsigned integer component, used for a depth render target.
+		SL2_MTLPixelFormatDepth24Unorm_Stencil8 = 255,	// A 32-bit combined depth and stencil pixel format with a 24-bit normalized unsigned integer for depth and an 8-bit unsigned integer for stencil.
+		SL2_MTLPixelFormatX24_Stencil8 = 262,	// A stencil pixel format used to read the stencil value from a texture with a combined 24-bit depth and 8-bit stencil value.
 		SL2_MTLPixelFormatEAC_R11Snorm	= 172,	// Indicates a single-channel EAC, normalized signed integer format.
 		SL2_MTLPixelFormatEAC_R11Unorm	= 170,	// Indicates a single-channel EAC, unnormalized signed integer format.
 		SL2_MTLPixelFormatEAC_RG11Snorm	= 176,	// Indicates a two-channel EAC, normalized signed integer format.
@@ -1155,6 +1158,8 @@ namespace sl2 {
 		SL2_MTLPixelFormatASTC_10x10_HDR = 234,	// ASTC-compressed format with high-dynamic range content, a block width of 10, and a block height of 10.
 		SL2_MTLPixelFormatASTC_12x10_HDR = 235,	// ASTC-compressed format with high-dynamic range content, a block width of 12, and a block height of 10.
 		SL2_MTLPixelFormatASTC_12x12_HDR = 236,	// ASTC-compressed format with high-dynamic range content, a block width of 12, and a block height of 12.
+
+		
 	};
 
 	/**
@@ -1887,6 +1892,11 @@ namespace sl2 {
 		 * \param _ui32D The depth of the source texture.
 		 **/
 		static void																	ToRGBA32F( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D );
+
+		/**
+		 * Prints the formats in a single long list.
+		 **/
+		static void																	PrintFormats_List();
 
 
 	protected :
