@@ -12,9 +12,12 @@
 #include "../Utilities/SL2Float16.h"
 #include "../Utilities/SL2FloatX.h"
 #include "../Utilities/SL2Utilities.h"
+#include "astc-encoder/astcenc.h"
+#include "astc-encoder/astcenccli_internal.h"
 #include "detex/detex.h"
 #include "ETCPACK/etcpack.h"
 #include "ISPC/ispc_texcomp.h"
+#include "PVRTexTool/PVRTexLib.hpp"
 #include "Squish/squish.h"
 #include <atomic>
 #include <cstdint>
@@ -734,245 +737,156 @@ namespace sl2 {
 		SL2_VK_FORMAT_ASTC_12x10_SRGB_BLOCK = 182,
 		SL2_VK_FORMAT_ASTC_12x12_UNORM_BLOCK = 183,
 		SL2_VK_FORMAT_ASTC_12x12_SRGB_BLOCK = 184,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G8B8G8R8_422_UNORM = 1000156000,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_B8G8R8G8_422_UNORM = 1000156001,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM = 1000156002,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G8_B8R8_2PLANE_420_UNORM = 1000156003,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM = 1000156004,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G8_B8R8_2PLANE_422_UNORM = 1000156005,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G8_B8_R8_3PLANE_444_UNORM = 1000156006,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_R10X6_UNORM_PACK16 = 1000156007,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_R10X6G10X6_UNORM_2PACK16 = 1000156008,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_R10X6G10X6B10X6A10X6_UNORM_4PACK16 = 1000156009,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G10X6B10X6G10X6R10X6_422_UNORM_4PACK16 = 1000156010,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16 = 1000156011,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16 = 1000156012,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16 = 1000156013,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_422_UNORM_3PACK16 = 1000156014,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G10X6_B10X6R10X6_2PLANE_422_UNORM_3PACK16 = 1000156015,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_444_UNORM_3PACK16 = 1000156016,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_R12X4_UNORM_PACK16 = 1000156017,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_R12X4G12X4_UNORM_2PACK16 = 1000156018,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_R12X4G12X4B12X4A12X4_UNORM_4PACK16 = 1000156019,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G12X4B12X4G12X4R12X4_422_UNORM_4PACK16 = 1000156020,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_B12X4G12X4R12X4G12X4_422_UNORM_4PACK16 = 1000156021,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_420_UNORM_3PACK16 = 1000156022,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G12X4_B12X4R12X4_2PLANE_420_UNORM_3PACK16 = 1000156023,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_422_UNORM_3PACK16 = 1000156024,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G12X4_B12X4R12X4_2PLANE_422_UNORM_3PACK16 = 1000156025,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_444_UNORM_3PACK16 = 1000156026,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G16B16G16R16_422_UNORM = 1000156027,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_B16G16R16G16_422_UNORM = 1000156028,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G16_B16_R16_3PLANE_420_UNORM = 1000156029,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G16_B16R16_2PLANE_420_UNORM = 1000156030,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G16_B16_R16_3PLANE_422_UNORM = 1000156031,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G16_B16R16_2PLANE_422_UNORM = 1000156032,
-		// Provided by SL2_VK_VERSION_1_1
 		SL2_VK_FORMAT_G16_B16_R16_3PLANE_444_UNORM = 1000156033,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_G8_B8R8_2PLANE_444_UNORM = 1000330000,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_G10X6_B10X6R10X6_2PLANE_444_UNORM_3PACK16 = 1000330001,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_G12X4_B12X4R12X4_2PLANE_444_UNORM_3PACK16 = 1000330002,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_G16_B16R16_2PLANE_444_UNORM = 1000330003,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_A4R4G4B4_UNORM_PACK16 = 1000340000,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_A4B4G4R4_UNORM_PACK16 = 1000340001,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_ASTC_4x4_SFLOAT_BLOCK = 1000066000,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_ASTC_5x4_SFLOAT_BLOCK = 1000066001,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_ASTC_5x5_SFLOAT_BLOCK = 1000066002,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_ASTC_6x5_SFLOAT_BLOCK = 1000066003,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_ASTC_6x6_SFLOAT_BLOCK = 1000066004,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_ASTC_8x5_SFLOAT_BLOCK = 1000066005,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_ASTC_8x6_SFLOAT_BLOCK = 1000066006,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_ASTC_8x8_SFLOAT_BLOCK = 1000066007,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_ASTC_10x5_SFLOAT_BLOCK = 1000066008,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_ASTC_10x6_SFLOAT_BLOCK = 1000066009,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_ASTC_10x8_SFLOAT_BLOCK = 1000066010,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_ASTC_10x10_SFLOAT_BLOCK = 1000066011,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_ASTC_12x10_SFLOAT_BLOCK = 1000066012,
-		// Provided by SL2_VK_VERSION_1_3
 		SL2_VK_FORMAT_ASTC_12x12_SFLOAT_BLOCK = 1000066013,
-		// Provided by SL2_VK_IMG_format_pvrtc
 		SL2_VK_FORMAT_PVRTC1_2BPP_UNORM_BLOCK_IMG = 1000054000,
-		// Provided by SL2_VK_IMG_format_pvrtc
 		SL2_VK_FORMAT_PVRTC1_4BPP_UNORM_BLOCK_IMG = 1000054001,
-		// Provided by SL2_VK_IMG_format_pvrtc
 		SL2_VK_FORMAT_PVRTC2_2BPP_UNORM_BLOCK_IMG = 1000054002,
-		// Provided by SL2_VK_IMG_format_pvrtc
 		SL2_VK_FORMAT_PVRTC2_4BPP_UNORM_BLOCK_IMG = 1000054003,
-		// Provided by SL2_VK_IMG_format_pvrtc
 		SL2_VK_FORMAT_PVRTC1_2BPP_SRGB_BLOCK_IMG = 1000054004,
-		// Provided by SL2_VK_IMG_format_pvrtc
 		SL2_VK_FORMAT_PVRTC1_4BPP_SRGB_BLOCK_IMG = 1000054005,
-		// Provided by SL2_VK_IMG_format_pvrtc
 		SL2_VK_FORMAT_PVRTC2_2BPP_SRGB_BLOCK_IMG = 1000054006,
-		// Provided by SL2_VK_IMG_format_pvrtc
 		SL2_VK_FORMAT_PVRTC2_4BPP_SRGB_BLOCK_IMG = 1000054007,
-		// Provided by SL2_VK_NV_optical_flow
+		SL2_VK_FORMAT_ASTC_3x3x3_UNORM_BLOCK_EXT = 1000288000,
+		SL2_VK_FORMAT_ASTC_3x3x3_SRGB_BLOCK_EXT = 1000288001,
+		SL2_VK_FORMAT_ASTC_3x3x3_SFLOAT_BLOCK_EXT = 1000288002,
+		SL2_VK_FORMAT_ASTC_4x3x3_UNORM_BLOCK_EXT = 1000288003,
+		SL2_VK_FORMAT_ASTC_4x3x3_SRGB_BLOCK_EXT = 1000288004,
+		SL2_VK_FORMAT_ASTC_4x3x3_SFLOAT_BLOCK_EXT = 1000288005,
+		SL2_VK_FORMAT_ASTC_4x4x3_UNORM_BLOCK_EXT = 1000288006,
+		SL2_VK_FORMAT_ASTC_4x4x3_SRGB_BLOCK_EXT = 1000288007,
+		SL2_VK_FORMAT_ASTC_4x4x3_SFLOAT_BLOCK_EXT = 1000288008,
+		SL2_VK_FORMAT_ASTC_4x4x4_UNORM_BLOCK_EXT = 1000288009,
+		SL2_VK_FORMAT_ASTC_4x4x4_SRGB_BLOCK_EXT = 1000288010,
+		SL2_VK_FORMAT_ASTC_4x4x4_SFLOAT_BLOCK_EXT = 1000288011,
+		SL2_VK_FORMAT_ASTC_5x4x4_UNORM_BLOCK_EXT = 1000288012,
+		SL2_VK_FORMAT_ASTC_5x4x4_SRGB_BLOCK_EXT = 1000288013,
+		SL2_VK_FORMAT_ASTC_5x4x4_SFLOAT_BLOCK_EXT = 1000288014,
+		SL2_VK_FORMAT_ASTC_5x5x4_UNORM_BLOCK_EXT = 1000288015,
+		SL2_VK_FORMAT_ASTC_5x5x4_SRGB_BLOCK_EXT = 1000288016,
+		SL2_VK_FORMAT_ASTC_5x5x4_SFLOAT_BLOCK_EXT = 1000288017,
+		SL2_VK_FORMAT_ASTC_5x5x5_UNORM_BLOCK_EXT = 1000288018,
+		SL2_VK_FORMAT_ASTC_5x5x5_SRGB_BLOCK_EXT = 1000288019,
+		SL2_VK_FORMAT_ASTC_5x5x5_SFLOAT_BLOCK_EXT = 1000288020,
+		SL2_VK_FORMAT_ASTC_6x5x5_UNORM_BLOCK_EXT = 1000288021,
+		SL2_VK_FORMAT_ASTC_6x5x5_SRGB_BLOCK_EXT = 1000288022,
+		SL2_VK_FORMAT_ASTC_6x5x5_SFLOAT_BLOCK_EXT = 1000288023,
+		SL2_VK_FORMAT_ASTC_6x6x5_UNORM_BLOCK_EXT = 1000288024,
+		SL2_VK_FORMAT_ASTC_6x6x5_SRGB_BLOCK_EXT = 1000288025,
+		SL2_VK_FORMAT_ASTC_6x6x5_SFLOAT_BLOCK_EXT = 1000288026,
+		SL2_VK_FORMAT_ASTC_6x6x6_UNORM_BLOCK_EXT = 1000288027,
+		SL2_VK_FORMAT_ASTC_6x6x6_SRGB_BLOCK_EXT = 1000288028,
+		SL2_VK_FORMAT_ASTC_6x6x6_SFLOAT_BLOCK_EXT = 1000288029,
 		SL2_VK_FORMAT_R16G16_S10_5_NV = 1000464000,
-		// Provided by SL2_VK_KHR_maintenance5
 		SL2_VK_FORMAT_A1B5G5R5_UNORM_PACK16_KHR = 1000470000,
-		// Provided by SL2_VK_KHR_maintenance5
 		SL2_VK_FORMAT_A8_UNORM_KHR = 1000470001,
-		// Provided by SL2_VK_EXT_texture_compression_astc_hdr
 		SL2_VK_FORMAT_ASTC_4x4_SFLOAT_BLOCK_EXT = SL2_VK_FORMAT_ASTC_4x4_SFLOAT_BLOCK,
-		// Provided by SL2_VK_EXT_texture_compression_astc_hdr
 		SL2_VK_FORMAT_ASTC_5x4_SFLOAT_BLOCK_EXT = SL2_VK_FORMAT_ASTC_5x4_SFLOAT_BLOCK,
-		// Provided by SL2_VK_EXT_texture_compression_astc_hdr
 		SL2_VK_FORMAT_ASTC_5x5_SFLOAT_BLOCK_EXT = SL2_VK_FORMAT_ASTC_5x5_SFLOAT_BLOCK,
-		// Provided by SL2_VK_EXT_texture_compression_astc_hdr
 		SL2_VK_FORMAT_ASTC_6x5_SFLOAT_BLOCK_EXT = SL2_VK_FORMAT_ASTC_6x5_SFLOAT_BLOCK,
-		// Provided by SL2_VK_EXT_texture_compression_astc_hdr
 		SL2_VK_FORMAT_ASTC_6x6_SFLOAT_BLOCK_EXT = SL2_VK_FORMAT_ASTC_6x6_SFLOAT_BLOCK,
-		// Provided by SL2_VK_EXT_texture_compression_astc_hdr
 		SL2_VK_FORMAT_ASTC_8x5_SFLOAT_BLOCK_EXT = SL2_VK_FORMAT_ASTC_8x5_SFLOAT_BLOCK,
-		// Provided by SL2_VK_EXT_texture_compression_astc_hdr
 		SL2_VK_FORMAT_ASTC_8x6_SFLOAT_BLOCK_EXT = SL2_VK_FORMAT_ASTC_8x6_SFLOAT_BLOCK,
-		// Provided by SL2_VK_EXT_texture_compression_astc_hdr
 		SL2_VK_FORMAT_ASTC_8x8_SFLOAT_BLOCK_EXT = SL2_VK_FORMAT_ASTC_8x8_SFLOAT_BLOCK,
-		// Provided by SL2_VK_EXT_texture_compression_astc_hdr
 		SL2_VK_FORMAT_ASTC_10x5_SFLOAT_BLOCK_EXT = SL2_VK_FORMAT_ASTC_10x5_SFLOAT_BLOCK,
-		// Provided by SL2_VK_EXT_texture_compression_astc_hdr
 		SL2_VK_FORMAT_ASTC_10x6_SFLOAT_BLOCK_EXT = SL2_VK_FORMAT_ASTC_10x6_SFLOAT_BLOCK,
-		// Provided by SL2_VK_EXT_texture_compression_astc_hdr
 		SL2_VK_FORMAT_ASTC_10x8_SFLOAT_BLOCK_EXT = SL2_VK_FORMAT_ASTC_10x8_SFLOAT_BLOCK,
-		// Provided by SL2_VK_EXT_texture_compression_astc_hdr
 		SL2_VK_FORMAT_ASTC_10x10_SFLOAT_BLOCK_EXT = SL2_VK_FORMAT_ASTC_10x10_SFLOAT_BLOCK,
-		// Provided by SL2_VK_EXT_texture_compression_astc_hdr
 		SL2_VK_FORMAT_ASTC_12x10_SFLOAT_BLOCK_EXT = SL2_VK_FORMAT_ASTC_12x10_SFLOAT_BLOCK,
-		// Provided by SL2_VK_EXT_texture_compression_astc_hdr
 		SL2_VK_FORMAT_ASTC_12x12_SFLOAT_BLOCK_EXT = SL2_VK_FORMAT_ASTC_12x12_SFLOAT_BLOCK,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G8B8G8R8_422_UNORM_KHR = SL2_VK_FORMAT_G8B8G8R8_422_UNORM,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_B8G8R8G8_422_UNORM_KHR = SL2_VK_FORMAT_B8G8R8G8_422_UNORM,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM_KHR = SL2_VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G8_B8R8_2PLANE_420_UNORM_KHR = SL2_VK_FORMAT_G8_B8R8_2PLANE_420_UNORM,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM_KHR = SL2_VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G8_B8R8_2PLANE_422_UNORM_KHR = SL2_VK_FORMAT_G8_B8R8_2PLANE_422_UNORM,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G8_B8_R8_3PLANE_444_UNORM_KHR = SL2_VK_FORMAT_G8_B8_R8_3PLANE_444_UNORM,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_R10X6_UNORM_PACK16_KHR = SL2_VK_FORMAT_R10X6_UNORM_PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_R10X6G10X6_UNORM_2PACK16_KHR = SL2_VK_FORMAT_R10X6G10X6_UNORM_2PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_R10X6G10X6B10X6A10X6_UNORM_4PACK16_KHR = SL2_VK_FORMAT_R10X6G10X6B10X6A10X6_UNORM_4PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G10X6B10X6G10X6R10X6_422_UNORM_4PACK16_KHR = SL2_VK_FORMAT_G10X6B10X6G10X6R10X6_422_UNORM_4PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16_KHR = SL2_VK_FORMAT_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16_KHR = SL2_VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16_KHR = SL2_VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_422_UNORM_3PACK16_KHR = SL2_VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_422_UNORM_3PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G10X6_B10X6R10X6_2PLANE_422_UNORM_3PACK16_KHR = SL2_VK_FORMAT_G10X6_B10X6R10X6_2PLANE_422_UNORM_3PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_444_UNORM_3PACK16_KHR = SL2_VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_444_UNORM_3PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_R12X4_UNORM_PACK16_KHR = SL2_VK_FORMAT_R12X4_UNORM_PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_R12X4G12X4_UNORM_2PACK16_KHR = SL2_VK_FORMAT_R12X4G12X4_UNORM_2PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_R12X4G12X4B12X4A12X4_UNORM_4PACK16_KHR = SL2_VK_FORMAT_R12X4G12X4B12X4A12X4_UNORM_4PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G12X4B12X4G12X4R12X4_422_UNORM_4PACK16_KHR = SL2_VK_FORMAT_G12X4B12X4G12X4R12X4_422_UNORM_4PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_B12X4G12X4R12X4G12X4_422_UNORM_4PACK16_KHR = SL2_VK_FORMAT_B12X4G12X4R12X4G12X4_422_UNORM_4PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_420_UNORM_3PACK16_KHR = SL2_VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_420_UNORM_3PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G12X4_B12X4R12X4_2PLANE_420_UNORM_3PACK16_KHR = SL2_VK_FORMAT_G12X4_B12X4R12X4_2PLANE_420_UNORM_3PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_422_UNORM_3PACK16_KHR = SL2_VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_422_UNORM_3PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G12X4_B12X4R12X4_2PLANE_422_UNORM_3PACK16_KHR = SL2_VK_FORMAT_G12X4_B12X4R12X4_2PLANE_422_UNORM_3PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_444_UNORM_3PACK16_KHR = SL2_VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_444_UNORM_3PACK16,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G16B16G16R16_422_UNORM_KHR = SL2_VK_FORMAT_G16B16G16R16_422_UNORM,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_B16G16R16G16_422_UNORM_KHR = SL2_VK_FORMAT_B16G16R16G16_422_UNORM,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G16_B16_R16_3PLANE_420_UNORM_KHR = SL2_VK_FORMAT_G16_B16_R16_3PLANE_420_UNORM,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G16_B16R16_2PLANE_420_UNORM_KHR = SL2_VK_FORMAT_G16_B16R16_2PLANE_420_UNORM,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G16_B16_R16_3PLANE_422_UNORM_KHR = SL2_VK_FORMAT_G16_B16_R16_3PLANE_422_UNORM,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G16_B16R16_2PLANE_422_UNORM_KHR = SL2_VK_FORMAT_G16_B16R16_2PLANE_422_UNORM,
-		// Provided by SL2_VK_KHR_sampler_ycbcr_conversion
 		SL2_VK_FORMAT_G16_B16_R16_3PLANE_444_UNORM_KHR = SL2_VK_FORMAT_G16_B16_R16_3PLANE_444_UNORM,
-		// Provided by SL2_VK_EXT_ycbcr_2plane_444_formats
 		SL2_VK_FORMAT_G8_B8R8_2PLANE_444_UNORM_EXT = SL2_VK_FORMAT_G8_B8R8_2PLANE_444_UNORM,
-		// Provided by SL2_VK_EXT_ycbcr_2plane_444_formats
 		SL2_VK_FORMAT_G10X6_B10X6R10X6_2PLANE_444_UNORM_3PACK16_EXT = SL2_VK_FORMAT_G10X6_B10X6R10X6_2PLANE_444_UNORM_3PACK16,
-		// Provided by SL2_VK_EXT_ycbcr_2plane_444_formats
 		SL2_VK_FORMAT_G12X4_B12X4R12X4_2PLANE_444_UNORM_3PACK16_EXT = SL2_VK_FORMAT_G12X4_B12X4R12X4_2PLANE_444_UNORM_3PACK16,
-		// Provided by SL2_VK_EXT_ycbcr_2plane_444_formats
 		SL2_VK_FORMAT_G16_B16R16_2PLANE_444_UNORM_EXT = SL2_VK_FORMAT_G16_B16R16_2PLANE_444_UNORM,
-		// Provided by SL2_VK_EXT_4444_formats
 		SL2_VK_FORMAT_A4R4G4B4_UNORM_PACK16_EXT = SL2_VK_FORMAT_A4R4G4B4_UNORM_PACK16,
-		// Provided by SL2_VK_EXT_4444_formats
 		SL2_VK_FORMAT_A4B4G4R4_UNORM_PACK16_EXT = SL2_VK_FORMAT_A4B4G4R4_UNORM_PACK16,
-		SL2_VK_FORMAT_MAX_ENUM														= 0x7FFFFFFF
+		SL2_VK_FORMAT_MAX_ENUM = 0x7FFFFFFF
 	};
 
 	/**
@@ -1226,6 +1140,21 @@ namespace sl2 {
 		SL2_MTLPixelFormatBC6H_RGBUfloat	= 151,	// Compressed format with four unsigned floating-point components.
 		SL2_MTLPixelFormatBC7_RGBAUnorm = 152,	// Compressed format with four normalized unsigned integer components.
 		SL2_MTLPixelFormatBC7_RGBAUnorm_sRGB = 153,	// Compressed format with four normalized unsigned integer components, with conversion between sRGB and linear space.
+
+		SL2_MTLPixelFormatASTC_4x4_HDR = 222,	// ASTC-compressed format with high-dynamic-range content, a block width of 4, and a block height of 4.
+		SL2_MTLPixelFormatASTC_5x4_HDR = 223,	// ASTC-compressed format with high-dynamic range content, a block width of 5, and a block height of 4.
+		SL2_MTLPixelFormatASTC_5x5_HDR = 224,	// ASTC-compressed format with high-dynamic range content, a block width of 5, and a block height of 6.
+		SL2_MTLPixelFormatASTC_6x5_HDR = 225,	// ASTC-compressed format with high-dynamic range content, a block width of 6, and a block height of 5.
+		SL2_MTLPixelFormatASTC_6x6_HDR = 226,	// ASTC-compressed format with high-dynamic range content, a block width of 6, and a block height of 6.
+		SL2_MTLPixelFormatASTC_8x5_HDR = 228,	// ASTC-compressed format with high-dynamic range content, a block width of 8, and a block height of 5.
+		SL2_MTLPixelFormatASTC_8x6_HDR = 229,	// ASTC-compressed format with high-dynamic range content, a block width of 8, and a block height of 6.
+		SL2_MTLPixelFormatASTC_8x8_HDR = 230,	// ASTC-compressed format with high-dynamic range content, a block width of 8, and a block height of 8.
+		SL2_MTLPixelFormatASTC_10x5_HDR = 231,	// ASTC-compressed format with high-dynamic range content, a block width of 10, and a block height of 5.
+		SL2_MTLPixelFormatASTC_10x6_HDR = 232,	// ASTC-compressed format with high-dynamic range content, a block width of 10, and a block height of 6.
+		SL2_MTLPixelFormatASTC_10x8_HDR = 233,	// ASTC-compressed format with high-dynamic range content, a block width of 10, and a block height of 8.
+		SL2_MTLPixelFormatASTC_10x10_HDR = 234,	// ASTC-compressed format with high-dynamic range content, a block width of 10, and a block height of 10.
+		SL2_MTLPixelFormatASTC_12x10_HDR = 235,	// ASTC-compressed format with high-dynamic range content, a block width of 12, and a block height of 10.
+		SL2_MTLPixelFormatASTC_12x12_HDR = 236,	// ASTC-compressed format with high-dynamic range content, a block width of 12, and a block height of 12.
 	};
 
 	/**
@@ -1924,6 +1853,41 @@ namespace sl2 {
 		static bool																	ToRGB8A8( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D,
 			std::vector<uint8_t> &_vAlpha, int32_t _i32Thresh = -0 );
 
+		/**
+		 * Converts an RGBA64F texture to 11-bit R represented as 16-bit values in-place.
+		 * 
+		 * \param _pui8Src The source texture.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 * \param _bSigned Whether to translate the values to a signed format.
+		 **/
+		static void																	ToR11( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D, bool _bSigned );
+
+		/**
+		 * Converts an RGBA64F texture to 11-bit R represented as 16-bit values in-place.
+		 * 
+		 * \param _pui8Src The source texture.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 * \param _bSigned Whether to translate the values to a signed format.
+		 * \param _vGreen Holds the green values.
+		 * \return Returns true if the green buffer was allocated.
+		 **/
+		static bool																	ToRG11( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D,
+			std::vector<uint8_t> &_vGreen, bool _bSigned );
+
+		/**
+		 * Converts an RGBA64F texture to RGBAF32 in-place.
+		 * 
+		 * \param _pui8Src The source texture.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 **/
+		static void																	ToRGBA32F( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D );
+
 
 	protected :
 		// == Types.
@@ -1960,6 +1924,34 @@ namespace sl2 {
 			 */
 			inline bool 															operator != ( const SL2_BLOCK &_bOther ) const;
 		} * LPSL2_BLOCK, * const LPCSL2_BLOCK;
+
+		/** An ASTC Codec image. */
+		struct SL2_ASTC_IMAGE {
+			SL2_ASTC_IMAGE( uint32_t _ui32Bits, uint32_t _ui32X, uint32_t _ui32Y, uint32_t _ui32Z ) :
+				piImage( ::alloc_image( _ui32Bits, _ui32X, _ui32Y, _ui32Z ) ) {
+			}
+			~SL2_ASTC_IMAGE() {
+				if ( piImage ) {
+					::free_image( piImage );
+				}
+			}
+			::astcenc_image *														piImage;
+		};
+
+		/** An ASTC context. */
+		struct SL2_ASTC_CONTEXT {
+			SL2_ASTC_CONTEXT( const astcenc_config * _pcConfig, unsigned int _iThreadCount ) :
+				eError( ::astcenc_context_alloc( _pcConfig, _iThreadCount, &pcContext ) ) {
+			}
+			~SL2_ASTC_CONTEXT() {
+				if ( pcContext ) {
+					::astcenc_context_free( pcContext );
+					pcContext = nullptr;
+				}
+			}
+			::astcenc_context *														pcContext;
+			::astcenc_error															eError;
+		};
 
 
 		// == Members.
@@ -2629,7 +2621,7 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		static bool 																Depth16ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Depth16ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * RGBA64F -> Depth-16 conversion.
@@ -2641,7 +2633,7 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		static bool 																Depth16FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Depth16FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Depth-24 -> RGBA64F conversion.
@@ -2653,7 +2645,7 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		static bool 																Depth24ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Depth24ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * RGBA64F -> Depth-24 conversion.
@@ -2665,7 +2657,7 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		static bool 																Depth24FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Depth24FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Depth-32 -> RGBA64F conversion.
@@ -2677,7 +2669,7 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		static bool 																Depth32ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Depth32ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * RGBA64F -> Depth-32 conversion.
@@ -2689,7 +2681,7 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		static bool 																Depth32FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Depth32FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Depth-32F -> RGBA64F conversion.
@@ -2701,7 +2693,7 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		static bool 																Depth32FToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Depth32FToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * RGBA64F -> Depth-32F conversion.
@@ -2713,7 +2705,7 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		static bool 																Depth32FFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Depth32FFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Depth-24/Stencil-8 -> RGBA64F conversion.
@@ -2725,7 +2717,7 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		static bool 																Depth24S8ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Depth24S8ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * RGBA64F -> Depth-24/Stencil-8 conversion.
@@ -2737,7 +2729,7 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		static bool 																Depth24S8FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Depth24S8FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Depth-32F/Stencil-8 -> RGBA64F conversion.
@@ -2749,7 +2741,7 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		static bool 																Depth32FS8ToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Depth32FS8ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * RGBA64F -> Depth-32F/Stencil-8 conversion.
@@ -2761,7 +2753,7 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		static bool 																Depth32FS8FromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		static bool 																Depth32FS8FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Stencil-X -> RGBA64F conversion.
@@ -3227,8 +3219,8 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		template <unsigned _bSrgb, unsigned _bSigned>
-		static bool 				R11EacToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		template <unsigned _bSigned>
+		static bool 																R11EacToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Generic RGBA64F -> R11 EAC conversion.
@@ -3240,8 +3232,8 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		template <unsigned _bSrgb, unsigned _bSigned>
-		static bool 				R11EacFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		template <unsigned _bSigned>
+		static bool 																R11EacFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * RG11 EAC -> RGBA64F conversion.
@@ -3253,8 +3245,8 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		template <unsigned _bSrgb, unsigned _bSigned>
-		static bool 				RG11EacToRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		template <unsigned _bSigned>
+		static bool 																RG11EacToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Generic RGBA64F -> RG11 EAC conversion.
@@ -3266,16 +3258,111 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		template <unsigned _bSrgb, unsigned _bSigned>
-		static bool 				RG11EacFromRgba32F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		template <unsigned _bSigned>
+		static bool 																RG11EacFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		
+
+		// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		// PVRTC FORMATS
+		// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 		/**
-		 * Thread function for converting a block of texels to DXTn formats.
+		 * Returns the total size of a compressed image given a factor and its width and height.
 		 *
-		 * \param _lpParameter The thread information, stored as a pointer to a SL2_DXT_THREAD_DATA structure.
-		 * \return Returns 0.
+		 * \param _ui32Width Width in pixels.
+		 * \param _ui32Height Height in pixels.
+		 * \param _ui32Depth Unused.
+		 * \param _ui32Factor Multiplier.
+		 * \param _pvParms Unused.
+		 * \return Returns the size of the compressed data.
 		 */
-		//template <unsigned _bSrgb>
-		//static uint32_t				DxtThread( void * _lpParameter );
+		template <unsigned _uW, unsigned _uH>
+		static uint32_t																GetCompressedSizePvrtc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t /*_ui32Factor*/, const void * /*_pvParms*/ ) {
+			return (((_ui32Width + (_uW - 1)) / _uW) * ((_ui32Height + (_uH - 1)) / _uH) * 8) * _ui32Depth;
+		}
+
+		/**
+		 * PVRTC -> RGBA64F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _pfFormat, unsigned _bSrgb>
+		static bool 																PvrtcToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * Generic RGBA64F -> PVRTC conversion.
+		 *
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
+		 * \param _pui8Dst Destination texels.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _pfFormat, unsigned _bSrgb>
+		static bool 																PvrtcFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+
+		// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		// ASTC FORMATS
+		// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		/**
+		 * Returns the total size of a compressed image given a factor and its width and height.
+		 *
+		 * \param _ui32Width Width in pixels.
+		 * \param _ui32Height Height in pixels.
+		 * \param _ui32Depth Unused.
+		 * \param _ui32Factor Multiplier.
+		 * \param _pvParms Unused.
+		 * \return Returns the size of the compressed data.
+		 */
+		template <unsigned _uW, unsigned _uH, unsigned _uD = 1>
+		static uint32_t																GetCompressedSizeAstc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t /*_ui32Factor*/, const void * /*_pvParms*/ ) {
+			return ((_ui32Width + (_uW - 1)) / _uW) * ((_ui32Height + (_uH - 1)) / _uH) * ((_ui32Depth + (_uD - 1)) / _uD) * 16;
+		}
+
+		/**
+		 * ASTC -> RGBA32F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _uiBlockW, unsigned _uiBlockH, unsigned _bSrgb, bool _bHdr = false, unsigned _uiBlockD = 1>
+		static bool 																AstcToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * Generic RGBA32F -> ASTC conversion.
+		 *
+		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _uiBlockW, unsigned _uiBlockH, unsigned _bSrgb, bool _bHdr = false>
+		static bool 																AstcFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * Generic RGBA32F -> ASTC (above 8x8) conversion.
+		 *
+		 * \param _pui8Src Source texels known to be in RGBA32F format.
+		 * \param _pui8Dst Destination texels.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _uiBlockW, unsigned _uiBlockH, unsigned _bSrgb, unsigned _uiBlockD = 1, bool _bHdr = false>
+		static bool 																AstcFromRgba64F_2( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 	};
 	
 
@@ -4895,6 +4982,8 @@ namespace sl2 {
 		const uint64_t * pui64Blocks = reinterpret_cast<const uint64_t *>(_pui8Src);
 		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
 		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+
+		uint32_t ui32DstSliceSize = _ui32Width * _ui32Height;
 		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
 		double dPalette[8];
 		uint8_t ui8Indices[16];
@@ -5014,6 +5103,7 @@ namespace sl2 {
 		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
 		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
 
+		uint32_t ui32DstSliceSize = _ui32Width * _ui32Height;
 		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
 		double dPalette[8];
 		uint8_t ui8Indices[16];
@@ -5122,6 +5212,7 @@ namespace sl2 {
 		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
 		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
 		
+		uint32_t ui32DstSliceSize = _ui32Width * _ui32Height;
 		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
 		double dPaletteR[8];
 		uint8_t ui8IndicesR[16];
@@ -5266,6 +5357,7 @@ namespace sl2 {
 		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
 		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
 		
+		uint32_t ui32DstSliceSize = _ui32Width * _ui32Height;
 		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
 		double dPaletteR[8];
 		uint8_t ui8IndicesR[16];
@@ -5903,8 +5995,8 @@ namespace sl2 {
 	template <unsigned _bSrgb>
 	bool CFormat::Etc2A1FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
 		format = ETC2PACKAGE_RGBA1_NO_MIPMAPS;
-		//::readCompressParams();
-		//::setupAlphaTableAndValtab();
+		::readCompressParams();
+		::setupAlphaTableAndValtab();
 
 		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
 		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
@@ -5956,7 +6048,538 @@ namespace sl2 {
 		}
 		return true;
 	}
-	
+
+	/**
+	 * R11 EAC -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSigned>
+	bool CFormat::R11EacToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_R11_BLOCK {
+			uint64_t ui64Block0;
+		};
+		const SL2_R11_BLOCK * pbbBlocks = reinterpret_cast<const SL2_R11_BLOCK *>(_pui8Src);
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH;
+
+		uint32_t ui32DstSliceSize = _ui32Width * _ui32Height;
+		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+		uint16_t fPaletteRgbUi16[16];
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < ui32BlocksH; ++Y ) {
+				for ( uint32_t X = 0; X < ui32BlocksW; ++X ) {
+					if constexpr ( _bSigned ) {
+						::detexDecompressBlockEAC_SIGNED_R11( reinterpret_cast<const uint8_t *>(&pbbBlocks[Z*ui32SliceSize+Y*ui32BlocksW+X]), 0,
+							0, reinterpret_cast<uint8_t *>(fPaletteRgbUi16) );
+					}
+					else {
+						::detexDecompressBlockEAC_R11( reinterpret_cast<const uint8_t *>(&pbbBlocks[Z*ui32SliceSize+Y*ui32BlocksW+X]), 0,
+							0, reinterpret_cast<uint8_t *>(fPaletteRgbUi16) );
+					}
+
+					for ( uint32_t I = 0; I < 16; ++I ) {
+						uint32_t ui32ThisX = X * 4 + I % 4;
+						uint32_t ui32ThisY = Y * 4 + I / 4;
+						if ( ui32ThisX < _ui32Width && ui32ThisY < _ui32Height ) {
+							SL2_RGBA64F * prgbaRow0 = &prgbaTexels[Z*ui32DstSliceSize+ui32ThisY*_ui32Width+ui32ThisX];
+							if constexpr ( _bSigned ) {
+								(*prgbaRow0).dRgba[SL2_PC_R] = CUtilities::Clamp( int16_t( fPaletteRgbUi16[I] ) / 32767.0, -1.0, 1.0 );
+							}
+							else {
+								(*prgbaRow0).dRgba[SL2_PC_R] = fPaletteRgbUi16[I] / 65535.0;
+							}
+							(*prgbaRow0).dRgba[SL2_PC_G] = 0.0;
+							(*prgbaRow0).dRgba[SL2_PC_B] = 0.0;
+							(*prgbaRow0).dRgba[SL2_PC_A] = 1.0;
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Generic RGBA64F -> R11 EAC conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSigned>
+	bool CFormat::R11EacFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_R11_BLOCK {
+			uint64_t ui64Block1;
+		};
+		format = ETC2PACKAGE_R_NO_MIPMAPS;
+		formatSigned_ = _bSigned;
+		::readCompressParams();
+		::setupAlphaTableAndValtab();
+
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_R11_BLOCK );
+		uint32_t ui32SrcPitch = SL2_ROUND_UP( _ui32Width * sizeof( SL2_RGBA64F ), 4 );
+		uint32_t ui32SrcSlice = ui32SrcPitch * _ui32Height;
+
+		std::vector<uint8_t> vResized;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			SL2_R11_BLOCK * peeDst = reinterpret_cast<SL2_R11_BLOCK *>(_pui8Dst);
+			const uint8_t * pui8Src = _pui8Src;
+			uint32_t ui32X = _ui32Width;
+			uint32_t ui32Y = _ui32Height;
+			uint32_t ui32Z = 1;
+			if ( (_ui32Width % 4) || (_ui32Height % 4) ) {
+				if ( !ExpandTexture( _pui8Src, ui32X, ui32Y, ui32Z,
+					vResized, 4, 4, 1 ) ) { return false; }
+				pui8Src = vResized.data();
+			}
+			if ( pui8Src != vResized.data() ) {
+				if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; }
+				pui8Src = vResized.data();
+			}
+			ToR11( vResized.data(), ui32X, ui32Y, 1, _bSigned );
+
+			for ( uint32_t H = 0; H < ui32BlocksH; ++H ) {
+				for ( uint32_t W = 0; W < ui32BlocksW; ++W ) {
+					SL2_R11_BLOCK & eeDst = peeDst[H*ui32BlocksW+W];
+					::compressBlockAlpha16( const_cast< uint8 *>(pui8Src),
+						W << 2, H << 2,
+						ui32X, ui32Y, reinterpret_cast<uint8 *>(&eeDst.ui64Block1) );
+				}
+			}
+
+			_pui8Dst += ui32SliceSize;
+			_pui8Src += ui32SrcSlice;
+		}
+		return true;
+	}
+
+	/**
+	 * RG11 EAC -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSigned>
+	bool CFormat::RG11EacToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_RG11_BLOCK {
+			uint64_t ui64Block0;
+			uint64_t ui64Block1;
+		};
+		const SL2_RG11_BLOCK * pbbBlocks = reinterpret_cast<const SL2_RG11_BLOCK *>(_pui8Src);
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH;
+
+		uint32_t ui32DstSliceSize = _ui32Width * _ui32Height;
+		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+		uint16_t fPaletteRgbUi16[16*2];
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < ui32BlocksH; ++Y ) {
+				for ( uint32_t X = 0; X < ui32BlocksW; ++X ) {
+					if constexpr ( _bSigned ) {
+						::detexDecompressBlockEAC_SIGNED_RG11( reinterpret_cast<const uint8_t *>(&pbbBlocks[Z*ui32SliceSize+Y*ui32BlocksW+X]), 0,
+							0, reinterpret_cast<uint8_t *>(fPaletteRgbUi16) );
+					}
+					else {
+						::detexDecompressBlockEAC_RG11( reinterpret_cast<const uint8_t *>(&pbbBlocks[Z*ui32SliceSize+Y*ui32BlocksW+X]), 0,
+							0, reinterpret_cast<uint8_t *>(fPaletteRgbUi16) );
+					}
+
+					for ( uint32_t I = 0; I < 16; ++I ) {
+						uint32_t ui32ThisX = X * 4 + I % 4;
+						uint32_t ui32ThisY = Y * 4 + I / 4;
+						if ( ui32ThisX < _ui32Width && ui32ThisY < _ui32Height ) {
+							SL2_RGBA64F * prgbaRow0 = &prgbaTexels[Z*ui32DstSliceSize+ui32ThisY*_ui32Width+ui32ThisX];
+							if constexpr ( _bSigned ) {
+								(*prgbaRow0).dRgba[SL2_PC_R] = CUtilities::Clamp( int16_t( fPaletteRgbUi16[I*2+0] ) / 32767.0, -1.0, 1.0 );
+								(*prgbaRow0).dRgba[SL2_PC_G] = CUtilities::Clamp( int16_t( fPaletteRgbUi16[I*2+1] ) / 32767.0, -1.0, 1.0 );
+							}
+							else {
+								(*prgbaRow0).dRgba[SL2_PC_R] = fPaletteRgbUi16[I*2+0] / 65535.0;
+								(*prgbaRow0).dRgba[SL2_PC_G] = fPaletteRgbUi16[I*2+1] / 65535.0;
+							}
+							(*prgbaRow0).dRgba[SL2_PC_B] = 0.0;
+							(*prgbaRow0).dRgba[SL2_PC_A] = 1.0;
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Generic RGBA64F -> RG11 EAC conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _bSigned>
+	bool CFormat::RG11EacFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_RG11_BLOCK {
+			uint64_t ui64Block0;
+			uint64_t ui64Block1;
+		};
+		format = ETC2PACKAGE_R_NO_MIPMAPS;
+		formatSigned_ = _bSigned;
+		::readCompressParams();
+		::setupAlphaTableAndValtab();
+
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_RG11_BLOCK );
+		uint32_t ui32SrcPitch = SL2_ROUND_UP( _ui32Width * sizeof( SL2_RGBA64F ), 4 );
+		uint32_t ui32SrcSlice = ui32SrcPitch * _ui32Height;
+
+		std::vector<uint8_t> vResized, vGreen;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			SL2_RG11_BLOCK * peeDst = reinterpret_cast<SL2_RG11_BLOCK *>(_pui8Dst);
+			const uint8_t * pui8Src = _pui8Src;
+			uint32_t ui32X = _ui32Width;
+			uint32_t ui32Y = _ui32Height;
+			uint32_t ui32Z = 1;
+			if ( (_ui32Width % 4) || (_ui32Height % 4) ) {
+				if ( !ExpandTexture( _pui8Src, ui32X, ui32Y, ui32Z,
+					vResized, 4, 4, 1 ) ) { return false; }
+				pui8Src = vResized.data();
+			}
+			if ( pui8Src != vResized.data() ) {
+				if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; }
+				pui8Src = vResized.data();
+			}
+			ToRG11( vResized.data(), ui32X, ui32Y, 1, vGreen, _bSigned );
+
+			for ( uint32_t H = 0; H < ui32BlocksH; ++H ) {
+				for ( uint32_t W = 0; W < ui32BlocksW; ++W ) {
+					SL2_RG11_BLOCK & eeDst = peeDst[H*ui32BlocksW+W];
+					::compressBlockAlpha16( const_cast< uint8 *>(pui8Src),
+						W << 2, H << 2,
+						ui32X, ui32Y, reinterpret_cast<uint8 *>(&eeDst.ui64Block0) );
+					::compressBlockAlpha16( vGreen.data(),
+						W << 2, H << 2,
+						ui32X, ui32Y, reinterpret_cast<uint8 *>(&eeDst.ui64Block1) );
+				}
+			}
+
+			_pui8Dst += ui32SliceSize;
+			_pui8Src += ui32SrcSlice;
+		}
+		return true;
+	}
+
+	/**
+	 * PVRTC -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _pfFormat, unsigned _bSrgb>
+	bool CFormat::PvrtcToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		pvrtexlib::PVRTextureHeader thTexHeader( _pfFormat,
+			_ui32Width, _ui32Height, _ui32Depth,
+			1U, 1U, 1U,
+			_bSrgb ? PVRTLCS_sRGB : PVRTLCS_Linear,
+			PVRTLVT_UnsignedByteNorm );
+		pvrtexlib::PVRTexture tTex( thTexHeader, _pui8Src );
+
+		uint32_t ui32DstSliceSize = _ui32Width * _ui32Height;
+		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+
+		if ( !tTex.Transcode( PVRTGENPIXELID4( 'r', 'g', 'b', 'a', 32, 32, 32, 32 ),
+			PVRTLVT_SignedFloat,
+			PVRTLCS_Linear,
+			PVRTLCQ_PVRTCBest ) ) { return false; }
+		
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			uint8_t * pui8Data = static_cast<uint8_t *>(tTex.GetTextureDataPointer( 0U, 0U, 0U, Z ));
+			if ( !pui8Data ) { return false; }
+
+			SL2_RGBA * prgbSrc = reinterpret_cast<SL2_RGBA *>(pui8Data);
+			for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+				for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+					SL2_RGBA64F * prgbaDst = &prgbaTexels[Z*ui32DstSliceSize+H*_ui32Width+W];
+					SL2_RGBA * prgbaSrc = &prgbSrc[H*_ui32Width+W];
+					
+					prgbaDst->dRgba[SL2_PC_R] = prgbaSrc->fRgba[0];
+					prgbaDst->dRgba[SL2_PC_G] = prgbaSrc->fRgba[1];
+					prgbaDst->dRgba[SL2_PC_B] = prgbaSrc->fRgba[2];
+					prgbaDst->dRgba[SL2_PC_A] = prgbaSrc->fRgba[3];
+
+					if constexpr ( _bSrgb ) {
+						(*prgbaDst).dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( (*prgbaDst).dRgba[SL2_PC_R] );
+						(*prgbaDst).dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( (*prgbaDst).dRgba[SL2_PC_G] );
+						(*prgbaDst).dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( (*prgbaDst).dRgba[SL2_PC_B] );
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Generic RGBA64F -> PVRTC conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _pfFormat, unsigned _bSrgb>
+	bool CFormat::PvrtcFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		if ( _ui32Width != _ui32Height ) { return false; }
+		if ( !CUtilities::IsPo2( _ui32Width ) ) { return false; }
+		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * pkifdData = reinterpret_cast<const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *>(_pvParms);
+		const uint8_t * pui8Src = _pui8Src;
+		uint32_t ui32X = _ui32Width;
+		uint32_t ui32Y = _ui32Height;
+		uint32_t ui32Z = _ui32Depth;
+		std::vector<uint8_t> vResized;
+		if ( !CopyTexture( _pui8Src, ui32X, ui32Y, 1, vResized ) ) { return false; };
+
+		if constexpr ( _bSrgb ) {
+			ApplyGamma( vResized.data(), ui32X, ui32Y, 1, -2.2 );
+		}
+
+		pui8Src = vResized.data();
+		ToRGBA32F( vResized.data(), ui32X, ui32Y, _ui32Depth );
+
+
+		uint32_t ui32DstSliceSize = pkifdData->pfCompSizeFunc( _ui32Width, _ui32Height, 1, pkifdData->ui32Flags, _pvParms );
+
+		pvrtexlib::PVRTextureHeader thTexHeader( PVRTGENPIXELID4( 'r', 'g', 'b', 'a', 32, 32, 32, 32 ),
+			ui32X, ui32Y, ui32Z,
+			1U, 1U, 1U, PVRTLCS_Linear, PVRTLVT_SignedFloat );
+		pvrtexlib::PVRTexture tTex( thTexHeader, pui8Src );
+
+		if ( !tTex.Transcode( _pfFormat,
+			PVRTLVT_UnsignedByteNorm,
+			_bSrgb ? PVRTLCS_sRGB : PVRTLCS_Linear,
+			PVRTLCQ_PVRTCBest ) ) { return false; }
+
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			void * pvData = tTex.GetTextureDataPointer( 0U, 0U, 0U, Z );
+			if ( !pvData ) { return false; }
+			std::memcpy( _pui8Dst, pvData, ui32DstSliceSize );
+
+			_pui8Dst += ui32DstSliceSize;
+		}
+		return true;
+	}
+
+	/**
+	 * ASTC -> RGBA32F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _uiBlockW, unsigned _uiBlockH, unsigned _bSrgb, bool _bHdr, unsigned _uiBlockD>
+	bool CFormat::AstcToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * pkifdData = reinterpret_cast<const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *>(_pvParms);
+		::astcenc_config cConfig {};
+		::astcenc_profile pProfile = _bHdr ? ASTCENC_PRF_HDR : ASTCENC_PRF_LDR;
+		unsigned int iFlags = ASTCENC_FLG_USE_ALPHA_WEIGHT | ASTCENC_FLG_USE_PERCEPTUAL;
+		
+		::astcenc_error eStatus = ::astcenc_config_init( pProfile, _uiBlockW, _uiBlockH, _uiBlockD,
+			ASTCENC_PRE_FASTEST, iFlags, &cConfig );
+		if ( ASTCENC_SUCCESS != eStatus ) { return false; }
+
+		SL2_ASTC_CONTEXT acContext( &cConfig, 1 );
+		if ( ASTCENC_SUCCESS != acContext.eError ) { return false; }
+		::astcenc_swizzle sSwizzle = { ASTCENC_SWZ_R, ASTCENC_SWZ_G, ASTCENC_SWZ_B, ASTCENC_SWZ_A };
+
+		uint32_t ui32X = (_ui32Width + (_uiBlockW - 1)) / _uiBlockW * _uiBlockW;
+		uint32_t ui32Y = (_ui32Height + (_uiBlockH - 1)) / _uiBlockH * _uiBlockH;
+		uint32_t ui32Z = (_ui32Depth + (_uiBlockD - 1)) / _uiBlockD * _uiBlockD;
+
+		
+		uint32_t ui32DstSliceSize = pkifdData->pfCompSizeFunc( ui32X, ui32Y, ui32Z, pkifdData->ui32Flags, _pvParms );
+
+		SL2_ASTC_IMAGE aiImage( 32, ui32X, ui32Y, ui32Z );
+		eStatus = ::astcenc_decompress_image(
+			acContext.pcContext, _pui8Src, ui32DstSliceSize, aiImage.piImage, &sSwizzle,
+			0 );
+		::astcenc_decompress_reset( acContext.pcContext );
+		if ( ASTCENC_SUCCESS != eStatus ) { return false; }
+
+		SL2_RGBA64F * prgbaTexels = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+		uint32_t ui32SrcSliceSize = _ui32Width * _ui32Height;
+		for ( uint32_t D = 0; D < ui32Z; ++D ) {
+			SL2_RGBA * prgbSrc = static_cast<SL2_RGBA *>(aiImage.piImage->data[D]);
+			for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+				for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+					SL2_RGBA64F * prgbaDst = &prgbaTexels[D*ui32SrcSliceSize+H*_ui32Width+W];
+					prgbaDst->dRgba[SL2_PC_R] = prgbSrc[H*ui32X+W].fRgba[0];
+					prgbaDst->dRgba[SL2_PC_G] = prgbSrc[H*ui32X+W].fRgba[1];
+					prgbaDst->dRgba[SL2_PC_B] = prgbSrc[H*ui32X+W].fRgba[2];
+					prgbaDst->dRgba[SL2_PC_A] = prgbSrc[H*ui32X+W].fRgba[3];
+				}
+			}
+		}
+		
+		return true;
+		
+	}
+
+	/**
+	 * Generic RGBA32F -> ASTC conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA32F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _uiBlockW, unsigned _uiBlockH, unsigned _bSrgb, bool _bHdr>
+	bool CFormat::AstcFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		if constexpr ( _bHdr ) {
+			return AstcFromRgba64F_2<_uiBlockW, _uiBlockH, _bSrgb, 1, _bHdr>( _pui8Src, _pui8Dst, _ui32Width, _ui32Height, _ui32Depth, _pvParms );
+		}
+		if constexpr ( _uiBlockW > 8 || _uiBlockH > 8 ) {
+			return AstcFromRgba64F_2<_uiBlockW, _uiBlockH, _bSrgb, 1, _bHdr>( _pui8Src, _pui8Dst, _ui32Width, _ui32Height, _ui32Depth, _pvParms );
+		}
+		struct SL2_ETC1_BLOCK {
+			uint64_t ui64Block0;
+		};
+		uint32_t ui32BlocksW = (_ui32Width + 3) / 4;
+		uint32_t ui32BlocksH = (_ui32Height + 3) / 4;
+		uint32_t ui32SliceSize = ui32BlocksW * ui32BlocksH * sizeof( SL2_ETC1_BLOCK );
+		uint32_t ui32SrcPitch = SL2_ROUND_UP( _ui32Width * sizeof( SL2_RGBA64F ), 4 );
+		uint32_t ui32SrcSlice = ui32SrcPitch * _ui32Height;
+
+		std::vector<uint8_t> vResized, vTmp;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			const uint8_t * pui8Src = _pui8Src;
+			uint32_t ui32X = _ui32Width;
+			uint32_t ui32Y = _ui32Height;
+			uint32_t ui32Z = 1;
+			if ( (_ui32Width % _uiBlockW) || (_ui32Height % _uiBlockH) ) {
+				if ( !ExpandTexture( _pui8Src, ui32X, ui32Y, ui32Z,
+					vResized, _uiBlockW, _uiBlockH, 1 ) ) { return false; }
+				pui8Src = vResized.data();
+			}
+			if constexpr ( _bSrgb ) {
+				if ( pui8Src != vResized.data() ) {
+					if ( !CopyTexture( _pui8Src, ui32X, ui32Y, ui32Z, vResized ) ) { return false; };
+				}
+				ApplyGamma( vResized.data(), ui32X, ui32Y, ui32Z, -2.2 );
+				pui8Src = vResized.data();
+			}
+			if ( pui8Src != vResized.data() ) {
+				if ( !CopyTexture( _pui8Src, ui32X, ui32Y, ui32Z, vResized ) ) { return false; };
+				pui8Src = vResized.data();
+			}
+			ToRGBA8( vResized.data(), ui32X, ui32Y, ui32Z );
+
+			::rgba_surface rsSurface;
+			rsSurface.ptr = const_cast<uint8_t *>(pui8Src);
+			rsSurface.width = ui32X;
+			rsSurface.height = ui32Y;
+			rsSurface.stride = ui32X * sizeof( SL2_RGBA_UNORM );
+			::CompressBlocksASTC( &rsSurface, _pui8Dst, &m_aesAstcSettings );
+
+			_pui8Dst += ui32SliceSize;
+			_pui8Src += ui32SrcSlice;
+		}
+		return true;
+	}
+
+	/**
+	 * Generic RGBA32F -> ASTC (above 8x8) conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA32F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template <unsigned _uiBlockW, unsigned _uiBlockH, unsigned _bSrgb, unsigned _uiBlockD, bool _bHdr>
+	bool CFormat::AstcFromRgba64F_2( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * pkifdData = reinterpret_cast<const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *>(_pvParms);
+		::astcenc_config cConfig {};
+		::astcenc_profile pProfile = _bHdr ? ASTCENC_PRF_HDR : ASTCENC_PRF_LDR;
+		unsigned int iFlags = ASTCENC_FLG_USE_ALPHA_WEIGHT | ASTCENC_FLG_USE_PERCEPTUAL;
+		
+		::astcenc_error eStatus = ::astcenc_config_init( pProfile, _uiBlockW, _uiBlockH, _uiBlockD,
+			ASTCENC_PRE_FASTEST, iFlags, &cConfig );
+		if ( ASTCENC_SUCCESS != eStatus ) { return false; }
+		cConfig.cw_r_weight = float( m_lCurCoeffs.dRgb[0] );
+		cConfig.cw_g_weight = float( m_lCurCoeffs.dRgb[1] );
+		cConfig.cw_b_weight = float( m_lCurCoeffs.dRgb[2] );
+
+		SL2_ASTC_CONTEXT acContext( &cConfig, 1 );
+		if ( ASTCENC_SUCCESS != acContext.eError ) { return false; }
+		::astcenc_swizzle sSwizzle = { ASTCENC_SWZ_R, ASTCENC_SWZ_G, ASTCENC_SWZ_B, ASTCENC_SWZ_A };
+
+		std::vector<uint8_t> vResized;
+		const uint8_t * pui8Src = _pui8Src;
+		uint32_t ui32X = _ui32Width;
+		uint32_t ui32Y = _ui32Height;
+		uint32_t ui32Z = _ui32Depth;
+		if ( (_ui32Width % _uiBlockW) || (_ui32Height % _uiBlockH) || (_ui32Depth % _uiBlockD) ) {
+			if ( !ExpandTexture( _pui8Src, ui32X, ui32Y, ui32Z,
+				vResized, _uiBlockW, _uiBlockH, _uiBlockD ) ) { return false; }
+			pui8Src = vResized.data();
+		}
+
+		
+		uint32_t ui32DstSliceSize = pkifdData->pfCompSizeFunc( ui32X, ui32Y, ui32Z, pkifdData->ui32Flags, _pvParms );
+
+		SL2_ASTC_IMAGE aiImage( 32, ui32X, ui32Y, ui32Z );
+		const SL2_RGBA64F * prgbaTexels = reinterpret_cast<const SL2_RGBA64F *>(pui8Src);
+		uint32_t ui32SrcSliceSize = ui32X * ui32Y;
+		for ( uint32_t D = 0; D < ui32Z; ++D ) {
+			SL2_RGBA * prgbDst = static_cast<SL2_RGBA *>(aiImage.piImage->data[D]);
+			for ( uint32_t H = 0; H < ui32Y; ++H ) {
+				for ( uint32_t W = 0; W < ui32X; ++W ) {
+					const SL2_RGBA64F * prgbaSrc = &prgbaTexels[D*ui32SrcSliceSize+H*ui32X+W];
+					prgbDst[H*ui32X+W].fRgba[0] = float( prgbaSrc->dRgba[SL2_PC_R] );
+					prgbDst[H*ui32X+W].fRgba[1] = float( prgbaSrc->dRgba[SL2_PC_G] );
+					prgbDst[H*ui32X+W].fRgba[2] = float( prgbaSrc->dRgba[SL2_PC_B] );
+					prgbDst[H*ui32X+W].fRgba[3] = float( prgbaSrc->dRgba[SL2_PC_A] );
+				}
+			}
+		}
+
+
+		eStatus = ::astcenc_compress_image(
+			acContext.pcContext, aiImage.piImage, &sSwizzle,
+			_pui8Dst, ui32DstSliceSize, 0 );
+		if ( ASTCENC_SUCCESS != eStatus ) { return false; }
+		return true;
+	}
+
 }	// namespace sl2
 
 #pragma warning( pop )

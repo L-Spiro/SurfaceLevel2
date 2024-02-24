@@ -231,6 +231,14 @@ namespace sl2 {
 			if ( _tValue > _tHigh ) { return _tHigh; }
 			return _tValue;
 		}
+
+		/**
+		 * Is the given value a power of 2?
+		 * 
+		 * \param _ui32Val The value.
+		 * \return Returns true if the given value is a power of 2.
+		 **/
+		static inline bool									IsPo2( uint32_t _ui32Val );
 	};
 
 
@@ -260,6 +268,17 @@ namespace sl2 {
 		return _dVal <= 0.0031308 ?
 			_dVal * 12.92 :
 			1.055 * std::pow( _dVal, 1.0 / 2.4 ) - 0.055;
+	}
+
+	/**
+	 * Is the given value a power of 2?
+	 * 
+	 * \param _ui32Val The value.
+	 * \return Returns true if the given value is a power of 2.
+	 **/
+	inline bool CUtilities::IsPo2( uint32_t _ui32Val ) {
+		if ( !_ui32Val ) { return false; }
+		return (_ui32Val & (_ui32Val - 1UL)) == 0;
 	}
 
 }	// namespace sl2

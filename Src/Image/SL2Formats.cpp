@@ -276,91 +276,211 @@ namespace sl2 {
 																																							0, 128, 4, 4, 1, 1, 1, false, true, false, false, CFormat::GetCompressedSizeBc, SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Bc7uToRgba64F<false>, CFormat::Bc7uFromRgba64F<false> },
 		{ SL2_ID( VK_FORMAT_BC7_SRGB_BLOCK, DXGI_FORMAT_BC7_UNORM_SRGB, MTLPixelFormatBC7_RGBAUnorm_sRGB, GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_BC ),
 																																							0, 128, 4, 4, 1, 1, 1, false, true, false, false, CFormat::GetCompressedSizeBc, SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Bc7uToRgba64F<true>, CFormat::Bc7uFromRgba64F<true> },
-
 		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_ETC1_RGB8_OES, GL_UNSIGNED_BYTE, GL_RGB ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ETC ),
 																																							0, 64, 4, 4, 1, 1, 1, false, true, false, false, CFormat::GetCompressedSizeEtc, SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Etc1ToRgba64F, CFormat::Etc1FromRgba64F },
-		
 		{ SL2_ID( VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatETC2_RGB8, GL_COMPRESSED_RGB8_ETC2, GL_UNSIGNED_BYTE, GL_RGB ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ETC ),
 																																							0, 64, 4, 4, 1, 1, 1, false, true, false, false, CFormat::GetCompressedSizeEtc, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Etc2ToRgba64F<false>, CFormat::Etc2FromRgba64F<false> },
-
 		{ SL2_ID( VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatETC2_RGB8A1, GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ETC ),
 																																							0, 64, 4, 4, 1, 1, 1, false, true, false, false, CFormat::GetCompressedSizeEtc, SL2_TBITS(8, 8, 8, 1), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Etc2A1ToRgba64F<false>, CFormat::Etc2A1FromRgba64F<false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 64, 4, 4, 1, 1, 1, false, true, false, nullptr, CFormat::Etc2A1ToRgba64F<false>, CFormat::Etc2A1FromRgba64F<false> },
-		// 
 		{ SL2_ID( VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatEAC_RGBA8, GL_COMPRESSED_RGBA8_ETC2_EAC, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ETC ),
 																																							0, 128, 4, 4, 1, 1, 1, false, true, false, false, CFormat::GetCompressedSizeEtc, SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Etc2EacToRgba64F<false>, CFormat::Etc2EacFromRgba64F<false> },
 		{ SL2_ID( VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatETC2_RGB8_sRGB, GL_COMPRESSED_SRGB8_ETC2, GL_UNSIGNED_BYTE, GL_RGB ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ETC ),
 																																							0, 64, 4, 4, 1, 1, 1, true, true, false, false, CFormat::GetCompressedSizeEtc, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Etc2ToRgba64F<true>, CFormat::Etc2FromRgba64F<true> },
-
 		{ SL2_ID( VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatETC2_RGB8A1_sRGB, GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ETC ),
 																																							0, 64, 4, 4, 1, 1, 1, true, true, false, false, CFormat::GetCompressedSizeEtc, SL2_TBITS(8, 8, 8, 1), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Etc2A1ToRgba64F<true>, CFormat::Etc2A1FromRgba64F<true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 64, 4, 4, 1, 1, 1, true, true, false, nullptr, CFormat::Etc2A1ToRgba64F<true>, CFormat::Etc2A1FromRgba64F<true> },
 		{ SL2_ID( VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatEAC_RGBA8_sRGB, GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ETC ),
 																																							0, 128, 4, 4, 1, 1, 1, true, true, false, false, CFormat::GetCompressedSizeEtc, SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Etc2EacToRgba64F<true>, CFormat::Etc2EacFromRgba64F<true> },
-		//{ SL2_KIF_GL_COMPRESSED_R11_EAC, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RED, 0x02, 0, 64, 4, 4, 1, 1, 1, false, true, false, nullptr, CFormat::R11EacToRgba32F<false, false>, CFormat::R11EacFromRgba32F<false, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RG11_EAC, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RG, 0x02, 0, 128, 4, 4, 1, 1, 1, false, true, false, nullptr, CFormat::RG11EacToRgba32F<false, false>, CFormat::RG11EacFromRgba32F<false, false> },
-		//{ SL2_KIF_GL_COMPRESSED_SIGNED_R11_EAC, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RED, 0x02, 0, 64, 4, 4, 1, 1, 1, false, true, false, nullptr, CFormat::R11EacToRgba32F<false, true>, CFormat::R11EacFromRgba32F<false, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SIGNED_RG11_EAC, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RG, 0x02, 0, 128, 4, 4, 1, 1, 1, false, true, false, nullptr, CFormat::RG11EacToRgba32F<false, true>, CFormat::RG11EacFromRgba32F<false, true> },
-		//{ SL2_KIF_GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGB, 0x02, 0, 64, 8, 4, 1, 2, 2, false, true, false, &(GetCompressedSizePvrtc<8, 4>), CPvrtc::PvrtcToRgba32F<SL2_PF_PCRTC_2_RGB_V1, false>, CPvrtc::PvrtcFromRgba32F<SL2_PF_PCRTC_2_RGB_V1, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGB, 0x02, 0, 64, 4, 4, 1, 2, 2, false, true, false, &(GetCompressedSizePvrtc<4, 4>), CPvrtc::PvrtcToRgba32F<SL2_PF_PCRTC_4_RGB_V1, false>, CPvrtc::PvrtcFromRgba32F<SL2_PF_PCRTC_4_RGB_V1, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 64, 8, 4, 1, 2, 2, false, true, false, &(GetCompressedSizePvrtc<8, 4>), CPvrtc::PvrtcToRgba32F<SL2_PF_PCRTC_2_RGBA_V1, false>, CPvrtc::PvrtcFromRgba32F<SL2_PF_PCRTC_2_RGBA_V1, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 64, 4, 4, 1, 2, 2, false, true, false, &(GetCompressedSizePvrtc<4, 4>), CPvrtc::PvrtcToRgba32F<SL2_PF_PCRTC_4_RGBA_V1, false>, CPvrtc::PvrtcFromRgba32F<SL2_PF_PCRTC_4_RGBA_V1, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_PVRTC_2BPPV2_IMG, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 64, 8, 4, 1, 1, 1, false, true, false, &(GetCompressedSizePvrtc<8, 4>), CPvrtc::PvrtcToRgba32F<SL2_PF_PCRTC_2_RGBA_V2, false>, CPvrtc::PvrtcFromRgba32F<SL2_PF_PCRTC_2_RGBA_V2, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_PVRTC_4BPPV2_IMG, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 64, 4, 4, 1, 1, 1, false, true, false, &(GetCompressedSizePvrtc<4, 4>), CPvrtc::PvrtcToRgba32F<SL2_PF_PCRTC_4_RGBA_V2, false>, CPvrtc::PvrtcFromRgba32F<SL2_PF_PCRTC_4_RGBA_V2, false> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB_PVRTC_2BPPV1_EXT, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGB, 0x02, 0, 64, 8, 4, 1, 2, 2, true, true, false, &(GetCompressedSizePvrtc<8, 4>), CPvrtc::PvrtcToRgba32F<SL2_PF_PCRTC_2_RGB_V1, true>, CPvrtc::PvrtcFromRgba32F<SL2_PF_PCRTC_2_RGB_V1, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB_PVRTC_4BPPV1_EXT, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGB, 0x02, 0, 64, 4, 4, 1, 2, 2, true, true, false, &(GetCompressedSizePvrtc<4, 4>), CPvrtc::PvrtcToRgba32F<SL2_PF_PCRTC_4_RGB_V1, true>, CPvrtc::PvrtcFromRgba32F<SL2_PF_PCRTC_4_RGB_V1, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB_ALPHA_PVRTC_2BPPV1_EXT, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 64, 8, 4, 1, 2, 2, true, true, false, &(GetCompressedSizePvrtc<8, 4>), CPvrtc::PvrtcToRgba32F<SL2_PF_PCRTC_2_RGBA_V1, true>, CPvrtc::PvrtcFromRgba32F<SL2_PF_PCRTC_2_RGBA_V1, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB_ALPHA_PVRTC_4BPPV1_EXT, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 64, 4, 4, 1, 2, 2, true, true, false, &(GetCompressedSizePvrtc<4, 4>), CPvrtc::PvrtcToRgba32F<SL2_PF_PCRTC_4_RGBA_V1, true>, CPvrtc::PvrtcFromRgba32F<SL2_PF_PCRTC_4_RGBA_V1, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB_ALPHA_PVRTC_2BPPV2_IMG, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 64, 8, 4, 1, 1, 1, true, true, false, &(GetCompressedSizePvrtc<8, 4>), CPvrtc::PvrtcToRgba32F<SL2_PF_PCRTC_2_RGBA_V2, true>, CPvrtc::PvrtcFromRgba32F<SL2_PF_PCRTC_2_RGBA_V2, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB_ALPHA_PVRTC_4BPPV2_IMG, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 64, 4, 4, 1, 1, 1, true, true, false, &(GetCompressedSizePvrtc<4, 4>), CPvrtc::PvrtcToRgba32F<SL2_PF_PCRTC_4_RGBA_V2, true>, CPvrtc::PvrtcFromRgba32F<SL2_PF_PCRTC_4_RGBA_V2, true> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_4x4_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 4, 4, 1, 1, 1, false, true, false, &(CFormat::GetCompressedSizeAstc<4, 4>), CAstc::AstcToRgba32F<SL2_PF_ASTC_4_4, 4, 4, false>, CAstc::AstcFromRgba32F<SL2_PF_ASTC_4_4, 4, 4, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_5x4_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 5, 4, 1, 1, 1, false, true, false, &(CFormat::GetCompressedSizeAstc<5, 4>), CAstc::AstcToRgba32F<SL2_PF_ASTC_5_4, 5, 4, false>, CAstc::AstcFromRgba32F<SL2_PF_ASTC_5_4, 5, 4, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_5x5_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 5, 5, 1, 1, 1, false, true, false, &(CFormat::GetCompressedSizeAstc<5, 5>), CAstc::AstcToRgba32F<SL2_PF_ASTC_5_5, 5, 5, false>, CAstc::AstcFromRgba32F<SL2_PF_ASTC_5_5, 5, 5, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_6x5_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 6, 5, 1, 1, 1, false, true, false, &(CFormat::GetCompressedSizeAstc<6, 5>), CAstc::AstcToRgba32F<SL2_PF_ASTC_6_5, 6, 5, false>, CAstc::AstcFromRgba32F<SL2_PF_ASTC_6_5, 6, 5, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_6x6_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 6, 6, 1, 1, 1, false, true, false, &(CFormat::GetCompressedSizeAstc<6, 6>), CAstc::AstcToRgba32F<SL2_PF_ASTC_6_6, 6, 6, false>, CAstc::AstcFromRgba32F<SL2_PF_ASTC_6_6, 6, 6, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_8x5_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 8, 5, 1, 1, 1, false, true, false, &(CFormat::GetCompressedSizeAstc<8, 5>), CAstc::AstcToRgba32F<SL2_PF_ASTC_8_5, 8, 5, false>, CAstc::AstcFromRgba32F<SL2_PF_ASTC_8_5, 8, 5, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_8x6_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 8, 6, 1, 1, 1, false, true, false, &(CFormat::GetCompressedSizeAstc<8, 6>), CAstc::AstcToRgba32F<SL2_PF_ASTC_8_6, 8, 6, false>, CAstc::AstcFromRgba32F<SL2_PF_ASTC_8_6, 8, 6, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_8x8_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 8, 8, 1, 1, 1, false, true, false, &(CFormat::GetCompressedSizeAstc<8, 8>), CAstc::AstcToRgba32F<SL2_PF_ASTC_8_8, 8, 8, false>, CAstc::AstcFromRgba32F<SL2_PF_ASTC_8_8, 8, 8, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_10x5_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 10, 5, 1, 1, 1, false, true, false, &(CFormat::GetCompressedSizeAstc<10, 5>), CAstc::AstcToRgba32F<SL2_PF_ASTC_10_5, 10, 5, false>, CAstc::Astc2FromRgba32F<SL2_PF_ASTC_10_5, 10, 5, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_10x6_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 10, 6, 1, 1, 1, false, true, false, &(CFormat::GetCompressedSizeAstc<10, 6>), CAstc::AstcToRgba32F<SL2_PF_ASTC_10_6, 10, 6, false>, CAstc::Astc2FromRgba32F<SL2_PF_ASTC_10_6, 10, 6, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_10x8_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 10, 8, 1, 1, 1, false, true, false, &(CFormat::GetCompressedSizeAstc<10, 8>), CAstc::AstcToRgba32F<SL2_PF_ASTC_10_8, 10, 8, false>, CAstc::Astc2FromRgba32F<SL2_PF_ASTC_10_8, 10, 8, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_10x10_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 10, 10, 1, 1, 1, false, true, false, &(CFormat::GetCompressedSizeAstc<10, 10>), CAstc::AstcToRgba32F<SL2_PF_ASTC_10_10, 10, 10, false>, CAstc::Astc2FromRgba32F<SL2_PF_ASTC_10_10, 10, 10, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_12x10_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 12, 10, 1, 1, 1, false, true, false, &(CFormat::GetCompressedSizeAstc<12, 10>), CAstc::AstcToRgba32F<SL2_PF_ASTC_12_10, 12, 10, false>, CAstc::Astc2FromRgba32F<SL2_PF_ASTC_12_10, 12, 10, false> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_12x12_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 12, 12, 1, 1, 1, false, true, false, &(CFormat::GetCompressedSizeAstc<12, 12>), CAstc::AstcToRgba32F<SL2_PF_ASTC_12_12, 12, 12, false>, CAstc::Astc2FromRgba32F<SL2_PF_ASTC_12_12, 12, 12, false> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 4, 4, 1, 1, 1, true, true, false, &(CFormat::GetCompressedSizeAstc<4, 4>), CAstc::AstcToRgba32F<SL2_PF_ASTC_4_4, 4, 4, true>, CAstc::AstcFromRgba32F<SL2_PF_ASTC_4_4, 4, 4, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 5, 4, 1, 1, 1, true, true, false, &(CFormat::GetCompressedSizeAstc<5, 4>), CAstc::AstcToRgba32F<SL2_PF_ASTC_5_4, 5, 4, true>, CAstc::AstcFromRgba32F<SL2_PF_ASTC_5_4, 5, 4, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 5, 5, 1, 1, 1, true, true, false, &(CFormat::GetCompressedSizeAstc<5, 5>), CAstc::AstcToRgba32F<SL2_PF_ASTC_5_5, 5, 5, true>, CAstc::AstcFromRgba32F<SL2_PF_ASTC_5_5, 5, 5, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 6, 5, 1, 1, 1, true, true, false, &(CFormat::GetCompressedSizeAstc<6, 5>), CAstc::AstcToRgba32F<SL2_PF_ASTC_6_5, 6, 5, true>, CAstc::AstcFromRgba32F<SL2_PF_ASTC_6_5, 6, 5, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 6, 6, 1, 1, 1, true, true, false, &(CFormat::GetCompressedSizeAstc<6, 6>), CAstc::AstcToRgba32F<SL2_PF_ASTC_6_6, 6, 6, true>, CAstc::AstcFromRgba32F<SL2_PF_ASTC_6_6, 6, 6, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 8, 5, 1, 1, 1, true, true, false, &(CFormat::GetCompressedSizeAstc<8, 5>), CAstc::AstcToRgba32F<SL2_PF_ASTC_8_5, 8, 5, true>, CAstc::AstcFromRgba32F<SL2_PF_ASTC_8_5, 8, 5, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 8, 6, 1, 1, 1, true, true, false, &(CFormat::GetCompressedSizeAstc<8, 6>), CAstc::AstcToRgba32F<SL2_PF_ASTC_8_6, 8, 6, true>, CAstc::AstcFromRgba32F<SL2_PF_ASTC_8_6, 8, 6, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 8, 8, 1, 1, 1, true, true, false, &(CFormat::GetCompressedSizeAstc<8, 8>), CAstc::AstcToRgba32F<SL2_PF_ASTC_8_8, 8, 8, true>, CAstc::AstcFromRgba32F<SL2_PF_ASTC_8_8, 8, 8, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 10, 5, 1, 1, 1, true, true, false, &(CFormat::GetCompressedSizeAstc<10, 5>), CAstc::AstcToRgba32F<SL2_PF_ASTC_10_5, 10, 5, true>, CAstc::Astc2FromRgba32F<SL2_PF_ASTC_10_5, 10, 5, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 10, 6, 1, 1, 1, true, true, false, &(CFormat::GetCompressedSizeAstc<10, 6>), CAstc::AstcToRgba32F<SL2_PF_ASTC_10_6, 10, 6, true>, CAstc::Astc2FromRgba32F<SL2_PF_ASTC_10_6, 10, 6, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 10, 8, 1, 1, 1, true, true, false, &(CFormat::GetCompressedSizeAstc<10, 8>), CAstc::AstcToRgba32F<SL2_PF_ASTC_10_8, 10, 8, true>, CAstc::Astc2FromRgba32F<SL2_PF_ASTC_10_8, 10, 8, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 10, 10, 1, 1, 1, true, true, false, &(CFormat::GetCompressedSizeAstc<10, 10>), CAstc::AstcToRgba32F<SL2_PF_ASTC_10_10, 10, 10, true>, CAstc::Astc2FromRgba32F<SL2_PF_ASTC_10_10, 10, 10, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 12, 10, 1, 1, 1, true, true, false, &(CFormat::GetCompressedSizeAstc<12, 10>), CAstc::AstcToRgba32F<SL2_PF_ASTC_12_10, 12, 10, true>, CAstc::Astc2FromRgba32F<SL2_PF_ASTC_12_10, 12, 10, true> },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 12, 12, 1, 1, 1, true, true, false, &(CFormat::GetCompressedSizeAstc<12, 12>), CAstc::AstcToRgba32F<SL2_PF_ASTC_12_12, 12, 12, true>, CAstc::Astc2FromRgba32F<SL2_PF_ASTC_12_12, 12, 12, true> },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_3x3x3_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 3, 3, 3, 1, 1, false, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_4x3x3_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 4, 3, 3, 1, 1, false, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_4x4x3_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 4, 4, 3, 1, 1, false, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_4x4x4_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 4, 4, 4, 1, 1, false, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_5x4x4_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 5, 4, 4, 1, 1, false, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_5x5x4_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 5, 5, 4, 1, 1, false, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_5x5x5_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 5, 5, 5, 1, 1, false, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_6x5x5_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 6, 5, 5, 1, 1, false, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_6x6x5_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 6, 6, 5, 1, 1, false, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_RGBA_ASTC_6x6x6_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 6, 6, 6, 1, 1, false, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_3x3x3_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 3, 3, 3, 1, 1, true, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x3x3_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 4, 3, 3, 1, 1, true, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4x3_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 4, 4, 3, 1, 1, true, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4x4_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 4, 4, 4, 1, 1, true, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4x4_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 5, 4, 4, 1, 1, true, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5x4_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 5, 5, 4, 1, 1, true, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5x5_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 5, 5, 5, 1, 1, true, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5x5_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 6, 5, 5, 1, 1, true, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6x5_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 6, 6, 5, 1, 1, true, true, false, nullptr },
-		//{ SL2_KIF_GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6x6_OES, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 6, 6, 6, 1, 1, true, true, false, nullptr },
+																																								
+		{ SL2_ID( VK_FORMAT_EAC_R11_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatEAC_R11Unorm, GL_COMPRESSED_R11_EAC, GL_UNSIGNED_BYTE, GL_RED ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ETC ),
+																																							0, 64, 4, 4, 1, 1, 1, false, true, false, false, CFormat::GetCompressedSizeEtc, SL2_TBITS(11, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::R11EacToRgba64F<false>, CFormat::R11EacFromRgba64F<false> },
+		{ SL2_ID( VK_FORMAT_EAC_R11G11_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatEAC_RG11Unorm, GL_COMPRESSED_RG11_EAC, GL_UNSIGNED_BYTE, GL_RG ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ETC ),
+																																							0, 128, 4, 4, 1, 1, 1, false, true, false, false, CFormat::GetCompressedSizeEtc, SL2_TBITS(11, 11, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::RG11EacToRgba64F<false>, CFormat::RG11EacFromRgba64F<false> },
+		{ SL2_ID( VK_FORMAT_EAC_R11_SNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatEAC_R11Snorm, GL_COMPRESSED_SIGNED_R11_EAC, GL_UNSIGNED_BYTE, GL_RED ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ETC ),
+																																							0, 64, 4, 4, 1, 1, 1, true, true, false, false, CFormat::GetCompressedSizeEtc, SL2_TBITS(11, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::R11EacToRgba64F<true>, CFormat::R11EacFromRgba64F<true> },
+		{ SL2_ID( VK_FORMAT_EAC_R11G11_SNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatEAC_RG11Snorm, GL_COMPRESSED_SIGNED_RG11_EAC, GL_UNSIGNED_BYTE, GL_RG ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ETC ),
+																																							0, 128, 4, 4, 1, 1, 1, false, true, false, false, CFormat::GetCompressedSizeEtc, SL2_TBITS(11, 11, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::RG11EacToRgba64F<true>, CFormat::RG11EacFromRgba64F<true> },
+
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatPVRTC_RGB_2BPP, GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG, GL_UNSIGNED_BYTE, GL_RGB ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_PVRTC ),
+																																							0, 64, 8, 4, 1, 1, 1, false, true, false, false, &(GetCompressedSizePvrtc<8, 4>), SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::PvrtcToRgba64F<PVRTLPF_PVRTCI_2bpp_RGB, false>, CFormat::PvrtcFromRgba64F<PVRTLPF_PVRTCI_2bpp_RGB, false> },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatPVRTC_RGB_4BPP, GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG, GL_UNSIGNED_BYTE, GL_RGB ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_PVRTC ),
+																																							0, 64, 4, 4, 1, 1, 1, false, true, false, false, &(GetCompressedSizePvrtc<4, 4>), SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::PvrtcToRgba64F<PVRTLPF_PVRTCI_4bpp_RGB, false>, CFormat::PvrtcFromRgba64F<PVRTLPF_PVRTCI_4bpp_RGB, false> },
+		{ SL2_ID( VK_FORMAT_PVRTC1_2BPP_UNORM_BLOCK_IMG, DXGI_FORMAT_UNKNOWN, MTLPixelFormatPVRTC_RGBA_2BPP, GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_PVRTC ),
+																																							0, 64, 8, 4, 1, 1, 1, false, true, false, false, &(GetCompressedSizePvrtc<8, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::PvrtcToRgba64F<PVRTLPF_PVRTCI_2bpp_RGBA, false>, CFormat::PvrtcFromRgba64F<PVRTLPF_PVRTCI_2bpp_RGBA, false> },
+		{ SL2_ID( VK_FORMAT_PVRTC1_4BPP_UNORM_BLOCK_IMG, DXGI_FORMAT_UNKNOWN, MTLPixelFormatPVRTC_RGBA_4BPP, GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_PVRTC ),
+																																							0, 64, 4, 4, 1, 1, 1, false, true, false, false, &(GetCompressedSizePvrtc<4, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::PvrtcToRgba64F<PVRTLPF_PVRTCI_4bpp_RGBA, false>, CFormat::PvrtcFromRgba64F<PVRTLPF_PVRTCI_4bpp_RGBA, false> },
+		{ SL2_ID( VK_FORMAT_PVRTC2_2BPP_UNORM_BLOCK_IMG, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_RGBA_PVRTC_2BPPV2_IMG, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_PVRTC ),
+																																							0, 64, 8, 4, 1, 1, 1, false, true, false, false, &(GetCompressedSizePvrtc<8, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::PvrtcToRgba64F<PVRTLPF_PVRTCII_2bpp, false>, CFormat::PvrtcFromRgba64F<PVRTLPF_PVRTCII_2bpp, false> },
+		{ SL2_ID( VK_FORMAT_PVRTC2_4BPP_UNORM_BLOCK_IMG, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_RGBA_PVRTC_4BPPV2_IMG, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_PVRTC ),
+																																							0, 64, 4, 4, 1, 1, 1, false, true, false, false, &(GetCompressedSizePvrtc<4, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::PvrtcToRgba64F<PVRTLPF_PVRTCII_4bpp, false>, CFormat::PvrtcFromRgba64F<PVRTLPF_PVRTCII_4bpp, false> },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatPVRTC_RGB_2BPP_sRGB, GL_COMPRESSED_SRGB_PVRTC_2BPPV1_EXT, GL_UNSIGNED_BYTE, GL_RGB ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_PVRTC ),
+																																							0, 64, 8, 4, 1, 1, 1, true, true, false, false, &(GetCompressedSizePvrtc<8, 4>), SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::PvrtcToRgba64F<PVRTLPF_PVRTCI_2bpp_RGB, true>, CFormat::PvrtcFromRgba64F<PVRTLPF_PVRTCI_2bpp_RGB, true> },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatPVRTC_RGB_4BPP_sRGB, GL_COMPRESSED_SRGB_PVRTC_4BPPV1_EXT, GL_UNSIGNED_BYTE, GL_RGB ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_PVRTC ),
+																																							0, 64, 4, 4, 1, 1, 1, true, true, false, false, &(GetCompressedSizePvrtc<4, 4>), SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::PvrtcToRgba64F<PVRTLPF_PVRTCI_4bpp_RGB, true>, CFormat::PvrtcFromRgba64F<PVRTLPF_PVRTCI_4bpp_RGB, true> },
+		{ SL2_ID( VK_FORMAT_PVRTC1_2BPP_SRGB_BLOCK_IMG, DXGI_FORMAT_UNKNOWN, MTLPixelFormatPVRTC_RGBA_2BPP_sRGB, GL_COMPRESSED_SRGB_ALPHA_PVRTC_2BPPV1_EXT, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_PVRTC ),
+																																							0, 64, 8, 4, 1, 1, 1, true, true, false, false, &(GetCompressedSizePvrtc<8, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::PvrtcToRgba64F<PVRTLPF_PVRTCI_2bpp_RGBA, true>, CFormat::PvrtcFromRgba64F<PVRTLPF_PVRTCI_2bpp_RGBA, true> },
+		{ SL2_ID( VK_FORMAT_PVRTC1_4BPP_SRGB_BLOCK_IMG, DXGI_FORMAT_UNKNOWN, MTLPixelFormatPVRTC_RGBA_4BPP_sRGB, GL_COMPRESSED_SRGB_ALPHA_PVRTC_4BPPV1_EXT, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_PVRTC ),
+																																							0, 64, 4, 4, 1, 1, 1, true, true, false, false, &(GetCompressedSizePvrtc<4, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::PvrtcToRgba64F<PVRTLPF_PVRTCI_4bpp_RGBA, true>, CFormat::PvrtcFromRgba64F<PVRTLPF_PVRTCI_4bpp_RGBA, true> },
+		{ SL2_ID( VK_FORMAT_PVRTC2_2BPP_SRGB_BLOCK_IMG, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_SRGB_ALPHA_PVRTC_2BPPV2_IMG, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_PVRTC ),
+																																							0, 64, 8, 4, 1, 1, 1, true, true, false, false, &(GetCompressedSizePvrtc<8, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::PvrtcToRgba64F<PVRTLPF_PVRTCII_2bpp, true>, CFormat::PvrtcFromRgba64F<PVRTLPF_PVRTCII_2bpp, true> },
+		{ SL2_ID( VK_FORMAT_PVRTC2_4BPP_SRGB_BLOCK_IMG, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_SRGB_ALPHA_PVRTC_4BPPV2_IMG, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_PVRTC ),
+																																							0, 64, 4, 4, 1, 1, 1, true, true, false, false, &(GetCompressedSizePvrtc<4, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::PvrtcToRgba64F<PVRTLPF_PVRTCII_4bpp, true>, CFormat::PvrtcFromRgba64F<PVRTLPF_PVRTCII_4bpp, true> },
+
+
+		{ SL2_ID( VK_FORMAT_ASTC_4x4_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_4x4_LDR, GL_COMPRESSED_RGBA_ASTC_4x4_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 4, 4, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<4, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<4, 4, false>, CFormat::AstcFromRgba64F<4, 4, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_5x4_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_5x4_LDR, GL_COMPRESSED_RGBA_ASTC_5x4_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 5, 4, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<5, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<5, 4, false>, CFormat::AstcFromRgba64F<5, 4, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_5x5_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_5x5_LDR, GL_COMPRESSED_RGBA_ASTC_5x5_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 5, 5, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<5, 5>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<5, 5, false>, CFormat::AstcFromRgba64F<5, 5, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_6x5_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_6x5_LDR, GL_COMPRESSED_RGBA_ASTC_6x5_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 6, 5, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<6, 5>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<6, 5, false>, CFormat::AstcFromRgba64F<6, 5, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_6x6_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_6x6_LDR, GL_COMPRESSED_RGBA_ASTC_6x6_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 6, 6, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<6, 6>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<6, 6, false>, CFormat::AstcFromRgba64F<6, 6, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_8x5_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_8x5_LDR, GL_COMPRESSED_RGBA_ASTC_8x5_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 8, 5, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<8, 5>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<8, 5, false>, CFormat::AstcFromRgba64F<8, 5, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_8x6_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_8x6_LDR, GL_COMPRESSED_RGBA_ASTC_8x6_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 8, 6, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<8, 6>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<8, 6, false>, CFormat::AstcFromRgba64F<8, 6, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_8x8_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_8x8_LDR, GL_COMPRESSED_RGBA_ASTC_8x8_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 8, 8, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<8, 8>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<8, 8, false>, CFormat::AstcFromRgba64F<8, 8, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_10x5_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_10x5_LDR, GL_COMPRESSED_RGBA_ASTC_10x5_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 10, 5, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<10, 5>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<10, 5, false>, CFormat::AstcFromRgba64F<10, 5, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_10x6_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_10x6_LDR, GL_COMPRESSED_RGBA_ASTC_10x6_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 10, 6, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<10, 6>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<10, 6, false>, CFormat::AstcFromRgba64F<10, 6, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_10x8_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_10x8_LDR, GL_COMPRESSED_RGBA_ASTC_10x8_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 10, 8, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<10, 8>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<10, 8, false>, CFormat::AstcFromRgba64F<10, 8, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_10x10_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_10x10_LDR, GL_COMPRESSED_RGBA_ASTC_10x10_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 10, 10, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<10, 10>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<10, 10, false>, CFormat::AstcFromRgba64F<10, 10, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_12x10_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_12x10_LDR, GL_COMPRESSED_RGBA_ASTC_12x10_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 12, 10, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<12, 10>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<12, 10, false>, CFormat::AstcFromRgba64F<12, 10, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_12x12_UNORM_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_12x12_LDR, GL_COMPRESSED_RGBA_ASTC_12x12_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 12, 12, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<12, 12>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<12, 12, false>, CFormat::AstcFromRgba64F<12, 12, false> },
+
+
+		{ SL2_ID( VK_FORMAT_ASTC_4x4_SRGB_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_4x4_sRGB, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 4, 4, 1, 1, 1, true, true, false, false, &(GetCompressedSizeAstc<4, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<4, 4, true>, CFormat::AstcFromRgba64F<4, 4, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_5x4_SRGB_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_5x4_sRGB, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 5, 4, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<5, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<5, 4, true>, CFormat::AstcFromRgba64F<5, 4, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_5x5_SRGB_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_5x5_sRGB, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 5, 5, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<5, 5>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<5, 5, true>, CFormat::AstcFromRgba64F<5, 5, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_6x5_SRGB_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_6x5_sRGB, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 6, 5, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<6, 5>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<6, 5, true>, CFormat::AstcFromRgba64F<6, 5, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_6x6_SRGB_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_6x6_sRGB, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 6, 6, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<6, 6>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<6, 6, true>, CFormat::AstcFromRgba64F<6, 6, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_8x5_SRGB_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_8x5_sRGB, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 8, 5, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<8, 5>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<8, 5, true>, CFormat::AstcFromRgba64F<8, 5, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_8x6_SRGB_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_8x6_sRGB, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 8, 6, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<8, 6>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<8, 6, true>, CFormat::AstcFromRgba64F<8, 6, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_8x8_SRGB_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_8x8_sRGB, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 8, 8, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<8, 8>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<8, 8, true>, CFormat::AstcFromRgba64F<8, 8, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_10x5_SRGB_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_10x5_sRGB, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 10, 5, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<10, 5>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<10, 5, true>, CFormat::AstcFromRgba64F<10, 5, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_10x6_SRGB_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_10x6_sRGB, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 10, 6, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<10, 6>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<10, 6, true>, CFormat::AstcFromRgba64F<10, 6, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_10x8_SRGB_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_10x8_sRGB, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 10, 8, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<10, 8>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<10, 8, true>, CFormat::AstcFromRgba64F<10, 8, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_10x10_SRGB_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_10x10_sRGB, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 10, 10, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<10, 10>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<10, 10, true>, CFormat::AstcFromRgba64F<10, 10, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_12x10_SRGB_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_12x10_sRGB, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 12, 10, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<12, 10>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<12, 10, true>, CFormat::AstcFromRgba64F<12, 10, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_12x12_SRGB_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_12x12_sRGB, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 12, 12, 1, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<12, 12>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<12, 12, true>, CFormat::AstcFromRgba64F<12, 12, true> },
+				
+
+
+		{ SL2_ID( VK_FORMAT_ASTC_4x4_SFLOAT_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_4x4_HDR, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 4, 4, 1, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<4, 4>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<4, 4, false, true>, CFormat::AstcFromRgba64F<4, 4, false, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_5x4_SFLOAT_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_5x4_HDR, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 5, 4, 1, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<5, 4>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<5, 4, false, true>, CFormat::AstcFromRgba64F<5, 4, false, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_5x5_SFLOAT_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_5x5_HDR, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 5, 5, 1, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<5, 5>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<5, 5, false, true>, CFormat::AstcFromRgba64F<5, 5, false, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_6x5_SFLOAT_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_6x5_HDR, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 6, 5, 1, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<6, 5>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<6, 5, false, true>, CFormat::AstcFromRgba64F<6, 5, false, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_6x6_SFLOAT_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_6x6_HDR, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 6, 6, 1, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<6, 6>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<6, 6, false, true>, CFormat::AstcFromRgba64F<6, 6, false, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_8x5_SFLOAT_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_8x5_HDR, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 8, 5, 1, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<8, 5>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<8, 5, false, true>, CFormat::AstcFromRgba64F<8, 5, false, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_8x6_SFLOAT_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_8x6_HDR, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 8, 6, 1, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<8, 6>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<8, 6, false, true>, CFormat::AstcFromRgba64F<8, 6, false, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_8x8_SFLOAT_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_8x8_HDR, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 8, 8, 1, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<8, 8>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<8, 8, false, true>, CFormat::AstcFromRgba64F<8, 8, false, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_10x5_SFLOAT_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_10x5_HDR, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 10, 5, 1, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<10, 5>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<10, 5, false, true>, CFormat::AstcFromRgba64F<10, 5, false, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_10x6_SFLOAT_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_10x6_HDR, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 10, 6, 1, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<10, 6>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<10, 6, false, true>, CFormat::AstcFromRgba64F<10, 6, false, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_10x8_SFLOAT_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_10x8_HDR, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 10, 8, 1, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<10, 8>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<10, 8, false, true>, CFormat::AstcFromRgba64F<10, 8, false, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_10x10_SFLOAT_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_10x10_HDR, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 10, 10, 1, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<10, 10>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<10, 10, false, true>, CFormat::AstcFromRgba64F<10, 10, false, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_12x10_SFLOAT_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_12x10_HDR, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 12, 10, 1, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<12, 10>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<12, 10, false, true>, CFormat::AstcFromRgba64F<12, 10, false, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_12x12_SFLOAT_BLOCK, DXGI_FORMAT_UNKNOWN, MTLPixelFormatASTC_12x12_HDR, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 12, 12, 1, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<12, 12>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<12, 12, false, true>, CFormat::AstcFromRgba64F<12, 12, false, true> },
+
+
+		{ SL2_ID( VK_FORMAT_ASTC_3x3x3_UNORM_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_RGBA_ASTC_3x3x3_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 3, 3, 3, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<3, 3, 3>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<3, 3, false, false, 3>, CFormat::AstcFromRgba64F_2<3, 3, false, 3, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_4x3x3_UNORM_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_RGBA_ASTC_4x3x3_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 4, 3, 3, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<4, 3, 3>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<4, 3, false, false, 3>, CFormat::AstcFromRgba64F_2<4, 3, false, 3, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_4x4x3_UNORM_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_RGBA_ASTC_4x4x3_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 4, 4, 3, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<4, 4, 3>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<4, 4, false, false, 3>, CFormat::AstcFromRgba64F_2<4, 4, false, 3, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_4x4x4_UNORM_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_RGBA_ASTC_4x4x4_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 4, 4, 4, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<4, 4, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<4, 4, false, false, 4>, CFormat::AstcFromRgba64F_2<4, 4, false, 4, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_5x4x4_UNORM_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_RGBA_ASTC_5x4x4_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 5, 4, 4, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<5, 4, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<5, 4, false, false, 4>, CFormat::AstcFromRgba64F_2<5, 4, false, 4, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_5x5x4_UNORM_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_RGBA_ASTC_5x5x4_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 5, 5, 4, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<5, 5, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<5, 5, false, false, 4>, CFormat::AstcFromRgba64F_2<5, 5, false, 4, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_5x5x5_UNORM_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_RGBA_ASTC_5x5x5_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 5, 5, 5, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<5, 5, 5>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<5, 5, false, false, 5>, CFormat::AstcFromRgba64F_2<5, 5, false, 5, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_6x5x5_UNORM_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_RGBA_ASTC_6x5x5_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 6, 5, 5, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<6, 5, 5>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<6, 5, false, false, 5>, CFormat::AstcFromRgba64F_2<6, 5, false, 5, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_6x6x5_UNORM_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_RGBA_ASTC_6x6x5_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 6, 6, 5, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<6, 6, 5>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<6, 6, false, false, 5>, CFormat::AstcFromRgba64F_2<6, 6, false, 5, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_6x6x6_UNORM_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_RGBA_ASTC_6x6x6_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 6, 6, 6, 1, 1, false, true, false, false, &(GetCompressedSizeAstc<6, 6, 6>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<6, 6, false, false, 6>, CFormat::AstcFromRgba64F_2<6, 6, false, 6, false> },
+
+
+		{ SL2_ID( VK_FORMAT_ASTC_3x3x3_SRGB_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_3x3x3_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 3, 3, 3, 1, 1, true, true, false, false, &(GetCompressedSizeAstc<3, 3, 3>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<3, 3, true, false, 3>, CFormat::AstcFromRgba64F_2<3, 3, true, 3, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_4x3x3_SRGB_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x3x3_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 4, 3, 3, 1, 1, true, true, false, false, &(GetCompressedSizeAstc<4, 3, 3>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<4, 3, true, false, 3>, CFormat::AstcFromRgba64F_2<4, 3, true, 3, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_4x4x3_SRGB_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4x3_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 4, 4, 3, 1, 1, true, true, false, false, &(GetCompressedSizeAstc<4, 4, 3>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<4, 4, true, false, 3>, CFormat::AstcFromRgba64F_2<4, 4, true, 3, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_4x4x4_SRGB_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4x4_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 4, 4, 4, 1, 1, true, true, false, false, &(GetCompressedSizeAstc<4, 4, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<4, 4, true, false, 4>, CFormat::AstcFromRgba64F_2<4, 4, true, 4, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_5x4x4_SRGB_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4x4_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 5, 4, 4, 1, 1, true, true, false, false, &(GetCompressedSizeAstc<5, 4, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<5, 4, true, false, 4>, CFormat::AstcFromRgba64F_2<5, 4, true, 4, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_5x5x4_SRGB_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5x4_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 5, 5, 4, 1, 1, true, true, false, false, &(GetCompressedSizeAstc<5, 5, 4>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<5, 5, true, false, 4>, CFormat::AstcFromRgba64F_2<5, 5, true, 4, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_5x5x5_SRGB_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5x5_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 5, 5, 5, 1, 1, true, true, false, false, &(GetCompressedSizeAstc<5, 5, 5>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<5, 5, true, false, 5>, CFormat::AstcFromRgba64F_2<5, 5, true, 5, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_6x5x5_SRGB_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5x5_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 6, 5, 5, 1, 1, true, true, false, false, &(GetCompressedSizeAstc<6, 5, 5>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<6, 5, true, false, 5>, CFormat::AstcFromRgba64F_2<6, 5, true, 5, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_6x6x5_SRGB_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6x5_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 6, 6, 5, 1, 1, true, true, false, false, &(GetCompressedSizeAstc<6, 6, 5>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<6, 6, true, false, 5>, CFormat::AstcFromRgba64F_2<6, 6, true, 5, false> },
+		{ SL2_ID( VK_FORMAT_ASTC_6x6x6_SRGB_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6x6_OES, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 6, 6, 6, 1, 1, true, true, false, false, &(GetCompressedSizeAstc<6, 6, 6>), SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<6, 6, true, false, 6>, CFormat::AstcFromRgba64F_2<6, 6, true, 6, false> },
+
+		{ SL2_ID( VK_FORMAT_ASTC_3x3x3_SFLOAT_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 3, 3, 3, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<3, 3, 3>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<3, 3, false, true, 3>, CFormat::AstcFromRgba64F_2<3, 3, false, 3, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_4x3x3_SFLOAT_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 4, 3, 3, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<4, 3, 3>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<4, 3, false, true, 3>, CFormat::AstcFromRgba64F_2<4, 3, false, 3, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_4x4x3_SFLOAT_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 4, 4, 3, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<4, 4, 3>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<4, 4, false, true, 3>, CFormat::AstcFromRgba64F_2<4, 4, false, 3, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_4x4x4_SFLOAT_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 4, 4, 4, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<4, 4, 4>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<4, 4, false, true, 4>, CFormat::AstcFromRgba64F_2<4, 4, false, 4, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_5x4x4_SFLOAT_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 5, 4, 4, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<5, 4, 4>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<5, 4, false, true, 4>, CFormat::AstcFromRgba64F_2<5, 4, false, 4, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_5x5x4_SFLOAT_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 5, 5, 4, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<5, 5, 4>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<5, 5, false, true, 4>, CFormat::AstcFromRgba64F_2<5, 5, false, 4, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_5x5x5_SFLOAT_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 5, 5, 5, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<5, 5, 5>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<5, 5, false, true, 5>, CFormat::AstcFromRgba64F_2<5, 5, false, 5, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_6x5x5_SFLOAT_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 6, 5, 5, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<6, 5, 5>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<6, 5, false, true, 5>, CFormat::AstcFromRgba64F_2<6, 5, false, 5, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_6x6x5_SFLOAT_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 6, 6, 5, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<6, 6, 5>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<6, 6, false, true, 5>, CFormat::AstcFromRgba64F_2<6, 6, false, 5, true> },
+		{ SL2_ID( VK_FORMAT_ASTC_6x6x6_SFLOAT_BLOCK_EXT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_ASTC ),
+																																							0, 128, 6, 6, 6, 1, 1, false, true, false, true, &(GetCompressedSizeAstc<6, 6, 6>), SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::AstcToRgba64F<6, 6, false, true, 6>, CFormat::AstcFromRgba64F_2<6, 6, false, 6, true> },
+
 		//{ SL2_KIF_GL_ATC_RGB_AMD, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGB, 0x02, 0, 64, 4, 4, 1, 1, 1, false, true, false, nullptr },
 		//{ SL2_KIF_GL_ATC_RGBA_EXPLICIT_ALPHA_AMD, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 4, 4, 1, 1, 1, false, true, false, nullptr },
 		//{ SL2_KIF_GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_RGBA, 0x02, 0, 128, 4, 4, 1, 1, 1, false, true, false, nullptr },
@@ -380,18 +500,18 @@ namespace sl2 {
 		//{ SL2_KIF_GL_COLOR_INDEX8_EXT, SL2_KT_0, SL2_KBIF_0, 0x00, 0, 0, 1, 1, 1, 1, 1, false, false, false, nullptr },
 		//{ SL2_KIF_GL_COLOR_INDEX12_EXT, SL2_KT_0, SL2_KBIF_0, 0x00, 0, 0, 1, 1, 1, 1, 1, false, false, false, nullptr },
 		//{ SL2_KIF_GL_COLOR_INDEX16_EXT, SL2_KT_0, SL2_KBIF_0, 0x00, 0, 0, 1, 1, 1, 1, 1, false, false, false, nullptr },
-		//{ SL2_KIF_GL_DEPTH_COMPONENT16, SL2_KT_GL_UNSIGNED_SHORT, SL2_KBIF_GL_DEPTH_COMPONENT, 0x08, 0, 16, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::Depth16ToRgba32F, CFormat::Depth16FromRgba32F },
-		//{ SL2_KIF_GL_DEPTH_COMPONENT24, SL2_KT_GL_UNSIGNED_INT, SL2_KBIF_GL_DEPTH_COMPONENT, 0x08, 0, 32, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::Depth24ToRgba32F, CFormat::Depth24FromRgba32F },
-		//{ SL2_KIF_GL_DEPTH_COMPONENT32, SL2_KT_GL_UNSIGNED_INT, SL2_KBIF_GL_DEPTH_COMPONENT, 0x08, 0, 32, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::Depth32ToRgba32F, CFormat::Depth32FromRgba32F },
-		//{ SL2_KIF_GL_DEPTH_COMPONENT32F, SL2_KT_GL_FLOAT, SL2_KBIF_GL_DEPTH_COMPONENT, 0x08, 0, 32, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::Depth32FToRgba32F, CFormat::Depth32FFromRgba32F },
-		//{ SL2_KIF_GL_DEPTH_COMPONENT32F_NV, SL2_KT_GL_FLOAT, SL2_KBIF_GL_DEPTH_COMPONENT, 0x08, 0, 32, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::Depth32FToRgba32F, CFormat::Depth32FFromRgba32F },
+		//{ SL2_KIF_GL_DEPTH_COMPONENT16, SL2_KT_GL_UNSIGNED_SHORT, SL2_KBIF_GL_DEPTH_COMPONENT, 0x08, 0, 16, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F },
+		//{ SL2_KIF_GL_DEPTH_COMPONENT24, SL2_KT_GL_UNSIGNED_INT, SL2_KBIF_GL_DEPTH_COMPONENT, 0x08, 0, 32, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::Depth24ToRgba64F, CFormat::Depth24FromRgba64F },
+		//{ SL2_KIF_GL_DEPTH_COMPONENT32, SL2_KT_GL_UNSIGNED_INT, SL2_KBIF_GL_DEPTH_COMPONENT, 0x08, 0, 32, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::Depth32ToRgba64F, CFormat::Depth32FromRgba64F },
+		//{ SL2_KIF_GL_DEPTH_COMPONENT32F, SL2_KT_GL_FLOAT, SL2_KBIF_GL_DEPTH_COMPONENT, 0x08, 0, 32, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::Depth32FToRgba64F, CFormat::Depth32FFromRgba64F },
+		//{ SL2_KIF_GL_DEPTH_COMPONENT32F_NV, SL2_KT_GL_FLOAT, SL2_KBIF_GL_DEPTH_COMPONENT, 0x08, 0, 32, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::Depth32FToRgba64F, CFormat::Depth32FFromRgba64F },
 		//{ SL2_KIF_GL_STENCIL_INDEX1, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_STENCIL_INDEX, 0x10, 0, 8, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::StencilXToRgba64F<uint8_t, 1>, CFormat::StencilXFromRgba64F<uint8_t, 1> },
 		//{ SL2_KIF_GL_STENCIL_INDEX4, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_STENCIL_INDEX, 0x10, 0, 8, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::StencilXToRgba64F<uint8_t, 4>, CFormat::StencilXFromRgba64F<uint8_t, 4> },
 		//{ SL2_KIF_GL_STENCIL_INDEX8, SL2_KT_GL_UNSIGNED_BYTE, SL2_KBIF_GL_STENCIL_INDEX, 0x10, 0, 8, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::StencilXToRgba64F<uint8_t, 8>, CFormat::StencilXFromRgba64F<uint8_t, 8> },
 		//{ SL2_KIF_GL_STENCIL_INDEX16, SL2_KT_GL_UNSIGNED_SHORT, SL2_KBIF_GL_STENCIL_INDEX, 0x10, 0, 16, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::StencilXToRgba64F<uint16_t, 16>, CFormat::StencilXFromRgba64F<uint16_t, 16> },
-		//{ SL2_KIF_GL_DEPTH24_STENCIL8, SL2_KT_GL_UNSIGNED_INT_24_8, SL2_KBIF_GL_DEPTH_STENCIL, 0x18, 0, 32, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::Depth24S8ToRgba32F, CFormat::Depth24S8FromRgba32F },
-		//{ SL2_KIF_GL_DEPTH32F_STENCIL8, SL2_KT_GL_FLOAT_32_UNSIGNED_INT_24_8_REV, SL2_KBIF_GL_DEPTH_STENCIL, 0x18, 0, 64, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::Depth32FS8ToRgba32F, CFormat::Depth32FS8FromRgba32F },
-		//{ SL2_KIF_GL_DEPTH32F_STENCIL8_NV, SL2_KT_GL_FLOAT_32_UNSIGNED_INT_24_8_REV, SL2_KBIF_GL_DEPTH_STENCIL, 0x18, 0, 64, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::Depth32FS8ToRgba32F, CFormat::Depth32FS8FromRgba32F },
+		//{ SL2_KIF_GL_DEPTH24_STENCIL8, SL2_KT_GL_UNSIGNED_INT_24_8, SL2_KBIF_GL_DEPTH_STENCIL, 0x18, 0, 32, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::Depth24S8ToRgba64F, CFormat::Depth24S8FromRgba64F },
+		//{ SL2_KIF_GL_DEPTH32F_STENCIL8, SL2_KT_GL_FLOAT_32_UNSIGNED_INT_24_8_REV, SL2_KBIF_GL_DEPTH_STENCIL, 0x18, 0, 64, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::Depth32FS8ToRgba64F, CFormat::Depth32FS8FromRgba64F },
+		//{ SL2_KIF_GL_DEPTH32F_STENCIL8_NV, SL2_KT_GL_FLOAT_32_UNSIGNED_INT_24_8_REV, SL2_KBIF_GL_DEPTH_STENCIL, 0x18, 0, 64, 1, 1, 1, 1, 1, false, false, false, nullptr, CFormat::Depth32FS8ToRgba64F, CFormat::Depth32FS8FromRgba64F },
 		
 		
 #undef SL2_ID
@@ -731,15 +851,31 @@ namespace sl2 {
 		if ( !_pkifFormat || !_pkifTest ) { return 0.0f; }
 		float fScore = 0.0f;
 
-		if ( _pkifFormat->ui8RBits == _pkifTest->ui8RBits ) { fScore += 1.0f; }
-		if ( _pkifFormat->ui8GBits == _pkifTest->ui8GBits ) { fScore += 1.0f; }
-		if ( _pkifFormat->ui8BBits == _pkifTest->ui8BBits ) { fScore += 1.0f; }
-		if ( _pkifFormat->ui8ABits == _pkifTest->ui8ABits ) { fScore += 1.0f; }
+		if ( _pkifFormat->ui8RBits && _pkifFormat->ui8RBits == _pkifTest->ui8RBits ) { fScore += 1.0f; }
+		if ( _pkifFormat->ui8GBits && _pkifFormat->ui8GBits == _pkifTest->ui8GBits ) { fScore += 1.0f; }
+		if ( _pkifFormat->ui8BBits && _pkifFormat->ui8BBits == _pkifTest->ui8BBits ) { fScore += 1.0f; }
+		if ( _pkifFormat->ui8ABits && _pkifFormat->ui8ABits == _pkifTest->ui8ABits ) { fScore += 1.0f; }
 
-		if ( _pkifFormat->ui8RBits < _pkifTest->ui8RBits ) { fScore += float( _pkifFormat->ui8RBits ) / _pkifTest->ui8RBits * 0.25f; }
-		if ( _pkifFormat->ui8GBits < _pkifTest->ui8GBits ) { fScore += float( _pkifFormat->ui8GBits ) / _pkifTest->ui8GBits * 0.25f; }
-		if ( _pkifFormat->ui8BBits < _pkifTest->ui8BBits ) { fScore += float( _pkifFormat->ui8BBits ) / _pkifTest->ui8BBits * 0.25f; }
-		if ( _pkifFormat->ui8ABits < _pkifTest->ui8ABits ) { fScore += float( _pkifFormat->ui8ABits ) / _pkifTest->ui8ABits * 0.25f; }
+		uint8_t ui8Chans = CountChannels( _pkifFormat );
+		uint8_t ui8TheirChans = CountChannels( _pkifTest );
+		uint8_t ui32ChanMix = 0;
+		if ( _pkifFormat->ui8RBits && _pkifTest->ui8RBits ) { ++ui32ChanMix; }
+		if ( _pkifFormat->ui8GBits && _pkifTest->ui8GBits ) { ++ui32ChanMix; }
+		if ( _pkifFormat->ui8BBits && _pkifTest->ui8BBits ) { ++ui32ChanMix; }
+		if ( _pkifFormat->ui8ABits && _pkifTest->ui8ABits ) { ++ui32ChanMix; }
+		if ( ui32ChanMix == ui8Chans ) {
+			// Same channels active.
+			fScore += 1.0f;
+		}
+		else if ( ui8Chans < ui8TheirChans ) {
+			// All the channels we need and more.
+			fScore += 0.25f;
+		}
+
+		if ( _pkifFormat->ui8RBits && _pkifTest->ui8RBits && _pkifFormat->ui8RBits < _pkifTest->ui8RBits ) { fScore += float( _pkifFormat->ui8RBits ) / _pkifTest->ui8RBits * 0.25f; }
+		if ( _pkifFormat->ui8GBits && _pkifTest->ui8GBits && _pkifFormat->ui8GBits < _pkifTest->ui8GBits ) { fScore += float( _pkifFormat->ui8GBits ) / _pkifTest->ui8GBits * 0.25f; }
+		if ( _pkifFormat->ui8BBits && _pkifTest->ui8BBits && _pkifFormat->ui8BBits < _pkifTest->ui8BBits ) { fScore += float( _pkifFormat->ui8BBits ) / _pkifTest->ui8BBits * 0.25f; }
+		if ( _pkifFormat->ui8ABits && _pkifTest->ui8ABits && _pkifFormat->ui8ABits < _pkifTest->ui8ABits ) { fScore += float( _pkifFormat->ui8ABits ) / _pkifTest->ui8ABits * 0.25f; }
 
 		if ( !_pkifFormat->bCompressed ) {
 			if ( _pkifFormat->ui8RShift == _pkifTest->ui8RShift ) { fScore += 1.0f; }
@@ -748,8 +884,6 @@ namespace sl2 {
 			if ( _pkifFormat->ui8AShift == _pkifTest->ui8AShift ) { fScore += 1.0f; }
 		}
 
-		if ( CountChannels( _pkifFormat ) == CountChannels( _pkifTest ) ) { fScore += 1.0f; }
-		if ( CountChannels( _pkifFormat ) < CountChannels( _pkifTest ) ) { fScore += 0.25f; }
 		if ( SL2_GET_COMP_FLAG( _pkifFormat->ui32Flags ) == SL2_GET_COMP_FLAG( _pkifTest->ui32Flags ) ) { fScore += 1.0f; }
 
 		return fScore;
@@ -812,13 +946,7 @@ namespace sl2 {
 					uint32_t ui32ThisY = CUtilities::Min( H, _ui32H - 1 );
 					uint32_t ui32ThisZ = CUtilities::Min( D, _ui32D - 1 );
 
-					//prgbDst[ui32DstSlice*D+ui32DstPitch*H+W] = prgbSrc[ui32SrcSlice*ui32ThisZ+ui32SrcPitch*ui32ThisY+ui32ThisX];
-					/*char szBuffer[128];
-					::sprintf_s( szBuffer, "%X %X\r\n", ui32DstSlice*D+ui32DstPitch*H+W, ui32SrcSlice*ui32ThisZ+ui32SrcPitch*ui32ThisY+ui32ThisX );
-					::OutputDebugStringA( szBuffer );*/
 					prgbDst[ui32DstSlice*D+ui32DstPitch*H+W] = prgbSrc[ui32SrcSlice*ui32ThisZ+ui32SrcPitch*ui32ThisY+ui32ThisX];
-					/*prgbDst[ui32DstSlice*D+ui32DstPitch*H+W].dRgba[0] = ui32ThisX / (double)ui32NewW;
-					prgbDst[ui32DstSlice*D+ui32DstPitch*H+W].dRgba[1] = ui32ThisY / (double)ui32NewH;*/
 				}
 			}
 		}
@@ -1231,6 +1359,106 @@ namespace sl2 {
 				}
 			}
 		}
+		return true;
+	}
+
+	/**
+	 * Converts an RGBA64F texture to 11-bit R represented as 16-bit values in-place.
+	 * 
+	 * \param _pui8Src The source texture.
+	 * \param _ui32W The width of the source texture.
+	 * \param _ui32H The height of the source texture.
+	 * \param _ui32D The depth of the source texture.
+	 * \param _bSigned Whether to translate the values to a signed format.
+	 **/
+	void CFormat::ToR11( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D, bool _bSigned ) {
+		uint32_t ui32Pitch = _ui32W;
+		uint32_t ui32Slice = ui32Pitch * _ui32H;
+		uint16_t * pui16Dst = reinterpret_cast<uint16_t *>(_pui8Src);
+		SL2_RGBA64F * prgbSrc = reinterpret_cast<SL2_RGBA64F *>(_pui8Src);
+		for ( uint32_t D = 0; D < _ui32D; ++D ) {
+			for ( uint32_t H = 0; H < _ui32H; ++H ) {
+				for ( uint32_t W = 0; W < _ui32W; ++W ) {
+					size_t sIdx = ui32Slice * D + ui32Pitch * H + W;
+					if ( _bSigned ) {
+						pui16Dst[sIdx] = uint16_t( std::round( (CUtilities::Clamp<double>( prgbSrc[sIdx].dRgba[SL2_PC_R], -1.0, 1.0 ) / 2.0 + 0.5) * 65534.0 ) ) + 1;
+					}
+					else {
+						pui16Dst[sIdx] = uint16_t( std::round( CUtilities::Clamp<double>( prgbSrc[sIdx].dRgba[SL2_PC_R], 0.0, 1.0 ) * 65535.0 ) );
+					}
+					pui16Dst[sIdx] = ::_byteswap_ushort( pui16Dst[sIdx] );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Converts an RGBA64F texture to 11-bit R represented as 16-bit values in-place.
+	 * 
+	 * \param _pui8Src The source texture.
+	 * \param _ui32W The width of the source texture.
+	 * \param _ui32H The height of the source texture.
+	 * \param _ui32D The depth of the source texture.
+	 * \param _bSigned Whether to translate the values to a signed format.
+	 * \param _vGreen Holds the green values.
+	 * \return Returns true if the green buffer was allocated.
+	 **/
+	bool CFormat::ToRG11( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D,
+		std::vector<uint8_t> &_vGreen, bool _bSigned ) {
+		uint32_t ui32Pitch = _ui32W;
+		uint32_t ui32Slice = ui32Pitch * _ui32H;
+		try {
+			_vGreen.resize( ui32Slice * _ui32D * sizeof( uint16_t ) );
+		}
+		catch ( ... ) { return false; }
+
+		uint16_t * pui16DstR = reinterpret_cast<uint16_t *>(_pui8Src);
+		uint16_t * pui16DstG = reinterpret_cast<uint16_t *>(_vGreen.data());
+		SL2_RGBA64F * prgbSrc = reinterpret_cast<SL2_RGBA64F *>(_pui8Src);
+		for ( uint32_t D = 0; D < _ui32D; ++D ) {
+			for ( uint32_t H = 0; H < _ui32H; ++H ) {
+				for ( uint32_t W = 0; W < _ui32W; ++W ) {
+					size_t sIdx = ui32Slice * D + ui32Pitch * H + W;
+					if ( _bSigned ) {
+						pui16DstG[sIdx] = uint16_t( std::round( (CUtilities::Clamp<double>( prgbSrc[sIdx].dRgba[SL2_PC_G], -1.0, 1.0 ) / 2.0 + 0.5) * 65534.0 ) ) + 1;
+						pui16DstR[sIdx] = uint16_t( std::round( (CUtilities::Clamp<double>( prgbSrc[sIdx].dRgba[SL2_PC_R], -1.0, 1.0 ) / 2.0 + 0.5) * 65534.0 ) ) + 1;
+					}
+					else {
+						pui16DstG[sIdx] = uint16_t( std::round( CUtilities::Clamp<double>( prgbSrc[sIdx].dRgba[SL2_PC_G], 0.0, 1.0 ) * 65535.0 ) );
+						pui16DstR[sIdx] = uint16_t( std::round( CUtilities::Clamp<double>( prgbSrc[sIdx].dRgba[SL2_PC_R], 0.0, 1.0 ) * 65535.0 ) );
+					}
+					pui16DstR[sIdx] = ::_byteswap_ushort( pui16DstR[sIdx] );
+					pui16DstG[sIdx] = ::_byteswap_ushort( pui16DstG[sIdx] );
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Converts an RGBA64F texture to RGBAF32 in-place.
+	 * 
+	 * \param _pui8Src The source texture.
+	 * \param _ui32W The width of the source texture.
+	 * \param _ui32H The height of the source texture.
+	 * \param _ui32D The depth of the source texture.
+	 **/
+	void CFormat::ToRGBA32F( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D ) {
+		uint32_t ui32Pitch = _ui32W;
+		uint32_t ui32Slice = ui32Pitch * _ui32H;
+		SL2_RGBA * prgbDst = reinterpret_cast<SL2_RGBA *>(_pui8Src);
+		SL2_RGBA64F * prgbSrc = reinterpret_cast<SL2_RGBA64F *>(_pui8Src);
+		for ( uint32_t D = 0; D < _ui32D; ++D ) {
+			for ( uint32_t H = 0; H < _ui32H; ++H ) {
+				for ( uint32_t W = 0; W < _ui32W; ++W ) {
+					size_t sIdx = ui32Slice * D + ui32Pitch * H + W;
+					prgbDst[sIdx].fRgba[SL2_PC_R] = float( prgbSrc[sIdx].dRgba[SL2_PC_R] );
+					prgbDst[sIdx].fRgba[SL2_PC_G] = float( prgbSrc[sIdx].dRgba[SL2_PC_G] );
+					prgbDst[sIdx].fRgba[SL2_PC_B] = float( prgbSrc[sIdx].dRgba[SL2_PC_B] );
+					prgbDst[sIdx].fRgba[SL2_PC_A] = float( prgbSrc[sIdx].dRgba[SL2_PC_A] );
+				}
+			}
+		}
 	}
 
 	/**
@@ -1342,6 +1570,412 @@ namespace sl2 {
 			(*_pui8Indices++) = _ui64Block & 0x7;
 			_ui64Block >>= 3;
 		}
+	}
+
+	/**
+	 * Depth-16 -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	bool CFormat::Depth16ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_D16 {
+			uint16_t ui16Val;
+		};
+		const uint32_t ui32RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint32_t ui32PlaneSize = ui32RowSize * _ui32Height;
+		const uint32_t ui32SrcRowSize = SL2_ROUND_UP( sizeof( SL2_D16 ) * _ui32Width, 4 );
+		const uint32_t ui32SrcPlaneSize = ui32SrcRowSize * _ui32Height;
+		
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui32PlaneSize+Y*ui32RowSize+X*sizeof(SL2_RGBA64F)]);
+					const SL2_D16 * prSrc = reinterpret_cast<const SL2_D16 *>(&_pui8Src[Z*ui32SrcPlaneSize+Y*ui32SrcRowSize+X*sizeof(SL2_D16)]);
+					rgbaThis.dRgba[SL2_PC_R] = prSrc->ui16Val / 65535.0;
+					rgbaThis.dRgba[SL2_PC_G] = rgbaThis.dRgba[SL2_PC_R];
+					rgbaThis.dRgba[SL2_PC_B] = rgbaThis.dRgba[SL2_PC_R];
+					rgbaThis.dRgba[SL2_PC_A] = 1.0;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * RGBA64F -> Depth-16 conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	bool CFormat::Depth16FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_D16 {
+			uint16_t ui16Val;
+		};
+		const uint32_t ui32SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint32_t ui32SrcPlaneSize = ui32SrcRowSize * _ui32Height;
+		const uint32_t ui32RowSize = SL2_ROUND_UP( sizeof( SL2_D16 ) * _ui32Width, 4 );
+		const uint32_t ui32PlaneSize = ui32RowSize * _ui32Height;
+
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui32SrcPlaneSize+Y*ui32SrcRowSize+X*sizeof(SL2_RGBA64F)]);
+					SL2_D16 * prDst = reinterpret_cast<SL2_D16 *>(&_pui8Dst[Z*ui32PlaneSize+Y*ui32RowSize+X*sizeof(SL2_D16)]);
+					double dLum = (rgbaThis.dRgba[SL2_PC_R] +
+						rgbaThis.dRgba[SL2_PC_G] +
+						rgbaThis.dRgba[SL2_PC_B]) / 3.0;
+					prDst->ui16Val = static_cast<uint16_t>(dLum * 65535.5);
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Depth-24 -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	bool CFormat::Depth24ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_D24 {
+			uint32_t ui32Val;
+		};
+		const uint32_t ui32RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint32_t ui32PlaneSize = ui32RowSize * _ui32Height;
+		const uint32_t ui32SrcRowSize = SL2_ROUND_UP( sizeof( SL2_D24 ) * _ui32Width, 4 );
+		const uint32_t ui32SrcPlaneSize = ui32SrcRowSize * _ui32Height;
+		
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui32PlaneSize+Y*ui32RowSize+X*sizeof(SL2_RGBA64F)]);
+					const SL2_D24 * prSrc = reinterpret_cast<const SL2_D24 *>(&_pui8Src[Z*ui32SrcPlaneSize+Y*ui32SrcRowSize+X*sizeof(SL2_D24)]);
+					rgbaThis.dRgba[SL2_PC_R] = (prSrc->ui32Val >> 8) / 16777215.0;
+					rgbaThis.dRgba[SL2_PC_G] = rgbaThis.dRgba[SL2_PC_R];
+					rgbaThis.dRgba[SL2_PC_B] = rgbaThis.dRgba[SL2_PC_R];
+					rgbaThis.dRgba[SL2_PC_A] = 1.0;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * RGBA64F -> Depth-24 conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	bool CFormat::Depth24FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_D24 {
+			uint32_t ui32Val;
+		};
+		const uint32_t ui32SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint32_t ui32SrcPlaneSize = ui32SrcRowSize * _ui32Height;
+		const uint32_t ui32RowSize = SL2_ROUND_UP( sizeof( SL2_D24 ) * _ui32Width, 4 );
+		const uint32_t ui32PlaneSize = ui32RowSize * _ui32Height;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui32SrcPlaneSize+Y*ui32SrcRowSize+X*sizeof(SL2_RGBA64F)]);
+					SL2_D24 * prDst = reinterpret_cast<SL2_D24 *>(&_pui8Dst[Z*ui32PlaneSize+Y*ui32RowSize+X*sizeof(SL2_D24)]);
+					double dLum = (rgbaThis.dRgba[SL2_PC_R] +
+						rgbaThis.dRgba[SL2_PC_G] +
+						rgbaThis.dRgba[SL2_PC_B]) / 3.0;
+					prDst->ui32Val = static_cast<uint32_t>(dLum * 16777215.5) << 8;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Depth-32 -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	bool CFormat::Depth32ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_D32 {
+			uint32_t ui32Val;
+		};
+		const uint32_t ui32RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint32_t ui32PlaneSize = ui32RowSize * _ui32Height;
+		const uint32_t ui32SrcRowSize = SL2_ROUND_UP( sizeof( SL2_D32 ) * _ui32Width, 4 );
+		const uint32_t ui32SrcPlaneSize = ui32SrcRowSize * _ui32Height;
+		
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui32PlaneSize+Y*ui32RowSize+X*sizeof(SL2_RGBA64F)]);
+					const SL2_D32 * prSrc = reinterpret_cast<const SL2_D32 *>(&_pui8Src[Z*ui32SrcPlaneSize+Y*ui32SrcRowSize+X*sizeof(SL2_D32)]);
+					rgbaThis.dRgba[SL2_PC_R] = prSrc->ui32Val / 4294967295.0;
+					rgbaThis.dRgba[SL2_PC_G] = rgbaThis.dRgba[SL2_PC_R];
+					rgbaThis.dRgba[SL2_PC_B] = rgbaThis.dRgba[SL2_PC_R];
+					rgbaThis.dRgba[SL2_PC_A] = 1.0;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * RGBA64F -> Depth-32 conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	bool CFormat::Depth32FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_D32 {
+			uint32_t ui32Val;
+		};
+		const uint32_t ui32SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint32_t ui32SrcPlaneSize = ui32SrcRowSize * _ui32Height;
+		const uint32_t ui32RowSize = SL2_ROUND_UP( sizeof( SL2_D32 ) * _ui32Width, 4 );
+		const uint32_t ui32PlaneSize = ui32RowSize * _ui32Height;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui32SrcPlaneSize+Y*ui32SrcRowSize+X*sizeof(SL2_RGBA64F)]);
+					SL2_D32 * prDst = reinterpret_cast<SL2_D32 *>(&_pui8Dst[Z*ui32PlaneSize+Y*ui32RowSize+X*sizeof(SL2_D32)]);
+					double dLum = (rgbaThis.dRgba[SL2_PC_R] +
+						rgbaThis.dRgba[SL2_PC_G] +
+						rgbaThis.dRgba[SL2_PC_B]) / 3.0;
+					prDst->ui32Val = static_cast<uint32_t>(dLum * 4294967295.5);
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Depth-32F -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	bool CFormat::Depth32FToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_D32F {
+			float fVal;
+		};
+		const uint32_t ui32RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint32_t ui32PlaneSize = ui32RowSize * _ui32Height;
+		const uint32_t ui32SrcRowSize = SL2_ROUND_UP( sizeof( SL2_D32F ) * _ui32Width, 4 );
+		const uint32_t ui32SrcPlaneSize = ui32SrcRowSize * _ui32Height;
+		
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui32PlaneSize+Y*ui32RowSize+X*sizeof(SL2_RGBA64F)]);
+					const SL2_D32F * prSrc = reinterpret_cast<const SL2_D32F *>(&_pui8Src[Z*ui32SrcPlaneSize+Y*ui32SrcRowSize+X*sizeof(SL2_D32F)]);
+					rgbaThis.dRgba[SL2_PC_R] = prSrc->fVal;
+					rgbaThis.dRgba[SL2_PC_G] = prSrc->fVal;
+					rgbaThis.dRgba[SL2_PC_B] = prSrc->fVal;
+					rgbaThis.dRgba[SL2_PC_A] = 1.0;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * RGBA64F -> Depth-32F conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	bool CFormat::Depth32FFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_D32F {
+			float fVal;
+		};
+		const uint32_t ui32SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint32_t ui32SrcPlaneSize = ui32SrcRowSize * _ui32Height;
+		const uint32_t ui32RowSize = SL2_ROUND_UP( sizeof( SL2_D32F ) * _ui32Width, 4 );
+		const uint32_t ui32PlaneSize = ui32RowSize * _ui32Height;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui32SrcPlaneSize+Y*ui32SrcRowSize+X*sizeof(SL2_RGBA64F)]);
+					SL2_D32F * prDst = reinterpret_cast<SL2_D32F *>(&_pui8Dst[Z*ui32PlaneSize+Y*ui32RowSize+X*sizeof(SL2_D32F)]);
+					prDst->fVal = float( (rgbaThis.dRgba[SL2_PC_R] +
+						rgbaThis.dRgba[SL2_PC_G] +
+						rgbaThis.dRgba[SL2_PC_B]) / 3.0 );
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Depth-24/Stencil-8 -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	bool CFormat::Depth24S8ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_D24 {
+			uint32_t ui32Val;
+		};
+		const uint32_t ui32RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint32_t ui32PlaneSize = ui32RowSize * _ui32Height;
+		const uint32_t ui32SrcRowSize = SL2_ROUND_UP( sizeof( SL2_D24 ) * _ui32Width, 4 );
+		const uint32_t ui32SrcPlaneSize = ui32SrcRowSize * _ui32Height;
+		
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui32PlaneSize+Y*ui32RowSize+X*sizeof(SL2_RGBA64F)]);
+					const SL2_D24 * prSrc = reinterpret_cast<const SL2_D24 *>(&_pui8Src[Z*ui32SrcPlaneSize+Y*ui32SrcRowSize+X*sizeof(SL2_D24)]);
+					rgbaThis.dRgba[SL2_PC_R] = (prSrc->ui32Val >> 8) / 16777215.0;
+					rgbaThis.dRgba[SL2_PC_G] = rgbaThis.dRgba[SL2_PC_R];
+					rgbaThis.dRgba[SL2_PC_B] = rgbaThis.dRgba[SL2_PC_R];
+					rgbaThis.dRgba[SL2_PC_A] = static_cast<uint8_t>(prSrc->ui32Val) / 255.0;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * RGBA64F -> Depth-24/Stencil-8 conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	bool CFormat::Depth24S8FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_D24 {
+			uint32_t ui32Val;
+		};
+		const uint32_t ui32SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint32_t ui32SrcPlaneSize = ui32SrcRowSize * _ui32Height;
+		const uint32_t ui32RowSize = SL2_ROUND_UP( sizeof( SL2_D24 ) * _ui32Width, 4 );
+		const uint32_t ui32PlaneSize = ui32RowSize * _ui32Height;
+
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui32SrcPlaneSize+Y*ui32SrcRowSize+X*sizeof(SL2_RGBA64F)]);
+					SL2_D24 * prDst = reinterpret_cast<SL2_D24 *>(&_pui8Dst[Z*ui32PlaneSize+Y*ui32RowSize+X*sizeof(SL2_D24)]);
+					double dLum = (rgbaThis.dRgba[SL2_PC_R] +
+						rgbaThis.dRgba[SL2_PC_G] +
+						rgbaThis.dRgba[SL2_PC_B]) / 3.0;
+					prDst->ui32Val = static_cast<uint32_t>(dLum * 16777215.5) << 8;
+					prDst->ui32Val |= static_cast<uint8_t>(rgbaThis.dRgba[SL2_PC_A] * 255.5);
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Depth-32F/Stencil-8 -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	bool CFormat::Depth32FS8ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_D32FS8 {
+			float fVal;
+			uint32_t ui32Stencil;
+		};
+		const uint64_t ui64RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint64_t ui64PlaneSize = ui64RowSize * _ui32Height;
+		const uint64_t ui64SrcRowSize = SL2_ROUND_UP( sizeof( SL2_D32FS8 ) * _ui32Width, 4 );
+		const uint64_t ui64SrcPlaneSize = ui64SrcRowSize * _ui32Height;
+		
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui64PlaneSize+Y*ui64RowSize+X*sizeof(SL2_RGBA64F)]);
+					const SL2_D32FS8 * prSrc = reinterpret_cast<const SL2_D32FS8 *>(&_pui8Src[Z*ui64SrcPlaneSize+Y*ui64SrcRowSize+X*sizeof(SL2_D32FS8)]);
+					rgbaThis.dRgba[SL2_PC_R] = prSrc->fVal;
+					rgbaThis.dRgba[SL2_PC_G] = prSrc->fVal;
+					rgbaThis.dRgba[SL2_PC_B] = prSrc->fVal;
+					rgbaThis.dRgba[SL2_PC_A] = static_cast<uint8_t>(prSrc->ui32Stencil) / 255.0;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * RGBA64F -> Depth-32F/Stencil-8 conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	bool CFormat::Depth32FS8FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_D32FS8 {
+			float fVal;
+			uint32_t ui32Stencil;
+		};
+		const uint32_t ui32SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint32_t ui32SrcPlaneSize = ui32SrcRowSize * _ui32Height;
+		const uint32_t ui32RowSize = SL2_ROUND_UP( sizeof( SL2_D32FS8 ) * _ui32Width, 4 );
+		const uint32_t ui32PlaneSize = ui32RowSize * _ui32Height;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui32SrcPlaneSize+Y*ui32SrcRowSize+X*sizeof(SL2_RGBA64F)]);
+					SL2_D32FS8 * prDst = reinterpret_cast<SL2_D32FS8 *>(&_pui8Dst[Z*ui32PlaneSize+Y*ui32RowSize+X*sizeof(SL2_D32FS8)]);
+					prDst->fVal = float( (rgbaThis.dRgba[SL2_PC_R] +
+						rgbaThis.dRgba[SL2_PC_G] +
+						rgbaThis.dRgba[SL2_PC_B]) / 3.0 );
+					prDst->ui32Stencil = static_cast<uint8_t>(rgbaThis.dRgba[SL2_PC_A] * 255.5);
+				}
+			}
+		}
+		return true;
 	}
 
 	/**

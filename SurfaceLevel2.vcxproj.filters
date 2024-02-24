@@ -121,6 +121,18 @@
     <Filter Include="Source Files\Image\ETCPACK">
       <UniqueIdentifier>{085e56f5-b9f4-4385-9b79-7fd75fd2a254}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Image\PVRTexTool">
+      <UniqueIdentifier>{c018128f-bb40-42b6-98dc-fbe5ecc4c3aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Image\PVRTexTool">
+      <UniqueIdentifier>{9dac5872-c56b-4fc5-ae0e-5521c6e5a4b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Image\astc-encoder">
+      <UniqueIdentifier>{ea9cc17a-dbaa-4978-8b18-56093e4925f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Image\astc-encoder">
+      <UniqueIdentifier>{bca99001-e132-4c30-bcf1-d5b395141f06}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\SL2SurfaceLevel2.h">
@@ -321,6 +333,63 @@
     <ClInclude Include="Src\Image\ETCPACK\etcpack.h">
       <Filter>Header Files\Image\ETCPACK</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Image\PVRTexTool\PVRTexLib.h">
+      <Filter>Header Files\Image\PVRTexTool</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\PVRTexTool\PVRTexLib.hpp">
+      <Filter>Header Files\Image\PVRTexTool</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\PVRTexTool\PVRTexLibDefines.h">
+      <Filter>Header Files\Image\PVRTexTool</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\PVRTexTool\PVRTextureVersion.h">
+      <Filter>Header Files\Image\PVRTexTool</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\astc-encoder\astcenc.h">
+      <Filter>Header Files\Image\astc-encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_diagnostic_trace.h">
+      <Filter>Header Files\Image\astc-encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_internal.h">
+      <Filter>Header Files\Image\astc-encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_internal_entry.h">
+      <Filter>Header Files\Image\astc-encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_mathlib.h">
+      <Filter>Header Files\Image\astc-encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_vecmathlib.h">
+      <Filter>Header Files\Image\astc-encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_vecmathlib_avx2_8.h">
+      <Filter>Header Files\Image\astc-encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_vecmathlib_common_4.h">
+      <Filter>Header Files\Image\astc-encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_vecmathlib_neon_4.h">
+      <Filter>Header Files\Image\astc-encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_vecmathlib_none_4.h">
+      <Filter>Header Files\Image\astc-encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_vecmathlib_sse_4.h">
+      <Filter>Header Files\Image\astc-encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\astc-encoder\astcenccli_internal.h">
+      <Filter>Header Files\Image\astc-encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\astc-encoder\stb_image.h">
+      <Filter>Header Files\Image\astc-encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\astc-encoder\stb_image_write.h">
+      <Filter>Header Files\Image\astc-encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\astc-encoder\tinyexr.h">
+      <Filter>Header Files\Image\astc-encoder</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\SL2SurfaceLevel2.cpp">
@@ -512,6 +581,99 @@
     <ClCompile Include="Src\Image\ETCPACK\etcpack.cxx">
       <Filter>Source Files\Image\ETCPACK</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\wuffs-v0.3.c">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_averages_and_directions.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_block_sizes.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_color_quantize.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_color_unquantize.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_compress_symbolic.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_compute_variance.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_decompress_symbolic.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_diagnostic_trace.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_entry.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_find_best_partitioning.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_ideal_endpoints_and_weights.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_image.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_integer_sequence.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_mathlib.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_mathlib_softfloat.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_partition_tables.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_percentile_tables.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_pick_best_endpoint_format.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_quantization.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_symbolic_physical.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_weight_align.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_weight_quant_xfer_tables.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenccli_entry.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenccli_error_metrics.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenccli_image.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenccli_image_external.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenccli_image_load_store.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenccli_platform_dependents.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenccli_toplevel.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\astc-encoder\astcenccli_toplevel_help.cpp">
+      <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Image\KTX-Software\lib\texture_funcs.inl">
@@ -552,6 +714,9 @@
     </None>
     <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_pvrtc2_alpha_33.inc">
       <Filter>Header Files\Image\KTX-Software\lib\basisu\transcoder</Filter>
+    </None>
+    <None Include="Src\Image\astc-encoder\astcenccli_version.h.in">
+      <Filter>Source Files\Image\astc-encoder</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

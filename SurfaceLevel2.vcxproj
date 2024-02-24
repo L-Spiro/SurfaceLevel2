@@ -21,6 +21,21 @@
   <ItemGroup>
     <ClInclude Include="Src\Files\SL2FileBase.h" />
     <ClInclude Include="Src\Files\SL2StdFile.h" />
+    <ClInclude Include="Src\Image\astc-encoder\astcenc.h" />
+    <ClInclude Include="Src\Image\astc-encoder\astcenccli_internal.h" />
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_diagnostic_trace.h" />
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_internal.h" />
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_internal_entry.h" />
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_mathlib.h" />
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_vecmathlib.h" />
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_vecmathlib_avx2_8.h" />
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_vecmathlib_common_4.h" />
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_vecmathlib_neon_4.h" />
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_vecmathlib_none_4.h" />
+    <ClInclude Include="Src\Image\astc-encoder\astcenc_vecmathlib_sse_4.h" />
+    <ClInclude Include="Src\Image\astc-encoder\stb_image.h" />
+    <ClInclude Include="Src\Image\astc-encoder\stb_image_write.h" />
+    <ClInclude Include="Src\Image\astc-encoder\tinyexr.h" />
     <ClInclude Include="Src\Image\detex\bits.h" />
     <ClInclude Include="Src\Image\detex\bptc-tables.h" />
     <ClInclude Include="Src\Image\detex\detex.h" />
@@ -58,6 +73,10 @@
     <ClInclude Include="Src\Image\KTX-Software\lib\vkformat_enum.h" />
     <ClInclude Include="Src\Image\KTX-Software\lib\vk_format.h" />
     <ClInclude Include="Src\Image\KTX-Software\utils\unused.h" />
+    <ClInclude Include="Src\Image\PVRTexTool\PVRTexLib.h" />
+    <ClInclude Include="Src\Image\PVRTexTool\PVRTexLib.hpp" />
+    <ClInclude Include="Src\Image\PVRTexTool\PVRTexLibDefines.h" />
+    <ClInclude Include="Src\Image\PVRTexTool\PVRTextureVersion.h" />
     <ClInclude Include="Src\Image\SL2Formats.h" />
     <ClInclude Include="Src\Image\SL2Image.h" />
     <ClInclude Include="Src\Image\SL2KtxTexture.h" />
@@ -89,6 +108,37 @@
   <ItemGroup>
     <ClCompile Include="Src\Files\SL2FileBase.cpp" />
     <ClCompile Include="Src\Files\SL2StdFile.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenccli_entry.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenccli_error_metrics.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenccli_image.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenccli_image_external.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenccli_image_load_store.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenccli_platform_dependents.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenccli_toplevel.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenccli_toplevel_help.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_averages_and_directions.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_block_sizes.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_color_quantize.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_color_unquantize.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_compress_symbolic.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_compute_variance.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_decompress_symbolic.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_diagnostic_trace.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_entry.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_find_best_partitioning.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_ideal_endpoints_and_weights.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_image.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_integer_sequence.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_mathlib.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_mathlib_softfloat.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_partition_tables.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_percentile_tables.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_pick_best_endpoint_format.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_quantization.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_symbolic_physical.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_weight_align.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\astcenc_weight_quant_xfer_tables.cpp" />
+    <ClCompile Include="Src\Image\astc-encoder\wuffs-v0.3.c" />
     <ClCompile Include="Src\Image\detex\bits.c" />
     <ClCompile Include="Src\Image\detex\bptc-tables.c" />
     <ClCompile Include="Src\Image\detex\clamp.c" />
@@ -187,6 +237,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
     </CustomBuild>
+    <None Include="Src\Image\astc-encoder\astcenccli_version.h.in" />
     <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_astc.inc" />
     <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_astc_0_255.inc" />
     <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_atc_55.inc" />
@@ -265,7 +316,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>BASISU_NO_ITERATOR_DEBUG_LEVEL;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BASISU_NO_ITERATOR_DEBUG_LEVEL;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
@@ -277,8 +328,15 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)$(Platform)\$(Configuration)\FreeImage.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibOpenJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibPNG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibRaw.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibTIFF4.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibWebP.lib;$(ProjectDir)$(Platform)\$(Configuration)\OpenEXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\ZLib.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)$(Platform)\$(Configuration)\FreeImage.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibOpenJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibPNG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibRaw.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibTIFF4.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibWebP.lib;$(ProjectDir)$(Platform)\$(Configuration)\OpenEXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\ZLib.lib;$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.dll" "$(SolutionDir)$(Platform)\$(Configuration)\PVRTexLib.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -286,7 +344,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
@@ -299,14 +357,21 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)$(Platform)\$(Configuration)\FreeImage.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibOpenJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibPNG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibRaw.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibTIFF4.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibWebP.lib;$(ProjectDir)$(Platform)\$(Configuration)\OpenEXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\ZLib.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)$(Platform)\$(Configuration)\FreeImage.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibOpenJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibPNG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibRaw.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibTIFF4.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibWebP.lib;$(ProjectDir)$(Platform)\$(Configuration)\OpenEXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\ZLib.lib;$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.dll" "$(SolutionDir)$(Platform)\$(Configuration)\PVRTexLib.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>BASISU_NO_ITERATOR_DEBUG_LEVEL;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BASISU_NO_ITERATOR_DEBUG_LEVEL;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
@@ -318,8 +383,15 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)$(Platform)\$(Configuration)\FreeImage.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibOpenJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibPNG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibRaw.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibTIFF4.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibWebP.lib;$(ProjectDir)$(Platform)\$(Configuration)\OpenEXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\ZLib.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)$(Platform)\$(Configuration)\FreeImage.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibOpenJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibPNG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibRaw.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibTIFF4.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibWebP.lib;$(ProjectDir)$(Platform)\$(Configuration)\OpenEXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\ZLib.lib;$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.dll" "$(SolutionDir)$(Platform)\$(Configuration)\PVRTexLib.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -327,7 +399,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
@@ -340,8 +412,15 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)$(Platform)\$(Configuration)\FreeImage.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibOpenJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibPNG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibRaw.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibTIFF4.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibWebP.lib;$(ProjectDir)$(Platform)\$(Configuration)\OpenEXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\ZLib.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)$(Platform)\$(Configuration)\FreeImage.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibOpenJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibPNG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibRaw.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibTIFF4.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibWebP.lib;$(ProjectDir)$(Platform)\$(Configuration)\OpenEXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\ZLib.lib;$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.dll" "$(SolutionDir)$(Platform)\$(Configuration)\PVRTexLib.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
