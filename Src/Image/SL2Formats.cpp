@@ -40,27 +40,37 @@ namespace sl2 {
 		{ SL2_ID( VK_FORMAT_R8_UNORM, DXGI_FORMAT_R8_UNORM, MTLPixelFormatR8Unorm, GL_R8, GL_UNSIGNED_BYTE, GL_RED ),										0x00, 0, 8, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 1, false, true, false ) },
 		{ SL2_ID( VK_FORMAT_R8G8_UNORM, DXGI_FORMAT_R8G8_UNORM, MTLPixelFormatRG8Unorm, GL_RG8, GL_UNSIGNED_BYTE, GL_RG ),									0x00, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 0, 0), SL2_TSHIFTS(0, 8, 0, 0), 2, false, true, false ) },
 		{ SL2_ID( VK_FORMAT_R8G8B8_UNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB8, GL_UNSIGNED_BYTE, GL_RGB ),									0x00, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0), 3, false, true, false ) },
+		{ SL2_ID( VK_FORMAT_B8G8R8_UNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_SRGB8, GL_UNSIGNED_BYTE, GL_BGR ),									0x00, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(16, 8, 0, 0), 3, false, true, false ) },
 		{ SL2_ID( VK_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM, MTLPixelFormatRGBA8Unorm, GL_RGBA8, GL_UNSIGNED_BYTE, GL_RGBA ),					0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), 4, false, true, false ) },
+		{ SL2_ID( VK_FORMAT_B8G8R8A8_UNORM, DXGI_FORMAT_B8G8R8A8_UNORM, MTLPixelFormatBGRA8Unorm, GL_RGBA8, GL_UNSIGNED_BYTE, GL_BGRA ),					0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(16, 8, 0, 24), 4, false, true, false ) },
 
 		{ SL2_ID( VK_FORMAT_R8_SNORM, DXGI_FORMAT_R8_SNORM, MTLPixelFormatR8Snorm, GL_R8_SNORM, GL_BYTE, GL_RED ),											0x00, 0, 8, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 1, true, true, false ) },
 		{ SL2_ID( VK_FORMAT_R8G8_SNORM, DXGI_FORMAT_R8G8_SNORM, MTLPixelFormatRG8Snorm, GL_RG8_SNORM, GL_BYTE, GL_RG ),										0x00, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 0, 0), SL2_TSHIFTS(0, 8, 0, 0), 2, true, true, false ) },
 		{ SL2_ID( VK_FORMAT_R8G8B8_SNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB8_SNORM, GL_BYTE, GL_RGB ),										0x00, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0), 3, true, true, false ) },
+		{ SL2_ID( VK_FORMAT_B8G8R8_SNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB8_SNORM, GL_BYTE, GL_BGR ),										0x00, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(16, 8, 0, 0), 3, true, true, false ) },
 		{ SL2_ID( VK_FORMAT_R8G8B8A8_SNORM, DXGI_FORMAT_R8G8B8A8_SNORM, MTLPixelFormatRGBA8Snorm, GL_RGBA8_SNORM, GL_BYTE, GL_RGBA ),						0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), 4, true, true, false ) },
+		{ SL2_ID( VK_FORMAT_B8G8R8A8_SNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGBA8_SNORM, GL_BYTE, GL_BGRA ),									0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(16, 8, 0, 24), 4, true, true, false ) },
 
-		{ SL2_ID( VK_FORMAT_R8_UINT, DXGI_FORMAT_R8_UINT, MTLPixelFormatR8Uint, GL_R8UI, GL_UNSIGNED_BYTE, GL_RED ),										0x00, 0, 8, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 1, false, false, false ) },
-		{ SL2_ID( VK_FORMAT_R8G8_UINT, DXGI_FORMAT_R8G8_UINT, MTLPixelFormatRG8Uint, GL_RG8UI, GL_UNSIGNED_BYTE, GL_RG ),									0x00, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 0, 0), SL2_TSHIFTS(0, 8, 0, 0), 2, false, false, false ) },
-		{ SL2_ID( VK_FORMAT_R8G8B8_UINT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB8UI, GL_UNSIGNED_BYTE, GL_RGB ),									0x00, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0), 3, false, false, false ) },
-		{ SL2_ID( VK_FORMAT_R8G8B8A8_UINT, DXGI_FORMAT_R8G8B8A8_UINT, MTLPixelFormatRGBA8Uint, GL_RGBA8UI, GL_UNSIGNED_BYTE, GL_RGBA ),						0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), 4, false, false, false ) },
+		{ SL2_ID( VK_FORMAT_R8_UINT, DXGI_FORMAT_R8_UINT, MTLPixelFormatR8Uint, GL_R8UI, GL_UNSIGNED_BYTE, GL_RED_INTEGER ),								0x00, 0, 8, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 1, false, false, false ) },
+		{ SL2_ID( VK_FORMAT_R8G8_UINT, DXGI_FORMAT_R8G8_UINT, MTLPixelFormatRG8Uint, GL_RG8UI, GL_UNSIGNED_BYTE, GL_RG_INTEGER ),							0x00, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 0, 0), SL2_TSHIFTS(0, 8, 0, 0), 2, false, false, false ) },
+		{ SL2_ID( VK_FORMAT_R8G8B8_UINT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB8UI, GL_UNSIGNED_BYTE, GL_RGB_INTEGER ),							0x00, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0), 3, false, false, false ) },
+		{ SL2_ID( VK_FORMAT_B8G8R8_UINT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB8UI, GL_UNSIGNED_BYTE, GL_BGR_INTEGER ),							0x00, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(16, 8, 0, 0), 3, false, false, false ) },
+		{ SL2_ID( VK_FORMAT_R8G8B8A8_UINT, DXGI_FORMAT_R8G8B8A8_UINT, MTLPixelFormatRGBA8Uint, GL_RGBA8UI, GL_UNSIGNED_BYTE, GL_RGBA_INTEGER ),				0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), 4, false, false, false ) },
+		{ SL2_ID( VK_FORMAT_B8G8R8A8_UINT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGBA8UI, GL_UNSIGNED_BYTE, GL_BGRA_INTEGER ),						0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(16, 8, 0, 24), 4, false, false, false ) },
 
-		{ SL2_ID( VK_FORMAT_R8_SINT, DXGI_FORMAT_R8_SINT, MTLPixelFormatR8Sint, GL_R8I, GL_BYTE, GL_RED ),													0x00, 0, 8, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 1, true, false, false ) },
-		{ SL2_ID( VK_FORMAT_R8G8_SINT, DXGI_FORMAT_R8G8_SINT, MTLPixelFormatRG8Sint, GL_RG8I, GL_BYTE, GL_RG ),												0x00, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 0, 0), SL2_TSHIFTS(0, 8, 0, 0), 2, true, false, false ) },
-		{ SL2_ID( VK_FORMAT_R8G8B8_SINT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB8I, GL_BYTE, GL_RGB ),											0x00, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0), 3, true, false, false ) },
-		{ SL2_ID( VK_FORMAT_R8G8B8A8_SINT, DXGI_FORMAT_R8G8B8A8_SINT, MTLPixelFormatRGBA8Sint, GL_RGBA8I, GL_BYTE, GL_RGBA ),								0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), 4, true, false, false ) },
+		{ SL2_ID( VK_FORMAT_R8_SINT, DXGI_FORMAT_R8_SINT, MTLPixelFormatR8Sint, GL_R8I, GL_BYTE, GL_RED_INTEGER ),											0x00, 0, 8, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 1, true, false, false ) },
+		{ SL2_ID( VK_FORMAT_R8G8_SINT, DXGI_FORMAT_R8G8_SINT, MTLPixelFormatRG8Sint, GL_RG8I, GL_BYTE, GL_RG_INTEGER ),										0x00, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 0, 0), SL2_TSHIFTS(0, 8, 0, 0), 2, true, false, false ) },
+		{ SL2_ID( VK_FORMAT_R8G8B8_SINT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB8I, GL_BYTE, GL_RGB_INTEGER ),									0x00, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0), 3, true, false, false ) },
+		{ SL2_ID( VK_FORMAT_B8G8R8_SINT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB8I, GL_BYTE, GL_BGR_INTEGER ),									0x00, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(16, 8, 0, 0), 3, true, false, false ) },
+		{ SL2_ID( VK_FORMAT_R8G8B8A8_SINT, DXGI_FORMAT_R8G8B8A8_SINT, MTLPixelFormatRGBA8Sint, GL_RGBA8I, GL_UNSIGNED_BYTE, GL_RGBA_INTEGER ),				0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), 4, true, false, false ) },
+		{ SL2_ID( VK_FORMAT_B8G8R8A8_SINT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGBA8I, GL_UNSIGNED_BYTE, GL_BGRA_INTEGER ),						0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(16, 8, 0, 24), 4, true, false, false ) },
 
 		{ SL2_ID( VK_FORMAT_R8_SRGB, DXGI_FORMAT_UNKNOWN, MTLPixelFormatR8Unorm_sRGB, GL_SR8, GL_UNSIGNED_BYTE, GL_RED ),									0x00, 0, 8, 1, 1, 1, 1, 1, true, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 1, false, true, true ) },
 		{ SL2_ID( VK_FORMAT_R8G8_SRGB, DXGI_FORMAT_UNKNOWN, MTLPixelFormatRG8Unorm_sRGB, GL_SRG8, GL_UNSIGNED_BYTE, GL_RG ),								0x00, 0, 16, 1, 1, 1, 1, 1, true, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 0, 0), SL2_TSHIFTS(0, 8, 0, 0), 2, false, true, true ) },
 		{ SL2_ID( VK_FORMAT_R8G8B8_SRGB, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_SRGB8, GL_UNSIGNED_BYTE, GL_RGB ),									0x00, 0, 24, 1, 1, 1, 1, 1, true, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0), 3, false, true, true ) },
+		{ SL2_ID( VK_FORMAT_B8G8R8_SRGB, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_SRGB8, GL_UNSIGNED_BYTE, GL_BGR ),									0x00, 0, 24, 1, 1, 1, 1, 1, true, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(16, 8, 0, 0), 3, false, true, true ) },
 		{ SL2_ID( VK_FORMAT_R8G8B8A8_SRGB, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, MTLPixelFormatRGBA8Unorm_sRGB, GL_SRGB8_ALPHA8, GL_UNSIGNED_BYTE, GL_RGBA ),	0x00, 0, 32, 1, 1, 1, 1, 1, true, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), 4, false, true, true ) },
+		{ SL2_ID( VK_FORMAT_B8G8R8A8_SRGB, DXGI_FORMAT_B8G8R8A8_UNORM_SRGB, MTLPixelFormatBGRA8Unorm_sRGB, GL_SRGB8_ALPHA8, GL_UNSIGNED_BYTE, GL_BGRA ),	0x00, 0, 32, 1, 1, 1, 1, 1, true, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(16, 8, 0, 24), 4, false, true, true ) },
 
 		{ SL2_ID( VK_FORMAT_R16_UNORM, DXGI_FORMAT_R16_UNORM, MTLPixelFormatR16Unorm, GL_R16, GL_UNSIGNED_SHORT, GL_RED ),									0x00, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 2, false, true, false ) },
 		{ SL2_ID( VK_FORMAT_R16G16_UNORM, DXGI_FORMAT_R16G16_UNORM, MTLPixelFormatRG16Unorm, GL_RG16, GL_UNSIGNED_SHORT, GL_RG ),							0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 0, 0), SL2_TSHIFTS(0, 16, 0, 0), 4, false, true, false ) },
@@ -72,30 +82,30 @@ namespace sl2 {
 		{ SL2_ID( VK_FORMAT_R16G16B16_SNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB16_SNORM, GL_SHORT, GL_RGB ),								0x00, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 16, 32, 0), 6, true, true, false ) },
 		{ SL2_ID( VK_FORMAT_R16G16B16A16_SNORM, DXGI_FORMAT_R16G16B16A16_SNORM, MTLPixelFormatRGBA16Snorm, GL_RGBA16_SNORM, GL_SHORT, GL_RGBA ),			0x00, 0, 64, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 16, 32, 48), 8, true, true, false ) },
 
-		{ SL2_ID( VK_FORMAT_R16_UINT, DXGI_FORMAT_R16_UINT, MTLPixelFormatR16Uint, GL_R16UI, GL_UNSIGNED_SHORT, GL_RED ),									0x00, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 2, false, false, false ) },
-		{ SL2_ID( VK_FORMAT_R16G16_UINT, DXGI_FORMAT_R16G16_UINT, MTLPixelFormatRG16Uint, GL_RG16UI, GL_UNSIGNED_SHORT, GL_RG ),							0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 0, 0), SL2_TSHIFTS(0, 16, 0, 0), 4, false, false, false ) },
-		{ SL2_ID( VK_FORMAT_R16G16B16_UINT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB16UI, GL_UNSIGNED_SHORT, GL_RGB ),							0x00, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 16, 32, 0), 6, false, false, false ) },
-		{ SL2_ID( VK_FORMAT_R16G16B16A16_UINT, DXGI_FORMAT_R16G16B16A16_UINT, MTLPixelFormatRGBA16Uint, GL_RGBA16UI, GL_UNSIGNED_SHORT, GL_RGBA ),			0x00, 0, 64, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 16, 32, 48), 8, false, false, false ) },
+		{ SL2_ID( VK_FORMAT_R16_UINT, DXGI_FORMAT_R16_UINT, MTLPixelFormatR16Uint, GL_R16UI, GL_UNSIGNED_SHORT, GL_RED_INTEGER ),							0x00, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 2, false, false, false ) },
+		{ SL2_ID( VK_FORMAT_R16G16_UINT, DXGI_FORMAT_R16G16_UINT, MTLPixelFormatRG16Uint, GL_RG16UI, GL_UNSIGNED_SHORT, GL_RG_INTEGER ),					0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 0, 0), SL2_TSHIFTS(0, 16, 0, 0), 4, false, false, false ) },
+		{ SL2_ID( VK_FORMAT_R16G16B16_UINT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB16UI, GL_UNSIGNED_SHORT, GL_RGB_INTEGER ),					0x00, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 16, 32, 0), 6, false, false, false ) },
+		{ SL2_ID( VK_FORMAT_R16G16B16A16_UINT, DXGI_FORMAT_R16G16B16A16_UINT, MTLPixelFormatRGBA16Uint, GL_RGBA16UI, GL_UNSIGNED_SHORT, GL_RGBA_INTEGER ),	0x00, 0, 64, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 16, 32, 48), 8, false, false, false ) },
 
-		{ SL2_ID( VK_FORMAT_R16_SINT, DXGI_FORMAT_R16_SINT, MTLPixelFormatR16Sint, GL_R16I, GL_SHORT, GL_RED ),												0x00, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 2, true, false, false ) },
-		{ SL2_ID( VK_FORMAT_R16G16_SINT, DXGI_FORMAT_R16G16_SINT, MTLPixelFormatRG16Sint, GL_RG16I, GL_SHORT, GL_RG ),										0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 0, 0), SL2_TSHIFTS(0, 16, 0, 0), 4, true, false, false ) },
-		{ SL2_ID( VK_FORMAT_R16G16B16_SINT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB16I, GL_SHORT, GL_RGB ),										0x00, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 16, 32, 0), 6, true, false, false ) },
-		{ SL2_ID( VK_FORMAT_R16G16B16A16_SINT, DXGI_FORMAT_R16G16B16A16_SINT, MTLPixelFormatRGBA16Sint, GL_RGBA16I, GL_SHORT, GL_RGBA ),					0x00, 0, 64, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 16, 32, 48), 8, true, false, false ) },
+		{ SL2_ID( VK_FORMAT_R16_SINT, DXGI_FORMAT_R16_SINT, MTLPixelFormatR16Sint, GL_R16I, GL_SHORT, GL_RED_INTEGER ),										0x00, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 2, true, false, false ) },
+		{ SL2_ID( VK_FORMAT_R16G16_SINT, DXGI_FORMAT_R16G16_SINT, MTLPixelFormatRG16Sint, GL_RG16I, GL_SHORT, GL_RG_INTEGER ),								0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 0, 0), SL2_TSHIFTS(0, 16, 0, 0), 4, true, false, false ) },
+		{ SL2_ID( VK_FORMAT_R16G16B16_SINT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB16I, GL_SHORT, GL_RGB_INTEGER ),								0x00, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 16, 32, 0), 6, true, false, false ) },
+		{ SL2_ID( VK_FORMAT_R16G16B16A16_SINT, DXGI_FORMAT_R16G16B16A16_SINT, MTLPixelFormatRGBA16Sint, GL_RGBA16I, GL_SHORT, GL_RGBA_INTEGER ),			0x00, 0, 64, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 16, 32, 48), 8, true, false, false ) },
 		
 		{ SL2_ID( VK_FORMAT_R16_SFLOAT, DXGI_FORMAT_R16_FLOAT, MTLPixelFormatR16Float, GL_R16F, GL_HALF_FLOAT, GL_RED ),									0x00, 0, 16, 1, 1, 1, 1, 1, false, false, false, true, nullptr, SL2_TBITS(16, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), SL2_CONV_F( CFormat::F16ToRgba64F, CFormat::F16FromRgba64F, SL2_TBITS(16, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 2 ) },
 		{ SL2_ID( VK_FORMAT_R16G16_SFLOAT, DXGI_FORMAT_R16G16_FLOAT, MTLPixelFormatRG16Float, GL_RG16F, GL_HALF_FLOAT, GL_RG ),								0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, true, nullptr, SL2_TBITS(16, 16, 0, 0), SL2_TSHIFTS(0, 16, 0, 0), SL2_CONV_F( CFormat::F16ToRgba64F, CFormat::F16FromRgba64F, SL2_TBITS(16, 16, 0, 0), SL2_TSHIFTS(0, 16, 0, 0), 4 ) },
 		{ SL2_ID( VK_FORMAT_R16G16B16_SFLOAT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB16F, GL_HALF_FLOAT, GL_RGB ),								0x00, 0, 48, 1, 1, 1, 1, 1, false, false, false, true, nullptr, SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 16, 32, 0), SL2_CONV_F( CFormat::F16ToRgba64F, CFormat::F16FromRgba64F, SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 16, 32, 0), 6 ) },
 		{ SL2_ID( VK_FORMAT_R16G16B16A16_SFLOAT, DXGI_FORMAT_R16G16B16A16_FLOAT, MTLPixelFormatRGBA16Float, GL_RGBA16F, GL_HALF_FLOAT, GL_RGBA ),			0x00, 0, 64, 1, 1, 1, 1, 1, false, false, false, true, nullptr, SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 16, 32, 48), SL2_CONV_F( CFormat::F16ToRgba64F, CFormat::F16FromRgba64F, SL2_TBITS(16, 16, 16, 16), SL2_TSHIFTS(0, 16, 32, 48), 8 ) },
 		
-		{ SL2_ID( VK_FORMAT_R32_UINT, DXGI_FORMAT_R32_UINT, MTLPixelFormatR32Uint, GL_R32UI, GL_UNSIGNED_INT, GL_RED ),										0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_CONV_I( CFormat::Int128ToRgba64F, CFormat::Int128FromRgba64F, SL2_TBITS(32, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 4, false, false, false ) },
-		{ SL2_ID( VK_FORMAT_R32G32_UINT, DXGI_FORMAT_R32G32_UINT, MTLPixelFormatRG32Uint, GL_RG32UI, GL_UNSIGNED_INT, GL_RG ),								0x00, 0, 64, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_CONV_I( CFormat::Int128ToRgba64F, CFormat::Int128FromRgba64F, SL2_TBITS(32, 32, 0, 0), SL2_TSHIFTS(0, 32, 0, 0), 8, false, false, false ) },
-		{ SL2_ID( VK_FORMAT_R32G32B32_UINT, DXGI_FORMAT_R32G32B32_UINT, MTLPixelFormatInvalid, GL_RGB32UI, GL_UNSIGNED_INT, GL_RGB ),						0x00, 0, 96, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_CONV_I( CFormat::Int128ToRgba64F, CFormat::Int128FromRgba64F, SL2_TBITS(32, 32, 32, 0), SL2_TSHIFTS(0, 32, 64, 0), 12, false, false, false ) },
-		{ SL2_ID( VK_FORMAT_R32G32B32A32_UINT, DXGI_FORMAT_R32G32B32A32_UINT, MTLPixelFormatRGBA32Uint, GL_RGBA32UI, GL_UNSIGNED_INT, GL_RGBA ),			0x00, 0, 128, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_CONV_I( CFormat::Int128ToRgba64F, CFormat::Int128FromRgba64F, SL2_TBITS(32, 32, 32, 32), SL2_TSHIFTS(0, 32, 64, 96), 16, false, false, false ) },
+		{ SL2_ID( VK_FORMAT_R32_UINT, DXGI_FORMAT_R32_UINT, MTLPixelFormatR32Uint, GL_R32UI, GL_UNSIGNED_INT, GL_RED_INTEGER ),								0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_CONV_I( CFormat::Int128ToRgba64F, CFormat::Int128FromRgba64F, SL2_TBITS(32, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 4, false, false, false ) },
+		{ SL2_ID( VK_FORMAT_R32G32_UINT, DXGI_FORMAT_R32G32_UINT, MTLPixelFormatRG32Uint, GL_RG32UI, GL_UNSIGNED_INT, GL_RG_INTEGER ),						0x00, 0, 64, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_CONV_I( CFormat::Int128ToRgba64F, CFormat::Int128FromRgba64F, SL2_TBITS(32, 32, 0, 0), SL2_TSHIFTS(0, 32, 0, 0), 8, false, false, false ) },
+		{ SL2_ID( VK_FORMAT_R32G32B32_UINT, DXGI_FORMAT_R32G32B32_UINT, MTLPixelFormatInvalid, GL_RGB32UI, GL_UNSIGNED_INT, GL_RGB_INTEGER ),				0x00, 0, 96, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_CONV_I( CFormat::Int128ToRgba64F, CFormat::Int128FromRgba64F, SL2_TBITS(32, 32, 32, 0), SL2_TSHIFTS(0, 32, 64, 0), 12, false, false, false ) },
+		{ SL2_ID( VK_FORMAT_R32G32B32A32_UINT, DXGI_FORMAT_R32G32B32A32_UINT, MTLPixelFormatRGBA32Uint, GL_RGBA32UI, GL_UNSIGNED_INT, GL_RGBA_INTEGER ),	0x00, 0, 128, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_CONV_I( CFormat::Int128ToRgba64F, CFormat::Int128FromRgba64F, SL2_TBITS(32, 32, 32, 32), SL2_TSHIFTS(0, 32, 64, 96), 16, false, false, false ) },
 		
-		{ SL2_ID( VK_FORMAT_R32_SINT, DXGI_FORMAT_R32_SINT, MTLPixelFormatR32Sint, GL_R32I, GL_INT, GL_RED ),												0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_CONV_I( CFormat::Int128ToRgba64F, CFormat::Int128FromRgba64F, SL2_TBITS(32, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 4, true, false, false ) },
-		{ SL2_ID( VK_FORMAT_R32G32_SINT, DXGI_FORMAT_R32G32_SINT, MTLPixelFormatRG32Sint, GL_RG32I, GL_INT, GL_RG ),										0x00, 0, 64, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_CONV_I( CFormat::Int128ToRgba64F, CFormat::Int128FromRgba64F, SL2_TBITS(32, 32, 0, 0), SL2_TSHIFTS(0, 32, 0, 0), 8, true, false, false ) },
-		{ SL2_ID( VK_FORMAT_R32G32B32_SINT, DXGI_FORMAT_R32G32B32_SINT, MTLPixelFormatInvalid, GL_RGB32I, GL_INT, GL_RGB ),									0x00, 0, 96, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_CONV_I( CFormat::Int128ToRgba64F, CFormat::Int128FromRgba64F, SL2_TBITS(32, 32, 32, 0), SL2_TSHIFTS(0, 32, 64, 0), 12, true, false, false ) },
-		{ SL2_ID( VK_FORMAT_R32G32B32A32_SINT, DXGI_FORMAT_R32G32B32A32_SINT, MTLPixelFormatRGBA32Sint, GL_RGBA32I, GL_INT, GL_RGBA ),						0x00, 0, 128, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_CONV_I( CFormat::Int128ToRgba64F, CFormat::Int128FromRgba64F, SL2_TBITS(32, 32, 32, 32), SL2_TSHIFTS(0, 32, 64, 96), 16, true, false, false ) },
+		{ SL2_ID( VK_FORMAT_R32_SINT, DXGI_FORMAT_R32_SINT, MTLPixelFormatR32Sint, GL_R32I, GL_INT, GL_RED_INTEGER ),										0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_CONV_I( CFormat::Int128ToRgba64F, CFormat::Int128FromRgba64F, SL2_TBITS(32, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 4, true, false, false ) },
+		{ SL2_ID( VK_FORMAT_R32G32_SINT, DXGI_FORMAT_R32G32_SINT, MTLPixelFormatRG32Sint, GL_RG32I, GL_INT, GL_RG_INTEGER ),								0x00, 0, 64, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_CONV_I( CFormat::Int128ToRgba64F, CFormat::Int128FromRgba64F, SL2_TBITS(32, 32, 0, 0), SL2_TSHIFTS(0, 32, 0, 0), 8, true, false, false ) },
+		{ SL2_ID( VK_FORMAT_R32G32B32_SINT, DXGI_FORMAT_R32G32B32_SINT, MTLPixelFormatInvalid, GL_RGB32I, GL_INT, GL_RGB_INTEGER ),							0x00, 0, 96, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_CONV_I( CFormat::Int128ToRgba64F, CFormat::Int128FromRgba64F, SL2_TBITS(32, 32, 32, 0), SL2_TSHIFTS(0, 32, 64, 0), 12, true, false, false ) },
+		{ SL2_ID( VK_FORMAT_R32G32B32A32_SINT, DXGI_FORMAT_R32G32B32A32_SINT, MTLPixelFormatRGBA32Sint, GL_RGBA32I, GL_INT, GL_RGBA_INTEGER ),				0x00, 0, 128, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_CONV_I( CFormat::Int128ToRgba64F, CFormat::Int128FromRgba64F, SL2_TBITS(32, 32, 32, 32), SL2_TSHIFTS(0, 32, 64, 96), 16, true, false, false ) },
 		
 		{ SL2_ID( VK_FORMAT_R32_SFLOAT, DXGI_FORMAT_R32_FLOAT, MTLPixelFormatR32Float, GL_R32F, GL_FLOAT, GL_RED ),											0x00, 0, 32, 1, 1, 1, 1, 1, false, false, false, true, nullptr, SL2_TBITS(32, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), SL2_CONV_F( CFormat::F32ToRgba64F, CFormat::F32FromRgba64F, SL2_TBITS(32, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), 4 ) },
 		{ SL2_ID( VK_FORMAT_R32G32_SFLOAT, DXGI_FORMAT_R32G32_FLOAT, MTLPixelFormatRG32Float, GL_RG32F, GL_FLOAT, GL_RG ),									0x00, 0, 64, 1, 1, 1, 1, 1, false, false, false, true, nullptr, SL2_TBITS(32, 32, 0, 0), SL2_TSHIFTS(0, 32, 0, 0), SL2_CONV_F( CFormat::F32ToRgba64F, CFormat::F32FromRgba64F, SL2_TBITS(32, 32, 0, 0), SL2_TSHIFTS(0, 32, 0, 0), 8 ) },
@@ -118,34 +128,51 @@ namespace sl2 {
 		{ SL2_ID( VK_FORMAT_R64G64B64A64_SFLOAT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),							0x00, 0, 256, 1, 1, 1, 1, 1, false, false, false, true, nullptr, SL2_TBITS(64, 64, 64, 64), SL2_TSHIFTS(0, 64, 128, 192), SL2_CONV_F( CFormat::F64ToRgba64F, CFormat::F64FromRgba64F, SL2_TBITS(64, 64, 64, 64), SL2_TSHIFTS(0, 64, 128, 192), 32 ) },
 		
 		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_R3_G3_B2, GL_UNSIGNED_BYTE_2_3_3_REV, GL_RGB ),						0x01, 0, 8, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(3, 3, 2, 0), SL2_TSHIFTS(0, 3, 6, 0), 1, false, true, false ) },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB4, GL_UNSIGNED_BYTE, GL_RGB ),										0x01, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0), 3, false, true, false ) },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB5, GL_UNSIGNED_BYTE, GL_RGB ),										0x01, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0), 3, false, true, false ) },
+		{ SL2_ID( VK_FORMAT_R4G4_UNORM_PACK8, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),								0x01, 0, 8, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(4, 4, 0, 0), SL2_TSHIFTS(4, 0, 0, 0), 2, false, true, false ) },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB4, GL_UNSIGNED_SHORT_4_4_4_4, GL_RGB ),							0x01, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(4, 4, 4, 0), SL2_TSHIFTS(0, 4, 8, 0), 3, false, true, false ) },
+		{ SL2_ID( VK_FORMAT_R4G4B4A4_UNORM_PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatABGR4Unorm, GL_RGBA4, GL_UNSIGNED_SHORT_4_4_4_4, GL_RGBA ),			0x01, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(4, 4, 4, 4), SL2_TSHIFTS(12, 8, 4, 0), 2, false, true, false ) },
+		{ SL2_ID( VK_FORMAT_B4G4R4A4_UNORM_PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGBA4, GL_UNSIGNED_SHORT_4_4_4_4, GL_BGRA ),				0x01, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(4, 4, 4, 4), SL2_TSHIFTS(12, 8, 4, 0), 2, false, true, false ) },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB5, GL_UNSIGNED_SHORT_5_5_5_1, GL_RGB ),							0x01, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(5, 5, 5, 0), SL2_TSHIFTS(1, 6, 11, 0), 2, false, true, false ) },
 		{ SL2_ID( VK_FORMAT_R5G6B5_UNORM_PACK16, DXGI_FORMAT_B5G6R5_UNORM, MTLPixelFormatB5G6R5Unorm, GL_RGB565, GL_UNSIGNED_SHORT_5_6_5, GL_RGB ),			0x01, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(5, 6, 5, 0), SL2_TSHIFTS(11, 5, 0, 0), 2, false, true, false ) },
 		{ SL2_ID( VK_FORMAT_B5G6R5_UNORM_PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB565, GL_UNSIGNED_SHORT_5_6_5_REV, GL_RGB ),				0x01, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(5, 6, 5, 0), SL2_TSHIFTS(0, 5, 11, 0), 2, false, true, false ) },
 		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB10, GL_UNSIGNED_SHORT, GL_RGB ),									0x01, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 16, 32, 0), 6, false, true, false ) },
 		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB12, GL_UNSIGNED_SHORT, GL_RGB ),									0x01, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 16, 32, 0), 6, false, true, false ) },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGBA2, GL_UNSIGNED_SHORT, GL_RGBA ),									0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), 4, false, true, false ) },
-		{ SL2_ID( VK_FORMAT_A4R4G4B4_UNORM_PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatABGR4Unorm, GL_RGBA4, GL_UNSIGNED_SHORT_4_4_4_4, GL_RGBA ),			0x01, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(4, 4, 4, 4), SL2_TSHIFTS(12, 8, 4, 0), 2, false, true, false ) },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGBA2, GL_UNSIGNED_BYTE, GL_RGBA ),									0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), 4, false, true, false ) },
 		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGBA12, GL_UNSIGNED_SHORT, GL_RGBA ),									0x01, 0, 64, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(16, 16, 16, 1), SL2_TSHIFTS(0, 16, 32, 48), 8, false, true, false ) },
-		{ SL2_ID( VK_FORMAT_R5G5B5A1_UNORM_PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatA1BGR5Unorm, GL_RGB5_A1, GL_UNSIGNED_SHORT_5_5_5_1, GL_RGBA ),		0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(5, 5, 5, 1), SL2_TSHIFTS(10, 5, 0, 15), 2, false, true, false ) },
-		{ SL2_ID( VK_FORMAT_B5G5R5A1_UNORM_PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB5_A1, GL_UNSIGNED_SHORT_5_5_5_1, GL_BGRA ),			0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(5, 5, 5, 1), SL2_TSHIFTS(0, 5, 10, 15), 2, false, true, false ) },
-		{ SL2_ID( VK_FORMAT_A1B5G5R5_UNORM_PACK16_KHR, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB5_A1, GL_UNSIGNED_SHORT_1_5_5_5_REV, GL_RGBA ),	0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(5, 5, 5, 1), SL2_TSHIFTS(1, 6, 11, 0), 2, false, true, false ) },
+		{ SL2_ID( VK_FORMAT_R5G5B5A1_UNORM_PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatA1BGR5Unorm, GL_RGB5_A1, GL_UNSIGNED_SHORT_5_5_5_1, GL_RGBA ),		0x01, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(5, 5, 5, 1), SL2_TSHIFTS(11, 6, 1, 0), 2, false, true, false ) },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB5_A1, GL_UNSIGNED_SHORT_5_5_5_1, GL_BGRA ),						0x01, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(5, 5, 5, 1), SL2_TSHIFTS(1, 6, 11, 0), 2, false, true, false ) },
+		{ SL2_ID( VK_FORMAT_A1B5G5R5_UNORM_PACK16_KHR, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB5_A1, GL_UNSIGNED_SHORT_1_5_5_5_REV, GL_RGBA ),	0x01, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(5, 5, 5, 1), SL2_TSHIFTS(1, 6, 11, 0), 2, false, true, false ) },
 		{ SL2_ID( VK_FORMAT_A1R5G5B5_UNORM_PACK16, DXGI_FORMAT_B5G5R5A1_UNORM, MTLPixelFormatBGR5A1Unorm, GL_RGB5_A1, GL_UNSIGNED_SHORT_1_5_5_5_REV, GL_BGRA ),
-																																							0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(5, 5, 5, 1), SL2_TSHIFTS(11, 6, 1, 0), 2, false, true, false ) },
+																																							0x01, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(5, 5, 5, 1), SL2_TSHIFTS(10, 5, 0, 15), 2, false, true, false ) },
+			
+		{ SL2_ID( VK_FORMAT_A8B8G8R8_UNORM_PACK32, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),						0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), 4, false, true, false ) },
+		{ SL2_ID( VK_FORMAT_A8B8G8R8_SNORM_PACK32, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),						0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), 4, true, true, false ) },
+		{ SL2_ID( VK_FORMAT_A8B8G8R8_UINT_PACK32, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),							0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), 4, false, false, false ) },
+		{ SL2_ID( VK_FORMAT_A8B8G8R8_SINT_PACK32, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),							0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), 4, true, false, false ) },
+		{ SL2_ID( VK_FORMAT_A8B8G8R8_SRGB_PACK32, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),							0x00, 0, 32, 1, 1, 1, 1, 1, true, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), 4, false, true, true ) },
 
-		{ SL2_ID( VK_FORMAT_A2B10G10R10_UNORM_PACK32, DXGI_FORMAT_R10G10B10A2_UNORM, MTLPixelFormatRGB10A2Unorm, GL_RGB10_A2, GL_UNSIGNED_INT_2_10_10_10_REV, GL_RGBA ),
-																																							0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(10, 10, 10, 2), SL2_TSHIFTS(0, 10, 20, 30), 4, false, true, false ) },
 		{ SL2_ID( VK_FORMAT_A2R10G10B10_UNORM_PACK32, DXGI_FORMAT_UNKNOWN, MTLPixelFormatBGR10A2Unorm, GL_RGB10_A2, GL_UNSIGNED_INT_2_10_10_10_REV, GL_BGRA ),
 																																							0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(10, 10, 10, 2), SL2_TSHIFTS(20, 10, 0, 30), 4, false, true, false ) },
+		{ SL2_ID( VK_FORMAT_A2B10G10R10_UNORM_PACK32, DXGI_FORMAT_R10G10B10A2_UNORM, MTLPixelFormatRGB10A2Unorm, GL_RGB10_A2, GL_UNSIGNED_INT_2_10_10_10_REV, GL_RGBA ),
+																																							0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(10, 10, 10, 2), SL2_TSHIFTS(0, 10, 20, 30), 4, false, true, false ) },
+		{ SL2_ID( VK_FORMAT_A2R10G10B10_SNORM_PACK32, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),						0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(10, 10, 10, 2), SL2_TSHIFTS(20, 10, 0, 30), 4, true, true, false ) },
+		{ SL2_ID( VK_FORMAT_A2B10G10R10_SNORM_PACK32, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),						0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(10, 10, 10, 2), SL2_TSHIFTS(0, 10, 20, 30), 4, true, true, false ) },
 
 
-		{ SL2_ID( VK_FORMAT_A2B10G10R10_UINT_PACK32, DXGI_FORMAT_R10G10B10A2_UINT, MTLPixelFormatRGB10A2Uint, GL_RGB10_A2UI, GL_UNSIGNED_INT_2_10_10_10_REV, GL_RGBA ),
-																																							0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(10, 10, 10, 2), SL2_TSHIFTS(0, 10, 20, 30), 4, false, false, false ) },
-		{ SL2_ID( VK_FORMAT_A2R10G10B10_UINT_PACK32, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB10_A2UI, GL_UNSIGNED_INT_2_10_10_10_REV, GL_BGRA ),
+		{ SL2_ID( VK_FORMAT_A2R10G10B10_UINT_PACK32, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_RGB10_A2UI, GL_UNSIGNED_INT_2_10_10_10_REV, GL_BGRA_INTEGER ),
 																																							0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(10, 10, 10, 2), SL2_TSHIFTS(20, 10, 0, 30), 4, false, false, false ) },
+		{ SL2_ID( VK_FORMAT_A2B10G10R10_UINT_PACK32, DXGI_FORMAT_R10G10B10A2_UINT, MTLPixelFormatRGB10A2Uint, GL_RGB10_A2UI, GL_UNSIGNED_INT_2_10_10_10_REV, GL_RGBA_INTEGER ),
+																																							0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(10, 10, 10, 2), SL2_TSHIFTS(0, 10, 20, 30), 4, false, false, false ) },
+		{ SL2_ID( VK_FORMAT_A2R10G10B10_SINT_PACK32, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),						0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(10, 10, 10, 2), SL2_TSHIFTS(20, 10, 0, 30), 4, true, false, false ) },
+		{ SL2_ID( VK_FORMAT_A2B10G10R10_SINT_PACK32, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),						0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_GEN_INT( SL2_TBITS(10, 10, 10, 2), SL2_TSHIFTS(0, 10, 20, 30), 4, true, false, false ) },
+
+
+
 
 		{ SL2_ID( VK_FORMAT_B10G11R11_UFLOAT_PACK32, DXGI_FORMAT_R11G11B10_FLOAT, MTLPixelFormatRG11B10Float, GL_R11F_G11F_B10F, GL_UNSIGNED_INT_10F_11F_11F_REV, GL_RGB ),
 																																							0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, true, nullptr, SL2_TBITS(11, 11, 10, 0), SL2_TSHIFTS(0, 11, 22, 0), CFormat::R11G11B10FToRgba64F, CFormat::R11G11B10FFromRgba64F },
+
+
 		{ SL2_ID( VK_FORMAT_E5B9G9R9_UFLOAT_PACK32, DXGI_FORMAT_R9G9B9E5_SHAREDEXP, MTLPixelFormatRGB9E5Float, GL_RGB9_E5, GL_UNSIGNED_INT_5_9_9_9_REV, GL_RGB ),
 																																							0x01, 0, 32, 1, 1, 1, 1, 1, false, false, false, true, nullptr, SL2_TBITS(9, 9, 9, 0), SL2_TSHIFTS(9, 18, 27, 0), CFormat::RGB9E5ToRgba64F, CFormat::RGB9E5FromRgba64F },
 		
@@ -249,7 +276,7 @@ namespace sl2 {
 																																							0, 128, 4, 4, 1, 1, 1, true, true, false, false, CFormat::GetCompressedSizeBc, SL2_TBITS(5, 6, 5, 4), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Dxt3ToRgba64F<true>, CFormat::Dxt3FromRgba64F<true> },
 		{ SL2_ID( VK_FORMAT_BC3_SRGB_BLOCK, DXGI_FORMAT_BC3_UNORM_SRGB, MTLPixelFormatBC3_RGBA_sRGB, GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT, GL_UNSIGNED_BYTE, GL_RGBA ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_BC ),
 																																							0, 128, 4, 4, 1, 1, 1, true, true, false, false, CFormat::GetCompressedSizeBc, SL2_TBITS(5, 6, 5, 4), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Dxt5ToRgba64F<true>, CFormat::Dxt5FromRgba64F<true> },
-		// 
+		
 		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_LUMINANCE_LATC1_EXT, GL_UNSIGNED_BYTE, GL_RED ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_BC ),
 																																							0, 64, 4, 4, 1, 1, 1, false, true, false, false, CFormat::GetCompressedSizeBc, SL2_TBITS(8, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Bc4uToRgba64F<false, true>, CFormat::Bc4uFromRgba64F<false, true> },
 		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT, GL_UNSIGNED_BYTE, GL_RG ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_BC ),
@@ -268,7 +295,6 @@ namespace sl2 {
 																																							0, 128, 4, 4, 1, 1, 1, false, true, false, false, CFormat::GetCompressedSizeBc, SL2_TBITS(8, 8, 0, 0), SL2_TSHIFTS(0, 8, 0, 0), CFormat::Bc5sToRgba64F<false, false>, CFormat::Bc5sFromRgba64F<false, false> },
 		
 		//{ SL2_KIF_GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT, SL2_KT_GL_FLOAT, SL2_KBIF_GL_RGB, 0x02, 0, 128, 4, 4, 1, 1, 1, false, true, false, nullptr, /**/nullptr, nullptr /*CFormat::Bc6hToRgba64F<false>, CFormat::Bc6hFromRgba64F<false>*/ },
-		// 
 		{ SL2_ID( VK_FORMAT_BC6H_UFLOAT_BLOCK, DXGI_FORMAT_BC6H_UF16, MTLPixelFormatBC6H_RGBUfloat, GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT, GL_FLOAT, GL_RGB ),	0x02 | SL2_MAKE_COMP_FLAG( SL2_CS_BC ),
 																																							0, 128, 4, 4, 1, 1, 1, false, true, false, false, CFormat::GetCompressedSizeBc, SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Bc6hToRgba64F<false>, CFormat::Bc6hFromRgba64F<false> },
 
@@ -500,33 +526,26 @@ namespace sl2 {
 		//{ SL2_KIF_GL_COLOR_INDEX8_EXT, SL2_KT_0, SL2_KBIF_0, 0x00, 0, 0, 1, 1, 1, 1, 1, false, false, false, nullptr },
 		//{ SL2_KIF_GL_COLOR_INDEX12_EXT, SL2_KT_0, SL2_KBIF_0, 0x00, 0, 0, 1, 1, 1, 1, 1, false, false, false, nullptr },
 		//{ SL2_KIF_GL_COLOR_INDEX16_EXT, SL2_KT_0, SL2_KBIF_0, 0x00, 0, 0, 1, 1, 1, 1, 1, false, false, false, nullptr },
-		// 
-		{ SL2_ID( VK_FORMAT_D16_UNORM, DXGI_FORMAT_D16_UNORM, MTLPixelFormatDepth16Unorm, GL_DEPTH_COMPONENT16, GL_UNSIGNED_SHORT, GL_DEPTH_COMPONENT ), 0x08,
-																																							0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(16, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_DEPTH_COMPONENT24, GL_UNSIGNED_INT, GL_DEPTH_COMPONENT ), 0x08,
-																																							0, 24, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(24, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth24ToRgba64F, CFormat::Depth24FromRgba64F },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_DEPTH_COMPONENT32, GL_UNSIGNED_INT, GL_DEPTH_COMPONENT ), 0x08,
-																																							0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(32, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth32ToRgba64F, CFormat::Depth32FromRgba64F },
-		{ SL2_ID( VK_FORMAT_D32_SFLOAT, DXGI_FORMAT_D32_FLOAT, MTLPixelFormatDepth32Float, GL_DEPTH_COMPONENT32F, GL_FLOAT, GL_DEPTH_COMPONENT ), 0x08,
-																																							0, 32, 1, 1, 1, 1, 1, false, false, false, true, nullptr, SL2_TBITS(32, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth32FToRgba64F, CFormat::Depth32FFromRgba64F },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_DEPTH_COMPONENT32F_NV, GL_FLOAT, GL_DEPTH_COMPONENT ), 0x08,
-																																							0, 32, 1, 1, 1, 1, 1, false, false, false, true, nullptr, SL2_TBITS(32, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth32FToRgba64F, CFormat::Depth32FFromRgba64F },
+		
+		{ SL2_ID( VK_FORMAT_D16_UNORM, DXGI_FORMAT_D16_UNORM, MTLPixelFormatDepth16Unorm, GL_DEPTH_COMPONENT16, GL_UNSIGNED_SHORT, GL_DEPTH_COMPONENT ),	0x08, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(16, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_DEPTH_COMPONENT24, GL_UNSIGNED_INT, GL_DEPTH_COMPONENT ),				0x08, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(24, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth24ToRgba64F, CFormat::Depth24FromRgba64F },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_DEPTH_COMPONENT32, GL_UNSIGNED_INT, GL_DEPTH_COMPONENT ),				0x08, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(32, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth32ToRgba64F, CFormat::Depth32FromRgba64F },
+		{ SL2_ID( VK_FORMAT_D32_SFLOAT, DXGI_FORMAT_D32_FLOAT, MTLPixelFormatDepth32Float, GL_DEPTH_COMPONENT32F, GL_FLOAT, GL_DEPTH_COMPONENT ),			0x08, 0, 32, 1, 1, 1, 1, 1, false, false, false, true, nullptr, SL2_TBITS(32, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth32FToRgba64F, CFormat::Depth32FFromRgba64F },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_DEPTH_COMPONENT32F_NV, GL_FLOAT, GL_DEPTH_COMPONENT ),				0x08, 0, 32, 1, 1, 1, 1, 1, false, false, false, true, nullptr, SL2_TBITS(32, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth32FToRgba64F, CFormat::Depth32FFromRgba64F },
 
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_STENCIL_INDEX1, GL_UNSIGNED_BYTE, GL_STENCIL_INDEX ), 0x10,
-																																							0, 1, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(0, 0, 0, 1), SL2_TSHIFTS(0, 0, 0, 0), CFormat::StencilXToRgba64F<uint8_t, 1>, CFormat::StencilXFromRgba64F<uint8_t, 1> },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_STENCIL_INDEX4, GL_UNSIGNED_BYTE, GL_STENCIL_INDEX ), 0x10,
-																																							0, 4, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(0, 0, 0, 4), SL2_TSHIFTS(0, 0, 0, 0), CFormat::StencilXToRgba64F<uint8_t, 4>, CFormat::StencilXFromRgba64F<uint8_t, 4> },
-		{ SL2_ID( VK_FORMAT_S8_UINT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatStencil8, GL_STENCIL_INDEX8, GL_UNSIGNED_BYTE, GL_STENCIL_INDEX ), 0x10,
-																																							0, 8, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(0, 0, 0, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::StencilXToRgba64F<uint8_t, 8>, CFormat::StencilXFromRgba64F<uint8_t, 8> },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_STENCIL_INDEX16, GL_UNSIGNED_BYTE, GL_STENCIL_INDEX ), 0x10,
-																																							0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(0, 0, 0, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::StencilXToRgba64F<uint16_t, 16>, CFormat::StencilXFromRgba64F<uint16_t, 16> },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_STENCIL_INDEX1, GL_UNSIGNED_BYTE, GL_STENCIL_INDEX ),					0x10, 0, 1, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(0, 0, 0, 1), SL2_TSHIFTS(0, 0, 0, 0), CFormat::StencilXToRgba64F<uint8_t, 1>, CFormat::StencilXFromRgba64F<uint8_t, 1> },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_STENCIL_INDEX4, GL_UNSIGNED_BYTE, GL_STENCIL_INDEX ),					0x10, 0, 4, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(0, 0, 0, 4), SL2_TSHIFTS(0, 0, 0, 0), CFormat::StencilXToRgba64F<uint8_t, 4>, CFormat::StencilXFromRgba64F<uint8_t, 4> },
+		{ SL2_ID( VK_FORMAT_S8_UINT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatStencil8, GL_STENCIL_INDEX8, GL_UNSIGNED_BYTE, GL_STENCIL_INDEX ),					0x10, 0, 8, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(0, 0, 0, 8), SL2_TSHIFTS(0, 0, 0, 0), CFormat::StencilXToRgba64F<uint8_t, 8>, CFormat::StencilXFromRgba64F<uint8_t, 8> },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_STENCIL_INDEX16, GL_UNSIGNED_BYTE, GL_STENCIL_INDEX ),				0x10, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(0, 0, 0, 16), SL2_TSHIFTS(0, 0, 0, 0), CFormat::StencilXToRgba64F<uint16_t, 16>, CFormat::StencilXFromRgba64F<uint16_t, 16> },
 
-		{ SL2_ID( VK_FORMAT_D24_UNORM_S8_UINT, DXGI_FORMAT_D24_UNORM_S8_UINT, MTLPixelFormatDepth24Unorm_Stencil8, GL_DEPTH24_STENCIL8, GL_UNSIGNED_INT_24_8, GL_DEPTH_STENCIL ), 0x18,
-																																							0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(24, 0, 0, 8), SL2_TSHIFTS(8, 0, 0, 0), CFormat::Depth24S8ToRgba64F, CFormat::Depth24S8FromRgba64F },
-		{ SL2_ID( VK_FORMAT_D32_SFLOAT_S8_UINT, DXGI_FORMAT_D32_FLOAT_S8X24_UINT, MTLPixelFormatDepth32Float_Stencil8, GL_DEPTH32F_STENCIL8, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, GL_DEPTH_STENCIL ), 0x18,
-																																							0, 64, 1, 1, 1, 1, 1, false, false, false, true, nullptr, SL2_TBITS(32, 0, 0, 8), SL2_TSHIFTS(0, 0, 0, 32), CFormat::Depth32FS8ToRgba64F, CFormat::Depth32FS8FromRgba64F },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_DEPTH32F_STENCIL8_NV, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, GL_DEPTH_STENCIL ), 0x18,
-																																							0, 64, 1, 1, 1, 1, 1, false, false, false, true, nullptr, SL2_TBITS(32, 0, 0, 8), SL2_TSHIFTS(0, 0, 0, 32), CFormat::Depth32FS8ToRgba64F, CFormat::Depth32FS8FromRgba64F },
+		{ SL2_ID( VK_FORMAT_D16_UNORM_S8_UINT, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),							0x18, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(16, 0, 0, 8), SL2_TSHIFTS(0, 0, 0, 16), CFormat::Depth16S8ToRgba64F, CFormat::Depth16S8FromRgba64F },
+		{ SL2_ID( VK_FORMAT_D24_UNORM_S8_UINT, DXGI_FORMAT_D24_UNORM_S8_UINT, MTLPixelFormatDepth24Unorm_Stencil8, GL_DEPTH24_STENCIL8, GL_UNSIGNED_INT_24_8, GL_DEPTH_STENCIL ),
+																																							0x18, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(24, 0, 0, 8), SL2_TSHIFTS(8, 0, 0, 0), CFormat::Depth24S8ToRgba64F, CFormat::Depth24S8FromRgba64F },
+		{ SL2_ID( VK_FORMAT_X8_D24_UNORM_PACK32, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),							0x18, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(24, 0, 0, 8), SL2_TSHIFTS(8, 0, 0, 0), CFormat::Depth24X8ToRgba64F, CFormat::Depth24X8FromRgba64F },
+		{ SL2_ID( VK_FORMAT_D32_SFLOAT_S8_UINT, DXGI_FORMAT_D32_FLOAT_S8X24_UINT, MTLPixelFormatDepth32Float_Stencil8, GL_DEPTH32F_STENCIL8, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, GL_DEPTH_STENCIL ),
+																																							0x18, 0, 64, 1, 1, 1, 1, 1, false, false, false, true, nullptr, SL2_TBITS(32, 0, 0, 8), SL2_TSHIFTS(0, 0, 0, 32), CFormat::Depth32FS8ToRgba64F, CFormat::Depth32FS8FromRgba64F },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_DEPTH32F_STENCIL8_NV, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, GL_DEPTH_STENCIL ),
+																																							0x18, 0, 64, 1, 1, 1, 1, 1, false, false, false, true, nullptr, SL2_TBITS(32, 0, 0, 8), SL2_TSHIFTS(0, 0, 0, 32), CFormat::Depth32FS8ToRgba64F, CFormat::Depth32FS8FromRgba64F },
 		
 #undef SL2_ID
 #undef SL2_GEN_INT
@@ -922,6 +941,71 @@ namespace sl2 {
 	}
 
 	/**
+	 * Decodes a swizzle string.
+	 * 
+	 * \param _pwcString The swizzle string to decode.
+	 * \param _sReturn HOlds the return swizzle if true is returned.
+	 * \return Returns true if the string represents a valid swizzle.
+	 **/
+	bool CFormat::CreateSwizzleFromString( const wchar_t * _pwcString, SL2_SWIZZLE &_sReturn ) {
+		for ( size_t I = 0; I < 4; ++I ) {
+			switch ( _pwcString[I] ) {
+				case L'r' : {}
+				case L'R' : {}
+				case L'x' : {}
+				case L'X' : {
+					_sReturn.pcComp[I] = SL2_PC_R;
+					break;
+				}
+				case L'g' : {}
+				case L'G' : {}
+				case L'y' : {}
+				case L'Y' : {
+					_sReturn.pcComp[I] = SL2_PC_G;
+					break;
+				}
+				case L'b' : {}
+				case L'B' : {}
+				case L'z' : {}
+				case L'Z' : {
+					_sReturn.pcComp[I] = SL2_PC_B;
+					break;
+				}
+				case L'a' : {}
+				case L'A' : {}
+				case L'w' : {}
+				case L'W' : {
+					_sReturn.pcComp[I] = SL2_PC_A;
+					break;
+				}
+				case L'0' : {
+					_sReturn.pcComp[I] = SL2_PC_ZERO;
+					break;
+				}
+				case L'1' : {
+					_sReturn.pcComp[I] = SL2_PC_ONE;
+					break;
+				}
+				default : { return false; }
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Is the given swizzle a default swizzle?
+	 * 
+	 * \param _sSwizzle The swizzle to test.
+	 * \return Returns true if the swizzle represents no change to the components.
+	 **/
+	bool CFormat::SwizzleIsDefault( const SL2_SWIZZLE &_sSwizzle ) {
+		for ( size_t I = 0; I < 4; ++I ) {
+			if ( size_t( _sSwizzle.pcComp[I] ) != I ) { return false; }
+		}
+		return true;
+	}
+
+	/**
 	 * Expands an RGBA64F texture to a size divisible by some number of pixels.
 	 * 
 	 * \param _pui8Src The source texture to expand.
@@ -1049,6 +1133,45 @@ namespace sl2 {
 	}
 
 	/**
+	 * Applies a swizzle to a given texture.
+	 * 
+	 * \param _pui8Src The source texture to expand.
+	 * \param _ui32W The width of the source texture.
+	 * \param _ui32H The height of the source texture.
+	 * \param _ui32D The depth of the source texture.
+	 * \param _sSwizzle The swizzle to apply.
+	 **/
+	void CFormat::ApplySwizzle( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D,
+		const SL2_SWIZZLE &_sSwizzle ) {
+		uint32_t ui32Pitch = _ui32W;
+		uint32_t ui32Slice = ui32Pitch * _ui32H;
+		SL2_RGBA64F * prgbDst = reinterpret_cast<SL2_RGBA64F *>(_pui8Src);
+		for ( uint32_t D = 0; D < _ui32D; ++D ) {
+			for ( uint32_t H = 0; H < _ui32H; ++H ) {
+				for ( uint32_t W = 0; W < _ui32W; ++W ) {
+					size_t sIdx = ui32Slice * D + ui32Pitch * H + W;
+					SL2_RGBA64F rgbCopy = prgbDst[sIdx];
+					for ( size_t I = 0; I < 4; ++I ) {
+						switch ( _sSwizzle.pcComp[I] ) {
+							case SL2_PC_ZERO : {
+								prgbDst[sIdx].dRgba[I] = 0.0;
+								break;
+							}
+							case SL2_PC_ONE : {
+								prgbDst[sIdx].dRgba[I] = 1.0;
+								break;
+							}
+							default : {
+								prgbDst[sIdx].dRgba[I] = rgbCopy.dRgba[_sSwizzle.pcComp[I]];
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Pre-multiply the alpha values in the given RGBA64F texture.
 	 * 
 	 * \param _pui8Src The source texture.
@@ -1139,6 +1262,29 @@ namespace sl2 {
 					size_t sIdx0 = ui32Slice * D + ui32Pitch * H + W;
 					size_t sIdx1 = ui32Slice * (_ui32D - 1 - D) + ui32Pitch * H + W;
 					std::swap( prgbDst[sIdx0], prgbDst[sIdx1] );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Swaps the R and B channels in a givem RGBA64F texture.
+	 * 
+	 * \param param _pui8Src The source texture.
+	 * \param _ui32W The width of the source texture.
+	 * \param _ui32H The height of the source texture.
+	 * \param _ui32D The depth of the source texture.
+	 **/
+	void CFormat::Swap( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D ) {
+		uint32_t ui32Pitch = _ui32W;
+		uint32_t ui32Slice = ui32Pitch * _ui32H;
+		SL2_RGBA64F * prgbDst = reinterpret_cast<SL2_RGBA64F *>(_pui8Src);
+		uint32_t ui32HalfD = _ui32D >> 1;
+		for ( uint32_t D = 0; D < ui32HalfD; ++D ) {
+			for ( uint32_t H = 0; H < _ui32H; ++H ) {
+				for ( uint32_t W = 0; W < _ui32W; ++W ) {
+					size_t sIdx = ui32Slice * D + ui32Pitch * H + W;
+					std::swap( prgbDst[sIdx].dRgba[SL2_PC_R], prgbDst[sIdx].dRgba[SL2_PC_B] );
 				}
 			}
 		}
@@ -1896,6 +2042,76 @@ namespace sl2 {
 	}
 
 	/**
+	 * Depth-16/Stencil-8 -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	bool CFormat::Depth16S8ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_D16S8 {
+			uint16_t ui16Val;
+			uint16_t ui8S;
+		};
+		const uint32_t ui32RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint32_t ui32PlaneSize = ui32RowSize * _ui32Height;
+		const uint32_t ui32SrcRowSize = SL2_ROUND_UP( sizeof( SL2_D16S8 ) * _ui32Width, 4 );
+		const uint32_t ui32SrcPlaneSize = ui32SrcRowSize * _ui32Height;
+		
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui32PlaneSize+Y*ui32RowSize+X*sizeof(SL2_RGBA64F)]);
+					const SL2_D16S8 * prSrc = reinterpret_cast<const SL2_D16S8 *>(&_pui8Src[Z*ui32SrcPlaneSize+Y*ui32SrcRowSize+X*sizeof(SL2_D16S8)]);
+					rgbaThis.dRgba[SL2_PC_R] = prSrc->ui16Val / 65535.0;
+					rgbaThis.dRgba[SL2_PC_G] = rgbaThis.dRgba[SL2_PC_R];
+					rgbaThis.dRgba[SL2_PC_B] = rgbaThis.dRgba[SL2_PC_R];
+					rgbaThis.dRgba[SL2_PC_A] = prSrc->ui8S / 255.0;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * RGBA64F -> Depth-16/Stencil-8 conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	bool CFormat::Depth16S8FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_D16S8 {
+			uint16_t ui16Val;
+			uint16_t ui8S;
+		};
+		const uint32_t ui32SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint32_t ui32SrcPlaneSize = ui32SrcRowSize * _ui32Height;
+		const uint32_t ui32RowSize = SL2_ROUND_UP( sizeof( SL2_D16S8 ) * _ui32Width, 4 );
+		const uint32_t ui32PlaneSize = ui32RowSize * _ui32Height;
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui32SrcPlaneSize+Y*ui32SrcRowSize+X*sizeof(SL2_RGBA64F)]);
+					SL2_D16S8 * prDst = reinterpret_cast<SL2_D16S8 *>(&_pui8Dst[Z*ui32PlaneSize+Y*ui32RowSize+X*sizeof(SL2_D16S8)]);
+					double dLum = (rgbaThis.dRgba[SL2_PC_R] +
+						rgbaThis.dRgba[SL2_PC_G] +
+						rgbaThis.dRgba[SL2_PC_B]) / 3.0;
+					prDst->ui16Val = static_cast<uint32_t>(dLum * 65535.5);
+					prDst->ui8S = static_cast<uint8_t>(rgbaThis.dRgba[SL2_PC_A] * 255.5);
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Depth-24/Stencil-8 -> RGBA64F conversion.
 	 *
 	 * \param _pui8Src Source texels.
@@ -1958,6 +2174,74 @@ namespace sl2 {
 						rgbaThis.dRgba[SL2_PC_B]) / 3.0;
 					prDst->ui32Val = static_cast<uint32_t>(dLum * 16777215.5) << 8;
 					prDst->ui32Val |= static_cast<uint8_t>(rgbaThis.dRgba[SL2_PC_A] * 255.5);
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Depth-24/X-8 -> RGBA64F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	bool CFormat::Depth24X8ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_D24 {
+			uint32_t ui32Val;
+		};
+		const uint32_t ui32RowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint32_t ui32PlaneSize = ui32RowSize * _ui32Height;
+		const uint32_t ui32SrcRowSize = SL2_ROUND_UP( sizeof( SL2_D24 ) * _ui32Width, 4 );
+		const uint32_t ui32SrcPlaneSize = ui32SrcRowSize * _ui32Height;
+		
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[Z*ui32PlaneSize+Y*ui32RowSize+X*sizeof(SL2_RGBA64F)]);
+					const SL2_D24 * prSrc = reinterpret_cast<const SL2_D24 *>(&_pui8Src[Z*ui32SrcPlaneSize+Y*ui32SrcRowSize+X*sizeof(SL2_D24)]);
+					rgbaThis.dRgba[SL2_PC_R] = (prSrc->ui32Val >> 8) / 16777215.0;
+					rgbaThis.dRgba[SL2_PC_G] = rgbaThis.dRgba[SL2_PC_R];
+					rgbaThis.dRgba[SL2_PC_B] = rgbaThis.dRgba[SL2_PC_R];
+					rgbaThis.dRgba[SL2_PC_A] = 0.0;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * RGBA64F -> Depth-24/X-8 conversion.
+	 *
+	 * \param _pui8Src Source texels known to be in RGBA64F format.
+	 * \param _pui8Dst Destination texels.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	bool CFormat::Depth24X8FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		struct SL2_D24 {
+			uint32_t ui32Val;
+		};
+		const uint32_t ui32SrcRowSize = sizeof( SL2_RGBA64F ) * _ui32Width;
+		const uint32_t ui32SrcPlaneSize = ui32SrcRowSize * _ui32Height;
+		const uint32_t ui32RowSize = SL2_ROUND_UP( sizeof( SL2_D24 ) * _ui32Width, 4 );
+		const uint32_t ui32PlaneSize = ui32RowSize * _ui32Height;
+
+		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
+			for ( uint32_t Y = 0; Y < _ui32Height; ++Y ) {
+				for ( uint32_t X = 0; X < _ui32Width; ++X ) {
+					const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[Z*ui32SrcPlaneSize+Y*ui32SrcRowSize+X*sizeof(SL2_RGBA64F)]);
+					SL2_D24 * prDst = reinterpret_cast<SL2_D24 *>(&_pui8Dst[Z*ui32PlaneSize+Y*ui32RowSize+X*sizeof(SL2_D24)]);
+					double dLum = (rgbaThis.dRgba[SL2_PC_R] +
+						rgbaThis.dRgba[SL2_PC_G] +
+						rgbaThis.dRgba[SL2_PC_B]) / 3.0;
+					prDst->ui32Val = static_cast<uint32_t>(dLum * 16777215.5) << 8;
 				}
 			}
 		}

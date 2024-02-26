@@ -60,14 +60,14 @@
 /** RGB9_E5 epsilon. */
 #define SL2_EPSILON_RGB9E5															((1.0 / SL2_RGB9E5_MANTISSA_VALUES) / (1 << SL2_RGB9E5_EXP_BIAS))
 
-/** How many rows to do per-thread during a DXT conversion. */
-#define SL2_DXT_ROWS																12
-
-/** How many rows to do per-thread for BC6H and BC7 conversions. */
-#define SL2_BC_ROWS																	24
-
-/** Maximum number of threads to run concurrently for BC conversions. */
-#define SL2_BC_MAX_THREADS															16
+///** How many rows to do per-thread during a DXT conversion. */
+//#define SL2_DXT_ROWS																12
+//
+///** How many rows to do per-thread for BC6H and BC7 conversions. */
+//#define SL2_BC_ROWS																	24
+//
+///** Maximum number of threads to run concurrently for BC conversions. */
+//#define SL2_BC_MAX_THREADS															16
 
 /** Makes a texture-compression flag. */
 #define SL2_MAKE_COMP_FLAG( VAL )													uint32_t( VAL ) << 8
@@ -143,6 +143,8 @@ namespace sl2 {
 		SL2_KT_GL_UNSIGNED_INT_5_9_9_9_REV											= 0x8C3E, /** GL_UNSIGNED_INT_5_9_9_9_REV */
 		SL2_KT_GL_UNSIGNED_INT_24_8													= 0x84FA, /** GL_UNSIGNED_INT_24_8 */
 		SL2_KT_GL_FLOAT_32_UNSIGNED_INT_24_8_REV									= 0x8DAD, /** GL_FLOAT_32_UNSIGNED_INT_24_8_REV */
+		SL2_KT_GL_RGBA_INTEGER														= 0x8D99, /** GL_RGBA_INTEGER */
+		SL2_KT_GL_BGRA_INTEGER														= 0x8D9B, /** GL_BGRA_INTEGER */
 		SL2_KT_0																	= 0,
 	};
 
@@ -1183,6 +1185,8 @@ namespace sl2 {
 		SL2_PC_B,																	/**< Blue. */
 		SL2_PC_A,																	/**< Alpha. */
 		SL2_PC_INVALID,																/**< Invalid. */
+		SL2_PC_ZERO,																/**< Hardcoded zero. */
+		SL2_PC_ONE,																	/**< Hardcoded one. */
 	};
 
 	/** Luma coefficient standards. */
@@ -1394,6 +1398,11 @@ namespace sl2 {
 		/** Luma coefficients. */
 		struct SL2_LUMA {
 			double																	dRgb[3];						/**< The luma coefficients. */
+		};
+
+		/** A swizzle. */
+		struct SL2_SWIZZLE {
+			SL2_PIXEL_COMPONENTS													pcComp[4];						/** The array of component mappings. */
 		};
 
 
@@ -1696,6 +1705,36 @@ namespace sl2 {
 		static uint32_t																CountChannels( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat );
 
 		/**
+		 * Decodes a swizzle string.
+		 * 
+		 * \param _pwcString The swizzle string to decode.
+		 * \param _sReturn HOlds the return swizzle if true is returned.
+		 * \return Returns true if the string represents a valid swizzle.
+		 **/
+		static bool																	CreateSwizzleFromString( const wchar_t * _pwcString, SL2_SWIZZLE &_sReturn );
+
+		/**
+		 * Is the given swizzle a default swizzle?
+		 * 
+		 * \param _sSwizzle The swizzle to test.
+		 * \return Returns true if the swizzle represents no change to the components.
+		 **/
+		static bool																	SwizzleIsDefault( const SL2_SWIZZLE &_sSwizzle );
+
+		/**
+		 * Creates a default swizzle.
+		 * 
+		 * \return Returns a default swizzle.
+		 **/
+		static SL2_SWIZZLE															DefaultSwizzle() {
+			SL2_SWIZZLE sSwiz;
+			for ( size_t I = 4; I--; ) {
+				sSwiz.pcComp[I] = static_cast<SL2_PIXEL_COMPONENTS>(I);
+			}
+			return sSwiz;
+		}
+
+		/**
 		 * Expands an RGBA64F texture to a size divisible by some number of pixels.
 		 * 
 		 * \param _pui8Src The source texture to expand.
@@ -1737,6 +1776,18 @@ namespace sl2 {
 			double _dGamma );
 
 		/**
+		 * Applies a swizzle to a given texture.
+		 * 
+		 * \param _pui8Src The source texture to expand.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 * \param _sSwizzle The swizzle to apply.
+		 **/
+		static void																	ApplySwizzle( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D,
+			const SL2_SWIZZLE &_sSwizzle );
+
+		/**
 		 * Pre-multiply the alpha values in the given RGBA64F texture.
 		 * 
 		 * \param _pui8Src The source texture.
@@ -1775,6 +1826,16 @@ namespace sl2 {
 		 * \param _ui32D The depth of the source texture.
 		 **/
 		static void																	FlipZ( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D );
+
+		/**
+		 * Swaps the R and B channels in a givem RGBA64F texture.
+		 * 
+		 * \param param _pui8Src The source texture.
+		 * \param _ui32W The width of the source texture.
+		 * \param _ui32H The height of the source texture.
+		 * \param _ui32D The depth of the source texture.
+		 **/
+		static void																	Swap( uint8_t * _pui8Src, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D );
 
 		/**
 		 * Converts an RGBA64F texture from CYMK to RGB.
@@ -2718,6 +2779,30 @@ namespace sl2 {
 		static bool 																Depth32FFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
+		 * Depth-16/Stencil-8 -> RGBA64F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		static bool 																Depth16S8ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * RGBA64F -> Depth-16/Stencil-8 conversion.
+		 *
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
+		 * \param _pui8Dst Destination texels.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		static bool 																Depth16S8FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
 		 * Depth-24/Stencil-8 -> RGBA64F conversion.
 		 *
 		 * \param _pui8Src Source texels.
@@ -2740,6 +2825,30 @@ namespace sl2 {
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
 		static bool 																Depth24S8FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * Depth-24/X-8 -> RGBA64F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		static bool 																Depth24X8ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * RGBA64F -> Depth-24/X-8 conversion.
+		 *
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
+		 * \param _pui8Dst Destination texels.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		static bool 																Depth24X8FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 
 		/**
 		 * Depth-32F/Stencil-8 -> RGBA64F conversion.

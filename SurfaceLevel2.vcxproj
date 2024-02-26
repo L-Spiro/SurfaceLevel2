@@ -36,6 +36,7 @@
     <ClInclude Include="Src\Image\astc-encoder\stb_image.h" />
     <ClInclude Include="Src\Image\astc-encoder\stb_image_write.h" />
     <ClInclude Include="Src\Image\astc-encoder\tinyexr.h" />
+    <ClInclude Include="Src\Image\DDS\SL2Dds.h" />
     <ClInclude Include="Src\Image\detex\bits.h" />
     <ClInclude Include="Src\Image\detex\bptc-tables.h" />
     <ClInclude Include="Src\Image\detex\detex.h" />
@@ -139,6 +140,7 @@
     <ClCompile Include="Src\Image\astc-encoder\astcenc_weight_align.cpp" />
     <ClCompile Include="Src\Image\astc-encoder\astcenc_weight_quant_xfer_tables.cpp" />
     <ClCompile Include="Src\Image\astc-encoder\wuffs-v0.3.c" />
+    <ClCompile Include="Src\Image\DDS\SL2Dds.cpp" />
     <ClCompile Include="Src\Image\detex\bits.c" />
     <ClCompile Include="Src\Image\detex\bptc-tables.c" />
     <ClCompile Include="Src\Image\detex\clamp.c" />

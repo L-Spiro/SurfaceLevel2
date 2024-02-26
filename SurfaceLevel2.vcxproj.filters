@@ -133,6 +133,12 @@
     <Filter Include="Source Files\Image\astc-encoder">
       <UniqueIdentifier>{bca99001-e132-4c30-bcf1-d5b395141f06}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Image\DDS">
+      <UniqueIdentifier>{26c66a21-884f-4beb-a805-57a657a7f253}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Image\DDS">
+      <UniqueIdentifier>{3f445931-a3b3-4bc3-801b-e3dbaa689b48}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\SL2SurfaceLevel2.h">
@@ -389,6 +395,9 @@
     </ClInclude>
     <ClInclude Include="Src\Image\astc-encoder\tinyexr.h">
       <Filter>Header Files\Image\astc-encoder</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\DDS\SL2Dds.h">
+      <Filter>Header Files\Image\DDS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -673,6 +682,9 @@
     </ClCompile>
     <ClCompile Include="Src\Image\astc-encoder\astcenccli_toplevel_help.cpp">
       <Filter>Source Files\Image\astc-encoder</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\DDS\SL2Dds.cpp">
+      <Filter>Source Files\Image\DDS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

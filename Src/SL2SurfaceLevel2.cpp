@@ -302,6 +302,17 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.bNeedsPreMultiply = true;
                 SL2_ADV( 1 );
             }
+            if ( SL2_CHECK( 2, swizzle ) ) {
+                if ( !sl2::CFormat::CreateSwizzleFromString( _wcpArgV[1], oOptions.sSwizzle ) ) {
+                    SL2_ERRORT( std::format( L"Invalid \"swizzle\": \"{}\". Must be 4 characters in the RegEx format: /^[rgbaxyzw01]{{4}}$/.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 1, swap ) ) {
+                oOptions.bSwap = true;
+                SL2_ADV( 1 );
+            }
         }
 
 
@@ -323,6 +334,8 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         }
         iImage.SetNeedsPreMultiply( oOptions.bNeedsPreMultiply );
         iImage.SetGamma( oOptions.dGamma );
+        iImage.SetSwizzle( oOptions.sSwizzle );
+        iImage.SetSwap( oOptions.bSwap );
         oOptions.pkifdFinalFormat = pkifdFormat;
         if ( !oOptions.pkifdFinalFormat ) {
             oOptions.pkifdFinalFormat = iImage.Format();

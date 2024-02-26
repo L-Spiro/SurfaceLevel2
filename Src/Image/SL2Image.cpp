@@ -9,7 +9,7 @@
  *	3: 3D Slice
  *	4: Cube Face
  * 
- * This class is the primary workhorse of the tool.  Image conversion and manipulation takes place here.
+ * This class is the primary workhorse of the tool.  Image conversion and manipulation takes place here, although the functions for conversion etc. are in SL2Formats.
  */
 
 #include "SL2Image.h"
@@ -31,7 +31,9 @@ namespace sl2 {
 		m_bNeedsPreMultiply( false ),
 		m_bFlipX( false ),
 		m_bFlipY( false ), 
-		m_bFlipZ( false ) {
+		m_bFlipZ( false ),
+		m_bSwap( false ) {
+		m_sSwizzle = CFormat::DefaultSwizzle();
 	}
 	CImage::~CImage() {
 		Reset();
@@ -51,20 +53,25 @@ namespace sl2 {
 		m_sFaces = _iOther.m_sFaces;
 		m_pkifFormat = _iOther.m_pkifFormat;
 		m_dGamma = _iOther.m_dGamma;
+		m_sSwizzle = _iOther.m_sSwizzle;
 		m_bIsPreMultiplied = _iOther.m_bIsPreMultiplied;
 		m_bNeedsPreMultiply = _iOther.m_bNeedsPreMultiply;
 		m_bFlipX = _iOther.m_bFlipX;
 		m_bFlipY = _iOther.m_bFlipZ;
 		m_bFlipZ = _iOther.m_bFlipY;
+		m_bSwap = _iOther.m_bSwap;
 		_iOther.m_sArraySize = 0;
 		_iOther.m_sFaces = 0;
 		_iOther.m_pkifFormat = nullptr;
 		_iOther.m_dGamma = 0.0;
+		_iOther.m_sSwizzle = CFormat::DefaultSwizzle();
 		_iOther.m_bIsPreMultiplied = false;
 		_iOther.m_bNeedsPreMultiply = false;
 		_iOther.m_bFlipX = false;
 		_iOther.m_bFlipY = false;
 		_iOther.m_bFlipZ = false;
+		_iOther.m_bSwap = false;
+
 		return (*this);
 	}
 
@@ -80,12 +87,14 @@ namespace sl2 {
 			m_vMipMaps[I].reset();
 		}
 		m_vMipMaps = std::vector<std::unique_ptr<CSurface>>();
+		m_sSwizzle = CFormat::DefaultSwizzle();
 		m_pkifFormat = nullptr;
 		m_bIsPreMultiplied = false;
 		m_bNeedsPreMultiply = false;
 		m_bFlipX = false;
 		m_bFlipY = false;
 		m_bFlipZ = false;
+		m_bSwap = false;
 	}
 
 	/**
@@ -132,6 +141,8 @@ namespace sl2 {
 		if ( (m_dGamma == 0.0 || m_dGamma == 1.0) &&
 			!(!m_bIsPreMultiplied && m_bNeedsPreMultiply) &&
 			!m_bFlipX && !m_bFlipY && !m_bFlipZ &&
+			CFormat::SwizzleIsDefault( m_sSwizzle ) &&
+			!m_bSwap &&
 			((_pkifFormat->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED && _pkifFormat->vfVulkanFormat == Format()->vfVulkanFormat) ||
 			(_pkifFormat->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN && _pkifFormat->dfDxFormat == Format()->dfDxFormat) ||
 			(_pkifFormat->mfMetalFormat != SL2_MTLPixelFormatInvalid && _pkifFormat->mfMetalFormat == Format()->mfMetalFormat) ||
@@ -169,6 +180,12 @@ namespace sl2 {
 					}
 					if ( m_bFlipZ ) {
 						CFormat::FlipZ( iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					}
+					if ( m_bSwap ) {
+						CFormat::Swap( iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					}
+					if ( !CFormat::SwizzleIsDefault( m_sSwizzle ) ) {
+						CFormat::ApplySwizzle( iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), m_sSwizzle );
 					}
 				}
 			}
@@ -239,6 +256,8 @@ namespace sl2 {
 		if ( (m_dGamma == 0.0 || m_dGamma == 1.0) &&
 			!_bInvertY &&
 			!m_bFlipX && !m_bFlipY && !m_bFlipZ &&
+			CFormat::SwizzleIsDefault( m_sSwizzle ) &&
+			!m_bSwap &&
 			!(!m_bIsPreMultiplied && m_bNeedsPreMultiply) &&
 			((_pkifFormat->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED && _pkifFormat->vfVulkanFormat == Format()->vfVulkanFormat) ||
 			(_pkifFormat->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN && _pkifFormat->dfDxFormat == Format()->dfDxFormat) ||
@@ -278,6 +297,12 @@ namespace sl2 {
 		}
 		if ( m_bFlipZ ) {
 			CFormat::FlipZ( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
+		}
+		if ( m_bSwap ) {
+			CFormat::Swap( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
+		}
+		if ( !CFormat::SwizzleIsDefault( m_sSwizzle ) ) {
+			CFormat::ApplySwizzle( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), m_sSwizzle );
 		}
 
 		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*_pkifFormat);

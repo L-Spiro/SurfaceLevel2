@@ -9,7 +9,7 @@
  *	3: 3D Slice
  *	4: Cube Face
  * 
- * This class is the primary workhorse of the tool.  Image conversion and manipulation takes place here.
+ * This class is the primary workhorse of the tool.  Image conversion and manipulation takes place here, although the functions for conversion etc. are in SL2Formats.
  */
 
 #pragma once
@@ -274,6 +274,20 @@ namespace sl2 {
 		inline void											SetIsPreMultiply( bool _bPreMult ) { m_bIsPreMultiplied = _bPreMult; }
 
 		/**
+		 * Sets the swizzle to apply.
+		 * 
+		 * \param _sSwizzle The swizzle to set.
+		 **/
+		inline void											SetSwizzle( const CFormat::SL2_SWIZZLE &_sSwizzle ) { m_sSwizzle = _sSwizzle; }
+
+		/**
+		 * Sets whether to swap R and B or not.
+		 * 
+		 * \param _bSwap If true, R and B will be swapped.
+		 **/
+		inline void											SetSwap( bool _bSwap ) { m_bSwap = _bSwap; }
+
+		/**
 		 * Gets the final size of a byte buffer to be used as a texture plane.  The plane will be over-allocated by 8 bytes and then rounded up to the nearest 8 bytes.
 		 *	So if a 1-by-1 32-bit tecture is being allocated, 4 will be passed to _sSize, and 16 will be returned ((4+8) -> 16).
 		 * 
@@ -292,11 +306,13 @@ namespace sl2 {
 		std::vector<std::unique_ptr<CSurface>>				m_vMipMaps;								/**< The array of mipmaps.  Index 0 is the base level. */
 		size_t												m_sArraySize;							/**< Number of slices in an array.  1 for flat 1D/2D images. */
 		size_t												m_sFaces;								/**< 1 for normal textures, 6 for cube textures. */
+		CFormat::SL2_SWIZZLE								m_sSwizzle;								/**< Swizzle setting. */
 		bool												m_bIsPreMultiplied;						/**< Is the image already pre-multiplied? */
 		bool												m_bNeedsPreMultiply;					/**< Does the image need to be pre-multiplied? */
 		bool												m_bFlipX;								/**< Flip horizontally? */
 		bool												m_bFlipY;								/**< Flip vertically? */
 		bool												m_bFlipZ;								/**< Flip depth? */
+		bool												m_bSwap;								/**< Swap R and B? */
 
 
 		// == Functions.
