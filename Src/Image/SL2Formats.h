@@ -6489,7 +6489,7 @@ namespace sl2 {
 		ToRGBA32F( vResized.data(), ui32X, ui32Y, _ui32Depth );
 
 
-		uint32_t ui32DstSliceSize = pkifdData->pfCompSizeFunc( _ui32Width, _ui32Height, 1, pkifdData->ui32Flags, _pvParms );
+		uint32_t ui32DstSliceSize = pkifdData->pfCompSizeFunc( _ui32Width, _ui32Height, 1, pkifdData->ui32BlockSizeInBits, _pvParms );
 
 		pvrtexlib::PVRTextureHeader thTexHeader( PVRTGENPIXELID4( 'r', 'g', 'b', 'a', 32, 32, 32, 32 ),
 			ui32X, ui32Y, ui32Z,
@@ -6541,7 +6541,7 @@ namespace sl2 {
 		uint32_t ui32Z = (_ui32Depth + (_uiBlockD - 1)) / _uiBlockD * _uiBlockD;
 
 		
-		uint32_t ui32DstSliceSize = pkifdData->pfCompSizeFunc( ui32X, ui32Y, ui32Z, pkifdData->ui32Flags, _pvParms );
+		uint32_t ui32DstSliceSize = pkifdData->pfCompSizeFunc( ui32X, ui32Y, ui32Z, pkifdData->ui32BlockSizeInBits, _pvParms );
 
 		SL2_ASTC_IMAGE aiImage( 32, ui32X, ui32Y, ui32Z );
 		eStatus = ::astcenc_decompress_image(
@@ -6673,7 +6673,7 @@ namespace sl2 {
 		}
 
 		
-		uint32_t ui32DstSliceSize = pkifdData->pfCompSizeFunc( ui32X, ui32Y, ui32Z, pkifdData->ui32Flags, _pvParms );
+		uint32_t ui32DstSliceSize = pkifdData->pfCompSizeFunc( ui32X, ui32Y, ui32Z, pkifdData->ui32BlockSizeInBits, _pvParms );
 
 		SL2_ASTC_IMAGE aiImage( 32, ui32X, ui32Y, ui32Z );
 		const SL2_RGBA64F * prgbaTexels = reinterpret_cast<const SL2_RGBA64F *>(pui8Src);

@@ -13,9 +13,10 @@
  */
 
 #include "SL2Image.h"
-#include "SL2KtxTexture.h"
 #include "../Files/SL2StdFile.h"
 #include "../Utilities/SL2Stream.h"
+#include "DDS/SL2Dds.h"
+#include "SL2KtxTexture.h"
 
 #include <basisu_transcoder.h>
 
@@ -122,6 +123,7 @@ namespace sl2 {
 	 **/
 	SL2_ERRORS CImage::LoadFile( const std::vector<uint8_t> &_vData ) {
 		//CStream sFile( _vData );
+		if ( SL2_E_SUCCESS == LoadDds( _vData ) ) { return SL2_E_SUCCESS; }
 		if ( SL2_E_SUCCESS == LoadKtx1( _vData ) ) { return SL2_E_SUCCESS; }
 		if ( SL2_E_SUCCESS == LoadKtx2( _vData ) ) { return SL2_E_SUCCESS; }
 		return LoadFreeImage( _vData );
@@ -812,6 +814,21 @@ namespace sl2 {
 			}
 		}
 		return SL2_E_INVALIDFILETYPE;
+	}
+
+	/**
+	 * Loads a DDS file from memory.
+	 * 
+	 * \param _vData The file to load.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS CImage::LoadDds( const std::vector<uint8_t> &_vData ) {
+		CDds dFile;
+		if ( !dFile.LoadDds( _vData ) ) { return SL2_E_INVALIDFILETYPE; }
+
+
+
+		return SL2_E_SUCCESS;
 	}
 
 	/**

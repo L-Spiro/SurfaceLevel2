@@ -366,6 +366,14 @@ namespace sl2 {
 		SL2_ERRORS											LoadKtx2( const std::vector<uint8_t> &_vData );
 
 		/**
+		 * Loads a DDS file from memory.
+		 * 
+		 * \param _vData The file to load.
+		 * \return Returns an error code.
+		 **/
+		SL2_ERRORS											LoadDds( const std::vector<uint8_t> &_vData );
+
+		/**
 		 * Callback to load each face's data from a KTX file.
 		 *
 		 * \param _iMipLevel Mipmap level, starting from 0.
