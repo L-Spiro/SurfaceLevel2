@@ -13,7 +13,22 @@
 #include <memory>
 #include <vector>
 
-#define SL2_MAKEFOURCC( A, B, C, D )								(static_cast<uint32_t>(A) | (static_cast<uint32_t>(B) << 8) | (static_cast<uint32_t>(C) << 16) | (static_cast<uint32_t>(D) << 24))
+#define SL2_MAKEFOURCC( A, B, C, D )													(static_cast<uint32_t>(static_cast<uint8_t>(A)) |			\
+																						(static_cast<uint32_t>(static_cast<uint8_t>(B)) << 8) |		\
+																						(static_cast<uint32_t>(static_cast<uint8_t>(C)) << 16) |	\
+																						(static_cast<uint32_t>(static_cast<uint8_t>(D)) << 24))
+
+#define SL2_DDS_FOURCC										0x00000004					// DDPF_FOURCC
+#define SL2_DDS_RGB											0x00000040					// DDPF_RGB
+#define SL2_DDS_RGBA										0x00000041					// DDPF_RGB | DDPF_ALPHAPIXELS
+#define SL2_DDS_LUMINANCE									0x00020000					// DDPF_LUMINANCE
+#define SL2_DDS_LUMINANCEA									0x00020001					// DDPF_LUMINANCE | DDPF_ALPHAPIXELS
+#define SL2_DDS_ALPHAPIXELS									0x00000001					// DDPF_ALPHAPIXELS
+#define SL2_DDS_ALPHA										0x00000002					// DDPF_ALPHA
+#define SL2_DDS_PAL8										0x00000020					// DDPF_PALETTEINDEXED8
+#define SL2_DDS_PAL8A										0x00000021					// DDPF_PALETTEINDEXED8 | DDPF_ALPHAPIXELS
+#define SL2_DDS_BUMPDUDV									0x00080000					// DDPF_BUMPDUDV
+#define SL2_DDS_BUMPLUMINANCE								0x00040000
 
 
 namespace sl2 {
@@ -23,28 +38,28 @@ namespace sl2 {
 	 * Pixel format flags.
 	 */
 	enum LSI_DDS_PIXEL_FORMAT_FLAGS {
-		LSI_DPFF_ALPHAPIXELS			= 0x1,						/**< Texture contains alpha data; ui32RGBAlphaBitMask contains valid data. */
-		LSI_DPFF_ALPHA					= 0x2,						/**< Used in some older DDS files for alpha channel only uncompressed data (ui32RGBBitCount contains the alpha channel bitcount; ui32ABitMask contains valid data). */
-		LSI_DPFF_FOURCC					= 0x4,						/**< Texture contains compressed RGB data; ui32FourCC contains valid data. */
-		LSI_DPFF_RGB					= 0x40,						/**< Texture contains uncompressed RGB data; dwRGBBitCount and the RGB masks (ui32RBitMask, ui32RBitMask, ui32RBitMask) contain valid data. */
-		LSI_DPFF_RGBA					= LSI_DPFF_RGB |
-											LSI_DPFF_ALPHAPIXELS,	/**< Texture contains uncompressed RGB datawith alpha. */
-		LSI_DPFF_YUV					= 0x200,					/**< Used in some older DDS files for YUV uncompressed data (ui32RGBBitCount contains the YUV bit count; ui32RBitMask contains the Y mask, ui32GBitMask contains the U mask, ui32BBitMask contains the V mask). */
-		LSI_DPFF_LUMINANCE				= 0x20000,					/**< Used in some older DDS files for single channel color uncompressed data (ui32RGBBitCount contains the luminance channel bit count; ui32RBitMask contains the channel mask). Can be combined with LSI_DPFF_ALPHAPIXELS for a two-channel DDS file. */
+		LSI_DPFF_ALPHAPIXELS								= 0x1,						/**< Texture contains alpha data; ui32RGBAlphaBitMask contains valid data. */
+		LSI_DPFF_ALPHA										= 0x2,						/**< Used in some older DDS files for alpha channel only uncompressed data (ui32RGBBitCount contains the alpha channel bitcount; ui32ABitMask contains valid data). */
+		LSI_DPFF_FOURCC										= 0x4,						/**< Texture contains compressed RGB data; ui32FourCC contains valid data. */
+		LSI_DPFF_RGB										= 0x40,						/**< Texture contains uncompressed RGB data; dwRGBBitCount and the RGB masks (ui32RBitMask, ui32RBitMask, ui32RBitMask) contain valid data. */
+		LSI_DPFF_RGBA										= LSI_DPFF_RGB |
+																LSI_DPFF_ALPHAPIXELS,	/**< Texture contains uncompressed RGB datawith alpha. */
+		LSI_DPFF_YUV										= 0x200,					/**< Used in some older DDS files for YUV uncompressed data (ui32RGBBitCount contains the YUV bit count; ui32RBitMask contains the Y mask, ui32GBitMask contains the U mask, ui32BBitMask contains the V mask). */
+		LSI_DPFF_LUMINANCE									= 0x20000,					/**< Used in some older DDS files for single channel color uncompressed data (ui32RGBBitCount contains the luminance channel bit count; ui32RBitMask contains the channel mask). Can be combined with LSI_DPFF_ALPHAPIXELS for a two-channel DDS file. */
 	};
 
 	/**
 	 * DDS flags.
 	 */
 	enum LSI_DDS_FLAGS {
-		LSI_DF_CAPS						= 0x1,						/**< Required in every .dds file. */
-		LSI_DF_HEIGHT					= 0x2,						/**< Required in every .dds file. */
-		LSI_DF_WIDTH					= 0x4,						/**< Required in every .dds file. */
-		LSI_DF_PITCH					= 0x8,						/**< Required when pitch is provided for an uncompressed texture. */
-		LSI_DF_PIXELFORMAT				= 0x1000,					/**< Required in every .dds file. */
-		LSI_DF_MIPMAPCOUNT				= 0x20000,					/**< Required in a mipmapped texture. */
-		LSI_DF_LINEARSIZE				= 0x80000,					/**< Required when pitch is provided for a compressed texture. */
-		LSI_DF_DEPTH					= 0x800000,					/**< Required in a depth texture. */
+		LSI_DF_CAPS											= 0x1,						/**< Required in every .dds file. */
+		LSI_DF_HEIGHT										= 0x2,						/**< Required in every .dds file. */
+		LSI_DF_WIDTH										= 0x4,						/**< Required in every .dds file. */
+		LSI_DF_PITCH										= 0x8,						/**< Required when pitch is provided for an uncompressed texture. */
+		LSI_DF_PIXELFORMAT									= 0x1000,					/**< Required in every .dds file. */
+		LSI_DF_MIPMAPCOUNT									= 0x20000,					/**< Required in a mipmapped texture. */
+		LSI_DF_LINEARSIZE									= 0x80000,					/**< Required when pitch is provided for a compressed texture. */
+		LSI_DF_DEPTH										= 0x800000,					/**< Required in a depth texture. */
 	};
 
 	/**
@@ -72,10 +87,8 @@ namespace sl2 {
 			uint32_t										ui32BBitMask;
 			uint32_t										ui32ABitMask;
 		} * LPLSI_DDS_PIXELFORMAT, * const LPCLSI_DDS_PIXELFORMAT;
-#pragma pack( pop )
 
 		/** The DDS header. */
-#pragma pack( push, 1 )
 		typedef struct LSI_DDS_HEADER {
 			uint32_t										ui32Size;
 			uint32_t										ui32Flags;
@@ -291,15 +304,15 @@ namespace sl2 {
 			SL2_D3DFMT_V16U16               = 64,
 			SL2_D3DFMT_A2W10V10U10          = 67,
 
-			SL2_D3DFMT_UYVY                 = SL2_MAKEFOURCC('U', 'Y', 'V', 'Y'),
-			SL2_D3DFMT_R8G8_B8G8            = SL2_MAKEFOURCC('R', 'G', 'B', 'G'),
-			SL2_D3DFMT_YUY2                 = SL2_MAKEFOURCC('Y', 'U', 'Y', '2'),
-			SL2_D3DFMT_G8R8_G8B8            = SL2_MAKEFOURCC('G', 'R', 'G', 'B'),
-			SL2_D3DFMT_DXT1                 = SL2_MAKEFOURCC('D', 'X', 'T', '1'),
-			SL2_D3DFMT_DXT2                 = SL2_MAKEFOURCC('D', 'X', 'T', '2'),
-			SL2_D3DFMT_DXT3                 = SL2_MAKEFOURCC('D', 'X', 'T', '3'),
-			SL2_D3DFMT_DXT4                 = SL2_MAKEFOURCC('D', 'X', 'T', '4'),
-			SL2_D3DFMT_DXT5                 = SL2_MAKEFOURCC('D', 'X', 'T', '5'),
+			SL2_D3DFMT_UYVY                 = SL2_MAKEFOURCC( 'U', 'Y', 'V', 'Y' ),
+			SL2_D3DFMT_R8G8_B8G8            = SL2_MAKEFOURCC( 'R', 'G', 'B', 'G' ),
+			SL2_D3DFMT_YUY2                 = SL2_MAKEFOURCC( 'Y', 'U', 'Y', '2' ),
+			SL2_D3DFMT_G8R8_G8B8            = SL2_MAKEFOURCC( 'G', 'R', 'G', 'B' ),
+			SL2_D3DFMT_DXT1                 = SL2_MAKEFOURCC( 'D', 'X', 'T', '1' ),
+			SL2_D3DFMT_DXT2                 = SL2_MAKEFOURCC( 'D', 'X', 'T', '2' ),
+			SL2_D3DFMT_DXT3                 = SL2_MAKEFOURCC( 'D', 'X', 'T', '3' ),
+			SL2_D3DFMT_DXT4                 = SL2_MAKEFOURCC( 'D', 'X', 'T', '4' ),
+			SL2_D3DFMT_DXT5                 = SL2_MAKEFOURCC( 'D', 'X', 'T', '5' ),
 
 			SL2_D3DFMT_D16_LOCKABLE         = 70,
 			SL2_D3DFMT_D32                  = 71,
@@ -323,7 +336,7 @@ namespace sl2 {
 
 			SL2_D3DFMT_Q16W16V16U16         =110,
 
-			SL2_D3DFMT_MULTI2_ARGB8         = SL2_MAKEFOURCC('M','E','T','1'),
+			SL2_D3DFMT_MULTI2_ARGB8         = SL2_MAKEFOURCC( 'M','E','T','1' ),
 
 			SL2_D3DFMT_R16F                 = 111,
 			SL2_D3DFMT_G16R16F              = 112,
@@ -339,8 +352,18 @@ namespace sl2 {
 			SL2_D3DFMT_A2B10G10R10_XR_BIAS  = 119,
 			SL2_D3DFMT_BINARYBUFFER         = 199,
 
-			SL2_D3DFMT_FORCE_DWORD          =0x7fffffff
+
+			// == Special Formats == //
+			SL2_D3DFMT_BC4U					= SL2_MAKEFOURCC( 'B', 'C', '4', 'U' ),
+			SL2_D3DFMT_BC4S					= SL2_MAKEFOURCC( 'B', 'C', '4', 'S' ),
+			SL2_D3DFMT_BC5U					= SL2_MAKEFOURCC( 'A', 'T', 'I', '2' ),
+			SL2_D3DFMT_BC5S					= SL2_MAKEFOURCC( 'B', 'C', '5', 'S' ),
+
+			SL2_D3DFMT_FORCE_DWORD          = 0x7FFFFFFF
 		};
+
+		/** A conversion function. */
+		typedef void										(* PfConversion)( uint8_t * _pui8SrcDst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Pitch );
 
 
 		// == Types.
@@ -348,11 +371,29 @@ namespace sl2 {
 		struct SL2_FORMAT_DATA {
 			SL2_D3DFORMAT									fD3dFormat;								/**< The D3D format. */
 			SL2_DXGI_FORMAT									dfFormat;								/**< The DXGI format. */
-
+			uint8_t											ui8BitsPerBlock;						/**< Bits-per-block for compressed textures or format bit size per-texel. */
+			bool											bIsCompressed;							/**< Is this a compressed format? */
+			bool											bIsPremultiplied;						/**< Is alpha pre-multiplied? */
+			PfConversion									pfConverter;							/**< An optional conversion function. */
 		};
 
 		// == Members.
 		std::vector<std::unique_ptr<CSurface>>				m_vMipMaps;								/**< The array of mipmaps.  Index 0 is the base level. */
+		size_t												m_sPitch;								/**< Row size in bytes. */
+		/** Format data. */
+		static SL2_FORMAT_DATA								m_fdData[];
+
+
+		// == Functions.
+		/**
+		 * Converts D3DFMT_UYVY to DXGI_FORMAT_YUY2 in-place.
+		 * 
+		 * \param _pui8SrcDst The data to convert.
+		 * \param _ui32Width The width of the given data.
+		 * \param _ui32Height The height of the given data.
+		 * \param _ui32Pitch The row width in bytes of the given data.
+		 **/
+		static void											Convert_UYVY_to_YUY2( uint8_t * _pui8SrcDst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Pitch );
 	};
 
 }	// namespace sl2
