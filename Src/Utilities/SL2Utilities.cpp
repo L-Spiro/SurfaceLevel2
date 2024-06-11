@@ -172,4 +172,68 @@ namespace sl2 {
 		return vRet;
 	}
 
+	/**
+	 * Gets the extension from a file path.
+	 *
+	 * \param _s16Path The file path whose extension is to be obtained.
+	 * \return Returns a string containing the file extension.
+	 */
+	std::u16string CUtilities::GetFileExtension( const std::u16string &_s16Path ) {
+		std::u16string s16File = GetFileName( _s16Path );
+		std::string::size_type stFound = s16File.rfind( u'.' );
+		if ( stFound == std::string::npos ) { return std::u16string(); }
+		return s16File.substr( stFound + 1 );
+	}
+
+	/**
+	 * Removes the extension from a file path.
+	 *
+	 * \param _s16Path The file path whose extension is to be removed.
+	 * \return Returns a string containing the file mname without the extension.
+	 */
+	std::u16string CUtilities::NoExtension( const std::u16string &_s16Path ) {
+		std::u16string s16File = GetFileName( _s16Path );
+		std::string::size_type stFound = s16File.rfind( u'.' );
+		if ( stFound == std::string::npos ) { return std::u16string(); }
+		return s16File.substr( 0, stFound );
+	}
+
+	/**
+	 * Gets the file name from a file path.
+	 *
+	 * \param _s16Path The file path whose name is to be obtained.
+	 * \return Returns a string containing the file name.
+	 */
+	std::u16string CUtilities::GetFileName( const std::u16string &_s16Path ) {
+		// If the last character is } then it is a file inside a ZIP.
+		if ( _s16Path.size() && _s16Path[_s16Path.size()-1] == u'}' ) {
+			std::string::size_type stFound = _s16Path.rfind( u'{' );
+			std::u16string s16File = _s16Path.substr( stFound + 1 );
+			s16File.pop_back();
+			return s16File;
+		}
+		std::u16string s16Normalized = Replace( _s16Path, u'/', u'\\' );
+		std::string::size_type stFound = s16Normalized.rfind( u'\\' );
+		std::u16string s16File = s16Normalized.substr( stFound + 1 );
+
+		return s16File;
+	}
+
+	/**
+	 * Gets the file path without the file name
+	 *
+	 * \param _s16Path The file path whose path is to be obtained.
+	 * \return Returns a string containing the file path.
+	 */
+	std::u16string CUtilities::GetFilePath( const std::u16string &_s16Path ) {
+		if ( _s16Path.size() ) {
+			std::u16string s16Normalized = Replace( _s16Path, u'/', u'\\' );
+			std::string::size_type stFound = s16Normalized.rfind( u'\\' );
+			if ( stFound >= s16Normalized.size() ) { return std::u16string(); }
+			std::u16string s16File = s16Normalized.substr( 0, stFound + 1 );
+			return s16File;
+		}
+		return std::u16string();
+	}
+
 }	// namespace sl2

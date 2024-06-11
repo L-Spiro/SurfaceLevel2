@@ -332,6 +332,31 @@ namespace sl2 {
 		}
 
 
+		/**
+		 * Reads data from the array.
+		 * 
+		 * \param _pui8Dst A pointer to the destination buffer.  If nullptr, _sSize bytes are skipped in the stream.
+		 * \param _sSize The total number of bytes to copy or skip.
+		 * \return Returns the total number of bytes copied.
+		 **/
+		inline size_t								Read( uint8_t * _pui8Dst, size_t _sSize ) {
+			_sSize = std::min( _sSize, m_vStream.size() - m_stPos );
+			if ( _pui8Dst ) {
+				std::memcpy( _pui8Dst, &m_vStream.data()[m_stPos], _sSize );
+			}
+			m_stPos += _sSize;
+			return _sSize;
+		}
+
+
+		/**
+		 * Gets the pointer to the current data in the stream.
+		 *
+		 * \return Returns a pointer to the current position in the vector.
+		 **/
+		inline uint8_t *							Data() { return m_vStream.data() + m_stPos; }
+
+
 
 	protected :
 		// == Members.

@@ -826,7 +826,27 @@ namespace sl2 {
 		CDds dFile;
 		if ( !dFile.LoadDds( _vData ) ) { return SL2_E_INVALIDFILETYPE; }
 
-
+		if ( !AllocateTexture( CFormat::FindFormatDataByDx( static_cast<SL2_DXGI_FORMAT>(dFile.Format()) ),
+			dFile.Width(), dFile.Height(), dFile.Depth(),
+			dFile.Mips(), dFile.Array(), dFile.Faces() ) ) { return SL2_E_OUTOFMEMORY; }
+		if ( dFile.Faces() > 1 ) {
+			for ( uint32_t M = 0; M < dFile.Mips(); ++M ) {
+				for ( uint32_t F = 0; F < dFile.Faces(); ++F ) {
+					size_t sIdx = F * dFile.Faces() + M;
+					if ( sIdx >= dFile.Buffers().size() ) { return SL2_E_INVALIDDATA; }
+					std::memcpy( Data( M, 0, 0, F ), dFile.Buffers()[sIdx].vTexture.data(), dFile.Buffers()[sIdx].vTexture.size() );
+				}
+			}
+		}
+		else {
+			for ( uint32_t M = 0; M < dFile.Mips(); ++M ) {
+				for ( uint32_t A = 0; A < dFile.Array(); ++A ) {
+					size_t sIdx = A * dFile.Mips() + M;
+					if ( sIdx >= dFile.Buffers().size() ) { return SL2_E_INVALIDDATA; }
+					std::memcpy( Data( M, 0, A, 0 ), dFile.Buffers()[sIdx].vTexture.data(), dFile.Buffers()[sIdx].vTexture.size() );
+				}
+			}
+		}
 
 		return SL2_E_SUCCESS;
 	}

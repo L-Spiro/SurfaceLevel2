@@ -473,6 +473,22 @@ namespace sl2 {
         if ( _iImage.Mipmaps() == 1 && _iImage.ArraySize() == 1 && _iImage.Faces() == 1 && _iImage.Depth() == 1 ) {
             return ExportAsPng( _iImage, _sPath, _oOptions, 0, 0, 0, 0 );
         }
+        else {
+            wchar_t szBuffer[64];
+            std::u16string sRoot = CUtilities::GetFilePath( _sPath ) + CUtilities::NoExtension( _sPath );
+            for ( uint32_t M = 0; M < _iImage.Mipmaps(); ++M ) {
+                for ( uint32_t A = 0; A < _iImage.ArraySize(); ++A ) {
+                    for ( uint32_t F = 0; F < _iImage.Faces(); ++F ) {
+                        for ( uint32_t D = 0; D < _iImage.Depth(); ++D ) {
+                            ::wsprintfW( szBuffer, L"_M%.2u_A%.2u_F%.2u_D%.2u.png", M, A, F, D );
+                           SL2_ERRORS eErr = ExportAsPng( _iImage, CUtilities::Append( sRoot, szBuffer ), _oOptions, M, A, F, D );
+                           if ( eErr != SL2_E_SUCCESS ) { return eErr; }
+                        }
+                    }
+                }
+            }
+        }
+        return SL2_E_SUCCESS;
     }
 
     /**

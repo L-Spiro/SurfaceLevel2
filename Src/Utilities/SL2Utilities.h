@@ -178,6 +178,102 @@ namespace sl2 {
 		static std::vector<std::string>						Tokenize( const std::string &_sString, std::string::value_type _vtDelimiter, bool _bAllowEmptyStrings );
 
 		/**
+		 * Gets the extension from a file path.
+		 *
+		 * \param _s16Path The file path whose extension is to be obtained.
+		 * \return Returns a string containing the file extension.
+		 */
+		static std::u16string								GetFileExtension( const std::u16string &_s16Path );
+
+		/**
+		 * Removes the extension from a file path.
+		 *
+		 * \param _s16Path The file path whose extension is to be removed.
+		 * \return Returns a string containing the file mname without the extension.
+		 */
+		static std::u16string								NoExtension( const std::u16string &_s16Path );
+
+		/**
+		 * Gets the file name from a file path.
+		 *
+		 * \param _s16Path The file path whose name is to be obtained.
+		 * \return Returns a string containing the file name.
+		 */
+		static std::u16string								GetFileName( const std::u16string &_s16Path );
+
+		/**
+		 * Gets the file path without the file name
+		 *
+		 * \param _s16Path The file path whose path is to be obtained.
+		 * \return Returns a string containing the file path.
+		 */
+		static std::u16string								GetFilePath( const std::u16string &_s16Path );
+
+		/**
+		 * Gets the last character in a string or std::u16string::traits_type::char_type( 0 ).
+		 * 
+		 * \param _s16Str The string whose last character is to be returned, if it has any characters.
+		 * \return Returns the last character in the given string or std::u16string::traits_type::char_type( 0 ).
+		 **/
+		static std::u16string::traits_type::char_type		LastChar( const std::u16string &_s16Str ) {
+			return _s16Str.size() ? _s16Str[_s16Str.size()-1] : std::u16string::traits_type::char_type( 0 );
+		}
+
+		/**
+		 * Appends a char string to a char16_t string.
+		 * 
+		 * \param _sDst The string to which to append the string.
+		 * \param _pcString The string to append to the string.
+		 * \return Returns the new string.
+		 **/
+		static std::u16string								Append( const std::u16string &_sDst, const char * _pcString ) {
+			try {
+				std::u16string sTmp = _sDst;
+				while ( (*_pcString) ) {
+					sTmp.push_back( (*_pcString++) );
+				}
+				return sTmp;
+			}
+			catch ( ... ) { return std::u16string(); }
+		}
+
+		/**
+		 * Appends a _pwcString string to a char16_t string.
+		 * 
+		 * \param _sDst The string to which to append the string.
+		 * \param _pwcString The string to append to the string.
+		 * \return Returns the new string.
+		 **/
+		static std::u16string								Append( const std::u16string &_sDst, const wchar_t * _pwcString ) {
+			try {
+				std::u16string sTmp = _sDst;
+				while ( (*_pwcString) ) {
+					sTmp.push_back( (*_pwcString++) );
+				}
+				return sTmp;
+			}
+			catch ( ... ) { return std::u16string(); }
+		}
+
+		/**
+		 * Takes a bit mask and returns a shift and divisor.
+		 * 
+		 * \param _ui64Mask The bit mask.
+		 * \param _dMaxVal Holds teh returned maximum value for the given mask.
+		 * \return Returns the mask shift.
+		 **/
+		static size_t										BitMaskToShift( uint64_t _ui64Mask, double &_dMaxVal ) {
+			if ( !_ui64Mask ) { _dMaxVal = 0.0; return 0; }
+			size_t sShift = 0;
+			while ( !(_ui64Mask & 1) ) {
+				_ui64Mask >>= 1;
+				++sShift;
+			}
+			_dMaxVal = static_cast<double>(_ui64Mask);
+			return sShift;
+		}
+
+		/**
 		 * Converts a single double value from sRGB space to linear space.  Performs an accurate conversion.
 		 *
 		 * \param _dVal The value to convert.

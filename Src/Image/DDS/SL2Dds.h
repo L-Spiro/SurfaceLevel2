@@ -9,6 +9,8 @@
 #pragma once
 
 #include "../SL2Surface.h"
+#include "../../Utilities/SL2Utilities.h"
+
 #include <cstdint>
 #include <memory>
 #include <vector>
@@ -62,6 +64,25 @@ namespace sl2 {
 		LSI_DF_DEPTH										= 0x800000,					/**< Required in a depth texture. */
 	};
 
+	/** Caps1 flags. */
+	enum SL2_CAPS1 {
+		SL2_DDSCAPS_COMPLEX									= 0x8,
+		SL2_DDSCAPS_MIPMAP									= 0x400000,
+		SL2_DDSCAPS_TEXTURE									= 0x1000,
+	};
+
+	/** Cap2 flags. */
+	enum SL2_CAPS2 {
+		SL2_DDSCAPS2_CUBEMAP								= 0x200,
+		SL2_DDSCAPS2_CUBEMAP_POSITIVEX						= 0x400,
+		SL2_DDSCAPS2_CUBEMAP_NEGATIVEX						= 0x800,
+		SL2_DDSCAPS2_CUBEMAP_POSITIVEY						= 0x1000,
+		SL2_DDSCAPS2_CUBEMAP_NEGATIVEY						= 0x2000,
+		SL2_DDSCAPS2_CUBEMAP_POSITIVEZ						= 0x4000,
+		SL2_DDSCAPS2_CUBEMAP_NEGATIVEZ						= 0x8000,
+		SL2_DDSCAPS2_VOLUME									= 0x200000,
+	};
+
 	/**
 	 * Class CDds
 	 * \brief A DDS reader and writer.
@@ -74,73 +95,6 @@ namespace sl2 {
 		~CDds();
 
 
-		// == Types.
-		/** The DDS header pixel format structure. */
-#pragma pack( push, 1 )
-		typedef struct LSI_DDS_PIXELFORMAT {
-			uint32_t										ui32Size;
-			uint32_t										ui32Flags;
-			uint32_t										ui32FourCC;
-			uint32_t										ui32RGBBitCount;
-			uint32_t										ui32RBitMask;
-			uint32_t										ui32GBitMask;
-			uint32_t										ui32BBitMask;
-			uint32_t										ui32ABitMask;
-		} * LPLSI_DDS_PIXELFORMAT, * const LPCLSI_DDS_PIXELFORMAT;
-
-		/** The DDS header. */
-		typedef struct LSI_DDS_HEADER {
-			uint32_t										ui32Size;
-			uint32_t										ui32Flags;
-			uint32_t										ui32Height;
-			uint32_t										ui32Width;
-			uint32_t										ui32PitchOrLinearSize;
-			uint32_t										ui32Depth;
-			uint32_t										ui32MipMapCount;
-			uint32_t										ui32Reserved1[11];
-			LSI_DDS_PIXELFORMAT								dpPixelFormat;
-			uint32_t										ui32Caps;
-			uint32_t										ui32Caps2;
-			uint32_t										ui32Caps3;
-			uint32_t										ui32Caps4;
-			uint32_t										ui32Reserved2;
-		} * LPLSI_DDS_HEADER, * const LPCLSI_DDS_HEADER;
-
-		/** Extended header. */
-		typedef struct LSI_DDS_HEADER_DXT10 {
-			uint32_t										ui32DxgiFormat;
-			uint32_t										ui32ResourceDimension;
-			uint32_t										ui32MiscFlag;
-			uint32_t										ui32ArraySize;
-			uint32_t										ui32MiscFlags2;
-		} * LPLSI_DDS_HEADER_DXT10, * const LPCLSI_DDS_HEADER_DXT10;
-#pragma pack( pop )
-
-
-		/**
-		 * Loads a DDS file from memory.
-		 *
-		 * \param _vFileData The in-memory image of the file.
-		 * \return Returns true if the file was successfully loaded.  False indicates an invalid file or lack of RAM.
-		 */
-		static bool											LoadDds( const std::vector<uint8_t> &_vFileData );
-
-		/**
-		 * Returns the total size of a compressed image given a factor and its width and height.
-		 *
-		 * \param _ui32Width Width in pixels.
-		 * \param _ui32Height Height in pixels.
-		 * \param _ui32Depth Unused.
-		 * \param _ui32Bits Bits in the block size.
-		 * \param _pvParms Unused.
-		 * \return Returns the size of the compressed data.
-		 */
-		inline uint32_t										GetCompressedSizeBc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Bits ) {
-			return ((((_ui32Width + 3) >> 2) * ((_ui32Height + 3) >> 2) * _ui32Bits) >> 3) * _ui32Depth;
-		}
-
-
-	protected :
 		// == Enumerations.
 		/** DXGI formats.*/
 		enum SL2_DXGI_FORMAT {
@@ -268,132 +222,403 @@ namespace sl2 {
 			SL2_DXGI_FORMAT_FORCE_UINT = 0xFFFFFFFF
 		} ;
 
+
+		// == Types.
+		/** The DDS header pixel format structure. */
+#pragma pack( push, 1 )
+		typedef struct LSI_DDS_PIXELFORMAT {
+			uint32_t										ui32Size;
+			uint32_t										ui32Flags;
+			uint32_t										ui32FourCC;
+			uint32_t										ui32RGBBitCount;
+			uint32_t										ui32RBitMask;
+			uint32_t										ui32GBitMask;
+			uint32_t										ui32BBitMask;
+			uint32_t										ui32ABitMask;
+		} * LPLSI_DDS_PIXELFORMAT, * const LPCLSI_DDS_PIXELFORMAT;
+
+		/** The DDS header. */
+		typedef struct LSI_DDS_HEADER {
+			uint32_t										ui32Size;
+			uint32_t										ui32Flags;
+			uint32_t										ui32Height;
+			uint32_t										ui32Width;
+			uint32_t										ui32PitchOrLinearSize;
+			uint32_t										ui32Depth;
+			uint32_t										ui32MipMapCount;
+			uint32_t										ui32Reserved1[11];
+			LSI_DDS_PIXELFORMAT								dpPixelFormat;
+			uint32_t										ui32Caps;
+			uint32_t										ui32Caps2;
+			uint32_t										ui32Caps3;
+			uint32_t										ui32Caps4;
+			uint32_t										ui32Reserved2;
+		} * LPLSI_DDS_HEADER, * const LPCLSI_DDS_HEADER;
+
+		/** Extended header. */
+		typedef struct LSI_DDS_HEADER_DXT10 {
+			uint32_t										ui32DxgiFormat;
+			uint32_t										ui32ResourceDimension;
+			uint32_t										ui32MiscFlag;
+			uint32_t										ui32ArraySize;
+			uint32_t										ui32MiscFlags2;
+		} * LPLSI_DDS_HEADER_DXT10, * const LPCLSI_DDS_HEADER_DXT10;
+#pragma pack( pop )
+
+		/** A single texture. */
+		struct SL2_TEX {
+			SL2_TEX() = default;
+			SL2_TEX( SL2_TEX &&_tOther ) noexcept :
+				vTexture( std::move( _tOther.vTexture ) ),
+				ui32Pitch( _tOther.ui32Pitch ),
+				ui32W( _tOther.ui32W ),
+				ui32H( _tOther.ui32H ),
+				ui32D( _tOther.ui32D ) {}
+			SL2_TEX( const SL2_TEX & ) = delete;
+			SL2_TEX &										operator = ( const SL2_TEX & ) = delete;
+
+			std::vector<uint8_t>							vTexture;
+			uint32_t										ui32Pitch;
+			uint32_t										ui32W;
+			uint32_t										ui32H;
+			uint32_t										ui32D;
+
+
+			SL2_TEX &										operator = ( SL2_TEX &&_tOther ) noexcept {
+				if ( this != &_tOther ) {
+					vTexture = std::move( _tOther.vTexture );
+					ui32Pitch = _tOther.ui32Pitch;
+					ui32W = _tOther.ui32W;
+					ui32H = _tOther.ui32H;
+					ui32D = _tOther.ui32D;
+				}
+				return (*this);
+			}
+
+			
+		};
+
+
+		/**
+		 * Loads a DDS file from memory.
+		 *
+		 * \param _vFileData The in-memory image of the file.
+		 * \return Returns true if the file was successfully loaded.  False indicates an invalid file or lack of RAM.
+		 */
+		bool												LoadDds( const std::vector<uint8_t> &_vFileData );
+
+		/**
+		 * Returns the total size of a compressed image given a factor and its width and height.
+		 *
+		 * \param _ui32Width Width in pixels.
+		 * \param _ui32Height Height in pixels.
+		 * \param _ui32Depth Unused.
+		 * \param _ui32Bits Bits in the block size.
+		 * \param _pvParms Unused.
+		 * \return Returns the size of the compressed data.
+		 */
+		inline uint32_t										GetCompressedSizeBc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Bits ) {
+			return ((((_ui32Width + 3) >> 2) * ((_ui32Height + 3) >> 2) * _ui32Bits) >> 3) * _ui32Depth;
+		}
+
+		/**
+		 * Gets the format.
+		 *
+		 * \return Returns the DXGI format of the loaded data.
+		 **/
+		inline SL2_DXGI_FORMAT								Format() const { return m_pfdFormat ? m_pfdFormat->dfFormat : SL2_DXGI_FORMAT_UNKNOWN; }
+
+		/**
+		 * Gets the file width.
+		 *
+		 * \return Returns the file width.
+		 **/
+		inline uint32_t										Width() const { return std::max( m_dhHeader.ui32Width, static_cast<uint32_t>(1) ); }
+
+		/**
+		 * Gets the file height.
+		 *
+		 * \return Returns the file height.
+		 **/
+		inline uint32_t										Height() const { return std::max( m_dhHeader.ui32Height, static_cast<uint32_t>(1) ); }
+
+		/**
+		 * Gets the file depth.
+		 *
+		 * \return Returns the file depth.
+		 **/
+		inline uint32_t										Depth() const { return std::max( m_dhHeader.ui32Depth, static_cast<uint32_t>(1) ); }
+
+		/**
+		 * Gets the number of mipmaps.
+		 *
+		 * \return Returns the number of mipmaps in the file.
+		 **/
+		inline uint32_t										Mips() const { return std::max( m_dhHeader.ui32MipMapCount, static_cast<uint32_t>(1) ); }
+
+		/**
+		 * Gets the array size.
+		 *
+		 * \return Returns the array size.
+		 **/
+		inline uint32_t										Array() const { return std::max( m_ui32ArraySize, static_cast<uint32_t>(1) ); }
+
+		/**
+		 * Gets the face size.
+		 *
+		 * \return Returns the face size.
+		 **/
+		inline uint32_t										Faces() const { return std::max( m_ui32Faces, static_cast<uint32_t>(1) ); }
+
+		/**
+		 * Gets the texture buffers.
+		 *
+		 * \return Returns a constant reference to the buffered texture data.
+		 **/
+		inline const std::vector<SL2_TEX> &					Buffers() const { return m_vTextures; }
+
+
+	protected :
+		// == Enumerations.
 		/** D3DFMT formats. */
 		enum SL2_D3DFORMAT {
-			SL2_D3DFMT_UNKNOWN              =  0,
+			SL2_D3DFMT_UNKNOWN								=  0,
 
-			SL2_D3DFMT_R8G8B8               = 20,
-			SL2_D3DFMT_A8R8G8B8             = 21,
-			SL2_D3DFMT_X8R8G8B8             = 22,
-			SL2_D3DFMT_R5G6B5               = 23,
-			SL2_D3DFMT_X1R5G5B5             = 24,
-			SL2_D3DFMT_A1R5G5B5             = 25,
-			SL2_D3DFMT_A4R4G4B4             = 26,
-			SL2_D3DFMT_R3G3B2               = 27,
-			SL2_D3DFMT_A8                   = 28,
-			SL2_D3DFMT_A8R3G3B2             = 29,
-			SL2_D3DFMT_X4R4G4B4             = 30,
-			SL2_D3DFMT_A2B10G10R10          = 31,
-			SL2_D3DFMT_A8B8G8R8             = 32,
-			SL2_D3DFMT_X8B8G8R8             = 33,
-			SL2_D3DFMT_G16R16               = 34,
-			SL2_D3DFMT_A2R10G10B10          = 35,
-			SL2_D3DFMT_A16B16G16R16         = 36,
+			SL2_D3DFMT_R8G8B8								= 20,
+			SL2_D3DFMT_A8R8G8B8								= 21,
+			SL2_D3DFMT_X8R8G8B8								= 22,
+			SL2_D3DFMT_R5G6B5								= 23,
+			SL2_D3DFMT_X1R5G5B5								= 24,
+			SL2_D3DFMT_A1R5G5B5								= 25,
+			SL2_D3DFMT_A4R4G4B4								= 26,
+			SL2_D3DFMT_R3G3B2								= 27,
+			SL2_D3DFMT_A8									= 28,
+			SL2_D3DFMT_A8R3G3B2								= 29,
+			SL2_D3DFMT_X4R4G4B4								= 30,
+			SL2_D3DFMT_A2B10G10R10							= 31,
+			SL2_D3DFMT_A8B8G8R8								= 32,
+			SL2_D3DFMT_X8B8G8R8								= 33,
+			SL2_D3DFMT_G16R16								= 34,
+			SL2_D3DFMT_A2R10G10B10							= 35,
+			SL2_D3DFMT_A16B16G16R16							= 36,
 
-			SL2_D3DFMT_A8P8                 = 40,
-			SL2_D3DFMT_P8                   = 41,
+			SL2_D3DFMT_A8P8									= 40,
+			SL2_D3DFMT_P8									= 41,
 
-			SL2_D3DFMT_L8                   = 50,
-			SL2_D3DFMT_A8L8                 = 51,
-			SL2_D3DFMT_A4L4                 = 52,
+			SL2_D3DFMT_L8									= 50,
+			SL2_D3DFMT_A8L8									= 51,
+			SL2_D3DFMT_A4L4									= 52,
 
-			SL2_D3DFMT_V8U8                 = 60,
-			SL2_D3DFMT_L6V5U5               = 61,
-			SL2_D3DFMT_X8L8V8U8             = 62,
-			SL2_D3DFMT_Q8W8V8U8             = 63,
-			SL2_D3DFMT_V16U16               = 64,
-			SL2_D3DFMT_A2W10V10U10          = 67,
+			SL2_D3DFMT_V8U8									= 60,
+			SL2_D3DFMT_L6V5U5								= 61,
+			SL2_D3DFMT_X8L8V8U8								= 62,
+			SL2_D3DFMT_Q8W8V8U8								= 63,
+			SL2_D3DFMT_V16U16								= 64,
+			SL2_D3DFMT_A2W10V10U10							= 67,
 
-			SL2_D3DFMT_UYVY                 = SL2_MAKEFOURCC( 'U', 'Y', 'V', 'Y' ),
-			SL2_D3DFMT_R8G8_B8G8            = SL2_MAKEFOURCC( 'R', 'G', 'B', 'G' ),
-			SL2_D3DFMT_YUY2                 = SL2_MAKEFOURCC( 'Y', 'U', 'Y', '2' ),
-			SL2_D3DFMT_G8R8_G8B8            = SL2_MAKEFOURCC( 'G', 'R', 'G', 'B' ),
-			SL2_D3DFMT_DXT1                 = SL2_MAKEFOURCC( 'D', 'X', 'T', '1' ),
-			SL2_D3DFMT_DXT2                 = SL2_MAKEFOURCC( 'D', 'X', 'T', '2' ),
-			SL2_D3DFMT_DXT3                 = SL2_MAKEFOURCC( 'D', 'X', 'T', '3' ),
-			SL2_D3DFMT_DXT4                 = SL2_MAKEFOURCC( 'D', 'X', 'T', '4' ),
-			SL2_D3DFMT_DXT5                 = SL2_MAKEFOURCC( 'D', 'X', 'T', '5' ),
+			SL2_D3DFMT_UYVY									= SL2_MAKEFOURCC( 'U', 'Y', 'V', 'Y' ),
+			SL2_D3DFMT_R8G8_B8G8							= SL2_MAKEFOURCC( 'R', 'G', 'B', 'G' ),
+			SL2_D3DFMT_YUY2									= SL2_MAKEFOURCC( 'Y', 'U', 'Y', '2' ),
+			SL2_D3DFMT_G8R8_G8B8							= SL2_MAKEFOURCC( 'G', 'R', 'G', 'B' ),
+			SL2_D3DFMT_DXT1									= SL2_MAKEFOURCC( 'D', 'X', 'T', '1' ),
+			SL2_D3DFMT_DXT2									= SL2_MAKEFOURCC( 'D', 'X', 'T', '2' ),
+			SL2_D3DFMT_DXT3									= SL2_MAKEFOURCC( 'D', 'X', 'T', '3' ),
+			SL2_D3DFMT_DXT4									= SL2_MAKEFOURCC( 'D', 'X', 'T', '4' ),
+			SL2_D3DFMT_DXT5									= SL2_MAKEFOURCC( 'D', 'X', 'T', '5' ),
 
-			SL2_D3DFMT_D16_LOCKABLE         = 70,
-			SL2_D3DFMT_D32                  = 71,
-			SL2_D3DFMT_D15S1                = 73,
-			SL2_D3DFMT_D24S8                = 75,
-			SL2_D3DFMT_D24X8                = 77,
-			SL2_D3DFMT_D24X4S4              = 79,
-			SL2_D3DFMT_D16                  = 80,
+			SL2_D3DFMT_D16_LOCKABLE							= 70,
+			SL2_D3DFMT_D32									= 71,
+			SL2_D3DFMT_D15S1								= 73,
+			SL2_D3DFMT_D24S8								= 75,
+			SL2_D3DFMT_D24X8								= 77,
+			SL2_D3DFMT_D24X4S4								= 79,
+			SL2_D3DFMT_D16									= 80,
 
-			SL2_D3DFMT_D32F_LOCKABLE        = 82,
-			SL2_D3DFMT_D24FS8               = 83,
+			SL2_D3DFMT_D32F_LOCKABLE						= 82,
+			SL2_D3DFMT_D24FS8								= 83,
 
-			SL2_D3DFMT_D32_LOCKABLE         = 84,
-			SL2_D3DFMT_S8_LOCKABLE          = 85,
+			SL2_D3DFMT_D32_LOCKABLE							= 84,
+			SL2_D3DFMT_S8_LOCKABLE							= 85,
 
-			SL2_D3DFMT_L16                  = 81,
+			SL2_D3DFMT_L16									= 81,
 
-			SL2_D3DFMT_VERTEXDATA           =100,
-			SL2_D3DFMT_INDEX16              =101,
-			SL2_D3DFMT_INDEX32              =102,
+			SL2_D3DFMT_VERTEXDATA							= 100,
+			SL2_D3DFMT_INDEX16								= 101,
+			SL2_D3DFMT_INDEX32								= 102,
 
-			SL2_D3DFMT_Q16W16V16U16         =110,
+			SL2_D3DFMT_Q16W16V16U16							= 110,
 
-			SL2_D3DFMT_MULTI2_ARGB8         = SL2_MAKEFOURCC( 'M','E','T','1' ),
+			SL2_D3DFMT_MULTI2_ARGB8							= SL2_MAKEFOURCC( 'M','E','T','1' ),
 
-			SL2_D3DFMT_R16F                 = 111,
-			SL2_D3DFMT_G16R16F              = 112,
-			SL2_D3DFMT_A16B16G16R16F        = 113,
+			SL2_D3DFMT_R16F									= 111,
+			SL2_D3DFMT_G16R16F								= 112,
+			SL2_D3DFMT_A16B16G16R16F						= 113,
 
-			SL2_D3DFMT_R32F                 = 114,
-			SL2_D3DFMT_G32R32F              = 115,
-			SL2_D3DFMT_A32B32G32R32F        = 116,
+			SL2_D3DFMT_R32F									= 114,
+			SL2_D3DFMT_G32R32F								= 115,
+			SL2_D3DFMT_A32B32G32R32F						= 116,
 
-			SL2_D3DFMT_CxV8U8               = 117,
-
-			SL2_D3DFMT_A1                   = 118,
-			SL2_D3DFMT_A2B10G10R10_XR_BIAS  = 119,
-			SL2_D3DFMT_BINARYBUFFER         = 199,
+			SL2_D3DFMT_CxV8U8								= 117,
+			
+			SL2_D3DFMT_A1									= 118,
+			SL2_D3DFMT_A2B10G10R10_XR_BIAS					= 119,
+			SL2_D3DFMT_BINARYBUFFER							= 199,
 
 
 			// == Special Formats == //
-			SL2_D3DFMT_BC4U					= SL2_MAKEFOURCC( 'B', 'C', '4', 'U' ),
-			SL2_D3DFMT_BC4S					= SL2_MAKEFOURCC( 'B', 'C', '4', 'S' ),
-			SL2_D3DFMT_BC5U					= SL2_MAKEFOURCC( 'A', 'T', 'I', '2' ),
-			SL2_D3DFMT_BC5S					= SL2_MAKEFOURCC( 'B', 'C', '5', 'S' ),
+			SL2_D3DFMT_BC4U									= SL2_MAKEFOURCC( 'B', 'C', '4', 'U' ),
+			SL2_D3DFMT_BC4S									= SL2_MAKEFOURCC( 'B', 'C', '4', 'S' ),
+			SL2_D3DFMT_BC5U									= SL2_MAKEFOURCC( 'A', 'T', 'I', '2' ),
+			SL2_D3DFMT_BC5S									= SL2_MAKEFOURCC( 'B', 'C', '5', 'S' ),
 
-			SL2_D3DFMT_FORCE_DWORD          = 0x7FFFFFFF
+			SL2_D3DFMT_FORCE_DWORD							= 0x7FFFFFFF
 		};
 
 		/** A conversion function. */
-		typedef void										(* PfConversion)( uint8_t * _pui8SrcDst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Pitch );
+		typedef void (*										PfConversion)( uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Pitch, const LSI_DDS_PIXELFORMAT &_dpfPixelFormat );
 
 
 		// == Types.
+		/** RGBA8. */
+		struct SL2_TEXEL_RGBA8 {
+			uint8_t											ui8R;
+			uint8_t											ui8G;
+			uint8_t											ui8B;
+			uint8_t											ui8A;
+		};
+
+		/** RGBA8. */
+		struct SL2_TEXEL_BGRA8 {
+			uint8_t											ui8B;
+			uint8_t											ui8G;
+			uint8_t											ui8R;
+			uint8_t											ui8A;
+		};
+
+		/** RGB10A2. */
+		struct SL2_TEXEL_RGB10A2 {
+			uint32_t										ui8R : 10;
+			uint32_t										ui8G : 10;
+			uint32_t										ui8B : 10;
+			uint32_t										ui8A : 2;
+		};
+
+
 		/** Data associated with each supported format. */
 		struct SL2_FORMAT_DATA {
 			SL2_D3DFORMAT									fD3dFormat;								/**< The D3D format. */
 			SL2_DXGI_FORMAT									dfFormat;								/**< The DXGI format. */
 			uint8_t											ui8BitsPerBlock;						/**< Bits-per-block for compressed textures or format bit size per-texel. */
+			uint8_t											ui8BitsAfterConvert;					/**< Bits-per-block after pfConverter runs. */
 			bool											bIsCompressed;							/**< Is this a compressed format? */
 			bool											bIsPremultiplied;						/**< Is alpha pre-multiplied? */
+			bool											bPacked;								/**< Is it a packed or YUV format? */
 			PfConversion									pfConverter;							/**< An optional conversion function. */
 		};
 
+
 		// == Members.
-		std::vector<std::unique_ptr<CSurface>>				m_vMipMaps;								/**< The array of mipmaps.  Index 0 is the base level. */
 		size_t												m_sPitch;								/**< Row size in bytes. */
+		SL2_FORMAT_DATA *									m_pfdFormat;							/**< The format data. */
+		std::vector<SL2_TEX>								m_vTextures;							/**< Each of the textures in the file. */
+
+		uint32_t											m_ui32ArraySize;						/**< Array size. */
+		uint32_t											m_ui32Faces;							/**< Number of faces. */
+
+		LSI_DDS_HEADER										m_dhHeader;								/**< The header. */
+		LSI_DDS_HEADER_DXT10								m_dh10Header10;							/**< Extended header. */
+
 		/** Format data. */
 		static SL2_FORMAT_DATA								m_fdData[];
 
 
 		// == Functions.
 		/**
-		 * Converts D3DFMT_UYVY to DXGI_FORMAT_YUY2 in-place.
+		 * Converts D3DFMT_UYVY to DXGI_FORMAT_YUY2.
 		 * 
-		 * \param _pui8SrcDst The data to convert.
+		 * \param _pui8Src The data to convert.
+		 * \param _pui8Dst The data to convert.
 		 * \param _ui32Width The width of the given data.
 		 * \param _ui32Height The height of the given data.
+		 * \param _ui32Depth The depth of the given data.
 		 * \param _ui32Pitch The row width in bytes of the given data.
+		 * \param _dpfPixelFormat The pixel format data.
 		 **/
-		static void											Convert_UYVY_to_YUY2( uint8_t * _pui8SrcDst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Pitch );
+		static void											Convert_UYVY_to_YUY2( uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Pitch, const LSI_DDS_PIXELFORMAT &_dpfPixelFormat );
+
+		/**
+		 * Converts a maskd 24-bit RGB to a 32-bit SL2_DXGI_FORMAT_R8G8B8A8_UNORM or SL2_DXGI_FORMAT_R8G8B8A8_UNORM_SRGB.
+		 * 
+		 * \param _pui8Src The data to convert.
+		 * \param _pui8Dst The data to convert.
+		 * \param _ui32Width The width of the given data.
+		 * \param _ui32Height The height of the given data.
+		 * \param _ui32Depth The depth of the given data.
+		 * \param _ui32Pitch The row width in bytes of the given data.
+		 * \param _dpfPixelFormat The pixel format data.
+		 **/
+		static void											Convert_RGB24_to_RGBA32( uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Pitch, const LSI_DDS_PIXELFORMAT &_dpfPixelFormat );
+
+		/**
+		 * Converts a maskd 32-bit RGBA to a 32-bit SL2_DXGI_FORMAT_R8G8B8A8_UNORM or SL2_DXGI_FORMAT_R8G8B8A8_UNORM_SRGB.
+		 * 
+		 * \param _pui8Src The data to convert.
+		 * \param _pui8Dst The data to convert.
+		 * \param _ui32Width The width of the given data.
+		 * \param _ui32Height The height of the given data.
+		 * \param _ui32Depth The depth of the given data.
+		 * \param _ui32Pitch The row width in bytes of the given data.
+		 * \param _dpfPixelFormat The pixel format data.
+		 **/
+		template <typename _tDstType, bool _bHasAlpha>
+			static void											Convert_RGBA32_to_RGBA32( uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Pitch, const LSI_DDS_PIXELFORMAT &_dpfPixelFormat ) {
+			double dR, dG, dB, dA;
+			size_t sR = CUtilities::BitMaskToShift( _dpfPixelFormat.ui32RBitMask, dR );
+			size_t sG = CUtilities::BitMaskToShift( _dpfPixelFormat.ui32GBitMask, dG );
+			size_t sB = CUtilities::BitMaskToShift( _dpfPixelFormat.ui32BBitMask, dB );
+			size_t sA;
+			if constexpr ( _bHasAlpha ) {
+				sA = CUtilities::BitMaskToShift( _dpfPixelFormat.ui32BBitMask, dA );
+			}
+			else {
+				sA = 255;
+			}
+			
+			size_t sSliceSize = _ui32Pitch * _ui32Height;		
+			for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+				for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+						uint32_t * pui32TexelsSrc = reinterpret_cast<uint32_t *>(_pui8Src + _ui32Pitch * H + sSliceSize * D) + W;
+						_tDstType * ptTexelsDst = reinterpret_cast<_tDstType *>(_pui8Dst + _ui32Pitch * H + sSliceSize * D) + W;
+						ptTexelsDst->ui8R = (*pui32TexelsSrc) >> sR;
+						ptTexelsDst->ui8G = (*pui32TexelsSrc) >> sG;
+						ptTexelsDst->ui8B = (*pui32TexelsSrc) >> sB;
+						if constexpr ( _bHasAlpha ) {
+							ptTexelsDst->ui8A = (*pui32TexelsSrc) >> sA;
+						}
+						else {
+							ptTexelsDst->ui8A = static_cast<uint8_t>(sA);
+						}
+					}
+				}
+			}
+		}
+
+		/**
+		 * Gets format data given a SL2_D3DFORMAT format.
+		 * 
+		 * \param _dfFormat The format to find.
+		 * \return Returns a matching SL2_FORMAT_DATA pointer from m_fdData or nullptr.
+		 **/
+		static SL2_FORMAT_DATA *							FormatByD3DFORMAT( SL2_D3DFORMAT _dfFormat );
+
+		/**
+		 * Gets format data given a SL2_DXGI_FORMAT format.
+		 * 
+		 * \param _dfFormat The format to find.
+		 * \return Returns a matching SL2_FORMAT_DATA pointer from m_fdData or nullptr.
+		 **/
+		static SL2_FORMAT_DATA *							FormatByDXGI_FORMAT( SL2_DXGI_FORMAT _dfFormat );
 	};
 
 }	// namespace sl2
