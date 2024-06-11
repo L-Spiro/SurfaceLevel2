@@ -122,7 +122,7 @@ namespace sl2 {
 	 * \return Returns an error code.
 	 **/
 	SL2_ERRORS CImage::LoadFile( const std::vector<uint8_t> &_vData ) {
-		//CStream sFile( _vData );
+		if ( SL2_E_SUCCESS == LoadBmp( _vData ) ) { return SL2_E_SUCCESS; }
 		if ( SL2_E_SUCCESS == LoadDds( _vData ) ) { return SL2_E_SUCCESS; }
 		if ( SL2_E_SUCCESS == LoadKtx1( _vData ) ) { return SL2_E_SUCCESS; }
 		if ( SL2_E_SUCCESS == LoadKtx2( _vData ) ) { return SL2_E_SUCCESS; }
@@ -449,7 +449,7 @@ namespace sl2 {
 
 		FREE_IMAGE_TYPE fitType = ::FreeImage_GetImageType( flfmData.pbBitmap );
 
-		if ( (::FreeImage_GetICCProfile( flfmData.pbBitmap )->flags &
+		if ( flfmData.pbBitmap && (::FreeImage_GetICCProfile( flfmData.pbBitmap )->flags &
 			FIICC_COLOR_IS_CMYK) == FIICC_COLOR_IS_CMYK ) {
 			return SL2_E_SUCCESS;
 		}
@@ -756,6 +756,7 @@ namespace sl2 {
 				}
 				break;	// FIT_RGBAF
 			}
+			case FIT_UNKNOWN : { return SL2_E_INVALIDFILETYPE; }
 			default : {}
 		};
 
@@ -832,9 +833,30 @@ namespace sl2 {
 		if ( dFile.Faces() > 1 ) {
 			for ( uint32_t M = 0; M < dFile.Mips(); ++M ) {
 				for ( uint32_t F = 0; F < dFile.Faces(); ++F ) {
-					size_t sIdx = F * dFile.Faces() + M;
+					size_t sIdx = F * dFile.Mips() + M;
 					if ( sIdx >= dFile.Buffers().size() ) { return SL2_E_INVALIDDATA; }
-					std::memcpy( Data( M, 0, 0, F ), dFile.Buffers()[sIdx].vTexture.data(), dFile.Buffers()[sIdx].vTexture.size() );
+
+					auto aPitch = CFormat::GetFormatSize( static_cast<SL2_DXGI_FORMAT>(dFile.Format()), std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ), 1, 1 );
+					uint32_t ui32Height = std::max( dFile.Height() >> M, static_cast<uint32_t>(1) );
+					uint32_t ui32Depth = std::max( dFile.Depth() >> M, static_cast<uint32_t>(1) );
+					size_t sBaseSize = GetActualPlaneSize( CFormat::GetFormatSize( static_cast<SL2_DXGI_FORMAT>(dFile.Format()),
+						std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ),
+						ui32Height,
+						ui32Depth ) );
+					if ( sBaseSize < dFile.Buffers()[sIdx].vTexture.size() ) { return SL2_E_INVALIDDATA; }
+
+					for ( size_t D = 0; D < ui32Depth; ++D ) {
+						size_t sDstSliceOffset = D * ui32Height * aPitch;
+						size_t sSrcSliceOffset = D * ui32Height * dFile.Pitch();
+						for ( size_t H = 0; H < ui32Height; ++H ) {
+							size_t sDst = aPitch * H + sDstSliceOffset;
+							size_t sSrc = dFile.Pitch() * H + sSrcSliceOffset;
+
+							std::memcpy( Data( M, 0, 0, F ) + sDst, dFile.Buffers()[sIdx].vTexture.data() + sSrc, dFile.Pitch() );
+						}
+					}
+
+					//std::memcpy( Data( M, 0, 0, F ), dFile.Buffers()[sIdx].vTexture.data(), dFile.Buffers()[sIdx].vTexture.size() );
 				}
 			}
 		}
@@ -843,8 +865,428 @@ namespace sl2 {
 				for ( uint32_t A = 0; A < dFile.Array(); ++A ) {
 					size_t sIdx = A * dFile.Mips() + M;
 					if ( sIdx >= dFile.Buffers().size() ) { return SL2_E_INVALIDDATA; }
-					std::memcpy( Data( M, 0, A, 0 ), dFile.Buffers()[sIdx].vTexture.data(), dFile.Buffers()[sIdx].vTexture.size() );
+					
+					auto aPitch = CFormat::GetFormatSize( static_cast<SL2_DXGI_FORMAT>(dFile.Format()), std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ), 1, 1 );
+					uint32_t ui32Height = std::max( dFile.Height() >> M, static_cast<uint32_t>(1) );
+					uint32_t ui32Depth = std::max( dFile.Depth() >> M, static_cast<uint32_t>(1) );
+					size_t sBaseSize = GetActualPlaneSize( CFormat::GetFormatSize( static_cast<SL2_DXGI_FORMAT>(dFile.Format()),
+						std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ),
+						ui32Height,
+						ui32Depth ) );
+					if ( sBaseSize < dFile.Buffers()[sIdx].vTexture.size() ) { return SL2_E_INVALIDDATA; }
+
+					for ( size_t D = 0; D < ui32Depth; ++D ) {
+						size_t sDstSliceOffset = D * ui32Height * aPitch;
+						size_t sSrcSliceOffset = D * ui32Height * dFile.Pitch();
+						for ( size_t H = 0; H < ui32Height; ++H ) {
+							size_t sDst = aPitch * H + sDstSliceOffset;
+							size_t sSrc = dFile.Pitch() * H + sSrcSliceOffset;
+
+							std::memcpy( Data( M, 0, A, 0 ) + sDst, dFile.Buffers()[sIdx].vTexture.data() + sSrc, dFile.Pitch() );
+						}
+					}
+
+					//std::memcpy( Data( M, 0, 0, F ), dFile.Buffers()[sIdx].vTexture.data(), dFile.Buffers()[sIdx].vTexture.size() );
 				}
+			}
+		}
+
+		return SL2_E_SUCCESS;
+	}
+
+	/**
+	 * Loads a BMP file from memory.
+	 * 
+	 * \param _vData The file to load.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS CImage::LoadBmp( const std::vector<uint8_t> &_vData ) {
+		// == Types.
+#pragma pack( push, 1 )
+		/** The bitmap file header. */
+		typedef struct LSI_BITMAPFILEHEADER {
+			uint16_t					ui16Header;
+			uint32_t					ui32Size;
+			uint16_t					ui16Reserved1;
+			uint16_t					ui16Reserved2;
+			uint32_t					ui32Offset;
+		} * LPLSI_BITMAPFILEHEADER, * const LPCLSI_BITMAPFILEHEADER;
+
+		/** The bitmap info header. */
+		typedef struct LSI_BITMAPINFOHEADER {
+			uint32_t					ui32InfoSize;
+			uint32_t					ui32Width;
+			uint32_t					ui32Height;
+			uint16_t					ui16Planes;
+			uint16_t					ui16BitsPerPixel;
+			uint32_t					ui32Compression;
+			uint32_t					ui32ImageSize;
+			uint32_t					ui32PixelsPerMeterX;
+			uint32_t					ui32PixelsPerMeterY;
+			uint32_t					ui32ColorsInPalette;
+			uint32_t					ui32ImportantColors;
+		} * LPLSI_BITMAPINFOHEADER, * const LPCLSI_BITMAPINFOHEADER;
+
+		/** Bitmap color mask. */
+		typedef struct LSI_BITMAPCOLORMASK {
+			uint32_t					ui32Red,
+										ui32Green,
+										ui32Blue,
+										ui32Alpha;
+		} * LPLSI_BITMAPCOLORMASK, * const LPCLSI_BITMAPCOLORMASK;
+
+		/** Bitmap palette data. */
+		typedef union LSI_BITMAPPALETTE {
+			struct LSI_BM_COLOR {
+				uint8_t					ui8Red,
+										ui8Green,
+										ui8Blue,
+										ui8Alpha;
+			};
+			uint32_t					ui32Color;
+		} * LPLSI_BITMAPPALETTE, * const LPCLSI_BITMAPPALETTE;
+#pragma pack( pop )
+
+
+		// Size checks.
+		if ( _vData.size() < sizeof( LSI_BITMAPFILEHEADER ) + sizeof( LSI_BITMAPINFOHEADER ) ) { return SL2_E_INVALIDFILETYPE; }
+		const LSI_BITMAPFILEHEADER * lpbfhHeader = reinterpret_cast<const LSI_BITMAPFILEHEADER *>(_vData.data());
+		// Check the header.
+		if ( lpbfhHeader->ui16Header != 0x4D42 ) { return SL2_E_INVALIDFILETYPE; }
+
+		// Verify the size of the file.
+		if ( lpbfhHeader->ui32Size != _vData.size() ) { return SL2_E_INVALIDFILETYPE; }
+
+		// Header checks are done.  Move on to the bitmap info.
+		const LSI_BITMAPINFOHEADER * lpbfhInfo = reinterpret_cast<const LSI_BITMAPINFOHEADER *>(&_vData.data()[sizeof( LSI_BITMAPFILEHEADER )]);
+		
+		// Check the size of the information header.
+		if ( lpbfhInfo->ui32InfoSize < sizeof( LSI_BITMAPINFOHEADER ) ) { return SL2_E_INVALIDFILETYPE; }
+
+		// Verify the compression.
+		int32_t i32Compression = static_cast<int32_t>(lpbfhInfo->ui32Compression);
+		if ( i32Compression < 0 || i32Compression > 3 ) { return SL2_E_INVALIDFILETYPE; }
+		if ( i32Compression == 1 ) {
+			if ( _vData.size() < sizeof( LSI_BITMAPFILEHEADER ) + sizeof( LSI_BITMAPINFOHEADER ) + sizeof( LSI_BITMAPPALETTE ) * lpbfhInfo->ui32ColorsInPalette ) { return SL2_E_INVALIDFILETYPE; }
+		}
+		if ( i32Compression == 3 ) {
+			if ( _vData.size() < sizeof( LSI_BITMAPFILEHEADER ) + sizeof( LSI_BITMAPINFOHEADER ) + sizeof( LSI_BITMAPCOLORMASK ) ) { return SL2_E_INVALIDFILETYPE; }
+		}
+
+
+		// We only handle bits-per-pixels of 1, 4, 8, 16, 24, and 32.
+		switch ( lpbfhInfo->ui16BitsPerPixel ) {
+			case 1 : {}
+			case 4 : { return SL2_E_INVALIDFILETYPE; }	// Temporarily.
+			case 8 : {
+				if ( lpbfhInfo->ui32ColorsInPalette > 256 ) { return SL2_E_INVALIDFILETYPE; }
+				if ( _vData.size() < sizeof( LSI_BITMAPFILEHEADER ) + sizeof( LSI_BITMAPINFOHEADER ) + sizeof( LSI_BITMAPPALETTE ) * lpbfhInfo->ui32ColorsInPalette ) { return SL2_E_INVALIDFILETYPE; }
+				break;
+			}
+			case 16 : {}
+			case 24 : {}
+			case 32 : { break; }
+			default : { return SL2_E_INVALIDFILETYPE; }
+		}
+
+		SL2_VKFORMAT vFormat = SL2_VK_FORMAT_UNDEFINED;
+		uint32_t ui32BytesPerPixel;
+		uint32_t ui32BytesPerPixelDst;
+		uint32_t ui32BitMask = 0x0;
+		switch ( lpbfhInfo->ui16BitsPerPixel ) {
+			case 1 : {
+				vFormat = SL2_VK_FORMAT_R8G8B8_UNORM;
+				ui32BytesPerPixel = 1;
+				ui32BytesPerPixelDst = 3;
+				ui32BitMask = 0x1;
+				break;
+			}
+			case 4 : {
+				vFormat = SL2_VK_FORMAT_R8G8B8_UNORM;
+				ui32BytesPerPixel = 4;
+				ui32BytesPerPixelDst = 3;
+				ui32BitMask = 0xF;
+				break;
+			}
+			case 8 : {
+				vFormat = SL2_VK_FORMAT_R8G8B8_UNORM;
+				ui32BytesPerPixel = 8;
+				ui32BytesPerPixelDst = 3;
+				ui32BitMask = 0xFF;
+				break;
+			}
+			case 16 : {
+				vFormat = SL2_VK_FORMAT_R5G6B5_UNORM_PACK16;
+				ui32BytesPerPixel = ui32BytesPerPixelDst = 2;
+				break;
+			}
+			case 24 : { vFormat = SL2_VK_FORMAT_R8G8B8_UNORM; ui32BytesPerPixel = ui32BytesPerPixelDst = 3; break; }
+			case 32 : { vFormat = SL2_VK_FORMAT_R8G8B8A8_UNORM; ui32BytesPerPixel = ui32BytesPerPixelDst = 4; break; }
+			default : { return SL2_E_INVALIDFILETYPE; }
+		}
+
+
+		// We are now ready to begin the extraction of the image data.
+		// Start by allocating enough RAM.
+		uint32_t ui32Height = lpbfhInfo->ui32Height;
+		bool bReverse = false;
+		if ( ui32Height & 0x80000000 ) {
+			bReverse = true;
+			// Invert the height.
+			ui32Height = ~ui32Height + 1;
+		}
+
+
+		// Everything is set.  Start the extraction.
+
+		uint32_t ui32RowWidth = lpbfhInfo->ui32Width * ui32BytesPerPixel;
+		if ( lpbfhInfo->ui16BitsPerPixel < 16 ) {
+			ui32RowWidth = lpbfhInfo->ui32Width;
+		}
+		if ( ui32RowWidth & 0x3 ) {
+			ui32RowWidth = (ui32RowWidth & ~3) + 4;
+		}
+
+		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * pkiffFormat = CFormat::FindFormatDataByVulkan( vFormat );
+		uint32_t ui32DestRowWidth = CFormat::GetFormatSize( pkiffFormat, lpbfhInfo->ui32Width, 1, 1 );
+
+		switch ( lpbfhInfo->ui16BitsPerPixel ) {
+			case 8 : {
+				
+				if ( !AllocateTexture( pkiffFormat,
+					lpbfhInfo->ui32Width, ui32Height, 1,
+					1, 1, 1 ) ) { return SL2_E_OUTOFMEMORY; }
+
+				uint32_t ui32ActualOffset = lpbfhHeader->ui32Offset;
+
+				// Pointer to the palette data.
+				const LSI_BITMAPPALETTE * lpbpPalette = reinterpret_cast<const LSI_BITMAPPALETTE *>(&_vData.data()[sizeof( LSI_BITMAPFILEHEADER )+sizeof( LSI_BITMAPINFOHEADER )]);
+
+				// If it is RLE-compressed.
+				if ( i32Compression == 1 ) {
+				}
+				else {
+					uint32_t ui32EightOverBytes = 8 / ui32BytesPerPixel;
+					// Otherwise not RLE compressed.
+					for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+						uint32_t ui32BitIndexBase = Y * lpbfhInfo->ui32Width;
+						uint32_t ui32YOff = ((Y * ui32RowWidth * ui32BytesPerPixel) >> 3) + ui32ActualOffset;
+
+						// This line is what handles reverse-encoded bitmaps.
+						uint32_t ui32YOffDest = bReverse ? Y * ui32DestRowWidth :
+							(ui32Height - Y - 1) * ui32DestRowWidth;
+
+						uint8_t * pui8Dest = &Data()[ui32YOffDest];
+
+						
+
+						for ( uint32_t X = 0; X < lpbfhInfo->ui32Width; ++X ) {
+							// Get the byte from which we will read.
+							const uint8_t * pui8TargetByte = &_vData.data()[ui32YOff+((X*ui32BytesPerPixel)>>3)];
+							// Get the bits within that byte we need.
+							uint32_t ui32BitIndex = (ui32BitIndexBase + X) % (ui32EightOverBytes);
+							uint32_t ui32Shift = ui32BitIndex * ui32BytesPerPixel;
+
+							// Decode into an index.
+							uint32_t ui32Index = ((*pui8TargetByte) & (ui32BitMask << (ui32Shift))) >> ui32Shift;
+
+							// Sanity check.
+							if ( ui32Index >= lpbfhInfo->ui32ColorsInPalette ) { return SL2_E_INVALIDFILETYPE; }
+
+							// Get the color from the palette.
+							uint32_t ui32R = (lpbpPalette[ui32Index].ui32Color >> 0) & 0xFF;
+							uint32_t ui32G = (lpbpPalette[ui32Index].ui32Color >> 8) & 0xFF;
+							uint32_t ui32B = (lpbpPalette[ui32Index].ui32Color >> 16) & 0xFF;
+							uint32_t ui32A = (lpbpPalette[ui32Index].ui32Color >> 24) & 0xFF;
+							CFormat::SL2_RGBA_UNORM ruColor;
+							ruColor.ui8Rgba[SL2_PC_R] = static_cast<uint8_t>(ui32R);
+							ruColor.ui8Rgba[SL2_PC_G] = static_cast<uint8_t>(ui32G);
+							ruColor.ui8Rgba[SL2_PC_B] = static_cast<uint8_t>(ui32B);
+							ruColor.ui8Rgba[SL2_PC_A] = static_cast<uint8_t>(ui32A);
+
+							// Convert to the destination format.
+							uint32_t ui32Final = (*reinterpret_cast<uint32_t *>(&ruColor.ui8Rgba));
+
+							static const uint32_t ui32Mask[] = {
+								0xFFFFFFFF,
+								0xFFFFFF00,
+								0xFFFF0000,
+								0xFF000000,
+								0x00000000
+							};
+							static const uint32_t ui32Sizes[] = {
+								0x00000000,
+								0x000000FF,
+								0x0000FFFF,
+								0x00FFFFFF,
+								0xFFFFFFFF
+							};
+
+							uint32_t * pui32Dst = reinterpret_cast<uint32_t *>(&pui8Dest[X*ui32BytesPerPixelDst]);
+							(*pui32Dst) = ((*pui32Dst) & ui32Mask[ui32BytesPerPixelDst]) | (ui32Final & ui32Sizes[ui32BytesPerPixelDst]);
+						}
+					}
+				}
+
+				break;
+			}
+			case 16 : {}
+			case 24 : {}
+			case 32 : {
+				uint32_t ui32ActualOffset = lpbfhHeader->ui32Offset;
+
+				// The color masks tell us the order and sizes of the colors in the image.
+				const LSI_BITMAPCOLORMASK * lpbcmMask;
+				if ( i32Compression == 3 ) {
+					lpbcmMask = reinterpret_cast<const LSI_BITMAPCOLORMASK *>(&_vData.data()[sizeof( LSI_BITMAPFILEHEADER )+sizeof( LSI_BITMAPINFOHEADER )]);
+				}
+				else {
+					static const LSI_BITMAPCOLORMASK bcmDefaultMask32 = {
+						0x00FF0000,
+						0x0000FF00,
+						0x000000FF,
+						0xFF000000,
+					};
+					static const LSI_BITMAPCOLORMASK bcmDefaultMask24 = {
+						0x00FF0000,
+						0x0000FF00,
+						0x000000FF,
+						0x00000000,
+					};
+					static const LSI_BITMAPCOLORMASK bcmDefaultMask16 = {
+						0x00007C00,
+						0x000003E0,
+						0x0000001F,
+						0x00000000,
+					};
+					if ( lpbfhInfo->ui16BitsPerPixel == 16 ) {
+						lpbcmMask = &bcmDefaultMask16;
+					}
+					else if ( lpbfhInfo->ui16BitsPerPixel == 32 ) {
+						lpbcmMask = &bcmDefaultMask32;
+					}
+					else {
+						lpbcmMask = &bcmDefaultMask24;
+					}
+				}
+				// Determine how much we need to shift each channel to get the values we expect.
+				uint32_t ui32RShift = 0;
+				uint32_t ui32GShift = 0;
+				uint32_t ui32BShift = 0;
+				uint32_t ui32AShift = 0;
+				while ( ui32RShift < 32 && !(lpbcmMask->ui32Red & (1 << ui32RShift)) ) { ++ui32RShift; }
+				while ( ui32GShift < 32 && !(lpbcmMask->ui32Green & (1 << ui32GShift)) ) { ++ui32GShift; }
+				while ( ui32BShift < 32 && !(lpbcmMask->ui32Blue & (1 << ui32BShift)) ) { ++ui32BShift; }
+				while ( ui32AShift < 32 && !(lpbcmMask->ui32Alpha & (1 << ui32AShift)) ) { ++ui32AShift; }
+
+				// Also get the number of bits per component.
+				uint32_t ui32RBits = 0;
+				uint32_t ui32GBits = 0;
+				uint32_t ui32BBits = 0;
+				uint32_t ui32ABits = 0;
+				while ( (lpbcmMask->ui32Red & (1 << (ui32RShift + ui32RBits)) ) ) { ++ui32RBits; }
+				while ( (lpbcmMask->ui32Green & (1 << (ui32GShift + ui32GBits)) ) ) { ++ui32GBits; }
+				while ( (lpbcmMask->ui32Blue & (1 << (ui32BShift + ui32BBits)) ) ) { ++ui32BBits; }
+				while ( (lpbcmMask->ui32Alpha & (1 << (ui32AShift + ui32ABits)) ) ) { ++ui32ABits; }
+				
+
+				// It is not too late to change the format as long as it stays the same size.
+				// Specifically, here we want to verify/modify the 16-bit format.
+				if ( lpbfhInfo->ui16BitsPerPixel == 16 ) {
+					// If there is an alpha channel, we need to modify the format to have one
+					//	as well.
+					if ( ui32ABits ) {
+						// If more than one bit is needed for alpha.
+						if ( ui32ABits > 1 ) {
+							vFormat = SL2_VK_FORMAT_R4G4B4A4_UNORM_PACK16;
+						}
+						// Otherwise use one bit.
+						else {
+							vFormat = SL2_VK_FORMAT_R5G5B5A1_UNORM_PACK16;
+						}
+					}
+				}
+				pkiffFormat = CFormat::FindFormatDataByVulkan( vFormat );
+				if ( !AllocateTexture( pkiffFormat,
+					lpbfhInfo->ui32Width, ui32Height, 1,
+					1, 1, 1 ) ) { return SL2_E_OUTOFMEMORY; }
+
+				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
+					uint32_t ui32YOffSrc = Y * ui32RowWidth + ui32ActualOffset;
+					// This line is what handles reverse-encoded bitmaps.
+					uint32_t ui32YOffDest = bReverse ? Y * ui32DestRowWidth :
+						(ui32Height - Y - 1) * ui32DestRowWidth;
+
+					// We can copy whole rows at a time if they are in the same format already.
+					const uint8_t * pui8Src = &_vData.data()[ui32YOffSrc];
+					uint8_t * pui8Dest = &Data()[ui32YOffDest];
+
+					// Since bitmaps store the alpha on the reverse side, we cannot use this trick
+					//	when there is an alpha channel.  In the end, it turns out that this only
+					//	works on 24-bit bitmaps.  But that is not so bad since they are actually
+					//	fairly common.
+					if ( i32Compression == 0 &&
+						ui32RShift == offsetof( CFormat::SL2_RGBA_UNORM, ui8Rgba[SL2_PC_R] ) &&
+						ui32GShift == offsetof( CFormat::SL2_RGBA_UNORM, ui8Rgba[SL2_PC_G] ) &&
+						ui32BShift == offsetof( CFormat::SL2_RGBA_UNORM, ui8Rgba[SL2_PC_B] ) &&
+						(ui32AShift == 32 || ui32AShift == offsetof( CFormat::SL2_RGBA_UNORM, ui8Rgba[SL2_PC_A] )) ) {
+						std::memcpy( pui8Dest, pui8Src, lpbfhInfo->ui32Width * ui32BytesPerPixel );
+					}
+					else {
+						for ( uint32_t X = 0; X < lpbfhInfo->ui32Width; ++X ) {
+							uint32_t ui32Src = (*reinterpret_cast<const uint32_t *>(&pui8Src[X*ui32BytesPerPixel]));
+
+							uint32_t ui32R = (ui32Src & lpbcmMask->ui32Red) >> ui32RShift;
+							uint32_t ui32G = (ui32Src & lpbcmMask->ui32Green) >> ui32GShift;
+							uint32_t ui32B = (ui32Src & lpbcmMask->ui32Blue) >> ui32BShift;
+							uint32_t ui32A = (ui32Src & lpbcmMask->ui32Alpha) >> ui32AShift;
+							// Correct the missing alpha channel.
+							if ( ui32AShift == 32 ) { ui32A = 0xFF; }
+							switch ( vFormat ) {
+								case SL2_VK_FORMAT_R5G6B5_UNORM_PACK16 : {
+									CFormat::SL2_R5G6B5_PACKED * prgbDst = reinterpret_cast<CFormat::SL2_R5G6B5_PACKED *>(&pui8Dest[X*ui32BytesPerPixelDst]);
+									prgbDst->ui16R = static_cast<uint8_t>(std::round( ui32R / ((1 << ui32RBits) - 1.0) * ((1 << 5) - 1) ));
+									prgbDst->ui16G = static_cast<uint8_t>(std::round( ui32G / ((1 << ui32GBits) - 1.0) * ((1 << 6) - 1) ));
+									prgbDst->ui16B = static_cast<uint8_t>(std::round( ui32B / ((1 << ui32BBits) - 1.0) * ((1 << 5) - 1) ));
+									break;
+								}
+								case SL2_VK_FORMAT_R5G5B5A1_UNORM_PACK16 : {
+									CFormat::SL2_A1R5G6B5_PACKED * prgbDst = reinterpret_cast<CFormat::SL2_A1R5G6B5_PACKED *>(&pui8Dest[X*ui32BytesPerPixelDst]);
+									prgbDst->ui16R = static_cast<uint8_t>(std::round( ui32R / ((1 << ui32RBits) - 1.0) * ((1 << 5) - 1) ));
+									prgbDst->ui16G = static_cast<uint8_t>(std::round( ui32G / ((1 << ui32GBits) - 1.0) * ((1 << 5) - 1) ));
+									prgbDst->ui16B = static_cast<uint8_t>(std::round( ui32B / ((1 << ui32BBits) - 1.0) * ((1 << 5) - 1) ));
+									prgbDst->ui16A = static_cast<uint8_t>(std::round( ui32A / ((1 << ui32ABits) - 1.0) * ((1 << 1) - 1) ));
+									break;
+								}
+								case SL2_VK_FORMAT_R4G4B4A4_UNORM_PACK16 : {
+									CFormat::SL2_RGBA4_PACKED * prgbDst = reinterpret_cast<CFormat::SL2_RGBA4_PACKED *>(&pui8Dest[X*ui32BytesPerPixelDst]);
+									prgbDst->ui16R = static_cast<uint8_t>(std::round( ui32R / ((1 << ui32RBits) - 1.0) * ((1 << 4) - 1) ));
+									prgbDst->ui16G = static_cast<uint8_t>(std::round( ui32G / ((1 << ui32GBits) - 1.0) * ((1 << 4) - 1) ));
+									prgbDst->ui16B = static_cast<uint8_t>(std::round( ui32B / ((1 << ui32BBits) - 1.0) * ((1 << 4) - 1) ));
+									prgbDst->ui16A = static_cast<uint8_t>(std::round( ui32A / ((1 << ui32ABits) - 1.0) * ((1 << 4) - 1) ));
+									break;
+								}
+								case SL2_VK_FORMAT_R8G8B8_UNORM : {
+									CFormat::SL2_RGB_UNORM * prgbDst = reinterpret_cast<CFormat::SL2_RGB_UNORM *>(&pui8Dest[X*ui32BytesPerPixelDst]);
+									prgbDst->ui8Rgb[SL2_PC_R] = ui32R;
+									prgbDst->ui8Rgb[SL2_PC_G] = ui32G;
+									prgbDst->ui8Rgb[SL2_PC_B] = ui32B;
+									break;
+								}
+								case SL2_VK_FORMAT_R8G8B8A8_UNORM : {
+									CFormat::SL2_RGBA_UNORM * prgbDst = reinterpret_cast<CFormat::SL2_RGBA_UNORM *>(&pui8Dest[X*ui32BytesPerPixelDst]);
+									prgbDst->ui8Rgba[SL2_PC_R] = ui32R;
+									prgbDst->ui8Rgba[SL2_PC_G] = ui32G;
+									prgbDst->ui8Rgba[SL2_PC_B] = ui32B;
+									prgbDst->ui8Rgba[SL2_PC_A] = ui32A;
+									break;
+								}
+							}
+
+						}
+					}
+				}
+				break;
 			}
 		}
 

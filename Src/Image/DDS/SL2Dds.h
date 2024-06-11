@@ -371,6 +371,13 @@ namespace sl2 {
 		inline uint32_t										Faces() const { return std::max( m_ui32Faces, static_cast<uint32_t>(1) ); }
 
 		/**
+		 * Gets the pitch.
+		 *
+		 * \return Returns the pitch.
+		 **/
+		inline uint32_t										Pitch() const { return m_dhHeader.ui32PitchOrLinearSize; }
+
+		/**
 		 * Gets the texture buffers.
 		 *
 		 * \return Returns a constant reference to the buffered texture data.

@@ -49,12 +49,6 @@ namespace sl2 {
 		{ SL2_D3DFMT_G32R32F,			SL2_DXGI_FORMAT_R32G32_FLOAT,					64, 0, false, false, false },
 		{ SL2_D3DFMT_A32B32G32R32F,		SL2_DXGI_FORMAT_R32G32B32A32_FLOAT,				128, 0, false, false, false },
 
-		{ SL2_D3DFMT_UYVY,				SL2_DXGI_FORMAT_YUY2,							32, 0, false, false, true,	Convert_UYVY_to_YUY2 },
-		
-		{ SL2_D3DFMT_YUY2,				SL2_DXGI_FORMAT_YUY2,							32, 0, false, false, true },
-		{ SL2_D3DFMT_CxV8U8,			SL2_DXGI_FORMAT_V208,							16, 0, false, false, true },		// Add conversion.
-
-		
 		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,			32, 0, false, false, false },
 		{ SL2_D3DFMT_G16R16,			SL2_DXGI_FORMAT_R16G16_UNORM,					32, 0, false, false, false },
 		{ SL2_D3DFMT_A1R5G5B5,			SL2_DXGI_FORMAT_B5G5R5A1_UNORM,					16, 0, false, false, false },
@@ -124,10 +118,19 @@ namespace sl2 {
 		{ SL2_D3DFMT_A8B8G8R8,			SL2_DXGI_FORMAT_B8G8R8A8_UNORM,					32, 0, false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_BGRA8, true> },
 		{ SL2_D3DFMT_X8B8G8R8,			SL2_DXGI_FORMAT_B8G8R8X8_UNORM,					32, 0, false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_BGRA8, false> },
 
+
 		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R10G10B10A2_UNORM,				32, 0, false, false, false },
 
 		{ SL2_D3DFMT_A2B10G10R10,		SL2_DXGI_FORMAT_R10G10B10A2_UNORM,				32, 0, false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_RGB10A2, true> },
 		{ SL2_D3DFMT_A2R10G10B10,		SL2_DXGI_FORMAT_R10G10B10A2_UNORM,				32, 0, false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_RGB10A2, true> },
+
+
+		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_YUY2,							32, 0, false, false, true },
+		{ SL2_D3DFMT_YUY2,				SL2_DXGI_FORMAT_YUY2,							32, 0, false, false, true },
+		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_V208,							24, 0, false, false, true },
+
+		{ SL2_D3DFMT_UYVY,				SL2_DXGI_FORMAT_YUY2,							32, 0, false, false, true, Convert_UYVY_to_YUY2 },
+		{ SL2_D3DFMT_CxV8U8,			SL2_DXGI_FORMAT_V208,							16, 24, false, false, true },		// Add conversion.
 
 		
 	};
@@ -243,7 +246,7 @@ namespace sl2 {
 				ui32D = std::max( ui32D >> 1, static_cast<uint32_t>(1) );
 			}
 		}
-
+		m_dhHeader.ui32PitchOrLinearSize = ui32Pitch;
 		return true;
 	}
 

@@ -1337,9 +1337,9 @@ namespace sl2 {
 
 		/** An R5G6B5 color component. */
 		typedef struct SL2_R5G6B5_PACKED {
-			uint16_t																ui16R : 5;
-			uint16_t																ui16G : 6;
 			uint16_t																ui16B : 5;
+			uint16_t																ui16G : 6;
+			uint16_t																ui16R : 5;
 		} * LPSL2_R5G6B5_PACKED, * const LPCSL2_R5G6B5_PACKED;
 
 		/** An A1R5G5B5 color component. */
@@ -1349,6 +1349,14 @@ namespace sl2 {
 			uint16_t																ui16G : 5;
 			uint16_t																ui16B : 5;
 		} * LPSL2_A1R5G6B5_PACKED, * const LPCSL2_A1R5G6B5_PACKED;
+
+		/** An RGBA4 color component. */
+		typedef struct SL2_RGBA4_PACKED {
+			uint16_t																ui16R : 4;
+			uint16_t																ui16G : 4;
+			uint16_t																ui16B : 4;
+			uint16_t																ui16A : 4;
+		} * LPSL2_RGBA4_PACKED, * const LPCSL2_RGBA4_PACKED;
 
 
 		/** Options for creating DXT file images. */

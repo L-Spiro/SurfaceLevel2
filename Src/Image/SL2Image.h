@@ -374,6 +374,14 @@ namespace sl2 {
 		SL2_ERRORS											LoadDds( const std::vector<uint8_t> &_vData );
 
 		/**
+		 * Loads a BMP file from memory.
+		 * 
+		 * \param _vData The file to load.
+		 * \return Returns an error code.
+		 **/
+		SL2_ERRORS											LoadBmp( const std::vector<uint8_t> &_vData );
+
+		/**
 		 * Callback to load each face's data from a KTX file.
 		 *
 		 * \param _iMipLevel Mipmap level, starting from 0.
