@@ -836,7 +836,7 @@ namespace sl2 {
 					size_t sIdx = F * dFile.Mips() + M;
 					if ( sIdx >= dFile.Buffers().size() ) { return SL2_E_INVALIDDATA; }
 
-					auto aPitch = CFormat::GetFormatSize( static_cast<SL2_DXGI_FORMAT>(dFile.Format()), std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ), 1, 1 );
+					auto aPitch = CFormat::GetRowSize( static_cast<SL2_DXGI_FORMAT>(dFile.Format()), std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
 					uint32_t ui32Height = std::max( dFile.Height() >> M, static_cast<uint32_t>(1) );
 					uint32_t ui32Depth = std::max( dFile.Depth() >> M, static_cast<uint32_t>(1) );
 					size_t sBaseSize = GetActualPlaneSize( CFormat::GetFormatSize( static_cast<SL2_DXGI_FORMAT>(dFile.Format()),
@@ -866,7 +866,7 @@ namespace sl2 {
 					size_t sIdx = A * dFile.Mips() + M;
 					if ( sIdx >= dFile.Buffers().size() ) { return SL2_E_INVALIDDATA; }
 					
-					auto aPitch = CFormat::GetFormatSize( static_cast<SL2_DXGI_FORMAT>(dFile.Format()), std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ), 1, 1 );
+					auto aPitch = CFormat::GetRowSize( static_cast<SL2_DXGI_FORMAT>(dFile.Format()), std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
 					uint32_t ui32Height = std::max( dFile.Height() >> M, static_cast<uint32_t>(1) );
 					uint32_t ui32Depth = std::max( dFile.Depth() >> M, static_cast<uint32_t>(1) );
 					size_t sBaseSize = GetActualPlaneSize( CFormat::GetFormatSize( static_cast<SL2_DXGI_FORMAT>(dFile.Format()),
@@ -901,56 +901,9 @@ namespace sl2 {
 	 * \return Returns an error code.
 	 **/
 	SL2_ERRORS CImage::LoadBmp( const std::vector<uint8_t> &_vData ) {
-		// == Types.
-#pragma pack( push, 1 )
-		/** The bitmap file header. */
-		typedef struct LSI_BITMAPFILEHEADER {
-			uint16_t					ui16Header;
-			uint32_t					ui32Size;
-			uint16_t					ui16Reserved1;
-			uint16_t					ui16Reserved2;
-			uint32_t					ui32Offset;
-		} * LPLSI_BITMAPFILEHEADER, * const LPCLSI_BITMAPFILEHEADER;
-
-		/** The bitmap info header. */
-		typedef struct LSI_BITMAPINFOHEADER {
-			uint32_t					ui32InfoSize;
-			uint32_t					ui32Width;
-			uint32_t					ui32Height;
-			uint16_t					ui16Planes;
-			uint16_t					ui16BitsPerPixel;
-			uint32_t					ui32Compression;
-			uint32_t					ui32ImageSize;
-			uint32_t					ui32PixelsPerMeterX;
-			uint32_t					ui32PixelsPerMeterY;
-			uint32_t					ui32ColorsInPalette;
-			uint32_t					ui32ImportantColors;
-		} * LPLSI_BITMAPINFOHEADER, * const LPCLSI_BITMAPINFOHEADER;
-
-		/** Bitmap color mask. */
-		typedef struct LSI_BITMAPCOLORMASK {
-			uint32_t					ui32Red,
-										ui32Green,
-										ui32Blue,
-										ui32Alpha;
-		} * LPLSI_BITMAPCOLORMASK, * const LPCLSI_BITMAPCOLORMASK;
-
-		/** Bitmap palette data. */
-		typedef union LSI_BITMAPPALETTE {
-			struct LSI_BM_COLOR {
-				uint8_t					ui8Red,
-										ui8Green,
-										ui8Blue,
-										ui8Alpha;
-			};
-			uint32_t					ui32Color;
-		} * LPLSI_BITMAPPALETTE, * const LPCLSI_BITMAPPALETTE;
-#pragma pack( pop )
-
-
 		// Size checks.
-		if ( _vData.size() < sizeof( LSI_BITMAPFILEHEADER ) + sizeof( LSI_BITMAPINFOHEADER ) ) { return SL2_E_INVALIDFILETYPE; }
-		const LSI_BITMAPFILEHEADER * lpbfhHeader = reinterpret_cast<const LSI_BITMAPFILEHEADER *>(_vData.data());
+		if ( _vData.size() < sizeof( SL2_BITMAPFILEHEADER ) + sizeof( SL2_BITMAPINFOHEADER ) ) { return SL2_E_INVALIDFILETYPE; }
+		const SL2_BITMAPFILEHEADER * lpbfhHeader = reinterpret_cast<const SL2_BITMAPFILEHEADER *>(_vData.data());
 		// Check the header.
 		if ( lpbfhHeader->ui16Header != 0x4D42 ) { return SL2_E_INVALIDFILETYPE; }
 
@@ -958,19 +911,19 @@ namespace sl2 {
 		if ( lpbfhHeader->ui32Size != _vData.size() ) { return SL2_E_INVALIDFILETYPE; }
 
 		// Header checks are done.  Move on to the bitmap info.
-		const LSI_BITMAPINFOHEADER * lpbfhInfo = reinterpret_cast<const LSI_BITMAPINFOHEADER *>(&_vData.data()[sizeof( LSI_BITMAPFILEHEADER )]);
+		const SL2_BITMAPINFOHEADER * lpbfhInfo = reinterpret_cast<const SL2_BITMAPINFOHEADER *>(&_vData.data()[sizeof( SL2_BITMAPFILEHEADER )]);
 		
 		// Check the size of the information header.
-		if ( lpbfhInfo->ui32InfoSize < sizeof( LSI_BITMAPINFOHEADER ) ) { return SL2_E_INVALIDFILETYPE; }
+		if ( lpbfhInfo->ui32InfoSize < sizeof( SL2_BITMAPINFOHEADER ) ) { return SL2_E_INVALIDFILETYPE; }
 
 		// Verify the compression.
 		int32_t i32Compression = static_cast<int32_t>(lpbfhInfo->ui32Compression);
-		if ( i32Compression < 0 || i32Compression > 3 ) { return SL2_E_INVALIDFILETYPE; }
-		if ( i32Compression == 1 ) {
-			if ( _vData.size() < sizeof( LSI_BITMAPFILEHEADER ) + sizeof( LSI_BITMAPINFOHEADER ) + sizeof( LSI_BITMAPPALETTE ) * lpbfhInfo->ui32ColorsInPalette ) { return SL2_E_INVALIDFILETYPE; }
+		if ( i32Compression < BI_RGB || i32Compression > BI_BITFIELDS ) { return SL2_E_INVALIDFILETYPE; }
+		if ( i32Compression == BI_RLE8 ) {
+			if ( _vData.size() < sizeof( SL2_BITMAPFILEHEADER ) + sizeof( SL2_BITMAPINFOHEADER ) + sizeof( SL2_BITMAPPALETTE ) * lpbfhInfo->ui32ColorsInPalette ) { return SL2_E_INVALIDFILETYPE; }
 		}
-		if ( i32Compression == 3 ) {
-			if ( _vData.size() < sizeof( LSI_BITMAPFILEHEADER ) + sizeof( LSI_BITMAPINFOHEADER ) + sizeof( LSI_BITMAPCOLORMASK ) ) { return SL2_E_INVALIDFILETYPE; }
+		if ( i32Compression == BI_BITFIELDS ) {
+			if ( _vData.size() < sizeof( SL2_BITMAPFILEHEADER ) + sizeof( SL2_BITMAPINFOHEADER ) + sizeof( SL2_BITMAPCOLORMASK ) ) { return SL2_E_INVALIDFILETYPE; }
 		}
 
 
@@ -980,7 +933,7 @@ namespace sl2 {
 			case 4 : { return SL2_E_INVALIDFILETYPE; }	// Temporarily.
 			case 8 : {
 				if ( lpbfhInfo->ui32ColorsInPalette > 256 ) { return SL2_E_INVALIDFILETYPE; }
-				if ( _vData.size() < sizeof( LSI_BITMAPFILEHEADER ) + sizeof( LSI_BITMAPINFOHEADER ) + sizeof( LSI_BITMAPPALETTE ) * lpbfhInfo->ui32ColorsInPalette ) { return SL2_E_INVALIDFILETYPE; }
+				if ( _vData.size() < sizeof( SL2_BITMAPFILEHEADER ) + sizeof( SL2_BITMAPINFOHEADER ) + sizeof( SL2_BITMAPPALETTE ) * lpbfhInfo->ui32ColorsInPalette ) { return SL2_E_INVALIDFILETYPE; }
 				break;
 			}
 			case 16 : {}
@@ -1048,7 +1001,7 @@ namespace sl2 {
 		}
 
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * pkiffFormat = CFormat::FindFormatDataByVulkan( vFormat );
-		uint32_t ui32DestRowWidth = CFormat::GetFormatSize( pkiffFormat, lpbfhInfo->ui32Width, 1, 1 );
+		uint32_t ui32DestRowWidth = CFormat::GetRowSize( pkiffFormat, lpbfhInfo->ui32Width );
 
 		switch ( lpbfhInfo->ui16BitsPerPixel ) {
 			case 8 : {
@@ -1060,7 +1013,7 @@ namespace sl2 {
 				uint32_t ui32ActualOffset = lpbfhHeader->ui32Offset;
 
 				// Pointer to the palette data.
-				const LSI_BITMAPPALETTE * lpbpPalette = reinterpret_cast<const LSI_BITMAPPALETTE *>(&_vData.data()[sizeof( LSI_BITMAPFILEHEADER )+sizeof( LSI_BITMAPINFOHEADER )]);
+				const SL2_BITMAPPALETTE * lpbpPalette = reinterpret_cast<const SL2_BITMAPPALETTE *>(&_vData.data()[sizeof( SL2_BITMAPFILEHEADER )+sizeof( SL2_BITMAPINFOHEADER )]);
 
 				// If it is RLE-compressed.
 				if ( i32Compression == 1 ) {
@@ -1136,24 +1089,24 @@ namespace sl2 {
 				uint32_t ui32ActualOffset = lpbfhHeader->ui32Offset;
 
 				// The color masks tell us the order and sizes of the colors in the image.
-				const LSI_BITMAPCOLORMASK * lpbcmMask;
-				if ( i32Compression == 3 ) {
-					lpbcmMask = reinterpret_cast<const LSI_BITMAPCOLORMASK *>(&_vData.data()[sizeof( LSI_BITMAPFILEHEADER )+sizeof( LSI_BITMAPINFOHEADER )]);
+				const SL2_BITMAPCOLORMASK * lpbcmMask;
+				if ( i32Compression == BI_BITFIELDS ) {
+					lpbcmMask = reinterpret_cast<const SL2_BITMAPCOLORMASK *>(&_vData.data()[sizeof( SL2_BITMAPFILEHEADER )+sizeof( SL2_BITMAPINFOHEADER )]);
 				}
 				else {
-					static const LSI_BITMAPCOLORMASK bcmDefaultMask32 = {
+					static const SL2_BITMAPCOLORMASK bcmDefaultMask32 = {
 						0x00FF0000,
 						0x0000FF00,
 						0x000000FF,
 						0xFF000000,
 					};
-					static const LSI_BITMAPCOLORMASK bcmDefaultMask24 = {
+					static const SL2_BITMAPCOLORMASK bcmDefaultMask24 = {
 						0x00FF0000,
 						0x0000FF00,
 						0x000000FF,
 						0x00000000,
 					};
-					static const LSI_BITMAPCOLORMASK bcmDefaultMask16 = {
+					static const SL2_BITMAPCOLORMASK bcmDefaultMask16 = {
 						0x00007C00,
 						0x000003E0,
 						0x0000001F,

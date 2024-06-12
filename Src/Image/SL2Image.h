@@ -108,6 +108,51 @@ namespace sl2 {
 			FIBITMAP *										pbBitmap;
 		};
 
+#pragma pack( push, 1 )
+		/** The bitmap file header. */
+		typedef struct SL2_BITMAPFILEHEADER {
+			uint16_t										ui16Header;
+			uint32_t										ui32Size;
+			uint16_t										ui16Reserved1;
+			uint16_t										ui16Reserved2;
+			uint32_t										ui32Offset;
+		} * LPSL2_BITMAPFILEHEADER, * const LPCSL2_BITMAPFILEHEADER;
+
+		/** The bitmap info header. */
+		typedef struct SL2_BITMAPINFOHEADER {
+			uint32_t										ui32InfoSize;
+			uint32_t										ui32Width;
+			uint32_t										ui32Height;
+			uint16_t										ui16Planes;
+			uint16_t										ui16BitsPerPixel;
+			uint32_t										ui32Compression;
+			uint32_t										ui32ImageSize;
+			uint32_t										ui32PixelsPerMeterX;
+			uint32_t										ui32PixelsPerMeterY;
+			uint32_t										ui32ColorsInPalette;
+			uint32_t										ui32ImportantColors;
+		} * LPSL2_BITMAPINFOHEADER, * const LPCSL2_BITMAPINFOHEADER;
+
+		/** Bitmap color mask. */
+		typedef struct SL2_BITMAPCOLORMASK {
+			uint32_t										ui32Red,
+															ui32Green,
+															ui32Blue,
+															ui32Alpha;
+		} * LPSL2_BITMAPCOLORMASK, * const LPCSL2_BITMAPCOLORMASK;
+
+		/** Bitmap palette data. */
+		typedef union SL2_BITMAPPALETTE {
+			struct SL2_BM_COLOR {
+				uint8_t										ui8Red,
+															ui8Green,
+															ui8Blue,
+															ui8Alpha;
+			};
+			uint32_t										ui32Color;
+		} * LPSL2_BITMAPPALETTE, * const LPCSL2_BITMAPPALETTE;
+#pragma pack( pop )
+
 
 		// == Operators.
 		/**

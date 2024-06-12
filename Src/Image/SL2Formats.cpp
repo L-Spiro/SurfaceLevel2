@@ -839,8 +839,8 @@ namespace sl2 {
 	 * \param _pfScore AN optional pointer to a float that can receive the score for the return format.
 	 * \return Returns the format among _pkifFormats that best fits _pkifFormat.  Can return nullptr in case of error.
 	 **/
-	const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * CFormat::FindBestFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat,
-		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ** _ppkifFormats, size_t _sTotal, float * _pfScore ) {
+	const CFormat::SL2_BEST_INTERNAL_FORMAT * CFormat::FindBestFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat,
+		const CFormat::SL2_BEST_INTERNAL_FORMAT * _ppkifFormats, size_t _sTotal, float * _pfScore ) {
 		/*struct SL2_SCORE {
 			SL2_SCORE( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _ppkifdFormat ) :
 				pkifdFormat( _ppkifdFormat ),
@@ -850,24 +850,24 @@ namespace sl2 {
 			float									fScore = 0.0f;
 		};
 		std::vector<SL2_SCORE> vScores;*/
-		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * pkifdWinner = nullptr;
+		const CFormat::SL2_BEST_INTERNAL_FORMAT * pkifdWinner = nullptr;
 		float fScore = -INFINITY;
 		try {
 			for ( auto I = _sTotal; I--; ) {
-				if ( _pkifFormat == _ppkifFormats[I] ||
-					((_pkifFormat->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED && _pkifFormat->vfVulkanFormat == _ppkifFormats[I]->vfVulkanFormat) ||
-					(_pkifFormat->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN && _pkifFormat->dfDxFormat == _ppkifFormats[I]->dfDxFormat) ||
-					(_pkifFormat->mfMetalFormat != SL2_MTLPixelFormatInvalid && _pkifFormat->mfMetalFormat == _ppkifFormats[I]->mfMetalFormat) ||
-					(_pkifFormat->kifInternalFormat != SL2_KIF_GL_INVALID && _pkifFormat->kifInternalFormat == _ppkifFormats[I]->kifInternalFormat)) ) {
+				if ( _pkifFormat == _ppkifFormats[I].pkifdFormat ||
+					((_pkifFormat->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED && _pkifFormat->vfVulkanFormat == _ppkifFormats[I].pkifdFormat->vfVulkanFormat) ||
+					(_pkifFormat->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN && _pkifFormat->dfDxFormat == _ppkifFormats[I].pkifdFormat->dfDxFormat) ||
+					(_pkifFormat->mfMetalFormat != SL2_MTLPixelFormatInvalid && _pkifFormat->mfMetalFormat == _ppkifFormats[I].pkifdFormat->mfMetalFormat) ||
+					(_pkifFormat->kifInternalFormat != SL2_KIF_GL_INVALID && _pkifFormat->kifInternalFormat == _ppkifFormats[I].pkifdFormat->kifInternalFormat)) ) {
 					// Exact match with the input.
 					if ( _pfScore ) { (*_pfScore) = 100.0f; }
-					return _pkifFormat;
+					return &_ppkifFormats[I];
 				}
 				//vScores.push_back( _ppkifFormats[I] );
-				float fThisScore = ScoreFormat( _pkifFormat, _ppkifFormats[I] );
+				float fThisScore = ScoreFormat( _pkifFormat, _ppkifFormats[I].pkifdFormat );
 				if ( fThisScore > fScore ) {
 					fScore = fThisScore;
-					pkifdWinner = _ppkifFormats[I];
+					pkifdWinner = &_ppkifFormats[I];
 				}
 			}
 		}

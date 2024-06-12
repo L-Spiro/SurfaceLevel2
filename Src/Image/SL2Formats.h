@@ -1295,6 +1295,16 @@ namespace sl2 {
 			void *																	pvCustom;
 		} * LPSL2_KTX_INTERNAL_FORMAT_DATA, * const LPCSL2_KTX_INTERNAL_FORMAT_DATA;
 
+		/** For finding best matches. */
+		struct SL2_BEST_INTERNAL_FORMAT {
+			/** The format. */
+			const SL2_KTX_INTERNAL_FORMAT_DATA *									pkifdFormat;
+			/** Extra parameter. */
+			size_t																	sParm0;
+			/** Extra parameter. */
+			void *																	pvParm1;
+		} * LPSL2_BEST_INTERNAL_FORMAT, * const LPCSL2_BEST_INTERNAL_FORMAT;
+
 		/** An RGBA color component. */
 		typedef struct SL2_RGBA {
 			float																	fRgba[4];
@@ -1691,8 +1701,8 @@ namespace sl2 {
 		 * \param _pfScore AN optional pointer to a float that can receive the score for the return format.
 		 * \return Returns the format among _pkifFormats that best fits _pkifFormat.  Can return nullptr in case of error.
 		 **/
-		static const SL2_KTX_INTERNAL_FORMAT_DATA *									FindBestFormat( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat,
-			const SL2_KTX_INTERNAL_FORMAT_DATA ** _ppkifFormats, size_t _sTotal, float * _pfScore = nullptr );
+		static const SL2_BEST_INTERNAL_FORMAT *										FindBestFormat( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat,
+			const SL2_BEST_INTERNAL_FORMAT * _ppkifFormats, size_t _sTotal, float * _pfScore = nullptr );
 
 		/**
 		 * Gets the score for how well _pkifTest matches _pkifFormat as a possible conversion target format.  IE how well _pkifFormat can be converted to _pkifTest.

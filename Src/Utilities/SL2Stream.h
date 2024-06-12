@@ -340,9 +340,30 @@ namespace sl2 {
 		 * \return Returns the total number of bytes copied.
 		 **/
 		inline size_t								Read( uint8_t * _pui8Dst, size_t _sSize ) {
-			_sSize = std::min( _sSize, m_vStream.size() - m_stPos );
+			_sSize = std::min( _sSize, Remaining() );
 			if ( _pui8Dst ) {
 				std::memcpy( _pui8Dst, &m_vStream.data()[m_stPos], _sSize );
+			}
+			m_stPos += _sSize;
+			return _sSize;
+		}
+
+		/**
+		 * Writes data to the array.
+		 * 
+		 * \param _pui8Src A pointer to the source buffer.  If nullptr, 0's are written.
+		 * \param _sSize The total number of bytes to write.
+		 * \return Returns the total number of bytes written.
+		 **/
+		inline size_t								Write( const uint8_t * _pui8Src, size_t _sSize ) {
+			if ( m_stPos + _sSize > m_vStream.size() ) {
+				m_vStream.resize( m_stPos + _sSize );
+			}
+			if ( _pui8Src ) {
+				std::memcpy( &m_vStream.data()[m_stPos], _pui8Src, _sSize );
+			}
+			else {
+				std::memset( &m_vStream.data()[m_stPos], 0, _sSize );
 			}
 			m_stPos += _sSize;
 			return _sSize;
@@ -355,6 +376,13 @@ namespace sl2 {
 		 * \return Returns a pointer to the current position in the vector.
 		 **/
 		inline uint8_t *							Data() { return m_vStream.data() + m_stPos; }
+
+		/**
+		 * Gets the number of bytes remaining in the buffer.
+		 *
+		 * \return Returns the number of bytes remaining in the buffer.
+		 **/
+		inline size_t								Remaining() const { return m_vStream.size() - m_stPos; }
 
 
 
