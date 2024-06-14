@@ -95,7 +95,7 @@ namespace sl2 {
 
 		/** Wraps FreeImage_AllocateT(). */
 		struct SL2_FREEIMAGE_ALLOCATET {
-			SL2_FREEIMAGE_ALLOCATET( FREE_IMAGE_TYPE _fitType, int _iWidth, int _iHeight, int _iBpp, unsigned _uRedMask FI_DEFAULT(0), unsigned _uGreenMask FI_DEFAULT(0), unsigned _uBlueMask FI_DEFAULT(0) ) :
+			SL2_FREEIMAGE_ALLOCATET( FREE_IMAGE_TYPE _fitType, int _iWidth, int _iHeight, int _iBpp = 8, unsigned _uRedMask FI_DEFAULT(0), unsigned _uGreenMask FI_DEFAULT(0), unsigned _uBlueMask FI_DEFAULT(0) ) :
 				pbBitmap( ::FreeImage_AllocateT( _fitType, _iWidth, _iHeight, _iBpp, _uRedMask, _uGreenMask, _uBlueMask ) ) {
 			}
 			~SL2_FREEIMAGE_ALLOCATET() {

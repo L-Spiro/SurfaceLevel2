@@ -16,10 +16,16 @@
 #include <format>
 #include <iostream>
 
+void FreeImageErrorHandler(FREE_IMAGE_FORMAT fif, const char* message) {
+    std::cerr << "FreeImage error: " << message << std::endl;
+}
+
+
 int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
     --_iArgC;
     std::u16string sThisDir = sl2::CFileBase::GetFilePath( reinterpret_cast<const char16_t *>((*_wcpArgV++)) );
     ::FreeImage_Initialise();
+    ::FreeImage_SetOutputMessage( FreeImageErrorHandler );
     sl2::CFormat::Init();
     sl2::SL2_OPTIONS oOptions;
 
@@ -441,6 +447,35 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 }
                 SL2_ADV( 2 );
             }
+
+            if ( SL2_CHECK( 1, exr_float ) ) {
+                oOptions.iExrSaveOption |= EXR_FLOAT;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, exr_none ) || SL2_CHECK( 1, exr_nocompression ) ) {
+                oOptions.iExrSaveOption |= EXR_NONE;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, exr_zip ) ) {
+                oOptions.iExrSaveOption |= EXR_ZIP;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, exr_piz ) ) {
+                oOptions.iExrSaveOption |= EXR_PIZ;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, exr_pxr24 ) ) {
+                oOptions.iExrSaveOption |= EXR_PXR24;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, exr_b44 ) ) {
+                oOptions.iExrSaveOption |= EXR_B44;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, exr_lc ) ) {
+                oOptions.iExrSaveOption |= EXR_LC;
+                SL2_ADV( 1 );
+            }
         }
 
 
@@ -492,6 +527,13 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         }
         else if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"bmp" ) == 0 ) {
             eError = sl2::ExportAsBmp( iConverted, oOptions.vOutputs[I], oOptions );
+            if ( sl2::SL2_E_SUCCESS != eError ) {
+                SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
+                    reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
+            }
+        }
+        else if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"exr" ) == 0 ) {
+            eError = sl2::ExportAsExr( iConverted, oOptions.vOutputs[I], oOptions );
             if ( sl2::SL2_E_SUCCESS != eError ) {
                 SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
                     reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
@@ -1130,6 +1172,42 @@ namespace sl2 {
         catch ( ... ) { return SL2_E_OUTOFMEMORY; }
     }
 
+	/**
+	 * Exports as EXR.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS ExportAsExr( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions ) {
+        if ( _iImage.Mipmaps() == 1 && _iImage.ArraySize() == 1 && _iImage.Faces() == 1 && _iImage.Depth() == 1 ) {
+            return ExportAsExr( _iImage, _sPath, _oOptions, 0, 0, 0, 0 );
+        }
+        else {
+            wchar_t szBuffer[64];
+            std::u16string sRoot = CUtilities::GetFilePath( _sPath ) + CUtilities::NoExtension( _sPath );
+            for ( uint32_t M = 0; M < _iImage.Mipmaps(); ++M ) {
+                for ( uint32_t A = 0; A < _iImage.ArraySize(); ++A ) {
+                    for ( uint32_t F = 0; F < _iImage.Faces(); ++F ) {
+                        for ( uint32_t D = 0; D < _iImage.Depth(); ++D ) {
+                            wchar_t * pwcBuf = szBuffer;
+                            if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_M%.2u", M ); }
+                            if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_A%.2u", A ); }
+                            if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_F%.2u", F ); }
+                            if ( _iImage.Depth() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_D%.2u", D ); }
+                            pwcBuf += ::wsprintfW( szBuffer, L".png" );
+                            //::wsprintfW( szBuffer, L"_M%.2u_A%.2u_F%.2u_D%.2u.png", M, A, F, D );
+                           SL2_ERRORS eErr = ExportAsExr( _iImage, CUtilities::Append( sRoot, szBuffer ), _oOptions, M, A, F, D );
+                           if ( eErr != SL2_E_SUCCESS ) { return eErr; }
+                        }
+                    }
+                }
+            }
+        }
+        return SL2_E_SUCCESS;
+    }
+
     /**
 	 * Exports as EXR.
 	 * 
@@ -1143,18 +1221,108 @@ namespace sl2 {
 	 * \return Returns an error code.
 	 **/
 	SL2_ERRORS ExportAsExr( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice ) {
-        return SL2_E_SUCCESS;
-    }
+        SL2_VKFORMAT fFormat;
+        FREE_IMAGE_TYPE fitType;
+        if ( _iImage.Format()->ui8ABits ) {
+            fFormat = SL2_VK_FORMAT_R32G32B32A32_SFLOAT;
+            fitType = FIT_RGBAF;
+        }
+        else {
+            fFormat = SL2_VK_FORMAT_R32G32B32_SFLOAT;
+            fitType = FIT_RGBF;
+        }
 
-	/**
-	 * Exports as EXR.
-	 * 
-	 * \param _iImage The image to export.
-	 * \param _sPath The path to which to export _iImage.
-	 * \param _oOptions Export options.
-	 * \return Returns an error code.
-	 **/
-	SL2_ERRORS ExportAsExr( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions ) {
+        std::vector<uint8_t> vConverted;
+        SL2_ERRORS eError = _iImage.ConvertToFormat( CFormat::FindFormatDataByVulkan( fFormat ), _sMip, _sArray, _sFace, vConverted, true );
+        if ( eError != SL2_E_SUCCESS ) { return eError; }
+
+
+        CImage::SL2_FREEIMAGE_ALLOCATET fiImage( fitType, _iImage.GetMipmaps()[_sMip]->Width(), _iImage.GetMipmaps()[_sMip]->Height() );
+		if ( !fiImage.pbBitmap ) { return SL2_E_OUTOFMEMORY; }
+
+
+        uint32_t ui32Pitch = CFormat::GetRowSize( CFormat::FindFormatDataByVulkan( fFormat ), _iImage.GetMipmaps()[_sMip]->Width() );
+        uint32_t ui32Slice = uint32_t( ui32Pitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
+        uint32_t ui32Height = _iImage.GetMipmaps()[_sMip]->Height();
+        uint32_t ui32Width = _iImage.GetMipmaps()[_sMip]->Width();
+        for ( uint32_t H = 0; H < ui32Height; ++H ) {
+            BYTE * pui8Bits = ::FreeImage_GetScanLine( fiImage.pbBitmap, int( H ) );
+            uint8_t * pui8Src = vConverted.data() + ui32Slice + ui32Pitch * H;
+            switch ( fitType ) {
+                case FIT_RGB16 : {
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+                        FIRGB16 * prgbDst = reinterpret_cast<FIRGB16 *>(pui8Bits) + X;
+						const CFormat::SL2_RGB16_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGB16_UNORM *>(pui8Src) + X;
+						prgbDst->red = pRgb->ui16Rgb[SL2_PC_R];
+						prgbDst->green = pRgb->ui16Rgb[SL2_PC_G];
+						prgbDst->blue = pRgb->ui16Rgb[SL2_PC_B];
+					}
+				    break;	// FIT_RGB16
+                }
+                case FIT_RGBA16 : {
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+                        FIRGBA16 * prgbDst = reinterpret_cast<FIRGBA16 *>(pui8Bits) + X;
+						const CFormat::SL2_RGBA16_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA16_UNORM *>(pui8Src) + X;
+						prgbDst->red = pRgb->ui16Rgba[SL2_PC_R];
+						prgbDst->green = pRgb->ui16Rgba[SL2_PC_G];
+						prgbDst->blue = pRgb->ui16Rgba[SL2_PC_B];
+                        prgbDst->alpha = pRgb->ui16Rgba[SL2_PC_A];
+					}
+				    break;	// FIT_RGBA16
+                }
+
+                case FIT_RGBF : {
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+                        FIRGBF * prgbDst = reinterpret_cast<FIRGBF *>(pui8Bits) + X;
+						const CFormat::SL2_RGB * pRgb = reinterpret_cast<CFormat::SL2_RGB *>(pui8Src) + X;
+						prgbDst->red = pRgb->fRgb[SL2_PC_R];
+						prgbDst->green = pRgb->fRgb[SL2_PC_G];
+						prgbDst->blue = pRgb->fRgb[SL2_PC_B];
+					}
+				    break;	// FIT_RGB16
+                }
+                case FIT_RGBAF : {
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+                        FIRGBAF * prgbDst = reinterpret_cast<FIRGBAF *>(pui8Bits) + X;
+						const CFormat::SL2_RGBA * pRgb = reinterpret_cast<CFormat::SL2_RGBA *>(pui8Src) + X;
+						prgbDst->red = pRgb->fRgba[SL2_PC_R];
+						prgbDst->green = pRgb->fRgba[SL2_PC_G];
+						prgbDst->blue = pRgb->fRgba[SL2_PC_B];
+                        prgbDst->alpha = pRgb->fRgba[SL2_PC_A];
+					}
+				    break;	// FIT_RGBA16
+                }
+            }
+        }
+
+
+        CImage::SL2_FREE_IMAGE fiBuffer;
+        if ( !fiBuffer.pmMemory ) { return SL2_E_OUTOFMEMORY; }
+
+        if ( !::FreeImage_SaveToMemory( FIF_EXR, fiImage.pbBitmap, fiBuffer.pmMemory, _oOptions.iExrSaveOption ) ) {
+            return SL2_E_OUTOFMEMORY;
+        }
+        BYTE * pbData = nullptr;
+        DWORD dwSize = 0;
+        if ( !::FreeImage_AcquireMemory( fiBuffer.pmMemory, &pbData, &dwSize ) ) {
+            return SL2_E_INTERNALERROR;
+        }
+        try {
+            vConverted.resize( dwSize );
+        }
+        catch ( ... ) {
+            return SL2_E_OUTOFMEMORY;
+        }
+        std::memcpy( vConverted.data(), pbData, dwSize );
+        {
+            CStdFile sfFile;
+            if ( !sfFile.Create( _sPath.c_str() ) ) {
+                return SL2_E_INVALIDWRITEPERMISSIONS;
+            }
+            if ( !sfFile.WriteToFile( vConverted ) ) {
+                return SL2_E_FILEWRITEERROR;
+            }
+        }
         return SL2_E_SUCCESS;
     }
 

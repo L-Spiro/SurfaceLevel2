@@ -138,13 +138,9 @@ namespace sl2 {
 	 * \param _iImage The image to export.
 	 * \param _sPath The path to which to export _iImage.
 	 * \param _oOptions Export options.
-	 * \param _sMip The mipmap level to export.
-	 * \param _sArray The array index to export.
-	 * \param _sFace The face to export.
-	 * \param _sSlice The slice to export.
 	 * \return Returns an error code.
 	 **/
-	SL2_ERRORS															ExportAsExr( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice );
+	SL2_ERRORS															ExportAsExr( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions );
 
 	/**
 	 * Exports as EXR.
@@ -152,8 +148,12 @@ namespace sl2 {
 	 * \param _iImage The image to export.
 	 * \param _sPath The path to which to export _iImage.
 	 * \param _oOptions Export options.
+	 * \param _sMip The mipmap level to export.
+	 * \param _sArray The array index to export.
+	 * \param _sFace The face to export.
+	 * \param _sSlice The slice to export.
 	 * \return Returns an error code.
 	 **/
-	SL2_ERRORS															ExportAsExr( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions );
+	SL2_ERRORS															ExportAsExr( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice );
 
 }	// namespace sl2
