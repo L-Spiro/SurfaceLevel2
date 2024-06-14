@@ -375,19 +375,23 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
             if ( SL2_CHECK( 2, bmp_format ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"RGB24" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8" ) == 0 ) {
                     oOptions.vkBmpFormat = sl2::SL2_VK_FORMAT_R8G8B8_UNORM;
+                    oOptions.vkBmpFormatNoMask = oOptions.vkBmpFormat;
                 }
                 else if ( ::_wcsicmp( _wcpArgV[1], L"B8G8R8" ) == 0 ) {
                     oOptions.vkBmpFormat = sl2::SL2_VK_FORMAT_B8G8R8_UNORM;
                 }
                 else if ( ::_wcsicmp( _wcpArgV[1], L"R8G8B8_SRGB" ) == 0 ) {
                     oOptions.vkBmpFormat = sl2::SL2_VK_FORMAT_R8G8B8_SRGB;
+                    oOptions.vkBmpFormatNoMask = oOptions.vkBmpFormat;
                 }
                 else if ( ::_wcsicmp( _wcpArgV[1], L"RGBA32" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGBA" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8A8" ) == 0 ) {
                     oOptions.vkBmpFormat = sl2::SL2_VK_FORMAT_R8G8B8A8_UNORM;
+                    oOptions.vkBmpFormatNoMask = oOptions.vkBmpFormat;
                 }
 
                 else if ( ::_wcsicmp( _wcpArgV[1], L"R8G8B8A8_SRGB" ) == 0 ) {
                     oOptions.vkBmpFormat = sl2::SL2_VK_FORMAT_R8G8B8A8_SRGB;
+                    oOptions.vkBmpFormatNoMask = oOptions.vkBmpFormat;
                 }
                 else if ( ::_wcsicmp( _wcpArgV[1], L"B8G8R8A8" ) == 0 ) {
                     oOptions.vkBmpFormat = sl2::SL2_VK_FORMAT_B8G8R8A8_UNORM;
@@ -417,6 +421,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 
                 else if ( ::_wcsicmp( _wcpArgV[1], L"R5G6B5" ) == 0 ) {
                     oOptions.vkBmpFormat = sl2::SL2_VK_FORMAT_R5G6B5_UNORM_PACK16;
+                    oOptions.vkBmpFormatNoMask = oOptions.vkBmpFormat;
                 }
                 else if ( ::_wcsicmp( _wcpArgV[1], L"B5G6R5" ) == 0 ) {
                     oOptions.vkBmpFormat = sl2::SL2_VK_FORMAT_B5G6R5_UNORM_PACK16;
@@ -429,6 +434,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 }
                 else if ( ::_wcsicmp( _wcpArgV[1], L"A1R5G5B5" ) == 0 ) {
                     oOptions.vkBmpFormat = sl2::SL2_VK_FORMAT_A1R5G5B5_UNORM_PACK16;
+                    oOptions.vkBmpFormatNoMask = oOptions.vkBmpFormat;
                 }
                 else if ( ::_wcsicmp( _wcpArgV[1], L"A4B4G4R4" ) == 0 ) {
                     oOptions.vkBmpFormat = sl2::SL2_VK_FORMAT_A4B4G4R4_UNORM_PACK16;
@@ -888,9 +894,17 @@ namespace sl2 {
             { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_A1R5G5B5_UNORM_PACK16 ), },
             { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R5G6B5_UNORM_PACK16 ), },
         };
-        const CFormat::SL2_BEST_INTERNAL_FORMAT * pkifdUseMe = CFormat::FindBestFormat( _iImage.Format(), bifFormats, SL2_ELEMENTS( bifFormats ) );
-        if ( !pkifdUseMe ) {
-            return SL2_E_BADFORMAT;
+        const CFormat::SL2_BEST_INTERNAL_FORMAT * pkifdUseMe = nullptr;
+        CFormat::SL2_BEST_INTERNAL_FORMAT bifTmp;
+        if ( _oOptions.vkBmpFormatNoMask != SL2_VK_FORMAT_UNDEFINED ) {
+            bifTmp.pkifdFormat = CFormat::FindFormatDataByVulkan( _oOptions.vkBmpFormatNoMask );
+            pkifdUseMe = &bifTmp;
+        }
+        else {
+            pkifdUseMe = CFormat::FindBestFormat( _iImage.Format(), bifFormats, SL2_ELEMENTS( bifFormats ) );
+            if ( !pkifdUseMe ) {
+                return SL2_E_BADFORMAT;
+            }
         }
 
         std::vector<uint8_t> vConverted;
@@ -1064,12 +1078,12 @@ namespace sl2 {
 
 		CImage::SL2_BITMAPFILEHEADER bmfhHeader = { 0x4D42 };
 		bmfhHeader.ui32Offset = sizeof( CImage::SL2_BITMAPFILEHEADER ) + sizeof( CImage::SL2_BITMAPINFOHEADER ) + sizeof( CImage::SL2_BITMAPCOLORMASK );
-		bmfhHeader.ui32Size = bmfhHeader.ui32Offset + ui32Stride * _iImage.GetMipmaps()[_sMip]->Height() + 0;
+		bmfhHeader.ui32Size = bmfhHeader.ui32Offset + ui32Stride * _iImage.GetMipmaps()[_sMip]->Height();
 		CImage::SL2_BITMAPINFOHEADER bihInfo = { sizeof( CImage::SL2_BITMAPINFOHEADER ) };
 		bihInfo.ui32Width = _iImage.GetMipmaps()[_sMip]->Width();
 		bihInfo.ui32Height = _iImage.GetMipmaps()[_sMip]->Height();
 		bihInfo.ui16Planes = 1;
-		bihInfo.ui32ImageSize = ui32Stride * _iImage.GetMipmaps()[_sMip]->Height() + 0;
+		bihInfo.ui32ImageSize = ui32Stride * _iImage.GetMipmaps()[_sMip]->Height();
 		bihInfo.ui32PixelsPerMeterX = static_cast<uint32_t>(std::round( 96.0 * 39.37007874015748096 ));
 		bihInfo.ui32PixelsPerMeterY = static_cast<uint32_t>(std::round( 96.0 * 39.37007874015748096 ));
         bihInfo.ui32Compression = BI_BITFIELDS;
@@ -1099,9 +1113,6 @@ namespace sl2 {
                 if ( sFile.Write( vRow.data(), vRow.size() ) != vRow.size() ) { return SL2_E_OUTOFMEMORY; }
 		    }
 
-            uint16_t ui16Post = 0;
-		    //if ( sFile.Write( reinterpret_cast<const uint8_t *>(&ui16Post), sizeof( ui16Post ) ) != sizeof( ui16Post ) ) { return SL2_E_OUTOFMEMORY; }
-
 
             {
                 CStdFile sfFile;
@@ -1117,6 +1128,34 @@ namespace sl2 {
 
         }
         catch ( ... ) { return SL2_E_OUTOFMEMORY; }
+    }
+
+    /**
+	 * Exports as EXR.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \param _sMip The mipmap level to export.
+	 * \param _sArray The array index to export.
+	 * \param _sFace The face to export.
+	 * \param _sSlice The slice to export.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS ExportAsExr( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice ) {
+        return SL2_E_SUCCESS;
+    }
+
+	/**
+	 * Exports as EXR.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS ExportAsExr( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions ) {
+        return SL2_E_SUCCESS;
     }
 
 }   // namespace sl2
