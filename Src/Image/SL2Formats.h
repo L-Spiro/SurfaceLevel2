@@ -1302,7 +1302,9 @@ namespace sl2 {
 			/** Extra parameter. */
 			size_t																	sParm0;
 			/** Extra parameter. */
-			void *																	pvParm1;
+			int32_t																	i32Parm1;
+			/** Extra parameter. */
+			void *																	pvParm2;
 		} * LPSL2_BEST_INTERNAL_FORMAT, * const LPCSL2_BEST_INTERNAL_FORMAT;
 
 		/** An RGBA color component. */

@@ -320,6 +320,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.bSwap = true;
                 SL2_ADV( 1 );
             }
+            
             if ( SL2_CHECK( 1, png_default ) ) {
                 oOptions.iPngSaveOption = (oOptions.iPngSaveOption & 0xFF00) | PNG_DEFAULT;
                 SL2_ADV( 1 );
@@ -348,20 +349,30 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"RGB24" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8" ) == 0 ) {
                     oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8_UNORM );
                 }
+                if ( ::_wcsicmp( _wcpArgV[1], L"RGB24_SRGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGB_SRGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8_SRGB" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8_SRGB );
+                }
                 else if ( ::_wcsicmp( _wcpArgV[1], L"RGBA32" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGBA" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8A8" ) == 0 ) {
                     oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8A8_UNORM );
                 }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"RGB16" ) == 0 ) {
+                else if ( ::_wcsicmp( _wcpArgV[1], L"RGBA32_SRGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGBA_SRGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8A8_SRGB" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8A8_SRGB );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"RGB16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R16G16B16" ) == 0 ) {
                     oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R16G16B16_UNORM );
                 }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"RGBA16" ) == 0 ) {
+                else if ( ::_wcsicmp( _wcpArgV[1], L"RGBA16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R16G16B16A16" ) == 0 ) {
                     oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R16G16B16A16_UNORM );
                 }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"L8" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GREYSCALE8" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GRAYSCALE8" ) == 0 ) {
+                else if ( ::_wcsicmp( _wcpArgV[1], L"L8" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GREYSCALE8" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GRAYSCALE8" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"LUMINANCE8" ) == 0 ) {
                     oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE8 );
                 }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"L16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GREYSCALE16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GRAYSCALE16" ) == 0 ) {
+                else if ( ::_wcsicmp( _wcpArgV[1], L"L16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GREYSCALE16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GRAYSCALE16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"LUMINANCE16" ) == 0 ) {
                     oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE16 );
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"bmp_format\": \"{}\". Must be R8G8B8, R8G8B8_SRGB, R8G8B8A8, R8G8B8A8_SRGB, R16G16B16, R16G16B16A16, L8, or L16.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 SL2_ADV( 2 );
             }
@@ -445,6 +456,11 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 else if ( ::_wcsicmp( _wcpArgV[1], L"A4B4G4R4" ) == 0 ) {
                     oOptions.vkBmpFormat = sl2::SL2_VK_FORMAT_A4B4G4R4_UNORM_PACK16;
                 }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"bmp_format\": \"{}\". Must be R8G8B8, B8G8R8, R8G8B8_SRGB, R8G8B8A8, R8G8B8A8_SRGB, B8G8R8A8, B8G8R8A8_SRGB, A8B8G8R8, A8B8G8R8_SRGB, R4G4B4A4, B4G4R4A4, A4R4G4B4, A4B4G4R4, R5G6B5, B5G6R5, R5G5B5A1, A1B5G5R5, A1R5G5B5, or A4B4G4R4. "
+                        "Only R8G8B8, R8G8B8_SRGB, R8G8B8A8, R8G8B8A8_SRGB, R5G6B5, and A1R5G5B5 are available without a bitmask (nearest format will be selected).",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
                 SL2_ADV( 2 );
             }
 
@@ -475,6 +491,80 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
             if ( SL2_CHECK( 1, exr_lc ) ) {
                 oOptions.iExrSaveOption |= EXR_LC;
                 SL2_ADV( 1 );
+            }
+
+            if ( SL2_CHECK( 2, j2k_comp ) || SL2_CHECK( 2, j2k_compression ) ) {
+                oOptions.iJ2kSaveOption = ::_wtoi( _wcpArgV[1] );
+                if ( oOptions.iJ2kSaveOption < 1 || oOptions.iJ2kSaveOption > 512 ) {
+                    SL2_ERRORT( std::format( L"Invalid \"j2k_comp\": \"{}\". Must be between 1 and 512.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 2, j2k_format ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"RGB24" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8_UNORM );
+                }
+                if ( ::_wcsicmp( _wcpArgV[1], L"RGB24_SRGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGB_SRGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8_SRGB" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8_SRGB );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"RGBA32" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGBA" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8A8" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8A8_UNORM );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"RGBA32_SRGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGBA_SRGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8A8_SRGB" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8A8_SRGB );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"L16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GREYSCALE16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GRAYSCALE16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"LUMINANCE16" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE16 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"RGB16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R16G16B16" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R16G16B16_UNORM );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"RGBA16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R16G16B16A16" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R16G16B16A16_UNORM );
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"j2k_format\": \"{}\". Must be R8G8B8, R8G8B8_SRGB, R8G8B8A8, R8G8B8A8_SRGB, R16G16B16, R16G16B16A16, or L16.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
+
+            if ( SL2_CHECK( 2, jp2_comp ) || SL2_CHECK( 2, jp2_compression ) ) {
+                oOptions.iJ2kSaveOption = ::_wtoi( _wcpArgV[1] );
+                if ( oOptions.iJ2kSaveOption < 1 || oOptions.iJ2kSaveOption > 512 ) {
+                    SL2_ERRORT( std::format( L"Invalid \"jp2_comp\": \"{}\". Must be between 1 and 512.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 2, jp2_format ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"RGB24" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8_UNORM );
+                }
+                if ( ::_wcsicmp( _wcpArgV[1], L"RGB24_SRGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGB_SRGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8_SRGB" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8_SRGB );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"RGBA32" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGBA" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8A8" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8A8_UNORM );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"RGBA32_SRGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGBA_SRGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8A8_SRGB" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8A8_SRGB );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"L16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GREYSCALE16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GRAYSCALE16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"LUMINANCE16" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE16 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"RGB16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R16G16B16" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R16G16B16_UNORM );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"RGBA16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R16G16B16A16" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R16G16B16A16_UNORM );
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"jp2_format\": \"{}\". Must be R8G8B8, R8G8B8_SRGB, R8G8B8A8, R8G8B8A8_SRGB, R16G16B16, R16G16B16A16, or L16.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
             }
         }
 
@@ -511,10 +601,10 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         uint64_t ui64Time = cClock.GetRealTick() - cClock.GetStartTick();
         iImage.Reset();
         char szPrintfMe[128];
-		::sprintf_s( szPrintfMe, "Total time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
+		::sprintf_s( szPrintfMe, "Conversion time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
 		::OutputDebugStringA( szPrintfMe );
 		if ( oOptions.bShowTime ) {
-			::printf( "Total time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
+			::printf( "Conversion time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
 		}
 
 
@@ -539,7 +629,27 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
             }
         }
-        //
+        else if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"j2k" ) == 0 ) {
+            eError = sl2::ExportAsJ2k( iConverted, oOptions.vOutputs[I], oOptions );
+            if ( sl2::SL2_E_SUCCESS != eError ) {
+                SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
+                    reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
+            }
+        }
+        else if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"jp2" ) == 0 ) {
+            eError = sl2::ExportAsJp2( iConverted, oOptions.vOutputs[I], oOptions );
+            if ( sl2::SL2_E_SUCCESS != eError ) {
+                SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
+                    reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
+            }
+        }
+        
+        ui64Time = cClock.GetRealTick() - cClock.GetStartTick();
+        ::sprintf_s( szPrintfMe, "Total time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
+		::OutputDebugStringA( szPrintfMe );
+		if ( oOptions.bShowTime ) {
+			::printf( "Total time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
+		}
     }
 
 
@@ -1223,7 +1333,11 @@ namespace sl2 {
 	SL2_ERRORS ExportAsExr( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice ) {
         SL2_VKFORMAT fFormat;
         FREE_IMAGE_TYPE fitType;
-        if ( _iImage.Format()->ui8ABits ) {
+        if ( CFormat::CountChannels( _iImage.Format() ) == 1 ) {
+            fFormat = SL2_VK_FORMAT_R32_SFLOAT;
+            fitType = FIT_FLOAT;
+        }
+        else if ( _iImage.Format()->ui8ABits ) {
             fFormat = SL2_VK_FORMAT_R32G32B32A32_SFLOAT;
             fitType = FIT_RGBAF;
         }
@@ -1249,26 +1363,13 @@ namespace sl2 {
             BYTE * pui8Bits = ::FreeImage_GetScanLine( fiImage.pbBitmap, int( H ) );
             uint8_t * pui8Src = vConverted.data() + ui32Slice + ui32Pitch * H;
             switch ( fitType ) {
-                case FIT_RGB16 : {
+                case FIT_FLOAT : {
 					for ( uint32_t X = 0; X < ui32Width; ++X ) {
-                        FIRGB16 * prgbDst = reinterpret_cast<FIRGB16 *>(pui8Bits) + X;
-						const CFormat::SL2_RGB16_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGB16_UNORM *>(pui8Src) + X;
-						prgbDst->red = pRgb->ui16Rgb[SL2_PC_R];
-						prgbDst->green = pRgb->ui16Rgb[SL2_PC_G];
-						prgbDst->blue = pRgb->ui16Rgb[SL2_PC_B];
+                        float * prgbDst = reinterpret_cast<float *>(pui8Bits) + X;
+						const float * pRgb = reinterpret_cast<float *>(pui8Src) + X;
+						(*prgbDst) = (*pRgb);
 					}
-				    break;	// FIT_RGB16
-                }
-                case FIT_RGBA16 : {
-					for ( uint32_t X = 0; X < ui32Width; ++X ) {
-                        FIRGBA16 * prgbDst = reinterpret_cast<FIRGBA16 *>(pui8Bits) + X;
-						const CFormat::SL2_RGBA16_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA16_UNORM *>(pui8Src) + X;
-						prgbDst->red = pRgb->ui16Rgba[SL2_PC_R];
-						prgbDst->green = pRgb->ui16Rgba[SL2_PC_G];
-						prgbDst->blue = pRgb->ui16Rgba[SL2_PC_B];
-                        prgbDst->alpha = pRgb->ui16Rgba[SL2_PC_A];
-					}
-				    break;	// FIT_RGBA16
+				    break;	// FIT_FLOAT
                 }
 
                 case FIT_RGBF : {
@@ -1323,6 +1424,362 @@ namespace sl2 {
                 return SL2_E_FILEWRITEERROR;
             }
         }
+        return SL2_E_SUCCESS;
+    }
+
+    /**
+	 * Exports as J2K.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS ExportAsJ2k( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions ) {
+        if ( _iImage.Mipmaps() == 1 && _iImage.ArraySize() == 1 && _iImage.Faces() == 1 && _iImage.Depth() == 1 ) {
+            return ExportAsJ2k( _iImage, _sPath, _oOptions, 0, 0, 0, 0 );
+        }
+        else {
+            wchar_t szBuffer[64];
+            std::u16string sRoot = CUtilities::GetFilePath( _sPath ) + CUtilities::NoExtension( _sPath );
+            for ( uint32_t M = 0; M < _iImage.Mipmaps(); ++M ) {
+                for ( uint32_t A = 0; A < _iImage.ArraySize(); ++A ) {
+                    for ( uint32_t F = 0; F < _iImage.Faces(); ++F ) {
+                        for ( uint32_t D = 0; D < _iImage.Depth(); ++D ) {
+                            wchar_t * pwcBuf = szBuffer;
+                            if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_M%.2u", M ); }
+                            if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_A%.2u", A ); }
+                            if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_F%.2u", F ); }
+                            if ( _iImage.Depth() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_D%.2u", D ); }
+                            pwcBuf += ::wsprintfW( szBuffer, L".png" );
+                            //::wsprintfW( szBuffer, L"_M%.2u_A%.2u_F%.2u_D%.2u.png", M, A, F, D );
+                           SL2_ERRORS eErr = ExportAsJ2k( _iImage, CUtilities::Append( sRoot, szBuffer ), _oOptions, M, A, F, D );
+                           if ( eErr != SL2_E_SUCCESS ) { return eErr; }
+                        }
+                    }
+                }
+            }
+        }
+        return SL2_E_SUCCESS;
+    }
+
+	/**
+	 * Exports as J2K.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \param _sMip The mipmap level to export.
+	 * \param _sArray The array index to export.
+	 * \param _sFace The face to export.
+	 * \param _sSlice The slice to export.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS ExportAsJ2k( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice ) {
+        const CFormat::SL2_BEST_INTERNAL_FORMAT bifFormats[] = {
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8_UNORM ),        FIT_BITMAP,     24 },
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8_SRGB ),         FIT_BITMAP,     24 },
+
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8A8_UNORM ),      FIT_BITMAP,     32 },
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8A8_SRGB ),       FIT_BITMAP,     32 },
+
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16_UNORM ),           FIT_UINT16,     16 },
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16G16B16_UNORM ),     FIT_RGB16,      16 * 3 },
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16G16B16A16_UNORM ),  FIT_RGBA16,     16 * 4 },
+        };
+        const CFormat::SL2_BEST_INTERNAL_FORMAT * pkifdUseMe = nullptr;
+        if ( _oOptions.vkJ2kFormat != SL2_VK_FORMAT_UNDEFINED ) {
+            pkifdUseMe = CFormat::FindBestFormat( CFormat::FindFormatDataByVulkan( _oOptions.vkJ2kFormat ), bifFormats, SL2_ELEMENTS( bifFormats ) );
+            if ( !pkifdUseMe ) {
+                return SL2_E_BADFORMAT;
+            }
+        }
+        else {
+            pkifdUseMe = CFormat::FindBestFormat( _iImage.Format(), bifFormats, SL2_ELEMENTS( bifFormats ) );
+            if ( !pkifdUseMe ) {
+                return SL2_E_BADFORMAT;
+            }
+        }
+
+        std::vector<uint8_t> vConverted;
+        SL2_ERRORS eError = _iImage.ConvertToFormat( pkifdUseMe->pkifdFormat, _sMip, _sArray, _sFace, vConverted, true );
+        if ( eError != SL2_E_SUCCESS ) { return eError; }
+
+
+        CImage::SL2_FREEIMAGE_ALLOCATET fiImage( static_cast<FREE_IMAGE_TYPE>(pkifdUseMe->sParm0), _iImage.GetMipmaps()[_sMip]->Width(), _iImage.GetMipmaps()[_sMip]->Height(), pkifdUseMe->i32Parm1 );
+		if ( !fiImage.pbBitmap ) { return SL2_E_OUTOFMEMORY; }
+
+
+        uint32_t ui32Pitch = CFormat::GetRowSize( pkifdUseMe->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
+        uint32_t ui32Slice = uint32_t( ui32Pitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
+        uint32_t ui32Height = _iImage.GetMipmaps()[_sMip]->Height();
+        uint32_t ui32Width = _iImage.GetMipmaps()[_sMip]->Width();
+        for ( uint32_t H = 0; H < ui32Height; ++H ) {
+            BYTE * pui8Bits = ::FreeImage_GetScanLine( fiImage.pbBitmap, int( H ) );
+            uint8_t * pui8Src = vConverted.data() + ui32Slice + ui32Pitch * H;
+            switch ( pkifdUseMe->pkifdFormat->vfVulkanFormat ) {
+                case SL2_VK_FORMAT_R8G8B8_UNORM : {}
+                case SL2_VK_FORMAT_R8G8B8_SRGB : {
+					for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
+                        RGBTRIPLE * prgbDst = reinterpret_cast<RGBTRIPLE *>(pui8Bits) + X;
+                        const CFormat::SL2_RGB_UNORM * prgbSrc = reinterpret_cast<CFormat::SL2_RGB_UNORM *>(pui8Src) + X;
+                        prgbDst->rgbtRed = prgbSrc->ui8Rgb[SL2_PC_R];
+                        prgbDst->rgbtGreen = prgbSrc->ui8Rgb[SL2_PC_G];
+                        prgbDst->rgbtBlue = prgbSrc->ui8Rgb[SL2_PC_B];
+                    }
+                    break;
+                }
+                case SL2_VK_FORMAT_R8G8B8A8_UNORM : {}
+                case SL2_VK_FORMAT_R8G8B8A8_SRGB : {
+                    for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
+                        RGBQUAD * prgbDst = reinterpret_cast<RGBQUAD *>(pui8Bits) + X;
+                        const CFormat::SL2_RGBA_UNORM * prgbSrc = reinterpret_cast<CFormat::SL2_RGBA_UNORM *>(pui8Src) + X;
+                        prgbDst->rgbRed = prgbSrc->ui8Rgba[SL2_PC_R];
+                        prgbDst->rgbGreen = prgbSrc->ui8Rgba[SL2_PC_G];
+                        prgbDst->rgbBlue = prgbSrc->ui8Rgba[SL2_PC_B];
+                        prgbDst->rgbReserved = _oOptions.bBmpHasAlpha ? prgbSrc->ui8Rgba[SL2_PC_A] : 0xFF;
+                    }
+                    break;
+                }
+                case SL2_VK_FORMAT_R16_UNORM : {
+                    for ( uint32_t X = 0; X < ui32Width; ++X ) {
+                        uint16_t * prgbDst = reinterpret_cast<uint16_t *>(pui8Bits) + X;
+						const uint16_t * pRgb = reinterpret_cast<uint16_t *>(pui8Src) + X;
+						(*prgbDst) = (*pRgb);
+					}
+                    break;
+                }
+                case SL2_VK_FORMAT_R16G16B16_UNORM : {
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+                        FIRGB16 * prgbDst = reinterpret_cast<FIRGB16 *>(pui8Bits) + X;
+						const CFormat::SL2_RGB16_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGB16_UNORM *>(pui8Src) + X;
+						prgbDst->red = pRgb->ui16Rgb[SL2_PC_R];
+						prgbDst->green = pRgb->ui16Rgb[SL2_PC_G];
+						prgbDst->blue = pRgb->ui16Rgb[SL2_PC_B];
+					}
+				    break;
+                }
+                case FIT_RGBAF : {
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+                        FIRGBA16 * prgbDst = reinterpret_cast<FIRGBA16 *>(pui8Bits) + X;
+						const CFormat::SL2_RGBA16_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA16_UNORM *>(pui8Src) + X;
+						prgbDst->red = pRgb->ui16Rgba[SL2_PC_R];
+						prgbDst->green = pRgb->ui16Rgba[SL2_PC_G];
+						prgbDst->blue = pRgb->ui16Rgba[SL2_PC_B];
+                        prgbDst->alpha = pRgb->ui16Rgba[SL2_PC_A];
+					}
+				    break;
+                }
+            }
+        }
+
+
+        CImage::SL2_FREE_IMAGE fiBuffer;
+        if ( !fiBuffer.pmMemory ) { return SL2_E_OUTOFMEMORY; }
+
+        if ( !::FreeImage_SaveToMemory( FIF_J2K, fiImage.pbBitmap, fiBuffer.pmMemory, _oOptions.iJ2kSaveOption ) ) {
+            return SL2_E_OUTOFMEMORY;
+        }
+        BYTE * pbData = nullptr;
+        DWORD dwSize = 0;
+        if ( !::FreeImage_AcquireMemory( fiBuffer.pmMemory, &pbData, &dwSize ) ) {
+            return SL2_E_INTERNALERROR;
+        }
+        try {
+            vConverted.resize( dwSize );
+        }
+        catch ( ... ) {
+            return SL2_E_OUTOFMEMORY;
+        }
+        std::memcpy( vConverted.data(), pbData, dwSize );
+        {
+            CStdFile sfFile;
+            if ( !sfFile.Create( _sPath.c_str() ) ) {
+                return SL2_E_INVALIDWRITEPERMISSIONS;
+            }
+            if ( !sfFile.WriteToFile( vConverted ) ) {
+                return SL2_E_FILEWRITEERROR;
+            }
+        }
+
+        return SL2_E_SUCCESS;
+    }
+
+    /**
+	 * Exports as JP2.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS ExportAsJp2( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions ) {
+        if ( _iImage.Mipmaps() == 1 && _iImage.ArraySize() == 1 && _iImage.Faces() == 1 && _iImage.Depth() == 1 ) {
+            return ExportAsJp2( _iImage, _sPath, _oOptions, 0, 0, 0, 0 );
+        }
+        else {
+            wchar_t szBuffer[64];
+            std::u16string sRoot = CUtilities::GetFilePath( _sPath ) + CUtilities::NoExtension( _sPath );
+            for ( uint32_t M = 0; M < _iImage.Mipmaps(); ++M ) {
+                for ( uint32_t A = 0; A < _iImage.ArraySize(); ++A ) {
+                    for ( uint32_t F = 0; F < _iImage.Faces(); ++F ) {
+                        for ( uint32_t D = 0; D < _iImage.Depth(); ++D ) {
+                            wchar_t * pwcBuf = szBuffer;
+                            if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_M%.2u", M ); }
+                            if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_A%.2u", A ); }
+                            if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_F%.2u", F ); }
+                            if ( _iImage.Depth() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_D%.2u", D ); }
+                            pwcBuf += ::wsprintfW( szBuffer, L".png" );
+                            //::wsprintfW( szBuffer, L"_M%.2u_A%.2u_F%.2u_D%.2u.png", M, A, F, D );
+                           SL2_ERRORS eErr = ExportAsJp2( _iImage, CUtilities::Append( sRoot, szBuffer ), _oOptions, M, A, F, D );
+                           if ( eErr != SL2_E_SUCCESS ) { return eErr; }
+                        }
+                    }
+                }
+            }
+        }
+        return SL2_E_SUCCESS;
+    }
+
+	/**
+	 * Exports as JP2.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \param _sMip The mipmap level to export.
+	 * \param _sArray The array index to export.
+	 * \param _sFace The face to export.
+	 * \param _sSlice The slice to export.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS ExportAsJp2( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice ) {
+        const CFormat::SL2_BEST_INTERNAL_FORMAT bifFormats[] = {
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8_UNORM ),        FIT_BITMAP,     24 },
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8_SRGB ),         FIT_BITMAP,     24 },
+
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8A8_UNORM ),      FIT_BITMAP,     32 },
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8A8_SRGB ),       FIT_BITMAP,     32 },
+
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16_UNORM ),           FIT_UINT16,     16 },
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16G16B16_UNORM ),     FIT_RGB16,      16 * 3 },
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16G16B16A16_UNORM ),  FIT_RGBA16,     16 * 4 },
+        };
+        const CFormat::SL2_BEST_INTERNAL_FORMAT * pkifdUseMe = nullptr;
+        if ( _oOptions.vkJ2kFormat != SL2_VK_FORMAT_UNDEFINED ) {
+            pkifdUseMe = CFormat::FindBestFormat( CFormat::FindFormatDataByVulkan( _oOptions.vkJ2kFormat ), bifFormats, SL2_ELEMENTS( bifFormats ) );
+            if ( !pkifdUseMe ) {
+                return SL2_E_BADFORMAT;
+            }
+        }
+        else {
+            pkifdUseMe = CFormat::FindBestFormat( _iImage.Format(), bifFormats, SL2_ELEMENTS( bifFormats ) );
+            if ( !pkifdUseMe ) {
+                return SL2_E_BADFORMAT;
+            }
+        }
+
+        std::vector<uint8_t> vConverted;
+        SL2_ERRORS eError = _iImage.ConvertToFormat( pkifdUseMe->pkifdFormat, _sMip, _sArray, _sFace, vConverted, true );
+        if ( eError != SL2_E_SUCCESS ) { return eError; }
+
+
+        CImage::SL2_FREEIMAGE_ALLOCATET fiImage( static_cast<FREE_IMAGE_TYPE>(pkifdUseMe->sParm0), _iImage.GetMipmaps()[_sMip]->Width(), _iImage.GetMipmaps()[_sMip]->Height(), pkifdUseMe->i32Parm1 );
+		if ( !fiImage.pbBitmap ) { return SL2_E_OUTOFMEMORY; }
+
+
+        uint32_t ui32Pitch = CFormat::GetRowSize( pkifdUseMe->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
+        uint32_t ui32Slice = uint32_t( ui32Pitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
+        uint32_t ui32Height = _iImage.GetMipmaps()[_sMip]->Height();
+        uint32_t ui32Width = _iImage.GetMipmaps()[_sMip]->Width();
+        for ( uint32_t H = 0; H < ui32Height; ++H ) {
+            BYTE * pui8Bits = ::FreeImage_GetScanLine( fiImage.pbBitmap, int( H ) );
+            uint8_t * pui8Src = vConverted.data() + ui32Slice + ui32Pitch * H;
+            switch ( pkifdUseMe->pkifdFormat->vfVulkanFormat ) {
+                case SL2_VK_FORMAT_R8G8B8_UNORM : {}
+                case SL2_VK_FORMAT_R8G8B8_SRGB : {
+					for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
+                        RGBTRIPLE * prgbDst = reinterpret_cast<RGBTRIPLE *>(pui8Bits) + X;
+                        const CFormat::SL2_RGB_UNORM * prgbSrc = reinterpret_cast<CFormat::SL2_RGB_UNORM *>(pui8Src) + X;
+                        prgbDst->rgbtRed = prgbSrc->ui8Rgb[SL2_PC_R];
+                        prgbDst->rgbtGreen = prgbSrc->ui8Rgb[SL2_PC_G];
+                        prgbDst->rgbtBlue = prgbSrc->ui8Rgb[SL2_PC_B];
+                    }
+                    break;
+                }
+                case SL2_VK_FORMAT_R8G8B8A8_UNORM : {}
+                case SL2_VK_FORMAT_R8G8B8A8_SRGB : {
+                    for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
+                        RGBQUAD * prgbDst = reinterpret_cast<RGBQUAD *>(pui8Bits) + X;
+                        const CFormat::SL2_RGBA_UNORM * prgbSrc = reinterpret_cast<CFormat::SL2_RGBA_UNORM *>(pui8Src) + X;
+                        prgbDst->rgbRed = prgbSrc->ui8Rgba[SL2_PC_R];
+                        prgbDst->rgbGreen = prgbSrc->ui8Rgba[SL2_PC_G];
+                        prgbDst->rgbBlue = prgbSrc->ui8Rgba[SL2_PC_B];
+                        prgbDst->rgbReserved = _oOptions.bBmpHasAlpha ? prgbSrc->ui8Rgba[SL2_PC_A] : 0xFF;
+                    }
+                    break;
+                }
+                case SL2_VK_FORMAT_R16_UNORM : {
+                    for ( uint32_t X = 0; X < ui32Width; ++X ) {
+                        uint16_t * prgbDst = reinterpret_cast<uint16_t *>(pui8Bits) + X;
+						const uint16_t * pRgb = reinterpret_cast<uint16_t *>(pui8Src) + X;
+						(*prgbDst) = (*pRgb);
+					}
+                    break;
+                }
+                case SL2_VK_FORMAT_R16G16B16_UNORM : {
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+                        FIRGB16 * prgbDst = reinterpret_cast<FIRGB16 *>(pui8Bits) + X;
+						const CFormat::SL2_RGB16_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGB16_UNORM *>(pui8Src) + X;
+						prgbDst->red = pRgb->ui16Rgb[SL2_PC_R];
+						prgbDst->green = pRgb->ui16Rgb[SL2_PC_G];
+						prgbDst->blue = pRgb->ui16Rgb[SL2_PC_B];
+					}
+				    break;
+                }
+                case FIT_RGBAF : {
+					for ( uint32_t X = 0; X < ui32Width; ++X ) {
+                        FIRGBA16 * prgbDst = reinterpret_cast<FIRGBA16 *>(pui8Bits) + X;
+						const CFormat::SL2_RGBA16_UNORM * pRgb = reinterpret_cast<CFormat::SL2_RGBA16_UNORM *>(pui8Src) + X;
+						prgbDst->red = pRgb->ui16Rgba[SL2_PC_R];
+						prgbDst->green = pRgb->ui16Rgba[SL2_PC_G];
+						prgbDst->blue = pRgb->ui16Rgba[SL2_PC_B];
+                        prgbDst->alpha = pRgb->ui16Rgba[SL2_PC_A];
+					}
+				    break;
+                }
+            }
+        }
+
+
+        CImage::SL2_FREE_IMAGE fiBuffer;
+        if ( !fiBuffer.pmMemory ) { return SL2_E_OUTOFMEMORY; }
+
+        if ( !::FreeImage_SaveToMemory( FIF_JP2, fiImage.pbBitmap, fiBuffer.pmMemory, _oOptions.iJ2kSaveOption ) ) {
+            return SL2_E_OUTOFMEMORY;
+        }
+        BYTE * pbData = nullptr;
+        DWORD dwSize = 0;
+        if ( !::FreeImage_AcquireMemory( fiBuffer.pmMemory, &pbData, &dwSize ) ) {
+            return SL2_E_INTERNALERROR;
+        }
+        try {
+            vConverted.resize( dwSize );
+        }
+        catch ( ... ) {
+            return SL2_E_OUTOFMEMORY;
+        }
+        std::memcpy( vConverted.data(), pbData, dwSize );
+        {
+            CStdFile sfFile;
+            if ( !sfFile.Create( _sPath.c_str() ) ) {
+                return SL2_E_INVALIDWRITEPERMISSIONS;
+            }
+            if ( !sfFile.WriteToFile( vConverted ) ) {
+                return SL2_E_FILEWRITEERROR;
+            }
+        }
+
         return SL2_E_SUCCESS;
     }
 

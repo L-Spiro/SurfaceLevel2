@@ -38,6 +38,12 @@ namespace sl2 {
 		sl2::SL2_VKFORMAT												vkExrFormat = SL2_VK_FORMAT_UNDEFINED;					/**< The EXR format. */
 		int																iExrSaveOption = EXR_DEFAULT;							/**< Options for saving as EXR. */
 
+		sl2::SL2_VKFORMAT												vkJ2kFormat = SL2_VK_FORMAT_UNDEFINED;					/**< The J2K format. */
+		int																iJ2kSaveOption = J2K_DEFAULT;							/**< J2K compression amount. */
+
+		sl2::SL2_VKFORMAT												vkJp2Format = SL2_VK_FORMAT_UNDEFINED;					/**< The JP2 format. */
+		int																iJp2SaveOption = JP2_DEFAULT;							/**< JP2 compression amount. */
+
 		bool															bNeedsPreMultiply = false;								/**< Does the target format, or user request, demand pre-multiplied alpha? */
 		bool															bSwap = false;											/**< Swap R and B? */
 		bool															bPause = false;											/**< If true, the program pauses before closing the command window. */
@@ -155,5 +161,53 @@ namespace sl2 {
 	 * \return Returns an error code.
 	 **/
 	SL2_ERRORS															ExportAsExr( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice );
+
+	/**
+	 * Exports as J2K.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS															ExportAsJ2k( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions );
+
+	/**
+	 * Exports as J2K.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \param _sMip The mipmap level to export.
+	 * \param _sArray The array index to export.
+	 * \param _sFace The face to export.
+	 * \param _sSlice The slice to export.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS															ExportAsJ2k( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice );
+
+	/**
+	 * Exports as JP2.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS															ExportAsJp2( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions );
+
+	/**
+	 * Exports as JP2.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \param _sMip The mipmap level to export.
+	 * \param _sArray The array index to export.
+	 * \param _sFace The face to export.
+	 * \param _sSlice The slice to export.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS															ExportAsJp2( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice );
 
 }	// namespace sl2
