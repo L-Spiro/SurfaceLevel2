@@ -1979,6 +1979,52 @@ namespace sl2 {
 		 **/
 		static void																	PrintFormats_List();
 
+		/**
+		 * RGB -> YUV.
+		 * 
+		 * \param _dR R.
+		 * \param _dG G.
+		 * \param _dB B.
+		 * \param _dY Y.
+		 * \param _dU U.
+		 * \param _dV V.
+		 **/
+		template <typename _tTargetType>
+		static void																	RgbToYuv( double _dR, double _dG, double _dB, _tTargetType &_tY, _tTargetType &_tU, _tTargetType &_tV ) {
+			_tY = static_cast<_tTargetType>(std::round( ((0.256788 * _dR + 0.504129 * _dG + 0.097906 * _dB) + 16.0 / 255.0) * ((1 << (sizeof( _tTargetType ) * 8)) - 1) ));
+			_tU = static_cast<_tTargetType>(std::round( ((-0.148223 * _dR - 0.290993 * _dG + 0.439216 * _dB) + 128.0 / 255.0) * ((1 << (sizeof( _tTargetType ) * 8)) - 1) ));
+			_tV = static_cast<_tTargetType>(std::round( ((0.439216 * _dR - 0.367788 * _dG - 0.071427 * _dB) + 128.0 / 255.0) * ((1 << (sizeof( _tTargetType ) * 8)) - 1) ));
+		}
+
+		/**
+		 * YUV -> RGB.
+		 * 
+		 * \param _dY Y.
+		 * \param _dU U.
+		 * \param _dV V.
+		 * \param _dR R.
+		 * \param _dG G.
+		 * \param _dB B.
+		 **/
+		template <typename _tTargetType>
+		static void																	YuvToRgb( _tTargetType _tY, _tTargetType _tU, _tTargetType _tV, double &_dR, double &_dG, double &_dB ) {
+			double dC = _tY / double( (1 << (sizeof( _tTargetType ) * 8)) - 1 );
+			double dD = _tU / double( (1 << (sizeof( _tTargetType ) * 8)) - 1 );
+			double dE = _tV / double( (1 << (sizeof( _tTargetType ) * 8)) - 1 );
+
+			dC -= 16.0 / 255.0;
+			dD -= 128.0 / 255.0;
+			dE -= 128.0 / 255.0;
+
+			dC *= 1.164383;
+			_dR = std::max( dC + 1.596027 * dE, 0.0 );
+			_dG = std::max( dC - (0.391762 * dD) - (0.812968 * dE), 0.0 );
+			_dB = std::max( dC + 2.017232 + dD, 0.0 );
+
+			_dR = std::min( _dR, 1.0 );
+			_dG = std::min( _dG, 1.0 );
+			_dB = std::min( _dB, 1.0 );
+		}
 
 	protected :
 		// == Types.

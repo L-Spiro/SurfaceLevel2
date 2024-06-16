@@ -923,6 +923,10 @@ namespace sl2 {
 
 		if ( SL2_GET_COMP_FLAG( _pkifFormat->ui32Flags ) == SL2_GET_COMP_FLAG( _pkifTest->ui32Flags ) ) { fScore += 1.0f; }
 
+		if ( _pkifFormat->bSrgb && _pkifTest->bSrgb ) {
+			fScore += 0.125f;
+		}
+
 		return fScore;
 	}
 
