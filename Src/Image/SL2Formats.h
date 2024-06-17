@@ -511,6 +511,11 @@ namespace sl2 {
 		SL2_KIF_GL_DEPTH24_STENCIL8													= 0x88F0, /** GL_DEPTH24_STENCIL8 */
 		SL2_KIF_GL_DEPTH32F_STENCIL8												= 0x8CAD, /** GL_DEPTH32F_STENCIL8 */
 		SL2_KIF_GL_DEPTH32F_STENCIL8_NV												= 0x8DAC, /** GL_DEPTH32F_STENCIL8_NV */
+
+		//
+		// YUV
+		//
+		SL2_KIF_GL_YCBCR_422_APPLE													= 0x85B9, /** GL_YCBCR_422_APPLE */
 	};
 
 	/**

@@ -399,6 +399,12 @@
     <ClInclude Include="Src\Image\DDS\SL2Dds.h">
       <Filter>Header Files\Image\DDS</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Utilities\SL2FeatureSet.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Utilities\SL2Resampler.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\SL2SurfaceLevel2.cpp">
@@ -685,6 +691,12 @@
     </ClCompile>
     <ClCompile Include="Src\Image\DDS\SL2Dds.cpp">
       <Filter>Source Files\Image\DDS</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Utilities\SL2FeatureSet.cpp">
+      <Filter>Source Files\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Utilities\SL2Resampler.cpp">
+      <Filter>Source Files\Utilities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

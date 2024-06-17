@@ -45,6 +45,7 @@ namespace sl2 {
 		int																iJp2SaveOption = JP2_DEFAULT;							/**< JP2 compression amount. */
 
 		int																iJpgSaveOption = JPEG_DEFAULT;							/**< JPG compression amount. */
+
 		bool															bNeedsPreMultiply = false;								/**< Does the target format, or user request, demand pre-multiplied alpha? */
 		bool															bSwap = false;											/**< Swap R and B? */
 		bool															bPause = false;											/**< If true, the program pauses before closing the command window. */

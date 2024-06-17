@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "SL2FeatureSet.h"
+
 #include <cmath>
 #include <string>
 #include <vector>
@@ -335,6 +337,71 @@ namespace sl2 {
 		 * \return Returns true if the given value is a power of 2.
 		 **/
 		static inline bool									IsPo2( uint32_t _ui32Val );
+
+		/**
+		 * Is AVX supported?
+		 *
+		 * \return Returns true if AVX is supported.
+		 **/
+		static inline bool									IsAvxSupported() {
+#if defined( __i386__ ) || defined( __x86_64__ ) || defined( _MSC_VER )
+			return CFeatureSet::AVX();
+#else
+			return false;
+#endif	// #if defined( __i386__ ) || defined( __x86_64__ )
+		}
+
+		/**
+		 * Is AVX 2 supported?
+		 *
+		 * \return Returns true if AVX is supported.
+		 **/
+		static inline bool									IsAvx2Supported() {
+#if defined( __i386__ ) || defined( __x86_64__ ) || defined( _MSC_VER )
+			return CFeatureSet::AVX2();
+#else
+			return false;
+#endif	// #if defined( __i386__ ) || defined( __x86_64__ )
+		}
+
+		/**
+		 * Is AVX-512F supported?
+		 *
+		 * \return Returns true if AVX-512F is supported.
+		 **/
+		static inline bool									IsAvx512FSupported() {
+#if defined( __i386__ ) || defined( __x86_64__ ) || defined( _MSC_VER )
+			return CFeatureSet::AVX512F();
+#else
+			return false;
+#endif	// #if defined( __i386__ ) || defined( __x86_64__ )
+		}
+
+		/**
+		 * Is AVX-512BW supported?
+		 *
+		 * \return Returns true if AVX-512BW is supported.
+		 **/
+		static inline bool									IsAvx512BWSupported() {
+#if defined( __i386__ ) || defined( __x86_64__ ) || defined( _MSC_VER )
+			return CFeatureSet::AVX512BW();
+#else
+			return false;
+#endif	// #if defined( __i386__ ) || defined( __x86_64__ )
+		}
+
+		/**
+		 * Is SSE 4 supported?
+		 *
+		 * \return Returns true if SSE 4 is supported.
+		 **/
+		static inline bool									IsSse4Supported() {
+#if defined( __i386__ ) || defined( __x86_64__ ) || defined( _MSC_VER )
+			return CFeatureSet::SSE41();
+#else
+			return false;
+#endif	// #if defined( __i386__ ) || defined( __x86_64__ )
+		}
 	};
 
 
