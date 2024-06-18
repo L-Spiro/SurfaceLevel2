@@ -405,6 +405,12 @@
     <ClInclude Include="Src\Utilities\SL2Resampler.h">
       <Filter>Header Files\Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Image\SL2TextureAddressing.h">
+      <Filter>Header Files\Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Utilities\SL2AlignmentAllocator.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\SL2SurfaceLevel2.cpp">
@@ -697,6 +703,9 @@
     </ClCompile>
     <ClCompile Include="Src\Utilities\SL2Resampler.cpp">
       <Filter>Source Files\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\SL2TextureAddressing.cpp">
+      <Filter>Source Files\Image</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

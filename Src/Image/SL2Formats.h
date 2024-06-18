@@ -90,7 +90,6 @@
 namespace sl2 {
 
 	// == Enumerations.
-	// == Enumerations.
 	/** Errors. */
 	enum SL2_ERRORS : int16_t {
 		SL2_E_SUCCESS																= 0,							/**< No problem. */

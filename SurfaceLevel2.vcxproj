@@ -82,6 +82,7 @@
     <ClInclude Include="Src\Image\SL2Image.h" />
     <ClInclude Include="Src\Image\SL2KtxTexture.h" />
     <ClInclude Include="Src\Image\SL2Surface.h" />
+    <ClInclude Include="Src\Image\SL2TextureAddressing.h" />
     <ClInclude Include="Src\Image\Squish\alpha.h" />
     <ClInclude Include="Src\Image\Squish\clusterfit.h" />
     <ClInclude Include="Src\Image\Squish\colourblock.h" />
@@ -101,6 +102,7 @@
     <ClInclude Include="Src\SL2SurfaceLevel2.h" />
     <ClInclude Include="Src\Thread\SL2Events.h" />
     <ClInclude Include="Src\Time\SL2Clock.h" />
+    <ClInclude Include="Src\Utilities\SL2AlignmentAllocator.h" />
     <ClInclude Include="Src\Utilities\SL2FeatureSet.h" />
     <ClInclude Include="Src\Utilities\SL2Float16.h" />
     <ClInclude Include="Src\Utilities\SL2FloatX.h" />
@@ -198,6 +200,7 @@
     <ClCompile Include="Src\Image\SL2Formats.cpp" />
     <ClCompile Include="Src\Image\SL2Image.cpp" />
     <ClCompile Include="Src\Image\SL2Surface.cpp" />
+    <ClCompile Include="Src\Image\SL2TextureAddressing.cpp" />
     <ClCompile Include="Src\Image\Squish\alpha.cpp" />
     <ClCompile Include="Src\Image\Squish\clusterfit.cpp" />
     <ClCompile Include="Src\Image\Squish\colourblock.cpp" />

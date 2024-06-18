@@ -29,6 +29,16 @@
 #define SL2_ROUND_UP( VALUE, X )							((VALUE) + (((X) - (VALUE) & ((X) - 1)) & ((X) - 1)))
 #endif	// #ifndef SL2_ROUND_UP
 
+#if defined( _MSC_VER )
+    // Microsoft Visual Studio Compiler
+    #define													SL2_ALIGN( n ) 						__declspec( align( n ) )
+#elif defined( __GNUC__ ) || defined( __clang__ )
+    // GNU Compiler Collection (GCC) or Clang
+    #define													SL2_ALIGN( n ) 						__attribute__( (aligned( n )) )
+#else
+    #error "Unsupported compiler"
+#endif
+
 
 namespace sl2 {
 
@@ -402,6 +412,92 @@ namespace sl2 {
 			return false;
 #endif	// #if defined( __i386__ ) || defined( __x86_64__ )
 		}
+
+#ifdef __AVX512F__
+		/**
+		 * Horizontally adds all the floats in a given AVX-512 register.
+		 * 
+		 * \param _mReg The register containing all of the values to sum.
+		 * \return Returns the sum of all the floats in the given register.
+		 **/
+		static inline double								HorizontalSum( __m512d _mReg ) {
+			// Step 1: Reduce 512 bits to 256 bits by adding high and low 256 bits.
+			__m256d mLow256 = _mm512_castpd512_pd256( _mReg );			// Low 256 bits.
+			__m256d mHigh256 = _mm512_extractf64x4_pd( _mReg, 1 );		// High 256 bits.
+			__m256d mSum256 = _mm256_add_pd( mLow256, mHigh256 );
+
+			// Step 2: Reduce 256 bits to 128 bits (similar to AVX version).
+			__m128d mHigh128 = _mm256_castpd256_pd128( mSum256 );		// High 128 bits.
+			__m128d mLow128 = _mm256_extractf128_pd( mSum256, 1 );		// Low 128 bits.
+			__m128d mSum128 = _mm_add_pd( mHigh128, mLow128 );			// Add them.
+
+			mSum128 = _mm_add_sd( mSum128, _mm_unpackhi_pd( mSum128, mSum128 ) );
+
+			// Step 4: Extract the scalar value.
+			return _mm_cvtsd_f64( mSum128 );
+		}
+
+		/**
+		 * Horizontally adds all the floats in a given AVX-512 register.
+		 * 
+		 * \param _mReg The register containing all of the values to sum.
+		 * \return Returns the sum of all the floats in the given register.
+		 **/
+		static inline float									HorizontalSum( __m512 _mReg ) {
+			// Step 1: Reduce 512 bits to 256 bits by adding high and low 256 bits.
+			__m256 mLow256 = _mm512_castps512_ps256( _mReg );			// Low 256 bits.
+			__m256 mHigh256 = _mm512_extractf32x8_ps( _mReg, 1 );		// High 256 bits.
+			__m256 mSum256 = _mm256_add_ps( mLow256, mHigh256 );
+
+			// Step 2: Reduce 256 bits to 128 bits (similar to AVX version).
+			__m128 mHigh128 = _mm256_extractf128_ps( mSum256, 1 );		// High 128 bits.
+			__m128 mLow128 = _mm256_castps256_ps128( mSum256 );			// Low 128 bits.
+			__m128 mSum128 = _mm_add_ps( mHigh128, mLow128 );			// Add them.
+
+			// Step 3: Perform horizontal addition on 128 bits.
+			__m128 mAddH1 = _mm_hadd_ps( mSum128, mSum128 );
+			__m128 mAddH2 = _mm_hadd_ps( mAddH1, mAddH1 );
+
+			// Step 4: Extract the scalar value.
+			return _mm_cvtss_f32( mAddH2 );
+		}
+#endif	// #ifdef __AVX512F__
+
+#ifdef __AVX__
+		/**
+		 * Horizontally adds all the floats in a given AVX register.
+		 * 
+		 * \param _mReg The register containing all of the values to sum.
+		 * \return Returns the sum of all the floats in the given register.
+		 **/
+		static inline float									HorizontalSum( __m256 &_mReg ) {
+			// Step 1 & 2: Shuffle and add the high 128 to the low 128.
+			__m128 mHigh128 = _mm256_extractf128_ps( _mReg, 1 );		// Extract high 128 bits.
+			__m128 mLow128 = _mm256_castps256_ps128( _mReg );			// Directly use low 128 bits.
+			__m128 mSum128 = _mm_add_ps( mHigh128, mLow128 );			// Add them.
+
+			// Step 3: Perform horizontal addition.
+			__m128 mAddH1 = _mm_hadd_ps( mSum128, mSum128 );
+			__m128 mAddH2 = _mm_hadd_ps( mAddH1, mAddH1 );
+
+			// Step 4: Extract the scalar value.
+			return _mm_cvtss_f32( mAddH2 );
+		}
+#endif	// #ifdef __AVX__
+
+#ifdef __SSE4_1__
+		/**
+		 * Horizontally adds all the floats in a given SSE register.
+		 * 
+		 * \param _mReg The register containing all of the values to sum.
+		 * \return Returns the sum of all the floats in the given register.
+		 **/
+		static inline float									HorizontalSum( __m128 &_mReg ) {
+			__m128 mAddH1 = _mm_hadd_ps( _mReg, _mReg );
+			__m128 mAddH2 = _mm_hadd_ps( mAddH1, mAddH1 );
+			return _mm_cvtss_f32( mAddH2 );
+		}
+#endif	// #ifdef __SSE4_1__
 	};
 
 
