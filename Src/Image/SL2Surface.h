@@ -60,6 +60,25 @@ namespace sl2 {
 		 **/
 		inline uint32_t									Depth() const { return m_ui32Depth; }
 
+		/**
+		 * Reallocates
+		 * 
+		 * \param PARM DESC
+		 * \param PARM DESC
+		 * \return DESC
+		 **/
+		inline bool										Reallocate( size_t _sAllocSize, size_t _sBaseSize, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D ) {
+			try {
+				resize( _sAllocSize );
+				m_sBaseSize = _sBaseSize;
+				m_ui32Width = _ui32W;
+				m_ui32Height = _ui32H;
+				m_ui32Depth = _ui32D;
+				return true;
+			}
+			catch ( ... ) { return false; }
+		}
+
 
 	protected :
 		// == Members.

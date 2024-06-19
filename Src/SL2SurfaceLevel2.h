@@ -25,6 +25,10 @@ namespace sl2 {
 		const sl2::CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *				pkifdFinalFormat = nullptr;								/**< Actual final format.  If not manually specified, vfAutoFormat is used. */
 		sl2::CFormat::SL2_SWIZZLE										sSwizzle = CFormat::DefaultSwizzle();					/**< The swizzle to apply. */
 		double															dGamma = 0.0;											/**< User-supplied gamma. */
+		uint32_t														ui32NewWidth = 0;										/**< -prescale width. */
+		uint32_t														ui32NewHeight = 0;										/**< -prescale height. */
+		uint32_t														ui32NewDepth = 0;										/**< -prescale3 depth. */
+		sl2::SL2_RESAMPLE_TO											rtResampleTo = sl2::SL2_RT_NONE;						/**< Resample size for -rescale. */
 
 		int																iPngSaveOption = PNG_Z_DEFAULT_COMPRESSION;				/**< Option for saving as PNG. */
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *					pkifdPngFormat = nullptr;								/**< The PNG format. */

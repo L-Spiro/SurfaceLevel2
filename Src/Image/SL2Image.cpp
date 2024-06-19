@@ -140,17 +140,7 @@ namespace sl2 {
 		CImage iTmp;
 		if ( !_pkifFormat || !Format() ) { return SL2_E_BADFORMAT; }
 
-		if ( (m_dGamma == 0.0 || m_dGamma == 1.0) &&
-			!(!m_bIsPreMultiplied && m_bNeedsPreMultiply) &&
-			!m_bFlipX && !m_bFlipY && !m_bFlipZ &&
-			CFormat::SwizzleIsDefault( m_sSwizzle ) &&
-			!m_bSwap &&
-			((_pkifFormat->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED && _pkifFormat->vfVulkanFormat == Format()->vfVulkanFormat) ||
-			(_pkifFormat->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN && _pkifFormat->dfDxFormat == Format()->dfDxFormat) ||
-			(_pkifFormat->mfMetalFormat != SL2_MTLPixelFormatInvalid && _pkifFormat->mfMetalFormat == Format()->mfMetalFormat) ||
-			((_pkifFormat->kifInternalFormat != SL2_KIF_GL_INVALID && _pkifFormat->kifInternalFormat == Format()->kifInternalFormat &&
-				_pkifFormat->kbifBaseInternalFormat != SL2_KBIF_GL_INVALID && _pkifFormat->kbifBaseInternalFormat == Format()->kbifBaseInternalFormat &&
-				_pkifFormat->ktType != SL2_KT_GL_INVALID && _pkifFormat->ktType == Format()->ktType))) ) {
+		if ( ParametersAreUnchanged( _pkifFormat, false, 0, 0, 0 ) ) {
 			// No format conversion needed.  Just copy the buffers.
 			if ( !_iDst.AllocateTexture( _pkifFormat, Width(), Height(), Depth(), Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
 			for ( size_t M = 0; M < Mipmaps(); ++M ) {
@@ -255,18 +245,7 @@ namespace sl2 {
 		if ( _sMip >= m_vMipMaps.size() ) { return SL2_E_INVALIDCALL; }
 
 		size_t sBaseSize = CFormat::GetFormatSize( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
-		if ( (m_dGamma == 0.0 || m_dGamma == 1.0) &&
-			!_bInvertY &&
-			!m_bFlipX && !m_bFlipY && !m_bFlipZ &&
-			CFormat::SwizzleIsDefault( m_sSwizzle ) &&
-			!m_bSwap &&
-			!(!m_bIsPreMultiplied && m_bNeedsPreMultiply) &&
-			((_pkifFormat->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED && _pkifFormat->vfVulkanFormat == Format()->vfVulkanFormat) ||
-			(_pkifFormat->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN && _pkifFormat->dfDxFormat == Format()->dfDxFormat) ||
-			(_pkifFormat->mfMetalFormat != SL2_MTLPixelFormatInvalid && _pkifFormat->mfMetalFormat == Format()->mfMetalFormat) ||
-			((_pkifFormat->kifInternalFormat != SL2_KIF_GL_INVALID && _pkifFormat->kifInternalFormat == Format()->kifInternalFormat &&
-				_pkifFormat->kbifBaseInternalFormat != SL2_KBIF_GL_INVALID && _pkifFormat->kbifBaseInternalFormat == Format()->kbifBaseInternalFormat &&
-				_pkifFormat->ktType != SL2_KT_GL_INVALID && _pkifFormat->ktType == Format()->ktType))) ) {
+		if ( ParametersAreUnchanged( _pkifFormat, _bInvertY, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() ) ) {
 			// No format conversion needed.  Just copy the buffers.
 			sBaseSize = CFormat::GetFormatSize( _pkifFormat, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
 			std::memcpy( _pui8Dst, Data( _sMip, 0, _sArray, _sFace ), sBaseSize );
@@ -349,7 +328,12 @@ namespace sl2 {
 				size_t sFullSize = sBaseSize * _sArray * _sFaces;
 				if ( !sFullSize ) { Reset(); return false; }
 
-				m_vMipMaps[I] = std::make_unique<CSurface>( sFullSize, sBaseSize, _ui32Width, _ui32Height, _ui32Depth );
+				if ( m_vMipMaps[I].get() ) {
+					if ( !m_vMipMaps[I]->Reallocate( sFullSize, sBaseSize, _ui32Width, _ui32Height, _ui32Depth ) ) { Reset(); return false; }
+				}
+				else {
+					m_vMipMaps[I] = std::make_unique<CSurface>( sFullSize, sBaseSize, _ui32Width, _ui32Height, _ui32Depth );
+				}
 
 				_ui32Width = CUtilities::Max<uint32_t>( _ui32Width >> 1, 1 );
 				_ui32Height = CUtilities::Max<uint32_t>( _ui32Height >> 1, 1 );
@@ -362,6 +346,36 @@ namespace sl2 {
 		}
 		
 		return true;
+	}
+
+	/**
+	 * Determines if any of the parameters change between this image and the given new image format.
+	 * 
+	 * \param _pkifFormat The new format to which to convert.
+	 * \param _bFlip The incoming flip flag.
+	 * \param _ui32Width The width of the slice being copied.
+	 * \param _ui32Height The height of the slice being copied.
+	 * \param _ui32Depth The depth of the slice being copied.
+	 * \return Returns true if no changes need to be made when copying this image to a new image given the target format, flip flag, resample paramaters, etc.
+	 **/
+	bool CImage::ParametersAreUnchanged( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, bool _bFlip, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) {
+		if ( (m_dGamma == 0.0 || m_dGamma == 1.0) &&
+			(_bFlip == m_bFlipY) &&
+			!m_bFlipX && !m_bFlipZ &&
+			CFormat::SwizzleIsDefault( m_sSwizzle ) &&
+			!m_bSwap &&
+			!(!m_bIsPreMultiplied && m_bNeedsPreMultiply) &&
+			((_pkifFormat->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED && _pkifFormat->vfVulkanFormat == Format()->vfVulkanFormat) ||
+			(_pkifFormat->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN && _pkifFormat->dfDxFormat == Format()->dfDxFormat) ||
+			(_pkifFormat->mfMetalFormat != SL2_MTLPixelFormatInvalid && _pkifFormat->mfMetalFormat == Format()->mfMetalFormat) ||
+			((_pkifFormat->kifInternalFormat != SL2_KIF_GL_INVALID && _pkifFormat->kifInternalFormat == Format()->kifInternalFormat &&
+				_pkifFormat->kbifBaseInternalFormat != SL2_KBIF_GL_INVALID && _pkifFormat->kbifBaseInternalFormat == Format()->kbifBaseInternalFormat &&
+				_pkifFormat->ktType != SL2_KT_GL_INVALID && _pkifFormat->ktType == Format()->ktType))) ) {
+			if ( (m_rResample.ui32NewW == 0 || m_rResample.ui32NewW == _ui32Width) &&
+				(m_rResample.ui32NewH == 0 || m_rResample.ui32NewH == _ui32Height) &&
+				(m_rResample.ui32NewD == 0 || m_rResample.ui32NewD == _ui32Depth) ) { return true; }
+		}
+		return false;
 	}
 
 	/**

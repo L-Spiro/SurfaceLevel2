@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "../Utilities/SL2Resampler.h"
 #include "SL2Formats.h"
 #include "SL2Surface.h"
 
@@ -25,6 +26,15 @@
 
 
 namespace sl2 {
+
+	// == Enumerations.
+	/** Nearest-to resizing. */
+	enum SL2_RESAMPLE_TO {
+		SL2_RT_NONE,
+		SL2_RT_NEAREST,
+		SL2_RT_NEXT_HI,
+		SL2_RT_NEXT_LO,
+	};
 
 	/**
 	 * Class CImage
@@ -341,8 +351,6 @@ namespace sl2 {
 		 **/
 		static inline size_t								GetActualPlaneSize( size_t _sSize );
 
-		
-
 
 	protected :
 		// == Members.
@@ -359,6 +367,8 @@ namespace sl2 {
 		bool												m_bFlipZ;								/**< Flip depth? */
 		bool												m_bSwap;								/**< Swap R and B? */
 
+		CResampler::SL2_RESAMPLE							m_rResample;							/**< Resample parameters. */
+
 
 		// == Functions.
 		/**
@@ -374,6 +384,18 @@ namespace sl2 {
 		 * \return Returns true if all mipmaps could be allocated and the texture size is valid (non-0) and a supported format.
 		 **/
 		bool												AllocateTexture( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, size_t _sMips = 1, size_t _sArray = 1, size_t _sFaces = 1 );
+
+		/**
+		 * Determines if any of the parameters change between this image and the given new image format.
+		 * 
+		 * \param _pkifFormat The new format to which to convert.
+		 * \param _bFlip The incoming flip flag.
+		 * \param _ui32Width The width of the slice being copied.
+		 * \param _ui32Height The height of the slice being copied.
+		 * \param _ui32Depth The depth of the slice being copied.
+		 * \return Returns true if no changes need to be made when copying this image to a new image given the target format, flip flag, resample paramaters, etc.
+		 **/
+		bool												ParametersAreUnchanged( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, bool _bFlip, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth );
 
 		/**
 		 * Bakes the image special gamma into a given texture buffer.  The format must be RGBA64F.

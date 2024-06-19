@@ -29,15 +29,6 @@
 #define SL2_ROUND_UP( VALUE, X )							((VALUE) + (((X) - (VALUE) & ((X) - 1)) & ((X) - 1)))
 #endif	// #ifndef SL2_ROUND_UP
 
-#if defined( _MSC_VER )
-    // Microsoft Visual Studio Compiler
-    #define													SL2_ALIGN( n ) 						__declspec( align( n ) )
-#elif defined( __GNUC__ ) || defined( __clang__ )
-    // GNU Compiler Collection (GCC) or Clang
-    #define													SL2_ALIGN( n ) 						__attribute__( (aligned( n )) )
-#else
-    #error "Unsupported compiler"
-#endif
 
 
 namespace sl2 {
@@ -349,6 +340,14 @@ namespace sl2 {
 		static inline bool									IsPo2( uint32_t _ui32Val );
 
 		/**
+		 * Gets the lowest power-of-2 value not below the given input value.
+		 *
+		 * \param _ui32Value Value for which to derive the lowest power-of-2 value not under this value.
+		 * \return Returns the lowest power-of-2 value not below the given input value.
+		 */
+		static uint32_t										GetLowestPo2( uint32_t _ui32Value );
+
+		/**
 		 * Is AVX supported?
 		 *
 		 * \return Returns true if AVX is supported.
@@ -470,6 +469,22 @@ namespace sl2 {
 		 * \param _mReg The register containing all of the values to sum.
 		 * \return Returns the sum of all the floats in the given register.
 		 **/
+		static inline double									HorizontalSum( __m256d &_mReg ) {
+			__m256d mShuf = _mm256_permute2f128_pd( _mReg, _mReg, 0x1 );	// Swap the low and high halves.
+			__m256d mSums = _mm256_add_pd( _mReg, mShuf );					// Add the low and high halves.
+
+			mShuf = _mm256_shuffle_pd( mSums, mSums, 0x5 );					// Swap the pairs of doubles.
+			mSums = _mm256_add_pd( mSums, mShuf );							// Add the pairs.
+
+			return _mm256_cvtsd_f64( mSums );								// Extract the sum.
+		}
+
+		/**
+		 * Horizontally adds all the floats in a given AVX register.
+		 * 
+		 * \param _mReg The register containing all of the values to sum.
+		 * \return Returns the sum of all the floats in the given register.
+		 **/
 		static inline float									HorizontalSum( __m256 &_mReg ) {
 			// Step 1 & 2: Shuffle and add the high 128 to the low 128.
 			__m128 mHigh128 = _mm256_extractf128_ps( _mReg, 1 );		// Extract high 128 bits.
@@ -486,6 +501,18 @@ namespace sl2 {
 #endif	// #ifdef __AVX__
 
 #ifdef __SSE4_1__
+		/**
+		 * Horizontally adds all the floats in a given SSE register.
+		 * 
+		 * \param _mReg The register containing all of the values to sum.
+		 * \return Returns the sum of all the floats in the given register.
+		 **/
+		static inline double								HorizontalSum( __m128d &_mReg ) {
+			__m128d mAddH1 = _mm_shuffle_pd( _mReg, _mReg, 0x1 );
+			__m128d mAddH2 = _mm_add_pd( mAddH1, mAddH1 );
+			return _mm_cvtsd_f64( mAddH2 );
+		}
+
 		/**
 		 * Horizontally adds all the floats in a given SSE register.
 		 * 

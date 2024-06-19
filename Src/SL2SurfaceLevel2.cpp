@@ -320,6 +320,37 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.bSwap = true;
                 SL2_ADV( 1 );
             }
+            if ( SL2_CHECK( 3, prescale ) ) {
+                oOptions.ui32NewWidth = ::_wtoi( _wcpArgV[1] );
+                oOptions.ui32NewHeight = ::_wtoi( _wcpArgV[2] );
+                SL2_ADV( 3 );
+            }
+            if ( SL2_CHECK( 4, prescale3 ) ) {
+                oOptions.ui32NewWidth = ::_wtoi( _wcpArgV[1] );
+                oOptions.ui32NewHeight = ::_wtoi( _wcpArgV[2] );
+                oOptions.ui32NewDepth = ::_wtoi( _wcpArgV[3] );
+                SL2_ADV( 4 );
+            }
+            if ( SL2_CHECK( 2, rescale ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"nearest" ) == 0 ) {
+                    oOptions.rtResampleTo = sl2::SL2_RT_NEAREST;
+                }
+                if ( ::_wcsicmp( _wcpArgV[1], L"hi" ) == 0 ) {
+                    oOptions.rtResampleTo = sl2::SL2_RT_NEXT_HI;
+                }
+                if ( ::_wcsicmp( _wcpArgV[1], L"lo" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"next_lo" ) == 0 ) {
+                    oOptions.rtResampleTo = sl2::SL2_RT_NEXT_LO;
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"rescale\": \"{}\". Must be nearest, hi, or lo.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
+
+
+
+
             
             if ( SL2_CHECK( 1, png_default ) ) {
                 oOptions.iPngSaveOption = (oOptions.iPngSaveOption & 0xFF00) | PNG_DEFAULT;

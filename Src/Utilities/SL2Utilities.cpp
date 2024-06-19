@@ -236,4 +236,34 @@ namespace sl2 {
 		return std::u16string();
 	}
 
+	/**
+	 * Gets the lowest power-of-2 value not below the given input value.
+	 *
+	 * \param _ui32Value Value for which to derive the lowest power-of-2 value not under this value.
+	 * \return Returns the lowest power-of-2 value not below the given input value.
+	 */
+	uint32_t CUtilities::GetLowestPo2( uint32_t _ui32Value ) {
+		if ( !_ui32Value ) { return 0; }
+#ifdef SL2_X86
+		// On x86 processors there is an instruction that gets the highest-
+		//	set bit automatically.
+		uint32_t ui32Ret;
+		SL2_ASM_BEGIN
+			xor eax, eax
+			bsr eax, _ui32Value
+			mov ui32Ret, eax
+		SL2_ASM_END
+		ui32Ret = 1 << ui32Ret;
+		return (ui32Ret == _ui32Value) ? ui32Ret : ui32Ret << 1;
+#else	// SL2_X86
+		// Get it the hard way.
+		uint32_t ui32Ret = 1;
+		while ( ui32Ret < _ui32Value ) { ui32Ret <<= 1; }
+
+		// By now, ui32Ret either equals _ui32Value or is the next power of 2 up.
+		// If they are equal, _ui32Value is already a power of 2.
+		return ui32Ret;
+#endif	// SL2_X86
+	}
+
 }	// namespace sl2

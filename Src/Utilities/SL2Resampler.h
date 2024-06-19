@@ -36,13 +36,16 @@ namespace sl2 {
 		struct SL2_CONTRIBUTIONS {
 			std::vector<double, AlignmentAllocator<double, 64>>	dContributions;
 			std::vector<int32_t>								i32Indices;
+			bool												bInsideBounds;
 		};
 
 		typedef double (*										PfFilterFunc)( double );
 
 		/** Parameters for resampling. */
 		struct SL2_RESAMPLE {
-			double												dFilterSupport = 1.0;
+			double												dFilterSupportW = 1.0;
+			double												dFilterSupportH = 1.0;
+			double												dFilterSupportD = 1.0;
 			double												dBorderColor[4] = { 0.0, 0.0, 0.0, 1.0 };
 			float												fFilterScale = 1.0;
 			uint32_t											ui32W = 0;
@@ -68,12 +71,12 @@ namespace sl2 {
 		/**
 		 * Resamples an image in-place.
 		 * 
-		 * \param _vInOut The input buffer.
+		 * \param _pdIn The input buffer.
 		 * \param _vOut The output buffer.
 		 * \param _pParms Image/resampling parameters.
 		 * \return Returns true if all allocations succeed.
 		 **/
-		bool													Resample( const std::vector<double> &_vIn, double * _pdOut, const SL2_RESAMPLE &_pParms );
+		bool													Resample( const double * _pdIn, double * _pdOut, const SL2_RESAMPLE &_pParms );
 
 		/**
 		 * Creates a new contribution list.
@@ -444,7 +447,17 @@ namespace sl2 {
 		 * \param _sTotal The total values to which pdTexels and _pdWeights point.
 		 * \return Returns the summed weights * texels.
 		 **/
-		static double											Convolve( const double * _pdWeights, const double * _pdTexels, size_t _sTotal );
+		static double											ConvolveAligned( const double * _pdWeights, const double * _pdTexels, size_t _sTotal );
+
+		/**
+		 * Convolvinate using unaligned reads.
+		 *
+		 * \param _pdWeights The convolution weights.
+		 * \param _pdTexels The texels to be convolved.
+		 * \param _sTotal The total values to which pdTexels and _pdWeights point.
+		 * \return Returns the summed weights * texels.
+		 **/
+		static double											ConvolveUnaligned( const double * _pdWeights, const double * _pdTexels, size_t _sTotal );
 
 	};
 
