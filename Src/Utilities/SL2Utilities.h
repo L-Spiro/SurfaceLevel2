@@ -509,7 +509,7 @@ namespace sl2 {
 		 **/
 		static inline double								HorizontalSum( __m128d &_mReg ) {
 			__m128d mAddH1 = _mm_shuffle_pd( _mReg, _mReg, 0x1 );
-			__m128d mAddH2 = _mm_add_pd( mAddH1, mAddH1 );
+			__m128d mAddH2 = _mm_add_pd( _mReg, mAddH1 );
 			return _mm_cvtsd_f64( mAddH2 );
 		}
 

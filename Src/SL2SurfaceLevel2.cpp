@@ -140,6 +140,12 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.dGamma = -2.2;
                 SL2_ADV( 1 );
             }
+
+            if ( SL2_CHECK( 1, printformats ) || SL2_CHECK( 1, print_formats ) ) {
+                sl2::CFormat::PrintFormats_List();
+                SL2_ADV( 1 );
+            }
+
             if ( SL2_CHECK( 1, dxt1c ) || SL2_CHECK( 1, bc1 ) ) {
                 oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGB_S3TC_DXT1_EXT );
                 SL2_ADV( 1 );
@@ -272,6 +278,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 }
                 SL2_ADV( 2 );
             }
+
             if ( SL2_CHECK( 1, quality_highest ) || SL2_CHECK( 1, very_slow ) ) {
                 sl2::CFormat::SetPerfLevel( 0 );
                 SL2_ADV( 1 );
@@ -296,7 +303,8 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 sl2::CFormat::SetPerfLevel( 5 );
                 SL2_ADV( 1 );
             }
-            if ( SL2_CHECK( 2, luma ) ) {
+
+            if ( SL2_CHECK( 2, alpha_threshold ) ) {
                 double dVal = ::_wtof( _wcpArgV[1] );
                 if ( dVal < 0.0 || dVal > 255 ) {
                     SL2_ERRORT( std::format( L"Invalid \"alpha_threshold\": \"{}\". Must be between 0 and 255.",
@@ -321,32 +329,43 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 3, prescale ) ) {
-                oOptions.ui32NewWidth = ::_wtoi( _wcpArgV[1] );
-                oOptions.ui32NewHeight = ::_wtoi( _wcpArgV[2] );
+                oOptions.rResample.ui32NewW = ::_wtoi( _wcpArgV[1] );
+                oOptions.rResample.ui32NewH = ::_wtoi( _wcpArgV[2] );
                 SL2_ADV( 3 );
             }
-            if ( SL2_CHECK( 4, prescale3 ) ) {
-                oOptions.ui32NewWidth = ::_wtoi( _wcpArgV[1] );
-                oOptions.ui32NewHeight = ::_wtoi( _wcpArgV[2] );
-                oOptions.ui32NewDepth = ::_wtoi( _wcpArgV[3] );
+            if ( SL2_CHECK( 4, resample ) || SL2_CHECK( 4, prescale3 ) ) {
+                oOptions.rResample.ui32NewW = ::_wtoi( _wcpArgV[1] );
+                oOptions.rResample.ui32NewH = ::_wtoi( _wcpArgV[2] );
+                oOptions.rResample.ui32NewD = ::_wtoi( _wcpArgV[3] );
                 SL2_ADV( 4 );
             }
-            if ( SL2_CHECK( 2, rescale ) ) {
+            if ( SL2_CHECK( 2, rescale ) || SL2_CHECK( 2, rescale_to ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"nearest" ) == 0 ) {
                     oOptions.rtResampleTo = sl2::SL2_RT_NEAREST;
                 }
-                if ( ::_wcsicmp( _wcpArgV[1], L"hi" ) == 0 ) {
+                else if ( ::_wcsicmp( _wcpArgV[1], L"hi" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"next_hi" ) == 0 ) {
                     oOptions.rtResampleTo = sl2::SL2_RT_NEXT_HI;
                 }
-                if ( ::_wcsicmp( _wcpArgV[1], L"lo" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"next_lo" ) == 0 ) {
+                else if ( ::_wcsicmp( _wcpArgV[1], L"lo" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"next_lo" ) == 0 ) {
                     oOptions.rtResampleTo = sl2::SL2_RT_NEXT_LO;
                 }
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"rescale\": \"{}\". Must be nearest, hi, or lo.",
+                    SL2_ERRORT( std::format( L"Invalid \"rescale\": \"{}\". Must be nearest, [hi|next_hi], or [lo|next_lo].",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 SL2_ADV( 2 );
             }
+			if ( SL2_CHECK( 3, rel_scale ) ) {
+				oOptions.dRelScaleW = ::_wtof( _wcpArgV[1] );
+				oOptions.dRelScaleH = ::_wtof( _wcpArgV[2] );
+				SL2_ADV( 3 );
+			}
+            if ( SL2_CHECK( 4, rel_scale3 ) ) {
+				oOptions.dRelScaleW = ::_wtof( _wcpArgV[1] );
+				oOptions.dRelScaleH = ::_wtof( _wcpArgV[2] );
+                oOptions.dRelScaleD = ::_wtof( _wcpArgV[3] );
+				SL2_ADV( 4 );
+			}
 
 
 
@@ -675,6 +694,8 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
             SL2_ERRORT( std::format( L"Failed to load file: \"{}\".",
                reinterpret_cast<const wchar_t *>(oOptions.vInputs[I].c_str()) ).c_str(), eError );
         }
+        FixResampling( oOptions, iImage );
+        iImage.Resampling() = oOptions.rResample;
         iImage.SetNeedsPreMultiply( oOptions.bNeedsPreMultiply );
         iImage.SetGamma( oOptions.dGamma );
         iImage.SetSwizzle( oOptions.sSwizzle );
@@ -696,7 +717,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 		if ( oOptions.bShowTime ) {
 			::printf( "Conversion time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
 		}
-
+        cClock.SetStartingTick();
 
         if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"png" ) == 0 ) {
             eError = sl2::ExportAsPng( iConverted, oOptions.vOutputs[I], oOptions );
@@ -742,10 +763,10 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         }
         
         ui64Time = cClock.GetRealTick() - cClock.GetStartTick();
-        ::sprintf_s( szPrintfMe, "Total time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
+        ::sprintf_s( szPrintfMe, "Save time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
 		::OutputDebugStringA( szPrintfMe );
 		if ( oOptions.bShowTime ) {
-			::printf( "Total time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
+			::printf( "Save time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
 		}
     }
 
@@ -834,6 +855,71 @@ namespace sl2 {
             ::OutputDebugStringW( reinterpret_cast<const wchar_t *>((sError + u"\r\n").c_str()) );
 #endif  // #ifdef SL2_WINDOWS
         }
+    }
+
+    /**
+	 * Fix up the resampling parameters.
+	 * 
+	 * \param _oOptions The options to fix up.
+     * \param _iImage The image off of which to base the adjustments.
+	 **/
+	void FixResampling( SL2_OPTIONS &_oOptions, CImage &_iImage ) {
+        // Determine the resampling size.
+		uint32_t ui32NewWidth = _oOptions.rResample.ui32NewW;
+		uint32_t ui32NewHeight = _oOptions.rResample.ui32NewH;
+        uint32_t ui32NewDepth = _oOptions.rResample.ui32NewD;
+		if ( !ui32NewWidth ) { ui32NewWidth = _iImage.Width(); }
+        if ( !ui32NewHeight ) { ui32NewHeight = _iImage.Height(); }
+        if ( !ui32NewDepth ) { ui32NewDepth = _iImage.Depth(); }
+
+		// If relative scaling is applied, apply it.
+		ui32NewWidth = static_cast<uint32_t>(ui32NewWidth * _oOptions.dRelScaleW);
+		ui32NewHeight = static_cast<uint32_t>(ui32NewHeight * _oOptions.dRelScaleH);
+        ui32NewDepth = static_cast<uint32_t>(ui32NewDepth * _oOptions.dRelScaleD);
+
+		// Rounding to any powers of 2?
+		switch ( _oOptions.rtResampleTo ) {
+			case sl2::SL2_RT_NONE : { break; }
+			case sl2::SL2_RT_NEAREST : {
+				uint32_t ui32NearestLowW = sl2::CUtilities::GetLowestPo2( ui32NewWidth ) >> 1;
+				uint32_t ui32NearestLowH = sl2::CUtilities::GetLowestPo2( ui32NewHeight ) >> 1;
+                uint32_t ui32NearestLowD = sl2::CUtilities::GetLowestPo2( ui32NewDepth ) >> 1;
+
+				uint32_t ui32NearestHiW = sl2::CUtilities::GetLowestPo2( ui32NewWidth );
+				uint32_t ui32NearestHiH = sl2::CUtilities::GetLowestPo2( ui32NewHeight );
+                uint32_t ui32NearestHiD = sl2::CUtilities::GetLowestPo2( ui32NewDepth );
+
+				ui32NewWidth = (ui32NearestHiW - ui32NewWidth) < (ui32NewWidth - ui32NearestLowW) ? ui32NearestHiW : ui32NearestLowW;
+				ui32NewHeight = (ui32NearestHiH - ui32NewHeight) < (ui32NewHeight - ui32NearestLowH) ? ui32NearestHiH : ui32NearestLowH;
+                ui32NewDepth = (ui32NearestHiD - ui32NewDepth) < (ui32NewDepth - ui32NearestLowD) ? ui32NearestHiD : ui32NearestLowD;
+				break;
+			}
+			case sl2::SL2_RT_NEXT_HI : {
+				ui32NewWidth = sl2::CUtilities::GetLowestPo2( ui32NewWidth );
+				ui32NewHeight = sl2::CUtilities::GetLowestPo2( ui32NewHeight );
+                ui32NewDepth = sl2::CUtilities::GetLowestPo2( ui32NewDepth );
+				break;
+			}
+			case sl2::SL2_RT_NEXT_LO : {
+				uint32_t ui32TempW = sl2::CUtilities::GetLowestPo2( ui32NewWidth );
+				uint32_t ui32TempH = sl2::CUtilities::GetLowestPo2( ui32NewHeight );
+                uint32_t ui32TempD = sl2::CUtilities::GetLowestPo2( ui32NewDepth );
+				ui32NewWidth = ui32TempW == ui32NewWidth ? ui32NewWidth : ui32TempW >> 1;
+				ui32NewHeight = ui32TempH == ui32NewHeight ? ui32NewHeight : ui32TempH >> 1;
+                ui32NewDepth = ui32TempD == ui32NewDepth ? ui32NewDepth : ui32TempD >> 1;
+				break;
+			}
+		}
+        _oOptions.rResample.ui32NewW = ui32NewWidth;
+        _oOptions.rResample.ui32NewH = ui32NewHeight;
+        _oOptions.rResample.ui32NewD = ui32NewDepth;
+
+        _oOptions.rResample.pfFilterW = CResampler::m_fFilter[_oOptions.fFilterFuncW].pfFunc;
+        _oOptions.rResample.dFilterSupportW = CResampler::m_fFilter[_oOptions.fFilterFuncW].dfSupport;
+        _oOptions.rResample.pfFilterH = CResampler::m_fFilter[_oOptions.fFilterFuncH].pfFunc;
+        _oOptions.rResample.dFilterSupportH = CResampler::m_fFilter[_oOptions.fFilterFuncH].dfSupport;
+        _oOptions.rResample.pfFilterD = CResampler::m_fFilter[_oOptions.fFilterFuncD].pfFunc;
+        _oOptions.rResample.dFilterSupportD = CResampler::m_fFilter[_oOptions.fFilterFuncD].dfSupport;
     }
 
     /**

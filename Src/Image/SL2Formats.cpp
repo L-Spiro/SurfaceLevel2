@@ -914,6 +914,11 @@ namespace sl2 {
 		if ( _pkifFormat->ui8BBits && _pkifTest->ui8BBits && _pkifFormat->ui8BBits < _pkifTest->ui8BBits ) { fScore += float( _pkifFormat->ui8BBits ) / _pkifTest->ui8BBits * 0.25f; }
 		if ( _pkifFormat->ui8ABits && _pkifTest->ui8ABits && _pkifFormat->ui8ABits < _pkifTest->ui8ABits ) { fScore += float( _pkifFormat->ui8ABits ) / _pkifTest->ui8ABits * 0.25f; }
 
+		if ( _pkifFormat->ui8RBits && _pkifTest->ui8RBits && _pkifTest->ui8RBits < _pkifFormat->ui8RBits ) { fScore += float( _pkifTest->ui8RBits ) / _pkifFormat->ui8RBits * 0.35f; }
+		if ( _pkifFormat->ui8GBits && _pkifTest->ui8GBits && _pkifTest->ui8GBits < _pkifFormat->ui8GBits ) { fScore += float( _pkifTest->ui8GBits ) / _pkifFormat->ui8GBits * 0.35f; }
+		if ( _pkifFormat->ui8BBits && _pkifTest->ui8BBits && _pkifTest->ui8BBits < _pkifFormat->ui8BBits ) { fScore += float( _pkifTest->ui8BBits ) / _pkifFormat->ui8BBits * 0.35f; }
+		if ( _pkifFormat->ui8ABits && _pkifTest->ui8ABits && _pkifTest->ui8ABits < _pkifFormat->ui8ABits ) { fScore += float( _pkifTest->ui8ABits ) / _pkifFormat->ui8ABits * 0.35f; }
+
 		if ( !_pkifFormat->bCompressed ) {
 			if ( _pkifFormat->ui8RShift == _pkifTest->ui8RShift ) { fScore += 1.0f; }
 			if ( _pkifFormat->ui8GShift == _pkifTest->ui8GShift ) { fScore += 1.0f; }

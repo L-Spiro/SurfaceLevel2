@@ -15,6 +15,33 @@
 
 namespace sl2 {
 
+	// == Members.
+	/** Filter parameters. */
+	CResampler::SL2_FILTER CResampler::m_fFilter[] = {
+		{ CResampler::PointFilterFunc,					0.5 },
+		{ CResampler::BilinearFilterFunc,				1.0 },
+		{ CResampler::QuadraticInterpFilterFunc,		1.0 },
+		{ CResampler::KaiserFilterFunc,					3.0 },
+		{ CResampler::LanczosXFilterFunc<2>,			2.0 },
+		{ CResampler::LanczosXFilterFunc<3>,			3.0 },
+		{ CResampler::LanczosXFilterFunc<4>,			4.0 },
+		{ CResampler::LanczosXFilterFunc<6>,			6.0 },
+		{ CResampler::LanczosXFilterFunc<8>,			8.0 },
+		{ CResampler::LanczosXFilterFunc<12>,			12.0 },
+		{ CResampler::LanczosXFilterFunc<64>,			64.0 },
+		{ CResampler::MitchellFilterFunc,				2.0 },
+		{ CResampler::CatmullRomFilterFunc,				2.0 },
+		{ CResampler::BSplineFilterFunc,				2.0 },
+		{ CResampler::BlackmanFilterFunc,				3.0 },
+		{ CResampler::GaussianFilterFunc,				1.25 },
+		{ CResampler::BellFilterFunc,					1.5 },
+	};
+
+	CResampler::CResampler() {
+	}
+	CResampler::~CResampler() {
+	}
+
 	// == Functions.
 	/**
 	 * Resamples an image in-place.
@@ -48,13 +75,13 @@ namespace sl2 {
 			if ( _pParms.bAlpha ) {
 				dBufferA.resize( sSize );
 			}
-			sSize = ui32NewW * ui32NewH * ui32D;
+			/*sSize = ui32NewW * ui32NewH * ui32D;
 			dBufferR2.resize( sSize );
 			dBufferG2.resize( sSize );
 			dBufferB2.resize( sSize );
 			if ( _pParms.bAlpha ) {
 				dBufferA2.resize( sSize );
-			}
+			}*/
 		}
 		catch ( ... ) { return true; }
 
@@ -64,10 +91,13 @@ namespace sl2 {
 		// Resize W.
 		size_t sPagesSize = ui32W * ui32H * 4;
 		size_t sNewPagesSize = ui32NewW * ui32H;
+
+		uint32_t ui32DstW = ui32H;
+		uint32_t ui32DstH = ui32NewW;
 		for ( size_t I = 0; I < (_pParms.bAlpha ? 4 : 3); ++I ) {
 			for ( size_t D = 0; D < ui32D; ++D ) {
 				for ( size_t H = 0; H < ui32H; ++H ) {
-					const double * pdRowStart = _pdIn + I + (sPagesSize * D) + (H * ui32W * 4);
+					const double * pdRowStart = _pdIn + I + ((sPagesSize * D) + (H * ui32W * 4));
 					for ( size_t W = 0; W < ui32NewW; ++W ) {
 						for ( size_t J = 0; J < m_cContribs[W].i32Indices.size(); ++J ) {
 							int32_t i32Index = m_cContribs[W].i32Indices[J];
@@ -75,11 +105,13 @@ namespace sl2 {
 								m_dBuffer[J] = _pParms.dBorderColor[I];
 							}
 							else {
-								m_dBuffer[J] = (*(pdRowStart + (i32Index * 4)));
+								m_dBuffer[J] = pdRowStart[i32Index*4];
 							}
 						}
 						double dConvolved = ConvolveAligned( m_cContribs[W].dContributions.data(), m_dBuffer.data(), m_cContribs[W].dContributions.size() );
-						(*(pdDst[I] + (sNewPagesSize * D) + (W * ui32H) + H)) = dConvolved;
+						size_t sDstIdx = (sNewPagesSize * D) + (W * ui32H) + H;
+						pdDst[I][sDstIdx] = dConvolved;
+						//pdDst[I][sDstIdx] = H / double( ui32H );
 					}
 				}
 			}
@@ -89,19 +121,21 @@ namespace sl2 {
 		if ( !CreateContribList( ui32H, ui32NewH, _pParms.taAlphaH, _pParms.pfFilterH, _pParms.dFilterSupportH, _pParms.fFilterScale ) ) { return false; }
 		sPagesSize = sNewPagesSize;
 		sNewPagesSize = ui32NewW * ui32NewH;
-		double * pdDst2[4] = { dBufferR2.data(), dBufferG2.data(), dBufferB2.data(), dBufferA2.data() };
+		uint32_t tW = ui32H;
+		uint32_t tH = ui32NewW;
+		//double * pdDst2[4] = { dBufferR2.data(), dBufferG2.data(), dBufferB2.data(), dBufferA2.data() };
 		for ( size_t I = 0; I < (_pParms.bAlpha ? 4 : 3); ++I ) {
 			for ( size_t D = 0; D < ui32D; ++D ) {
-				for ( size_t W = 0; W < ui32NewW; ++W ) {
-					const double * pdRowStart = pdDst2[I] + (sPagesSize * D) + (W * ui32NewH);
-					for ( size_t H = 0; H < ui32NewH; ++H ) {
+				for ( size_t H = 0; H < tH; ++H ) {
+					const double * pdRowStart = pdDst[I] + (sPagesSize * D) + (H * tW);
+					for ( size_t W = 0; W < ui32NewH; ++W ) {
 						double dConvolved;
-						if ( m_cContribs[H].bInsideBounds ) {
-							dConvolved = ConvolveUnaligned( m_cContribs[H].dContributions.data(), pdRowStart + m_cContribs[H].i32Indices[0], m_cContribs[H].dContributions.size() );
+						if ( m_cContribs[W].bInsideBounds ) {
+							dConvolved = ConvolveUnaligned( m_cContribs[W].dContributions.data(), pdRowStart + m_cContribs[W].i32Indices[0], m_cContribs[W].dContributions.size() );
 						}
 						else {
-							for ( size_t J = 0; J < m_cContribs[H].i32Indices.size(); ++J ) {
-								int32_t i32Index = m_cContribs[H].i32Indices[J];
+							for ( size_t J = 0; J < m_cContribs[W].i32Indices.size(); ++J ) {
+								int32_t i32Index = m_cContribs[W].i32Indices[J];
 								if ( i32Index == -1 ) {
 									m_dBuffer[J] = _pParms.dBorderColor[I];
 								}
@@ -109,13 +143,16 @@ namespace sl2 {
 									m_dBuffer[J] = (*(pdRowStart + i32Index));
 								}
 							}
-							dConvolved = ConvolveAligned( m_cContribs[H].dContributions.data(), m_dBuffer.data(), m_cContribs[H].dContributions.size() );
+							dConvolved = ConvolveAligned( m_cContribs[W].dContributions.data(), m_dBuffer.data(), m_cContribs[W].dContributions.size() );
 						}
 						if ( ui32D > 1 || ui32NewD > 1 ) {
 						}
 						else {
-							size_t sDstIdx = ((sPagesSize * D) + (W * ui32NewH) + H) * 4 + I;
+							//size_t sDstIdx = ((sNewPagesSize * D) + (W * ui32NewH) + H) * 4 + I;
+							size_t sDstIdx = ((sNewPagesSize * D) + (W * ui32NewW) + H) * 4 + I;
 							_pdOut[sDstIdx] = dConvolved;
+							//_pdOut[sDstIdx] = double( W ) / ui32NewW;
+							//_pdOut[sDstIdx] = (*(pdRowStart + W));
 						}
 					}
 				}
@@ -131,7 +168,7 @@ namespace sl2 {
 				for ( size_t D = 0; D < ui32D; ++D ) {
 					for ( size_t H = 0; H < ui32NewH; ++H ) {
 						for ( size_t W = 0; W < ui32NewW; ++W ) {
-							size_t sDstIdx = ((sPagesSize * D) + (W * ui32NewH) + H) * 4;
+							size_t sDstIdx = ((sPagesSize * D) + (H * ui32NewW) + W) * 4;
 							_pdOut[sDstIdx+3] = 1.0;
 						}
 					}
@@ -167,7 +204,7 @@ namespace sl2 {
 
 		// For fast division.
 		const double dFilterScale = 1.0 / _fFilterScale;
-		const double dNudge = 0.5;
+		constexpr double dNudge = 0.5;
 
 		double dScale = static_cast<double>(_ui32DstSize) / static_cast<double>(_ui32SrcSize);
 		double dOrigScale = dScale;
@@ -180,7 +217,7 @@ namespace sl2 {
 		for ( uint32_t I = 0; I < _ui32DstSize; ++I ) {
 			// Convert from discrete to continuous coordinates, then back.
 			vBounds[I].dCenter = (static_cast<double>(I) + dNudge) / dOrigScale;
-			//vBounds[I].dCenter -= dNudge;
+			vBounds[I].dCenter -= dNudge;
 			vBounds[I].i32Left = static_cast<int32_t>(std::floor( vBounds[I].dCenter - dHalfWidth ));
 			vBounds[I].i32Right = static_cast<int32_t>(std::ceil( vBounds[I].dCenter + dHalfWidth ));
 		}
@@ -202,23 +239,22 @@ namespace sl2 {
 
 			double dTotalWeight = 0.0;
 			for ( int32_t J = i32Left; J <= i32Right; ++J ) {
-				double dIdx = std::floor( vBounds[I].dCenter ) + 0.5;
-				dTotalWeight += (*_pfFilter)( (J - dIdx) * dScale * _fFilterScale );
+				//dTotalWeight += (*_pfFilter)( ((vBounds[I].dCenter - (J + dNudge))) * dScale * _fFilterScale );
+				dTotalWeight += (*_pfFilter)( (vBounds[I].dCenter - J) * dScale * _fFilterScale );
 			}
 
 			const double dNorm = 1.0 / dTotalWeight;
 			dTotalWeight = 0.0;
 
 			for ( int32_t J = i32Left; J <= i32Right; ++J ) {
-				
-				double dIdx = std::floor( vBounds[I].dCenter );
-				double dThisWeight = (*_pfFilter)( (J - dIdx) * dScale * _fFilterScale ) * dNorm;
+				//double dThisWeight = (*_pfFilter)( ((vBounds[I].dCenter - (J + dNudge))) * dScale * _fFilterScale ) * dNorm;
+				double dThisWeight = (*_pfFilter)( (vBounds[I].dCenter - J) * dScale * _fFilterScale ) * dNorm;
 
-				m_cContribs[I].i32Indices[J+i32Left] = CTextureAddressing::m_pfFuncs[_taAddressMode]( _ui32SrcSize, int32_t( dIdx ) );
+				m_cContribs[I].i32Indices[J-i32Left] = CTextureAddressing::m_pfFuncs[_taAddressMode]( _ui32SrcSize, J );
 
 				if ( dThisWeight == 0.0 ) { continue; }
 
-				m_cContribs[I].dContributions[J+i32Left] = dThisWeight;
+				m_cContribs[I].dContributions[J-i32Left] = dThisWeight;
 
 				dTotalWeight += dThisWeight;
 
@@ -227,17 +263,26 @@ namespace sl2 {
 					i32MaxK = J;
 				}
 			}
-			// We can take a shortcut to gathering samples if all of the samples are in-range and sequential.
-			m_cContribs[I].bInsideBounds = vBounds[I].i32Left >= 0 && (vBounds[I].i32Right) < int32_t( _ui32DstSize );
-			for ( int32_t J = i32Left + 1; J <= i32Right; ++J ) {
-				if ( m_cContribs[I].i32Indices[J+i32Left] != (m_cContribs[I].i32Indices[J+i32Left-1] + 1) ) { m_cContribs[I].bInsideBounds = false; break; }
-			}
 			
 
 			if ( i32MaxK == -1 ) { return false; }
 
 			if ( dTotalWeight != 1.0 && i32MaxK >= 0 ) {
-				m_cContribs[I].dContributions[i32MaxK+i32Left] += 1.0 - dTotalWeight;
+				m_cContribs[I].dContributions[i32MaxK-i32Left] += 1.0 - dTotalWeight;
+			}
+
+			// Trim 0 values.
+			for ( size_t J = m_cContribs[I].dContributions.size(); J--; ) {
+				if ( 0.0 == m_cContribs[I].dContributions[J] ) {
+					m_cContribs[I].dContributions.erase( m_cContribs[I].dContributions.begin() + J );
+					m_cContribs[I].i32Indices.erase( m_cContribs[I].i32Indices.begin() + J );
+				}
+			}
+
+			// We can take a shortcut to gathering samples if all of the samples are in-range and sequential.
+			m_cContribs[I].bInsideBounds = vBounds[I].i32Left >= 0 && (vBounds[I].i32Right) < int32_t( _ui32SrcSize );
+			for ( int32_t J = 1; J < m_cContribs[I].dContributions.size(); ++J ) {
+				if ( m_cContribs[I].i32Indices[J] != (m_cContribs[I].i32Indices[J-1] + 1) ) { m_cContribs[I].bInsideBounds = false; break; }
 			}
 		}
 		if ( sMaxSize ) {

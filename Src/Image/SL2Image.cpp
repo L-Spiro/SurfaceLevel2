@@ -151,33 +151,68 @@ namespace sl2 {
 
 		if ( !Format()->pfToRgba64F ) { return SL2_E_BADFORMAT; }
 		
-		if ( !iTmp.AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), Width(), Height(), Depth(), Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
 		
+
+		m_rResample.ui32W = Width();
+		m_rResample.ui32H = Height();
+		m_rResample.ui32D = Depth();
+		m_rResample.bAlpha = Format()->ui8ABits && _pkifFormat->ui8ABits;
+		uint32_t ui32NewW = m_rResample.ui32NewW ? m_rResample.ui32NewW : Width();
+		uint32_t ui32NewH = m_rResample.ui32NewH ? m_rResample.ui32NewH : Height();
+		uint32_t ui32NewD = m_rResample.ui32NewD ? m_rResample.ui32NewD : Depth();
+		bool bResize = m_rResample.ui32W != ui32NewW || m_rResample.ui32H != ui32NewH || m_rResample.ui32D != ui32NewD;
+		bool bUseTmpBuffer = false;
+		
+		if ( bResize ) {
+			size_t sOldSize = m_rResample.ui32W * m_rResample.ui32H * m_rResample.ui32D;
+			size_t sNewSize = ui32NewW * ui32NewH * ui32NewD;
+			if ( sNewSize < sOldSize ) { bUseTmpBuffer = true; }
+		}
+		
+		if ( !iTmp.AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), ui32NewW, ui32NewH, ui32NewD, Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
+		std::vector<double> vTmp;
+		if ( bUseTmpBuffer ) {
+			try {
+				vTmp.resize( m_rResample.ui32W * m_rResample.ui32H * m_rResample.ui32D * 4 + 2 );
+			}
+			catch ( ... ) { return SL2_E_OUTOFMEMORY; }
+		}
+
 		for ( size_t M = 0; M < Mipmaps(); ++M ) {
 			for ( size_t A = 0; A < ArraySize(); ++A ) {
 				for ( size_t F = 0; F < Faces(); ++F ) {
-					if ( !Format()->pfToRgba64F( Data( M, 0, A, F ), iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), Format() ) ) {
+					uint8_t * pui8Dest = iTmp.Data( M, 0, A, F );
+					if ( bUseTmpBuffer ) {
+						pui8Dest = reinterpret_cast<uint8_t *>(vTmp.data());
+					}
+
+					if ( !Format()->pfToRgba64F( Data( M, 0, A, F ), pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), Format() ) ) {
 						return SL2_E_INTERNALERROR;
 					}
-					BakeGamma( iTmp.Data( M, 0, A, F ), m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					BakeGamma( pui8Dest, m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
 					if ( !m_bIsPreMultiplied && m_bNeedsPreMultiply ) {
-						CFormat::ApplyPreMultiply( iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+						CFormat::ApplyPreMultiply( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
 						iTmp.m_bIsPreMultiplied = true;
 					}
-					if ( m_bFlipX ) {
-						CFormat::FlipX( iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					if ( m_bFlipX && m_vMipMaps[M]->Width() > 1 ) {
+						CFormat::FlipX( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
 					}
-					if ( m_bFlipY ) {
-						CFormat::FlipY( iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					if ( m_bFlipY && m_vMipMaps[M]->Height() > 1 ) {
+						CFormat::FlipY( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
 					}
-					if ( m_bFlipZ ) {
-						CFormat::FlipZ( iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					if ( m_bFlipZ && m_vMipMaps[M]->Depth() > 1 ) {
+						CFormat::FlipZ( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
 					}
 					if ( m_bSwap ) {
-						CFormat::Swap( iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+						CFormat::Swap( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
 					}
 					if ( !CFormat::SwizzleIsDefault( m_sSwizzle ) ) {
-						CFormat::ApplySwizzle( iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), m_sSwizzle );
+						CFormat::ApplySwizzle( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), m_sSwizzle );
+					}
+
+					if ( bResize ) {
+						CResampler rResampleMe;
+						if ( !rResampleMe.Resample( reinterpret_cast<double *>(pui8Dest), reinterpret_cast<double *>(iTmp.Data( M, 0, A, F )), m_rResample ) ) { return SL2_E_OUTOFMEMORY; }
 					}
 				}
 			}
@@ -189,12 +224,12 @@ namespace sl2 {
 		}
 		if ( !_pkifFormat->pfFromRgba64F ) { return SL2_E_BADFORMAT; }
 		_iDst.Reset();
-		if ( !_iDst.AllocateTexture( _pkifFormat, Width(), Height(), Depth(), Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
+		if ( !_iDst.AllocateTexture( _pkifFormat, ui32NewW, ui32NewH, ui32NewD, Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
 		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*_pkifFormat);
 		for ( size_t M = 0; M < Mipmaps(); ++M ) {
 			for ( size_t A = 0; A < ArraySize(); ++A ) {
 				for ( size_t F = 0; F < Faces(); ++F ) {
-					if ( !_pkifFormat->pfFromRgba64F( iTmp.Data( M, 0, A, F ), _iDst.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), &ifdData ) ) {
+					if ( !_pkifFormat->pfFromRgba64F( iTmp.Data( M, 0, A, F ), _iDst.Data( M, 0, A, F ), iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth(), &ifdData ) ) {
 						return SL2_E_INTERNALERROR;
 					}
 				}
@@ -270,13 +305,13 @@ namespace sl2 {
 			CFormat::ApplyPreMultiply( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
 		}
 
-		if ( m_bFlipX ) {
+		if ( m_bFlipX && m_vMipMaps[_sMip]->Width() > 1 ) {
 			CFormat::FlipX( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
 		}
-		if ( _bInvertY != m_bFlipY ) {
+		if ( _bInvertY != m_bFlipY && m_vMipMaps[_sMip]->Height() > 1 ) {
 			CFormat::FlipY( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
 		}
-		if ( m_bFlipZ ) {
+		if ( m_bFlipZ && m_vMipMaps[_sMip]->Depth() > 1 ) {
 			CFormat::FlipZ( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
 		}
 		if ( m_bSwap ) {

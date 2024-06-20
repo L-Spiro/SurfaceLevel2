@@ -31,10 +31,33 @@ namespace sl2 {
 		~CResampler();
 
 
+		// == Enumerations.
+		/** Filter functions. */
+		enum SL2_FILTER_FUNCS : size_t {
+			SL2_FF_POINT,
+			SL2_FF_BILINEAR,
+			SL2_FF_QUADRATIC,
+			SL2_FF_KAISER,
+			SL2_FF_LANCZOS2,
+			SL2_FF_LANCZOS3,
+			SL2_FF_LANCZOS4,
+			SL2_FF_LANCZOS6,
+			SL2_FF_LANCZOS8,
+			SL2_FF_LANCZOS12,
+			SL2_FF_LANCZOS64,
+			SL2_FF_MITCHELL,
+			SL2_FF_CATMULLROM,
+			SL2_FF_BSPLINE,
+			SL2_FF_BLACKMAN,
+			SL2_FF_GAUSSIAN,
+			SL2_FF_BELL,
+		};
+
+
 		// == Types.
 		/** Contributions (weights and texel indices). */
 		struct SL2_CONTRIBUTIONS {
-			std::vector<double, AlignmentAllocator<double, 64>>	dContributions;
+			std::vector<double, CAlignmentAllocator<double, 64>>dContributions;
 			std::vector<int32_t>								i32Indices;
 			bool												bInsideBounds;
 		};
@@ -65,6 +88,15 @@ namespace sl2 {
 			PfFilterFunc										pfFilterD = BilinearFilterFunc;
 			bool												bAlpha = true;
 		};
+
+		/** Filter information. */
+		typedef struct SL2_FILTER {
+			/** The filter function to use. */
+			PfFilterFunc										pfFunc;
+
+			/** Filter helper value. */
+			double												dfSupport;
+		} * LPSL2_FILTER, * const LPCSL2_FILTER;
 
 
 		// == Functions.
@@ -257,85 +289,16 @@ namespace sl2 {
 		}
 
 		/**
-		 * The Lanczos filter function with 2 samples.
+		 * The Lanczos filter function with X samples.
 		 *
 		 * \param _dT The value to filter.
 		 * \return Returns the filtered value.
 		 */
-		static inline double									Lanczos2FilterFunc( double _dT ) {
+		template <unsigned _uX>
+		static inline double									LanczosXFilterFunc( double _dT ) {
 			_dT = std::fabs( _dT );
-			if ( _dT <= 2.0 ) {
-				return Clean( SinC( _dT ) * SinC( _dT / 2.0 ) );
-			}
-			return 0.0;
-		}
-
-		/**
-		 * The Lanczos filter function with 3 samples.
-		 *
-		 * \param _dT The value to filter.
-		 * \return Returns the filtered value.
-		 */
-		static inline double									Lanczos3FilterFunc( double _dT ) {
-			_dT = std::fabs( _dT );
-			if ( _dT <= 3.0 ) {
-				return Clean( SinC( _dT ) * SinC( _dT / 3.0 ) );
-			}
-			return 0.0;
-		}
-
-		/**
-		 * The Lanczos filter function with 6 samples.
-		 *
-		 * \param _dT The value to filter.
-		 * \return Returns the filtered value.
-		 */
-		static inline double									Lanczos6FilterFunc( double _dT ) {
-			_dT = std::fabs( _dT );
-			if ( _dT <= 6.0 ) {
-				return Clean( SinC( _dT ) * SinC( _dT / 6.0 ) );
-			}
-			return 0.0;
-		}
-
-		/**
-		 * The Lanczos filter function with 8 samples.
-		 *
-		 * \param _dT The value to filter.
-		 * \return Returns the filtered value.
-		 */
-		static inline double									Lanczos8FilterFunc( double _dT ) {
-			_dT = std::fabs( _dT );
-			if ( _dT <= 8.0 ) {
-				return Clean( SinC( _dT ) * SinC( _dT / 8.0 ) );
-			}
-			return 0.0;
-		}
-
-		/**
-		 * The Lanczos filter function with 12 samples.
-		 *
-		 * \param _dT The value to filter.
-		 * \return Returns the filtered value.
-		 */
-		static inline double									Lanczos12FilterFunc( double _dT ) {
-			_dT = std::fabs( _dT );
-			if ( _dT <= 12.0 ) {
-				return Clean( SinC( _dT ) * SinC( _dT / 12.0 ) );
-			}
-			return 0.0;
-		}
-
-		/**
-		 * The Lanczos filter function with 64 samples.
-		 *
-		 * \param _dT The value to filter.
-		 * \return Returns the filtered value.
-		 */
-		static inline double									Lanczos64FilterFunc( double _dT ) {
-			_dT = std::fabs( _dT );
-			if ( _dT < 64.0 ) {
-				return static_cast<float>(Clean( SinC( _dT ) * SinC( _dT / 64.0 ) ));
+			if ( _dT <= double( _uX ) ) {
+				return Clean( SinC( _dT ) * SinC( _dT / double( _uX ) ) );
 			}
 			return 0.0;
 		}
@@ -416,6 +379,11 @@ namespace sl2 {
 			return 0.0;
 		}
 
+
+		// == Members.
+		/** Filter parameters. */
+		static SL2_FILTER										m_fFilter[];
+
 	protected :
 		// == Types.
 		/** Contribution bounds. */
@@ -435,7 +403,7 @@ namespace sl2 {
 		/** Our array of contributions. */
 		std::vector<SL2_CONTRIBUTIONS>							m_cContribs;
 		/** Buffer for convolution. */
-		std::vector<double, AlignmentAllocator<double, 64>>		m_dBuffer;
+		std::vector<double, CAlignmentAllocator<double, 64>>	m_dBuffer;
 
 
 		// == Functions.

@@ -16,7 +16,7 @@
 namespace sl2 {
 
 	template <typename T, size_t N = 16>
-    class AlignmentAllocator {
+    class CAlignmentAllocator {
     public:
         typedef T value_type;
         typedef size_t size_type;
@@ -29,12 +29,12 @@ namespace sl2 {
         typedef const T & const_reference;
 
         public :
-        inline                                                      AlignmentAllocator() throw () {}
+        inline                                                      CAlignmentAllocator() throw () {}
 
         template <typename T2>
-        inline                                                      AlignmentAllocator( const AlignmentAllocator<T2, N> & ) throw () {}
+        inline                                                      CAlignmentAllocator( const CAlignmentAllocator<T2, N> & ) throw () {}
 
-        inline                                                      ~AlignmentAllocator() throw () {}
+        inline                                                      ~CAlignmentAllocator() throw () {}
 
         inline pointer                                              address( reference r ) {
         return &r;
@@ -62,17 +62,17 @@ namespace sl2 {
 
         template <typename T2>
         struct rebind {
-            typedef AlignmentAllocator<T2, N>                       other;
+            typedef CAlignmentAllocator<T2, N>                       other;
         };
 
-        bool                                                        operator != ( const AlignmentAllocator<T,N> &other ) const  {
+        bool                                                        operator != ( const CAlignmentAllocator<T,N> &other ) const  {
             return !(*this == other);
         }
 
         // Returns true if and only if storage allocated from *this
         // can be deallocated from other, and vice versa.
         // Always returns true for stateless allocators.
-        bool                                                        operator == ( const AlignmentAllocator<T,N> &other ) const {
+        bool                                                        operator == ( const CAlignmentAllocator<T,N> &other ) const {
             return true;
         }
     };

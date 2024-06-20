@@ -38,6 +38,18 @@
 
 // Define convenience intrinsics that are missing on older compilers
 #define astcenc_mm256_set_m128i(m, n) _mm256_insertf128_si256(_mm256_castsi128_si256((n)), (m), 1)
+#if defined(_M_IX86) || defined(__i386__)
+inline __m128i _mm_cvtsi64_si128(int64_t value) {
+    // Split the 64-bit integer into two 32-bit integers.
+    int32_t low_part = static_cast<int32_t>(value);
+    int32_t high_part = static_cast<int32_t>(value >> 32);
+
+    // Create a 128-bit vector using the two 32-bit integers.
+    __m128i result = _mm_set_epi32(0, 0, high_part, low_part);
+    return result;
+}
+
+#endif	// #if defined(_M_IX86) || defined(__i386__)
 
 // ============================================================================
 // vfloat8 data type

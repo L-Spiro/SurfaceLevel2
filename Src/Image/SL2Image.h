@@ -343,6 +343,13 @@ namespace sl2 {
 		inline void											SetSwap( bool _bSwap ) { m_bSwap = _bSwap; }
 
 		/**
+		 * Gets a read/write reference to the resampling parameters.
+		 * 
+		 * \return Returns a read/write reference to the resampling parameters.
+		 **/
+		inline CResampler::SL2_RESAMPLE &					Resampling() { return m_rResample; }
+
+		/**
 		 * Gets the final size of a byte buffer to be used as a texture plane.  The plane will be over-allocated by 8 bytes and then rounded up to the nearest 8 bytes.
 		 *	So if a 1-by-1 32-bit tecture is being allocated, 4 will be passed to _sSize, and 16 will be returned ((4+8) -> 16).
 		 * 

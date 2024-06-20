@@ -25,12 +25,16 @@ namespace sl2 {
 		const sl2::CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *				pkifdFinalFormat = nullptr;								/**< Actual final format.  If not manually specified, vfAutoFormat is used. */
 		sl2::CFormat::SL2_SWIZZLE										sSwizzle = CFormat::DefaultSwizzle();					/**< The swizzle to apply. */
 		double															dGamma = 0.0;											/**< User-supplied gamma. */
-		uint32_t														ui32NewWidth = 0;										/**< -prescale width. */
-		uint32_t														ui32NewHeight = 0;										/**< -prescale height. */
-		uint32_t														ui32NewDepth = 0;										/**< -prescale3 depth. */
-		sl2::SL2_RESAMPLE_TO											rtResampleTo = sl2::SL2_RT_NONE;						/**< Resample size for -rescale. */
+		sl2::CResampler::SL2_RESAMPLE									rResample;												/**< Resampling parameters. */
+		sl2::SL2_RESAMPLE_TO											rtResampleTo = SL2_RT_NONE;								/**< Resample size for -rescale. */
+		double															dRelScaleW = 1.0;										/**< Relative width scale. */
+		double															dRelScaleH = 1.0;										/**< Relative height scale. */
+		double															dRelScaleD = 1.0;										/**< Relative depth scale. */
+		CResampler::SL2_FILTER_FUNCS									fFilterFuncW = CResampler::SL2_FF_QUADRATIC;				/**< The width filter. */
+		CResampler::SL2_FILTER_FUNCS									fFilterFuncH = CResampler::SL2_FF_QUADRATIC;				/**< The height filter. */
+		CResampler::SL2_FILTER_FUNCS									fFilterFuncD = CResampler::SL2_FF_QUADRATIC;				/**< The depth filter. */
 
-		int																iPngSaveOption = PNG_Z_DEFAULT_COMPRESSION;				/**< Option for saving as PNG. */
+		int																iPngSaveOption = PNG_Z_BEST_SPEED;						/**< Option for saving as PNG. */
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *					pkifdPngFormat = nullptr;								/**< The PNG format. */
 
 		sl2::SL2_VKFORMAT												vkBmpFormat = SL2_VK_FORMAT_UNDEFINED;					/**< The BMP format. */
@@ -81,6 +85,14 @@ namespace sl2 {
 	 * \param _eError The error code to print.
 	 **/
 	void																PrintError( const char16_t * _pcText, SL2_ERRORS _eError );
+
+	/**
+	 * Fix up the resampling parameters.
+	 * 
+	 * \param _oOptions The options to fix up.
+	 * \param _iImage The image off of which to base the adjustments.
+	 **/
+	void																FixResampling( SL2_OPTIONS &_oOptions, CImage &_iImage );
 
 	/**
 	 * Exports as PNG.

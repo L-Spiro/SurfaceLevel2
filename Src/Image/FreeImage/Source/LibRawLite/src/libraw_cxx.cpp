@@ -1564,7 +1564,7 @@ void LibRaw::copy_fuji_uncropped(unsigned short cblack[4],unsigned short *dmaxp)
     {
       int col;
       unsigned short ldmax = 0;
-      for (col=0; col < IO.fuji_width << !libraw_internal_data.unpacker_data.fuji_layout; col++) 
+      for (col=0; col < IO.fuji_width << int(!libraw_internal_data.unpacker_data.fuji_layout); col++) 
         {
           unsigned r,c;
           if (libraw_internal_data.unpacker_data.fuji_layout) {
@@ -1718,7 +1718,7 @@ int LibRaw::raw2image_ex(int do_subtract_black)
     
     if(IO.fuji_width && do_crop)
       {
-        int IO_fw = S.width >> !libraw_internal_data.unpacker_data.fuji_layout;
+        int IO_fw = S.width >> int(!libraw_internal_data.unpacker_data.fuji_layout);
         int t_alloc_width = (S.height >> libraw_internal_data.unpacker_data.fuji_layout) + IO_fw;
         int t_alloc_height = t_alloc_width - 1;
         alloc_height = (t_alloc_height + IO.shrink) >> IO.shrink;
@@ -1755,7 +1755,7 @@ int LibRaw::raw2image_ex(int do_subtract_black)
           {
             if(do_crop)
               {
-                IO.fuji_width = S.width >> !libraw_internal_data.unpacker_data.fuji_layout;
+                IO.fuji_width = S.width >> int(!libraw_internal_data.unpacker_data.fuji_layout);
                 int IO_fwidth = (S.height >> libraw_internal_data.unpacker_data.fuji_layout) + IO.fuji_width;
                 int IO_fheight = IO_fwidth - 1;
                 
