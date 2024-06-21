@@ -25,6 +25,7 @@ namespace sl2 {
 
 	CImage::CImage() :
 		m_dGamma( 0.0 ),
+		m_dTargetGamma( 0.0 ),
 		m_sArraySize( 0 ),
 		m_sFaces( 0 ),
 		m_pkifFormat( nullptr ),
@@ -81,6 +82,8 @@ namespace sl2 {
 	 * Resets the object to scratch.  It can be reused after this.
 	 **/
 	void CImage::Reset() {
+		m_dGamma = 0.0,
+		m_dTargetGamma = 0.0;
 		m_sArraySize = 0;
 		m_sFaces = 0;
 		for ( auto I = m_vMipMaps.size(); I--; ) {
@@ -213,6 +216,9 @@ namespace sl2 {
 					if ( bResize ) {
 						CResampler rResampleMe;
 						if ( !rResampleMe.Resample( reinterpret_cast<double *>(pui8Dest), reinterpret_cast<double *>(iTmp.Data( M, 0, A, F )), m_rResample ) ) { return SL2_E_OUTOFMEMORY; }
+					}
+					if ( m_dTargetGamma ) {
+						BakeGamma( iTmp.Data( M, 0, A, F ), 1.0 / m_dTargetGamma, ui32NewW, ui32NewH, ui32NewD );
 					}
 				}
 			}
@@ -352,7 +358,7 @@ namespace sl2 {
 		m_sArraySize = _sArray;
 		m_sFaces = _sFaces;
 		m_pkifFormat = _pkifFormat;
-		m_dGamma = 0.0;
+		m_dGamma = m_dTargetGamma = 0.0;
 		
 		size_t sSrcBaseSize = CFormat::GetFormatSize( _pkifFormat, _ui32Width, _ui32Height, _ui32Depth );
 		if ( !sSrcBaseSize ) { Reset(); return false; }
@@ -394,7 +400,7 @@ namespace sl2 {
 	 * \return Returns true if no changes need to be made when copying this image to a new image given the target format, flip flag, resample paramaters, etc.
 	 **/
 	bool CImage::ParametersAreUnchanged( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, bool _bFlip, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) {
-		if ( (m_dGamma == 0.0 || m_dGamma == 1.0) &&
+		if ( (m_dGamma == 0.0 || m_dGamma == 1.0) && (m_dTargetGamma == 0.0 || m_dTargetGamma == 1.0) &&
 			(_bFlip == m_bFlipY) &&
 			!m_bFlipX && !m_bFlipZ &&
 			CFormat::SwizzleIsDefault( m_sSwizzle ) &&
@@ -1050,7 +1056,7 @@ namespace sl2 {
 		}
 
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * pkiffFormat = CFormat::FindFormatDataByVulkan( vFormat );
-		uint32_t ui32DestRowWidth = CFormat::GetRowSize( pkiffFormat, lpbfhInfo->ui32Width );
+		size_t sDestRowWidth = CFormat::GetRowSize( pkiffFormat, lpbfhInfo->ui32Width );
 
 		switch ( lpbfhInfo->ui16BitsPerPixel ) {
 			case 8 : {
@@ -1075,10 +1081,10 @@ namespace sl2 {
 						uint32_t ui32YOff = ((Y * ui32RowWidth * ui32BytesPerPixel) >> 3) + ui32ActualOffset;
 
 						// This line is what handles reverse-encoded bitmaps.
-						uint32_t ui32YOffDest = bReverse ? Y * ui32DestRowWidth :
-							(ui32Height - Y - 1) * ui32DestRowWidth;
+						size_t sYOffDest = bReverse ? Y * sDestRowWidth :
+							(ui32Height - Y - 1) * sDestRowWidth;
 
-						uint8_t * pui8Dest = &Data()[ui32YOffDest];
+						uint8_t * pui8Dest = &Data()[sYOffDest];
 
 						
 
@@ -1216,12 +1222,12 @@ namespace sl2 {
 				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 					uint32_t ui32YOffSrc = Y * ui32RowWidth + ui32ActualOffset;
 					// This line is what handles reverse-encoded bitmaps.
-					uint32_t ui32YOffDest = bReverse ? Y * ui32DestRowWidth :
-						(ui32Height - Y - 1) * ui32DestRowWidth;
+					size_t sYOffDest = bReverse ? Y * sDestRowWidth :
+						(ui32Height - Y - 1) * sDestRowWidth;
 
 					// We can copy whole rows at a time if they are in the same format already.
 					const uint8_t * pui8Src = &_vData.data()[ui32YOffSrc];
-					uint8_t * pui8Dest = &Data()[ui32YOffDest];
+					uint8_t * pui8Dest = &Data()[sYOffDest];
 
 					// Since bitmaps store the alpha on the reverse side, we cannot use this trick
 					//	when there is an alpha channel.  In the end, it turns out that this only

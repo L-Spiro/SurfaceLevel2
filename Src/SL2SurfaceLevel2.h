@@ -24,15 +24,16 @@ namespace sl2 {
 		std::vector<std::u16string>										vOutputs;												/**< The output files. */
 		const sl2::CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *				pkifdFinalFormat = nullptr;								/**< Actual final format.  If not manually specified, vfAutoFormat is used. */
 		sl2::CFormat::SL2_SWIZZLE										sSwizzle = CFormat::DefaultSwizzle();					/**< The swizzle to apply. */
-		double															dGamma = 0.0;											/**< User-supplied gamma. */
+		double															dGamma = 1.0 / -2.2;									/**< User-supplied gamma. */
+		double															dTargetGamma = 1.0 / -2.2;								/**< User-supplied target gamma. */
 		sl2::CResampler::SL2_RESAMPLE									rResample;												/**< Resampling parameters. */
 		sl2::SL2_RESAMPLE_TO											rtResampleTo = SL2_RT_NONE;								/**< Resample size for -rescale. */
 		double															dRelScaleW = 1.0;										/**< Relative width scale. */
 		double															dRelScaleH = 1.0;										/**< Relative height scale. */
 		double															dRelScaleD = 1.0;										/**< Relative depth scale. */
-		CResampler::SL2_FILTER_FUNCS									fFilterFuncW = CResampler::SL2_FF_QUADRATIC;				/**< The width filter. */
-		CResampler::SL2_FILTER_FUNCS									fFilterFuncH = CResampler::SL2_FF_QUADRATIC;				/**< The height filter. */
-		CResampler::SL2_FILTER_FUNCS									fFilterFuncD = CResampler::SL2_FF_QUADRATIC;				/**< The depth filter. */
+		CResampler::SL2_FILTER_FUNCS									fFilterFuncW = CResampler::SL2_FF_QUADRATIC;			/**< The width filter. */
+		CResampler::SL2_FILTER_FUNCS									fFilterFuncH = CResampler::SL2_FF_QUADRATIC;			/**< The height filter. */
+		CResampler::SL2_FILTER_FUNCS									fFilterFuncD = CResampler::SL2_FF_QUADRATIC;			/**< The depth filter. */
 
 		int																iPngSaveOption = PNG_Z_BEST_SPEED;						/**< Option for saving as PNG. */
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *					pkifdPngFormat = nullptr;								/**< The PNG format. */

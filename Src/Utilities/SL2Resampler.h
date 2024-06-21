@@ -238,7 +238,7 @@ namespace sl2 {
 		 * \return Returns the given value if it is above a certain epsilon or 0.
 		 */
 		static inline double									Clean( double _dVal ) {
-			static const double dEps = 0.0000125;
+			constexpr double dEps = 0.0000125;
 			return std::fabs( _dVal ) >= dEps ? _dVal : 0.0;
 		}
 

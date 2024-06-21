@@ -36,7 +36,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 												return int( CODE )
 #define SL2_ERROR( CODE )						SL2_ERRORT( nullptr, (CODE) )
 
-#define SL2_CHECK( TOTAL, NAME )                 _iArgC >= (TOTAL) && std::wcscmp( &(*_wcpArgV)[1], L ## #NAME ) == 0
+#define SL2_CHECK( TOTAL, NAME )                 _iArgC >= (TOTAL) && ::_wcsicmp( &(*_wcpArgV)[1], L ## #NAME ) == 0
 #define SL2_ADV( VAL )                          _iArgC -= (VAL); _wcpArgV += (VAL); continue
     while ( _iArgC ) {
         if ( (*_wcpArgV)[0] == L'-' ) {
@@ -137,6 +137,14 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, srgb ) ) {
+                oOptions.dGamma = 1.0 / -2.2;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 2, targetgamma ) ) {
+                oOptions.dTargetGamma = ::_wtof( _wcpArgV[1] );
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 1, target_srgb ) ) {
                 oOptions.dGamma = -2.2;
                 SL2_ADV( 1 );
             }
@@ -366,6 +374,108 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.dRelScaleD = ::_wtof( _wcpArgV[3] );
 				SL2_ADV( 4 );
 			}
+            if ( SL2_CHECK( 1, RescaleBox ) || SL2_CHECK( 1, ResampleBox ) || SL2_CHECK( 1, ResamplePoint ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_POINT;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_POINT;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_POINT;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleTent ) || SL2_CHECK( 1, ResampleTent ) || SL2_CHECK( 1, ResampleBilinear ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_BILINEAR;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_BILINEAR;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_BILINEAR;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleQuadratic ) || SL2_CHECK( 1, ResampleQuadratic ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_QUADRATIC;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_QUADRATIC;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_QUADRATIC;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleKaiser ) || SL2_CHECK( 1, ResampleKaiser ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_KAISER;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_KAISER;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_KAISER;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleLanczos2 ) || SL2_CHECK( 1, ResampleLanczos2 ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS2;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_LANCZOS2;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_LANCZOS2;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleLanczos3 ) || SL2_CHECK( 1, ResampleLanczos3 ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS3;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_LANCZOS3;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_LANCZOS3;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleLanczos4 ) || SL2_CHECK( 1, ResampleLanczos4 ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS4;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_LANCZOS4;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_LANCZOS4;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleLanczos6 ) || SL2_CHECK( 1, ResampleLanczos6 ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS6;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_LANCZOS6;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_LANCZOS6;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleLanczos8 ) || SL2_CHECK( 1, ResampleLanczos8 ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS8;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_LANCZOS8;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_LANCZOS8;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleLanczos12 ) || SL2_CHECK( 1, ResampleLanczos12 ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS12;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_LANCZOS12;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_LANCZOS12;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleLanczos64 ) || SL2_CHECK( 1, ResampleLanczos64 ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS64;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_LANCZOS64;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_LANCZOS64;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleMitchell ) || SL2_CHECK( 1, ResampleMitchell ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_MITCHELL;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_MITCHELL;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_MITCHELL;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleCatrom ) || SL2_CHECK( 1, ResampleCatrom ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_CATMULLROM;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_CATMULLROM;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_CATMULLROM;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleBSpline ) || SL2_CHECK( 1, ResampleBSpline ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_BSPLINE;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_BSPLINE;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_BSPLINE;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleBlackman ) || SL2_CHECK( 1, ResampleBlackman ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_BLACKMAN;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_BLACKMAN;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_BLACKMAN;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleGaussian ) || SL2_CHECK( 1, ResampleGaussian ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_GAUSSIAN;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_GAUSSIAN;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_GAUSSIAN;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleBell ) || SL2_CHECK( 1, ResampleBell ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_BELL;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_BELL;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_BELL;
+                SL2_ADV( 1 );
+            }
 
 
 
@@ -698,6 +808,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         iImage.Resampling() = oOptions.rResample;
         iImage.SetNeedsPreMultiply( oOptions.bNeedsPreMultiply );
         iImage.SetGamma( oOptions.dGamma );
+        iImage.SetTargetGamma( oOptions.dTargetGamma );
         iImage.SetSwizzle( oOptions.sSwizzle );
         iImage.SetSwap( oOptions.bSwap );
         oOptions.pkifdFinalFormat = pkifdFormat;
@@ -1054,11 +1165,11 @@ namespace sl2 {
         if ( eError != SL2_E_SUCCESS ) { return eError; }
 
 
-        uint32_t ui32Pitch = CFormat::GetRowSize( pkifdUseMe->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
-        uint32_t ui32Slice = uint32_t( ui32Pitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
+        size_t sPitch = CFormat::GetRowSize( pkifdUseMe->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
+        uint32_t ui32Slice = uint32_t( sPitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
         for ( uint32_t H = 0; H < _iImage.GetMipmaps()[_sMip]->Height(); ++H ) {
             BYTE * pui8Bits = ::FreeImage_GetScanLine( fiImage.pbBitmap, int( H ) );
-            uint8_t * pui8Src = vConverted.data() + ui32Slice + ui32Pitch * H;
+            uint8_t * pui8Src = vConverted.data() + ui32Slice + sPitch * H;
             switch ( fitType ) {
                 case FIT_BITMAP : {
                     switch ( pkifdUseMe->pkifdFormat->ui32BlockSizeInBits ) {
@@ -1267,11 +1378,11 @@ namespace sl2 {
 		if ( !fiImage.pbBitmap ) { return SL2_E_OUTOFMEMORY; }
 
 
-        uint32_t ui32Pitch = CFormat::GetRowSize( pkifdUseMe->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
-        uint32_t ui32Slice = uint32_t( ui32Pitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
+        size_t sPitch = CFormat::GetRowSize( pkifdUseMe->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
+        uint32_t ui32Slice = uint32_t( sPitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
         for ( uint32_t H = 0; H < _iImage.GetMipmaps()[_sMip]->Height(); ++H ) {
             BYTE * pui8Bits = ::FreeImage_GetScanLine( fiImage.pbBitmap, int( H ) );
-            uint8_t * pui8Src = vConverted.data() + ui32Slice + ui32Pitch * H;
+            uint8_t * pui8Src = vConverted.data() + ui32Slice + sPitch * H;
             switch ( fitType ) {
                 case FIT_BITMAP : {
                     switch ( pkifdUseMe->pkifdFormat->ui32BlockSizeInBits ) {
@@ -1538,13 +1649,13 @@ namespace sl2 {
 		if ( !fiImage.pbBitmap ) { return SL2_E_OUTOFMEMORY; }
 
 
-        uint32_t ui32Pitch = CFormat::GetRowSize( CFormat::FindFormatDataByVulkan( fFormat ), _iImage.GetMipmaps()[_sMip]->Width() );
-        uint32_t ui32Slice = uint32_t( ui32Pitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
+        size_t sPitch = CFormat::GetRowSize( CFormat::FindFormatDataByVulkan( fFormat ), _iImage.GetMipmaps()[_sMip]->Width() );
+        uint32_t ui32Slice = uint32_t( sPitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
         uint32_t ui32Height = _iImage.GetMipmaps()[_sMip]->Height();
         uint32_t ui32Width = _iImage.GetMipmaps()[_sMip]->Width();
         for ( uint32_t H = 0; H < ui32Height; ++H ) {
             BYTE * pui8Bits = ::FreeImage_GetScanLine( fiImage.pbBitmap, int( H ) );
-            uint8_t * pui8Src = vConverted.data() + ui32Slice + ui32Pitch * H;
+            uint8_t * pui8Src = vConverted.data() + ui32Slice + sPitch * H;
             switch ( fitType ) {
                 case FIT_FLOAT : {
 					for ( uint32_t X = 0; X < ui32Width; ++X ) {
@@ -1704,13 +1815,13 @@ namespace sl2 {
 		if ( !fiImage.pbBitmap ) { return SL2_E_OUTOFMEMORY; }
 
 
-        uint32_t ui32Pitch = CFormat::GetRowSize( pkifdUseMe->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
-        uint32_t ui32Slice = uint32_t( ui32Pitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
+        size_t sPitch = CFormat::GetRowSize( pkifdUseMe->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
+        uint32_t ui32Slice = uint32_t( sPitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
         uint32_t ui32Height = _iImage.GetMipmaps()[_sMip]->Height();
         uint32_t ui32Width = _iImage.GetMipmaps()[_sMip]->Width();
         for ( uint32_t H = 0; H < ui32Height; ++H ) {
             BYTE * pui8Bits = ::FreeImage_GetScanLine( fiImage.pbBitmap, int( H ) );
-            uint8_t * pui8Src = vConverted.data() + ui32Slice + ui32Pitch * H;
+            uint8_t * pui8Src = vConverted.data() + ui32Slice + sPitch * H;
             switch ( pkifdUseMe->pkifdFormat->vfVulkanFormat ) {
                 case SL2_VK_FORMAT_R8G8B8_UNORM : {}
                 case SL2_VK_FORMAT_R8G8B8_SRGB : {
@@ -1882,13 +1993,13 @@ namespace sl2 {
 		if ( !fiImage.pbBitmap ) { return SL2_E_OUTOFMEMORY; }
 
 
-        uint32_t ui32Pitch = CFormat::GetRowSize( pkifdUseMe->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
-        uint32_t ui32Slice = uint32_t( ui32Pitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
+        size_t sPitch = CFormat::GetRowSize( pkifdUseMe->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
+        uint32_t ui32Slice = uint32_t( sPitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
         uint32_t ui32Height = _iImage.GetMipmaps()[_sMip]->Height();
         uint32_t ui32Width = _iImage.GetMipmaps()[_sMip]->Width();
         for ( uint32_t H = 0; H < ui32Height; ++H ) {
             BYTE * pui8Bits = ::FreeImage_GetScanLine( fiImage.pbBitmap, int( H ) );
-            uint8_t * pui8Src = vConverted.data() + ui32Slice + ui32Pitch * H;
+            uint8_t * pui8Src = vConverted.data() + ui32Slice + sPitch * H;
             switch ( pkifdUseMe->pkifdFormat->vfVulkanFormat ) {
                 case SL2_VK_FORMAT_R8G8B8_UNORM : {}
                 case SL2_VK_FORMAT_R8G8B8_SRGB : {
@@ -2045,13 +2156,13 @@ namespace sl2 {
 		if ( !fiImage.pbBitmap ) { return SL2_E_OUTOFMEMORY; }
 
 
-        uint32_t ui32Pitch = CFormat::GetRowSize( pkifdUseMe->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
-        uint32_t ui32Slice = uint32_t( ui32Pitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
+        size_t sPitch = CFormat::GetRowSize( pkifdUseMe->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
+        uint32_t ui32Slice = uint32_t( sPitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
         uint32_t ui32Height = _iImage.GetMipmaps()[_sMip]->Height();
         uint32_t ui32Width = _iImage.GetMipmaps()[_sMip]->Width();
         for ( uint32_t H = 0; H < ui32Height; ++H ) {
             BYTE * pui8Bits = ::FreeImage_GetScanLine( fiImage.pbBitmap, int( H ) );
-            uint8_t * pui8Src = vConverted.data() + ui32Slice + ui32Pitch * H;
+            uint8_t * pui8Src = vConverted.data() + ui32Slice + sPitch * H;
             for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
                 RGBTRIPLE * prgbDst = reinterpret_cast<RGBTRIPLE *>(pui8Bits) + X;
                 const CFormat::SL2_RGB * prgbSrc = reinterpret_cast<CFormat::SL2_RGB *>(pui8Src) + X;

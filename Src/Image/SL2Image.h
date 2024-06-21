@@ -315,6 +315,13 @@ namespace sl2 {
 		inline void											SetGamma( double _dGamma ) { m_dGamma = _dGamma; }
 
 		/**
+		 * Sets the target gamma.
+		 * 
+		 * \param _dGamma The user-supplied gamma.
+		 **/
+		inline void											SetTargetGamma( double _dGamma ) { m_dTargetGamma = _dGamma; }
+
+		/**
 		 * Sets whether or not alpha needs to be pre-multiplied.
 		 * 
 		 * \param _bPreMult If true, alpha will be premultiplied.
@@ -362,6 +369,7 @@ namespace sl2 {
 	protected :
 		// == Members.
 		double												m_dGamma;								/**< The gamma curve.  Negative values indicate the IEC 61966-2-1:1999 sRGB curve. */
+		double												m_dTargetGamma;							/**< The target gamma curve. */
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *		m_pkifFormat;							/**< The texture format. */
 		std::vector<std::unique_ptr<CSurface>>				m_vMipMaps;								/**< The array of mipmaps.  Index 0 is the base level. */
 		size_t												m_sArraySize;							/**< Number of slices in an array.  1 for flat 1D/2D images. */
