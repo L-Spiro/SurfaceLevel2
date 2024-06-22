@@ -20,7 +20,10 @@ namespace sl2 {
 	CResampler::SL2_FILTER CResampler::m_fFilter[] = {
 		{ CResampler::PointFilterFunc,					0.5 },
 		{ CResampler::BilinearFilterFunc,				1.0 },
-		{ CResampler::QuadraticInterpFilterFunc,		1.0 },
+		{ CResampler::QuadraticSharpFilterFunc,			1.0 },
+		{ CResampler::QuadraticInterpolFilterFunc,		1.5 },
+		{ CResampler::QuadraticApproxFilterFunc,		1.5 },
+		{ CResampler::QuadraticMixFilterFunc,			1.5 },
 		{ CResampler::KaiserFilterFunc,					3.0 },
 		{ CResampler::LanczosXFilterFunc<2>,			2.0 },
 		{ CResampler::LanczosXFilterFunc<3>,			3.0 },
@@ -33,6 +36,7 @@ namespace sl2 {
 		{ CResampler::CatmullRomFilterFunc,				2.0 },
 		{ CResampler::BSplineFilterFunc,				2.0 },
 		{ CResampler::BlackmanFilterFunc,				3.0 },
+		{ CResampler::GaussianSharpFilterFunc,			1.25 },
 		{ CResampler::GaussianFilterFunc,				1.25 },
 		{ CResampler::BellFilterFunc,					1.5 },
 	};
@@ -260,7 +264,7 @@ namespace sl2 {
 
 				if ( dThisWeight > dMaxW ) {
 					dMaxW = dThisWeight;
-					i32MaxK = J;
+					i32MaxK = J - i32Left;
 				}
 			}
 			
@@ -268,7 +272,7 @@ namespace sl2 {
 			if ( i32MaxK == -1 ) { return false; }
 
 			if ( dTotalWeight != 1.0 && i32MaxK >= 0 ) {
-				m_cContribs[I].dContributions[i32MaxK-i32Left] += 1.0 - dTotalWeight;
+				m_cContribs[I].dContributions[i32MaxK] += 1.0 - dTotalWeight;
 			}
 
 			// Trim 0 values.

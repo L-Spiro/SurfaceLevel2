@@ -36,7 +36,10 @@ namespace sl2 {
 		enum SL2_FILTER_FUNCS : size_t {
 			SL2_FF_POINT,
 			SL2_FF_BILINEAR,
+			SL2_FF_QUADRATICSHARP,
 			SL2_FF_QUADRATIC,
+			SL2_FF_QUADRATICAPPROX,
+			SL2_FF_QUADRATICMIX,
 			SL2_FF_KAISER,
 			SL2_FF_LANCZOS2,
 			SL2_FF_LANCZOS3,
@@ -49,6 +52,7 @@ namespace sl2 {
 			SL2_FF_CATMULLROM,
 			SL2_FF_BSPLINE,
 			SL2_FF_BLACKMAN,
+			SL2_FF_GAUSSIANSHARP,
 			SL2_FF_GAUSSIAN,
 			SL2_FF_BELL,
 		};
@@ -132,7 +136,7 @@ namespace sl2 {
 		 * \param _dX A happy parameter.
 		 * \return Returns happiness.
 		 */
-		static inline double									SinC( double _dX ) {
+		static inline double									Sinc( double _dX ) {
 			_dX *= std::numbers::pi;
 			if ( _dX < 0.01 && _dX > -0.01 ) {
 				return 1.0 + _dX * _dX * (-1.0 / 6.0 + _dX * _dX * 1.0 / 120.0);
@@ -211,22 +215,47 @@ namespace sl2 {
 		 * \return Returns happiness.
 		 */
 		static inline double									BlackmanWindow( double _dX ) {
-			return 42659071 + 0.49656062 * std::cos( std::numbers::pi * _dX ) + 0.07684867 * std::cos( 2.0 * std::numbers::pi * _dX );
+			constexpr double dA0 = 7938.0 / 18608.0;	// 0.42659071367153911236158592146239243447780609130859375
+			constexpr double dA1 = 9240.0 / 18608.0;	// 0.4965606190885640813803547644056379795074462890625
+			constexpr double dA2 = 1430.0 / 18608.0;	// 0.07684866723989682013584712194642634131014347076416015625
+			return dA0 + dA1 * std::cos( std::numbers::pi * _dX ) + dA2 * std::cos( 2.0 * std::numbers::pi * _dX );
 		}
 
 		/**
 		 * Quadratic filter function.
 		 *
 		 * \param _dT The value to filter.
-		 * \param _fB Helper value.
+		 * \param _dB Helper value.
 		 * \return Returns the filtered value.
 		 */
-		static inline double									QuadraticFilterFunc( double _dT, float _fB ) {
+		static inline double									QuadraticSharpFilterFunc( double _dT, double _dB ) {
 			_dT = std::fabs( _dT );
 			if ( _dT < 1.0 ) {
 				double dTt = _dT * _dT;
-				return _dT < 0.5 ? (-2.0 * _fB) * dTt + 0.5 * (_fB + 1.0) :
-					(_fB * dTt) + (-2.0 * _fB - 0.5) * _dT + (3.0 / 4.0) * (_fB + 1.0);
+				return _dT < 0.5 ? (-2.0 * _dB) * dTt + 0.5 * (_dB + 1.0) :
+					(_dB * dTt) + (-2.0 * _dB - 0.5) * _dT + (3.0 / 4.0) * (_dB + 1.0);
+			}
+			return 0.0;
+		}
+
+		/**
+		 * Quadratic filter function.
+		 *
+		 * \param _dT The value to filter.
+		 * \param _dB Helper value.
+		 * \return Returns the filtered value.
+		 */
+		static inline double									QuadraticFilterFunc2( double _dT, double _dB ) {
+			_dT = std::fabs( _dT );
+			constexpr double dThresh = 1.5;
+			if ( _dT < dThresh ) {
+				double dTt = _dT * _dT;
+				if ( _dT < 0.5 ) {
+					return (-2.0 * _dB) * dTt + 0.5 * (_dB + 1.0);
+				}
+				else {
+					return (_dB * dTt) + (-2.0 * _dB - 0.5) * _dT + (3.0 / 4.0) * (_dB + 1.0);
+				}
 			}
 			return 0.0;
 		}
@@ -270,7 +299,31 @@ namespace sl2 {
 		 * \param _dT The value to filter.
 		 * \return Returns the filtered value.
 		 */
-		static inline double									QuadraticInterpFilterFunc( double _dT ) { return QuadraticFilterFunc( _dT, 1.0 ); }
+		static inline double									QuadraticSharpFilterFunc( double _dT ) { return QuadraticSharpFilterFunc( _dT, 1.0 ); }
+
+		/**
+		 * Quadratic filter function.
+		 *
+		 * \param _dT The value to filter.
+		 * \return Returns the filtered value.
+		 */
+		static inline double									QuadraticInterpolFilterFunc( double _dT ) { return QuadraticFilterFunc2( _dT, 1.0 ); }
+
+		/**
+		 * Quadratic filter function.
+		 *
+		 * \param _dT The value to filter.
+		 * \return Returns the filtered value.
+		 */
+		static inline double									QuadraticApproxFilterFunc( double _dT ) { return QuadraticFilterFunc2( _dT, 0.5 ); }
+
+		/**
+		 * Quadratic filter function.
+		 *
+		 * \param _dT The value to filter.
+		 * \return Returns the filtered value.
+		 */
+		static inline double									QuadraticMixFilterFunc( double _dT ) { return QuadraticFilterFunc2( _dT, 0.8 ); }
 
 		/**
 		 * The Kaiser filter function.
@@ -283,7 +336,7 @@ namespace sl2 {
 			if ( _dT < 3.0 ) {
 				static const float fAtt = 40.0;
 				static const double dAlpha = std::exp( std::log( 0.58417 * (fAtt - 20.96) ) * 0.4 ) + 0.07886 * (fAtt - 20.96);
-				return static_cast<float>(Clean( SinC( _dT ) * KaiserHelper( dAlpha, 3.0, _dT ) ));
+				return static_cast<float>(Clean( Sinc( _dT ) * KaiserHelper( dAlpha, 3.0, _dT ) ));
 			}
 			return 0.0;
 		}
@@ -298,7 +351,7 @@ namespace sl2 {
 		static inline double									LanczosXFilterFunc( double _dT ) {
 			_dT = std::fabs( _dT );
 			if ( _dT <= double( _uX ) ) {
-				return Clean( SinC( _dT ) * SinC( _dT / double( _uX ) ) );
+				return Clean( Sinc( _dT ) * Sinc( _dT / double( _uX ) ) );
 			}
 			return 0.0;
 		}
@@ -342,7 +395,7 @@ namespace sl2 {
 		static inline double									BlackmanFilterFunc( double _dT ) {
 			if ( _dT < 0.0 ) { _dT = -_dT; }
 			if ( _dT < 3.0 ) {
-				return Clean( SinC( _dT ) * BlackmanWindow( _dT / 3.0 ) );
+				return Clean( Sinc( _dT ) * BlackmanWindow( _dT / 3.0 ) );
 			}
 			return 0.0;
 		}
@@ -353,10 +406,25 @@ namespace sl2 {
 		 * \param _dT The value to filter.
 		 * \return Returns the filtered value.
 		 */
-		static inline double									GaussianFilterFunc( double _dT ) {
+		static inline double									GaussianSharpFilterFunc( double _dT ) {
 			if ( _dT < 0.0 ) { _dT = -_dT; }
 			if ( _dT < 1.25 ) {
 				return Clean( std::exp( -2.0 * _dT * _dT ) * std::sqrt( 2.0 / std::numbers::pi ) * BlackmanWindow( _dT / 1.25 ) );
+			}
+			return 0.0;
+		}
+
+		/**
+		 * The Gaussian Sharp filter function.
+		 *
+		 * \param _dT The value to filter.
+		 * \return Returns the filtered value.
+		 */
+		static inline double									GaussianFilterFunc( double _dT ) {
+			if ( _dT < 0.0 ) { _dT = -_dT; }
+			if ( _dT < 1.25 ) {
+				const double dSigma = 0.52;
+				return Clean( std::exp( -(_dT * _dT) / (2.0 * dSigma * dSigma) ) * (1.0 / (dSigma * std::sqrt( 2.0 * std::numbers::pi ))) * BlackmanWindow( _dT / 1.25 ) );
 			}
 			return 0.0;
 		}

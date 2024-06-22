@@ -31,9 +31,12 @@ namespace sl2 {
 		double															dRelScaleW = 1.0;										/**< Relative width scale. */
 		double															dRelScaleH = 1.0;										/**< Relative height scale. */
 		double															dRelScaleD = 1.0;										/**< Relative depth scale. */
-		CResampler::SL2_FILTER_FUNCS									fFilterFuncW = CResampler::SL2_FF_QUADRATIC;			/**< The width filter. */
-		CResampler::SL2_FILTER_FUNCS									fFilterFuncH = CResampler::SL2_FF_QUADRATIC;			/**< The height filter. */
-		CResampler::SL2_FILTER_FUNCS									fFilterFuncD = CResampler::SL2_FF_QUADRATIC;			/**< The depth filter. */
+		CResampler::SL2_FILTER_FUNCS									fFilterFuncW = CResampler::SL2_FF_QUADRATICSHARP;		/**< The width filter. */
+		CResampler::SL2_FILTER_FUNCS									fFilterFuncH = CResampler::SL2_FF_QUADRATICSHARP;		/**< The height filter. */
+		CResampler::SL2_FILTER_FUNCS									fFilterFuncD = CResampler::SL2_FF_QUADRATICSHARP;		/**< The depth filter. */
+		uint32_t														ui32ClampW = 0;											/**< Width clamp. */
+		uint32_t														ui32ClampH = 0;											/**< Height clamp. */
+		uint32_t														ui32ClampD = 0;											/**< Depth clamp. */
 
 		int																iPngSaveOption = PNG_Z_BEST_SPEED;						/**< Option for saving as PNG. */
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *					pkifdPngFormat = nullptr;								/**< The PNG format. */

@@ -96,9 +96,9 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 catch ( ... ) { SL2_ERROR( sl2::SL2_E_OUTOFMEMORY ); }
                 SL2_ADV( 2 );
             }
-            if ( SL2_CHECK( 4, weight ) ) {
-                sl2::CFormat::SetLuma( ::_wtof( _wcpArgV[1] ), ::_wtof( _wcpArgV[2] ), ::_wtof( _wcpArgV[3] ) );
-                SL2_ADV( 4 );
+            if ( SL2_CHECK( 4, weight ) || SL2_CHECK( 4, weights ) ) {
+				sl2::CFormat::SetLuma( ::_wtof( _wcpArgV[1] ), ::_wtof( _wcpArgV[2] ), ::_wtof( _wcpArgV[3] ) );
+				SL2_ADV( 4 );
             }
             if ( SL2_CHECK( 2, luma ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"REC_709" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"REC709" ) == 0 ) {
@@ -386,10 +386,28 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_BILINEAR;
                 SL2_ADV( 1 );
             }
+            if ( SL2_CHECK( 1, RescaleQuadraticSharp ) || SL2_CHECK( 1, ResampleQuadraticSharp ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_QUADRATICSHARP;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_QUADRATICSHARP;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_QUADRATICSHARP;
+                SL2_ADV( 1 );
+            }
             if ( SL2_CHECK( 1, RescaleQuadratic ) || SL2_CHECK( 1, ResampleQuadratic ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_QUADRATIC;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_QUADRATIC;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_QUADRATIC;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleQuadraticApprox ) || SL2_CHECK( 1, ResampleQuadraticApprox ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_QUADRATICAPPROX;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_QUADRATICAPPROX;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_QUADRATICAPPROX;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, RescaleQuadraticMix ) || SL2_CHECK( 1, ResampleQuadraticMix ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_QUADRATICMIX;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_QUADRATICMIX;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_QUADRATICMIX;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleKaiser ) || SL2_CHECK( 1, ResampleKaiser ) ) {
@@ -464,6 +482,12 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_BLACKMAN;
                 SL2_ADV( 1 );
             }
+            if ( SL2_CHECK( 1, RescaleGaussianSharp ) || SL2_CHECK( 1, ResampleGaussianSharp ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_GAUSSIANSHARP;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_GAUSSIANSHARP;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_GAUSSIANSHARP;
+                SL2_ADV( 1 );
+            }
             if ( SL2_CHECK( 1, RescaleGaussian ) || SL2_CHECK( 1, ResampleGaussian ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_GAUSSIAN;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_GAUSSIAN;
@@ -476,8 +500,19 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_BELL;
                 SL2_ADV( 1 );
             }
+            if ( SL2_CHECK( 3, clamp ) || SL2_CHECK( 3, clamp2 ) ) {
+				oOptions.ui32ClampW = ::_wtoi( _wcpArgV[1] );
+				oOptions.ui32ClampH = ::_wtoi( _wcpArgV[2] );
+				SL2_ADV( 3 );
+			}
+            if ( SL2_CHECK( 4, clamp3 ) ) {
+				oOptions.ui32ClampW = ::_wtoi( _wcpArgV[1] );
+				oOptions.ui32ClampH = ::_wtoi( _wcpArgV[2] );
+                oOptions.ui32ClampD = ::_wtoi( _wcpArgV[3] );
+				SL2_ADV( 4 );
+			}
 
-
+            
 
 
             
@@ -1021,6 +1056,17 @@ namespace sl2 {
 				break;
 			}
 		}
+        // Apply clamps.
+		if ( _oOptions.ui32ClampW ) {
+			ui32NewWidth = std::min( _oOptions.ui32ClampW, ui32NewWidth );
+		}
+		if ( _oOptions.ui32ClampH ) {
+			ui32NewHeight = std::min( _oOptions.ui32ClampH, ui32NewHeight );
+		}
+        if ( _oOptions.ui32ClampD ) {
+			ui32NewDepth = std::min( _oOptions.ui32ClampD, ui32NewDepth );
+		}
+
         _oOptions.rResample.ui32NewW = ui32NewWidth;
         _oOptions.rResample.ui32NewH = ui32NewHeight;
         _oOptions.rResample.ui32NewD = ui32NewDepth;
