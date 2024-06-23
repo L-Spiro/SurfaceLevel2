@@ -1205,6 +1205,17 @@ namespace sl2 {
 		SL2_LS_TOTAL
 	};
 
+	/** Channel access. */
+	enum SL2_CHANNEL_ACCESS {
+		SL2_CA_R,																	/**< The red channel. */
+		SL2_CA_G,																	/**< The green channel. */
+		SL2_CA_B,																	/**< The blue channel. */
+		SL2_CA_A,																	/**< The alpha channel. */
+		SL2_CA_AVERAGE,																/**< Average of the RGB channels. */
+		SL2_CA_WEIGHTED_AVERAGE,													/**< Weighted average of the RGB channels using LSI_*_WEIGHT. */
+		SL2_CA_MAX,																	/**< Maximum between the RGB channels. */
+	};
+
 	/**
 	 * Class CFormat
 	 * \brief All of the image formats, along with conversion routines and functions for working with the formats (encoding, decoding, etc.)

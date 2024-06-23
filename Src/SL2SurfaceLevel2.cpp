@@ -512,9 +512,262 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 				SL2_ADV( 4 );
 			}
 
-            
+            if ( SL2_CHECK( 2, textureaddressing ) || SL2_CHECK( 2, ta ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_CLAMP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"repeat" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"wrap" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_WRAP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirror" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"reflect" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_MIRROR;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirroronce" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"mirror_once" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_MIRROR_ONCE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_BORDER;
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressing\"|\"ta\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                oOptions.rResample.taColorH = oOptions.rResample.taColorD = oOptions.rResample.taAlphaW = oOptions.rResample.taAlphaH = oOptions.rResample.taAlphaD = oOptions.rResample.taColorW;
+                SL2_ADV( 2 );
+            }
 
+            if ( SL2_CHECK( 2, textureaddressingw ) || SL2_CHECK( 2, taw ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_CLAMP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"repeat" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"wrap" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_WRAP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirror" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"reflect" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_MIRROR;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirroronce" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"mirror_once" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_MIRROR_ONCE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_BORDER;
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingw\"|\"taw\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                oOptions.rResample.taAlphaW = oOptions.rResample.taColorW;
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 2, textureaddressingh ) || SL2_CHECK( 2, tah ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
+                    oOptions.rResample.taColorH = sl2::SL2_TA_CLAMP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"repeat" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"wrap" ) == 0 ) {
+                    oOptions.rResample.taColorH = sl2::SL2_TA_WRAP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirror" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"reflect" ) == 0 ) {
+                    oOptions.rResample.taColorH = sl2::SL2_TA_MIRROR;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirroronce" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"mirror_once" ) == 0 ) {
+                    oOptions.rResample.taColorH = sl2::SL2_TA_MIRROR_ONCE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
+                    oOptions.rResample.taColorH = sl2::SL2_TA_BORDER;
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingh\"|\"tah\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                oOptions.rResample.taAlphaH = oOptions.rResample.taColorH;
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 2, textureaddressingd ) || SL2_CHECK( 2, tad ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
+                    oOptions.rResample.taColorD = sl2::SL2_TA_CLAMP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"repeat" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"wrap" ) == 0 ) {
+                    oOptions.rResample.taColorD = sl2::SL2_TA_WRAP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirror" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"reflect" ) == 0 ) {
+                    oOptions.rResample.taColorD = sl2::SL2_TA_MIRROR;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirroronce" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"mirror_once" ) == 0 ) {
+                    oOptions.rResample.taColorD = sl2::SL2_TA_MIRROR_ONCE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
+                    oOptions.rResample.taColorD = sl2::SL2_TA_BORDER;
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingd\"|\"tad\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                oOptions.rResample.taAlphaD = oOptions.rResample.taColorD;
+                SL2_ADV( 2 );
+            }
 
+            if ( SL2_CHECK( 2, textureaddressingw_opaque ) || SL2_CHECK( 2, taw_opaque ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_CLAMP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"repeat" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"wrap" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_WRAP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirror" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"reflect" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_MIRROR;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirroronce" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"mirror_once" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_MIRROR_ONCE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_BORDER;
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingw_opaque\"|\"taw_opaque\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 2, textureaddressingh_opaque ) || SL2_CHECK( 2, tah_opaque ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
+                    oOptions.rResample.taColorH = sl2::SL2_TA_CLAMP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"repeat" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"wrap" ) == 0 ) {
+                    oOptions.rResample.taColorH = sl2::SL2_TA_WRAP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirror" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"reflect" ) == 0 ) {
+                    oOptions.rResample.taColorH = sl2::SL2_TA_MIRROR;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirroronce" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"mirror_once" ) == 0 ) {
+                    oOptions.rResample.taColorH = sl2::SL2_TA_MIRROR_ONCE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
+                    oOptions.rResample.taColorH = sl2::SL2_TA_BORDER;
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingh_opaque\"|\"tah_opaque\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 2, textureaddressingd_opaque ) || SL2_CHECK( 2, tad_opaque ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
+                    oOptions.rResample.taColorD = sl2::SL2_TA_CLAMP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"repeat" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"wrap" ) == 0 ) {
+                    oOptions.rResample.taColorD = sl2::SL2_TA_WRAP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirror" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"reflect" ) == 0 ) {
+                    oOptions.rResample.taColorD = sl2::SL2_TA_MIRROR;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirroronce" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"mirror_once" ) == 0 ) {
+                    oOptions.rResample.taColorD = sl2::SL2_TA_MIRROR_ONCE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
+                    oOptions.rResample.taColorD = sl2::SL2_TA_BORDER;
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingd_opaque\"|\"tad_opaque\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
+
+            if ( SL2_CHECK( 2, textureaddressingw_alpha ) || SL2_CHECK( 2, taw_alpha ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
+                    oOptions.rResample.taAlphaW = sl2::SL2_TA_CLAMP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"repeat" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"wrap" ) == 0 ) {
+                    oOptions.rResample.taAlphaW = sl2::SL2_TA_WRAP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirror" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"reflect" ) == 0 ) {
+                    oOptions.rResample.taAlphaW = sl2::SL2_TA_MIRROR;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirroronce" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"mirror_once" ) == 0 ) {
+                    oOptions.rResample.taAlphaW = sl2::SL2_TA_MIRROR_ONCE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
+                    oOptions.rResample.taAlphaW = sl2::SL2_TA_BORDER;
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingw_alpha\"|\"taw_alpha\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 2, textureaddressingh_alpha ) || SL2_CHECK( 2, tah_alpha ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
+                    oOptions.rResample.taAlphaH = sl2::SL2_TA_CLAMP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"repeat" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"wrap" ) == 0 ) {
+                    oOptions.rResample.taAlphaH = sl2::SL2_TA_WRAP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirror" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"reflect" ) == 0 ) {
+                    oOptions.rResample.taAlphaH = sl2::SL2_TA_MIRROR;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirroronce" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"mirror_once" ) == 0 ) {
+                    oOptions.rResample.taAlphaH = sl2::SL2_TA_MIRROR_ONCE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
+                    oOptions.rResample.taAlphaH = sl2::SL2_TA_BORDER;
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingh_alpha\"|\"tah_alpha\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 2, textureaddressingd_alpha ) || SL2_CHECK( 2, tad_alpha ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
+                    oOptions.rResample.taAlphaD = sl2::SL2_TA_CLAMP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"repeat" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"wrap" ) == 0 ) {
+                    oOptions.rResample.taAlphaD = sl2::SL2_TA_WRAP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirror" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"reflect" ) == 0 ) {
+                    oOptions.rResample.taAlphaD = sl2::SL2_TA_MIRROR;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirroronce" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"mirror_once" ) == 0 ) {
+                    oOptions.rResample.taAlphaD = sl2::SL2_TA_MIRROR_ONCE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
+                    oOptions.rResample.taAlphaD = sl2::SL2_TA_BORDER;
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingd_alpha\"|\"tad_alpha\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
+
+            if ( SL2_CHECK( 2, nm_channel ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"r" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"red" ) == 0 ) {
+                    oOptions.caChannelAccess = sl2::SL2_CA_R;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"g" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"green" ) == 0 ) {
+                    oOptions.caChannelAccess = sl2::SL2_CA_G;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"b" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"blue" ) == 0 ) {
+                    oOptions.caChannelAccess = sl2::SL2_CA_B;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"a" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"alpha" ) == 0 ) {
+                    oOptions.caChannelAccess = sl2::SL2_CA_A;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"max" ) == 0 ) {
+                    oOptions.caChannelAccess = sl2::SL2_CA_MAX;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"rgb" ) == 0 ) {
+                    oOptions.caChannelAccess = sl2::SL2_CA_AVERAGE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"colorspace" ) == 0 ) {
+                    oOptions.caChannelAccess = sl2::SL2_CA_WEIGHTED_AVERAGE;
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"nm_channel\": \"{}\". Must be r, g, b, a, rgb, max, or colorspace.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
             
             if ( SL2_CHECK( 1, png_default ) ) {
                 oOptions.iPngSaveOption = (oOptions.iPngSaveOption & 0xFF00) | PNG_DEFAULT;

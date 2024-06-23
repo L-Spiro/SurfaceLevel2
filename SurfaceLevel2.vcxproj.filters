@@ -411,6 +411,9 @@
     <ClInclude Include="Src\Utilities\SL2AlignmentAllocator.h">
       <Filter>Header Files\Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Image\SL2Kernel.h">
+      <Filter>Header Files\Image</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\SL2SurfaceLevel2.cpp">
@@ -705,6 +708,9 @@
       <Filter>Source Files\Utilities</Filter>
     </ClCompile>
     <ClCompile Include="Src\Image\SL2TextureAddressing.cpp">
+      <Filter>Source Files\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\SL2Kernel.cpp">
       <Filter>Source Files\Image</Filter>
     </ClCompile>
   </ItemGroup>

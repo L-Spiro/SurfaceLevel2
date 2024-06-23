@@ -38,6 +38,11 @@ namespace sl2 {
 		uint32_t														ui32ClampH = 0;											/**< Height clamp. */
 		uint32_t														ui32ClampD = 0;											/**< Depth clamp. */
 
+		uint32_t														ui32NormalKernelSize = 0;								/**< Normal-map generation kernel size. */
+		SL2_CHANNEL_ACCESS												caChannelAccess = SL2_CA_MAX;							/**< Normal-map channel access. */
+		double															dNormalScale = 1.0;										/**< Normal-map scalar. */
+		bool															bNormalizeMips = false;									/**< If mipmaps should be normalized or not. */
+
 		int																iPngSaveOption = PNG_Z_BEST_SPEED;						/**< Option for saving as PNG. */
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *					pkifdPngFormat = nullptr;								/**< The PNG format. */
 

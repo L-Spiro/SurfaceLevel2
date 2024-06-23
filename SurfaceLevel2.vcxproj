@@ -80,6 +80,7 @@
     <ClInclude Include="Src\Image\PVRTexTool\PVRTextureVersion.h" />
     <ClInclude Include="Src\Image\SL2Formats.h" />
     <ClInclude Include="Src\Image\SL2Image.h" />
+    <ClInclude Include="Src\Image\SL2Kernel.h" />
     <ClInclude Include="Src\Image\SL2KtxTexture.h" />
     <ClInclude Include="Src\Image\SL2Surface.h" />
     <ClInclude Include="Src\Image\SL2TextureAddressing.h" />
@@ -199,6 +200,7 @@
     <ClCompile Include="Src\Image\KTX-Software\lib\writer2.c" />
     <ClCompile Include="Src\Image\SL2Formats.cpp" />
     <ClCompile Include="Src\Image\SL2Image.cpp" />
+    <ClCompile Include="Src\Image\SL2Kernel.cpp" />
     <ClCompile Include="Src\Image\SL2Surface.cpp" />
     <ClCompile Include="Src\Image\SL2TextureAddressing.cpp" />
     <ClCompile Include="Src\Image\Squish\alpha.cpp" />
