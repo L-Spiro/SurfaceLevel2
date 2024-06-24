@@ -21,6 +21,7 @@ namespace sl2 {
 	 * Description: A kernel.
 	 */
 	class CKernel {
+	public :
 		CKernel();
 		CKernel( const CKernel &_kOther );
 		~CKernel();
@@ -161,8 +162,14 @@ namespace sl2 {
 	 * \return Returns true if the new kernel was made.
 	 */
 	inline bool CKernel::SetSize( uint32_t _ui32Size ) {
+		if ( !_ui32Size ) {
+			m_ui32Size = 0;
+			m_vKernel.clear();
+			m_vKernel = std::vector<double>();
+			return true;
+		}
 		try {
-			m_vKernel.resize( _ui32Size*_ui32Size );
+			m_vKernel.resize( _ui32Size * _ui32Size );
 		}
 		catch ( ... ) { m_ui32Size = 0; return false; }
 

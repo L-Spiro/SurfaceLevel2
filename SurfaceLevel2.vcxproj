@@ -110,6 +110,7 @@
     <ClInclude Include="Src\Utilities\SL2Resampler.h" />
     <ClInclude Include="Src\Utilities\SL2Stream.h" />
     <ClInclude Include="Src\Utilities\SL2Utilities.h" />
+    <ClInclude Include="Src\Utilities\SL2Vector.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Files\SL2FileBase.cpp" />

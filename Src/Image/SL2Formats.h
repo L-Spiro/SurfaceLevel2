@@ -1687,6 +1687,13 @@ namespace sl2 {
 		}
 
 		/**
+		 * Gets the current luma coefficient.
+		 *
+		 * \return Returns the current luma coefficient.
+		 **/
+		static const CFormat::SL2_LUMA &											Luma() { return m_lCurCoeffs; }
+
+		/**
 		 * Sets the performance level, 0-5, with 0 being the slowest and 5 being the fastest.
 		 * 
 		 * \param _ui32Level The performance level. 0 = Very Slow, 5 = Ultra Fast.

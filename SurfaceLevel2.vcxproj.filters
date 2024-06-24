@@ -414,6 +414,9 @@
     <ClInclude Include="Src\Image\SL2Kernel.h">
       <Filter>Header Files\Image</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Utilities\SL2Vector.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\SL2SurfaceLevel2.cpp">

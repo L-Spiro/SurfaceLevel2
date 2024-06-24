@@ -16,6 +16,7 @@
 
 #include "../Utilities/SL2Resampler.h"
 #include "SL2Formats.h"
+#include "SL2Kernel.h"
 #include "SL2Surface.h"
 
 #include <cstdint>
@@ -365,16 +366,37 @@ namespace sl2 {
 		 **/
 		static inline size_t								GetActualPlaneSize( size_t _sSize );
 
+		/**
+		 * Applies a kernel to the given double image.
+		 * 
+		 * \param _pdImage The buffer on which to operate.
+		 * \param _ui32X X coordinate of the texel to which to apply the kernel.
+		 * \param _ui32Y Y coordinate of the texel to which to apply the kernel.
+		 * \param _ui32W Width of the image buffer.
+		 * \param _ui32H Height of the image buffer.
+		 * \param _ui32D Depth slice of the image buffer.
+		 * \param _kKernel the kernel to apply.
+		 * \param _taAddressW Texture-addressing for width.
+		 * \param _taAddressH Texture-addressing for height.
+		 * \param _dBorder The borner color.
+		 * \return Returns true if allocating a temporary buffer succeeded.
+		 **/
+		static double										ApplyKernel( double * _pdImage, uint32_t _ui32X, uint32_t _ui32Y, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D, const CKernel &_kKernel,
+			SL2_TEXTURE_ADDRESSING _taAddressW, SL2_TEXTURE_ADDRESSING _taAddressH, double _dBorder );
+
 
 	protected :
 		// == Members.
 		double												m_dGamma;								/**< The gamma curve.  Negative values indicate the IEC 61966-2-1:1999 sRGB curve. */
 		double												m_dTargetGamma;							/**< The target gamma curve. */
+		CKernel												m_kKernel;								/**< The kernel to apply. */
+		double												m_dKernelScale;							/**< Kernel scale. */
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *		m_pkifFormat;							/**< The texture format. */
 		std::vector<std::unique_ptr<CSurface>>				m_vMipMaps;								/**< The array of mipmaps.  Index 0 is the base level. */
 		size_t												m_sArraySize;							/**< Number of slices in an array.  1 for flat 1D/2D images. */
 		size_t												m_sFaces;								/**< 1 for normal textures, 6 for cube textures. */
 		CFormat::SL2_SWIZZLE								m_sSwizzle;								/**< Swizzle setting. */
+		SL2_CHANNEL_ACCESS									m_caKernelChannal;						/**< The channel for the kernel to access. */
 		bool												m_bIsPreMultiplied;						/**< Is the image already pre-multiplied? */
 		bool												m_bNeedsPreMultiply;					/**< Does the image need to be pre-multiplied? */
 		bool												m_bFlipX;								/**< Flip horizontally? */
@@ -422,6 +444,17 @@ namespace sl2 {
 		 * \param _ui32Depth The depth of the image.
 		 **/
 		void												BakeGamma( uint8_t * _pui8Buffer, double _dGamma, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth );
+
+		/**
+		 * Converts a given RGBA64F buffer to a normal map.
+		 * 
+		 * \param _prgbaData The RGBA buffer to convert to a normal map.
+		 * \param _ui32W The width of the input texture.
+		 * \param _ui32H The height of the input texture.
+		 * \param _ui32D The depth slice to convert.
+		 * \return Returns true if the temporary buffer was allocated.
+		 **/
+		bool												ConvertToNormalMap( CFormat::SL2_RGBA64F * _prgbaData, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D );
 
 		/**
 		 * Loads using the FreeImage library.
