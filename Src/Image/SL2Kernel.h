@@ -193,7 +193,7 @@ namespace sl2 {
 	inline void CKernel::Transpose() {
 		for ( uint32_t Y = 0; Y < Size(); ++Y ) {
 			for ( uint32_t X = 0; X < Size(); ++X ) {
-				if ( Y == X ) { continue; }
+				if ( Y <= X ) { continue; }
 				std::swap( (*this)[Y][X], (*this)[X][Y] );
 			}
 		}

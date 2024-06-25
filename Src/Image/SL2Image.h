@@ -358,6 +358,16 @@ namespace sl2 {
 		inline CResampler::SL2_RESAMPLE &					Resampling() { return m_rResample; }
 
 		/**
+		 * Sets normal-map parameters.
+		 * 
+		 * \param _kKernel The kernel to use.
+		 * \param _dScale The normal-map scale.
+		 * \param _caNormalChannel the channel to use.
+		 * \return Returns true if the kernel copied successfully.  False indicates a memory failure.
+		 **/
+		bool												SetNormalMapParms( const CKernel &_kKernel, double _dScale, SL2_CHANNEL_ACCESS _caNormalChannel );
+
+		/**
 		 * Gets the final size of a byte buffer to be used as a texture plane.  The plane will be over-allocated by 8 bytes and then rounded up to the nearest 8 bytes.
 		 *	So if a 1-by-1 32-bit tecture is being allocated, 4 will be passed to _sSize, and 16 will be returned ((4+8) -> 16).
 		 * 
@@ -391,6 +401,7 @@ namespace sl2 {
 		double												m_dTargetGamma;							/**< The target gamma curve. */
 		CKernel												m_kKernel;								/**< The kernel to apply. */
 		double												m_dKernelScale;							/**< Kernel scale. */
+		double												m_dKernelYAxis;							/**< Kernel Y axis. */
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *		m_pkifFormat;							/**< The texture format. */
 		std::vector<std::unique_ptr<CSurface>>				m_vMipMaps;								/**< The array of mipmaps.  Index 0 is the base level. */
 		size_t												m_sArraySize;							/**< Number of slices in an array.  1 for flat 1D/2D images. */

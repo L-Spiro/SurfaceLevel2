@@ -32,6 +32,7 @@ namespace sl2 {
 		m_pkifFormat( nullptr ),
 		m_caKernelChannal( SL2_CA_R ),
 		m_dKernelScale( 1.0 ),
+		m_dKernelYAxis( 1.0 ),
 		m_bIsPreMultiplied( false ),
 		m_bNeedsPreMultiply( false ),
 		m_bFlipX( false ),
@@ -64,6 +65,7 @@ namespace sl2 {
 			m_sSwizzle = _iOther.m_sSwizzle;
 			m_caKernelChannal = _iOther.m_caKernelChannal;
 			m_dKernelScale = _iOther.m_dKernelScale;
+			m_dKernelYAxis = _iOther.m_dKernelYAxis;
 			m_bIsPreMultiplied = _iOther.m_bIsPreMultiplied;
 			m_bNeedsPreMultiply = _iOther.m_bNeedsPreMultiply;
 			m_bFlipX = _iOther.m_bFlipX;
@@ -86,6 +88,7 @@ namespace sl2 {
 			_iOther.m_bSwap = false;
 			_iOther.m_caKernelChannal = SL2_CA_R;
 			_iOther.m_dKernelScale = 1.0;
+			_iOther.m_dKernelYAxis = 1.0;
 			_iOther.m_rResample = CResampler::SL2_RESAMPLE();
 		}
 
@@ -109,6 +112,7 @@ namespace sl2 {
 		m_sSwizzle = CFormat::DefaultSwizzle();
 		m_caKernelChannal = SL2_CA_R;
 		m_dKernelScale = 1.0;
+		m_dKernelYAxis = 1.0;
 		m_kKernel.SetSize( 0 );
 		m_pkifFormat = nullptr;
 		m_bIsPreMultiplied = false;
@@ -207,28 +211,28 @@ namespace sl2 {
 						pui8Dest = reinterpret_cast<uint8_t *>(vTmp.data());
 					}
 
-					if ( !Format()->pfToRgba64F( Data( M, 0, A, F ), pui8Dest, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth(), Format() ) ) {
+					if ( !Format()->pfToRgba64F( Data( M, 0, A, F ), pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), Format() ) ) {
 						return SL2_E_INTERNALERROR;
 					}
-					BakeGamma( pui8Dest, m_dGamma, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );
+					BakeGamma( pui8Dest, m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
 					if ( !m_bIsPreMultiplied && m_bNeedsPreMultiply ) {
-						CFormat::ApplyPreMultiply( pui8Dest, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );
+						CFormat::ApplyPreMultiply( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
 						iTmp.m_bIsPreMultiplied = true;
 					}
-					if ( m_bFlipX && iTmp.m_vMipMaps[M]->Width() > 1 ) {
-						CFormat::FlipX( pui8Dest, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );
+					if ( m_bFlipX && m_vMipMaps[M]->Width() > 1 ) {
+						CFormat::FlipX( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
 					}
-					if ( m_bFlipY && iTmp.m_vMipMaps[M]->Height() > 1 ) {
-						CFormat::FlipY( pui8Dest, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );
+					if ( m_bFlipY && m_vMipMaps[M]->Height() > 1 ) {
+						CFormat::FlipY( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
 					}
-					if ( m_bFlipZ && iTmp.m_vMipMaps[M]->Depth() > 1 ) {
-						CFormat::FlipZ( pui8Dest, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );
+					if ( m_bFlipZ && m_vMipMaps[M]->Depth() > 1 ) {
+						CFormat::FlipZ( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
 					}
 					if ( m_bSwap ) {
-						CFormat::Swap( pui8Dest, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );
+						CFormat::Swap( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
 					}
 					if ( !CFormat::SwizzleIsDefault( m_sSwizzle ) ) {
-						CFormat::ApplySwizzle( pui8Dest, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth(), m_sSwizzle );
+						CFormat::ApplySwizzle( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), m_sSwizzle );
 					}
 
 					if ( bResize ) {
@@ -365,6 +369,23 @@ namespace sl2 {
 	}
 
 	/**
+	 * Sets normal-map parameters.
+	 * 
+	 * \param _kKernel The kernel to use.
+	 * \param _dScale The normal-map scale.
+	 * \param _caNormalChannel the channel to use.
+	 * \return Returns true if the kernel copied successfully.  False indicates a memory failure.
+	 **/
+	bool CImage::SetNormalMapParms( const CKernel &_kKernel, double _dScale, SL2_CHANNEL_ACCESS _caNormalChannel ) {
+		m_kKernel = _kKernel;
+		if ( m_kKernel.Size() != _kKernel.Size() ) { return false; }
+		m_dKernelScale = _dScale;
+		m_caKernelChannal = _caNormalChannel;
+
+		return true;
+	}
+
+	/**
 	 * Applies a kernel to the given double image.
 	 * 
 	 * \param _pdImage The buffer on which to operate.
@@ -384,7 +405,7 @@ namespace sl2 {
 		size_t sPageSize = _ui32W * _ui32H;
 
 		const uint32_t ui32Size = _kKernel.Size();
-		const int32_t i32KernelOffset = static_cast<int32_t>(ui32Size >> 1) - 1;
+		const int32_t i32KernelOffset = static_cast<int32_t>(ui32Size >> 1);
 		double dSum = 0.0;
 
 		for ( uint32_t Y = 0; Y < ui32Size; ++Y ) {
@@ -395,7 +416,7 @@ namespace sl2 {
 					dSum += _kKernel[Y][X] * _dBorder;
 				}
 				else {
-					size_t sIdx = (sPageSize * _ui32D) + ((Y + _ui32Y - i32KernelOffset) * _ui32W) + (X + _ui32X - i32KernelOffset);
+					size_t sIdx = (sPageSize * _ui32D) + (i32IdxH * _ui32W) + i32IdxW;
 					dSum += _kKernel[Y][X] * _pdImage[sIdx];
 				}
 			}
@@ -570,7 +591,7 @@ namespace sl2 {
 		for ( uint32_t D = 0; D < _ui32D; ++D ) {
 			for ( uint32_t H = 0; H < _ui32H; ++H ) {
 				for ( uint32_t W = 0; W < _ui32W; ++W ) {
-					size_t sIdx = sPageSize + (size_t( H ) * size_t( _ui32W )) + size_t( W );
+					size_t sIdx = (sPageSize * D) + (size_t( H ) * size_t( _ui32W )) + size_t( W );
 					if ( m_caKernelChannal == SL2_CA_AVERAGE ) {
 						vBuffer[sIdx] = (_prgbaData[sIdx].dRgba[SL2_CA_R] + _prgbaData[sIdx].dRgba[SL2_CA_G] + _prgbaData[sIdx].dRgba[SL2_CA_B]) / 3.0;
 						dBorder = (m_rResample.dBorderColor[0] + m_rResample.dBorderColor[1] + m_rResample.dBorderColor[2]) / 3.0;
@@ -598,13 +619,13 @@ namespace sl2 {
 		for ( uint32_t D = 0; D < _ui32D; ++D ) {
 			for ( uint32_t H = 0; H < _ui32H; ++H ) {
 				for ( uint32_t W = 0; W < _ui32W; ++W ) {
-					size_t sIdx = sPageSize + (size_t( H ) * size_t( _ui32W )) + size_t( W );
+					size_t sIdx = (sPageSize * D) + (size_t( H ) * size_t( _ui32W )) + size_t( W );
 					double dVal0 = ApplyKernel( vBuffer.data(), W, H, _ui32W, _ui32H, D, m_kKernel, m_rResample.taColorW, m_rResample.taColorH, dBorder );
 					double dVal1 = ApplyKernel( vBuffer.data(), W, H, _ui32W, _ui32H, D, kTransp, m_rResample.taColorW, m_rResample.taColorH, dBorder );
 					CVector vTmp( dVal0, dVal1, m_dKernelScale, 0.0 );
 					vTmp.Normalize();
-					_prgbaData[sIdx].dRgba[SL2_CA_R] = vTmp[0] * 0.5 + 0.5;
-					_prgbaData[sIdx].dRgba[SL2_CA_G] = vTmp[1] * 0.5 + 0.5;
+					_prgbaData[sIdx].dRgba[SL2_CA_R] = -vTmp[0] * 0.5 + 0.5;
+					_prgbaData[sIdx].dRgba[SL2_CA_G] = (vTmp[1] * m_dKernelYAxis) * 0.5 + 0.5;
 					_prgbaData[sIdx].dRgba[SL2_CA_B] = vTmp[2] * 0.5 + 0.5;
 					_prgbaData[sIdx].dRgba[SL2_CA_A] = 1.0;
 				}

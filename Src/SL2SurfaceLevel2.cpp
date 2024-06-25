@@ -132,8 +132,9 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.dGamma = ::_wtof( _wcpArgV[1] );
                 SL2_ADV( 2 );
             }
-            if ( SL2_CHECK( 1, rgbe ) ) {
+            if ( SL2_CHECK( 1, rgbe ) || SL2_CHECK( 1, linear ) ) {
                 oOptions.dGamma = 0.0;
+                oOptions.dTargetGamma = 0.0;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, srgb ) ) {
@@ -145,7 +146,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 SL2_ADV( 2 );
             }
             if ( SL2_CHECK( 1, target_srgb ) ) {
-                oOptions.dGamma = -2.2;
+                oOptions.dTargetGamma = -2.2;
                 SL2_ADV( 1 );
             }
 
@@ -392,7 +393,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_QUADRATICSHARP;
                 SL2_ADV( 1 );
             }
-            if ( SL2_CHECK( 1, RescaleQuadratic ) || SL2_CHECK( 1, ResampleQuadratic ) ) {
+            if ( SL2_CHECK( 1, RescaleQuadratic ) || SL2_CHECK( 1, ResampleQuadratic ) || SL2_CHECK( 1, ResampleQuad ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_QUADRATIC;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_QUADRATIC;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_QUADRATIC;
@@ -768,6 +769,55 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 }
                 SL2_ADV( 2 );
             }
+
+            if ( SL2_CHECK( 1, norm ) || SL2_CHECK( 1, normalize ) ) {
+                oOptions.bNormalizeMips = true;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, opengl ) ) {
+                oOptions.dNormalYAxis = 1.0;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, directx ) ) {
+                oOptions.dNormalYAxis = -1.0;
+                SL2_ADV( 1 );
+            }
+
+            if ( SL2_CHECK( 1, n3x3 ) ) {
+                if ( !oOptions.kKernel.CreateSobel3x3() ) {
+                    SL2_ERRORT( std::format( L"\"n3x3\": Out of memory allocating Sobel kernel." ).c_str(), sl2::SL2_E_OUTOFMEMORY );
+                }
+                oOptions.bNormalizeMips = true;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, n5x5 ) ) {
+                if ( !oOptions.kKernel.CreateSobel5x5() ) {
+                    SL2_ERRORT( std::format( L"\"n5x5\": Out of memory allocating Sobel kernel." ).c_str(), sl2::SL2_E_OUTOFMEMORY );
+                }
+                oOptions.bNormalizeMips = true;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, n7x7 ) ) {
+                if ( !oOptions.kKernel.CreateSobel7x7() ) {
+                    SL2_ERRORT( std::format( L"\"n7x7\": Out of memory allocating Sobel kernel." ).c_str(), sl2::SL2_E_OUTOFMEMORY );
+                }
+                oOptions.bNormalizeMips = true;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, n9x9 ) ) {
+                if ( !oOptions.kKernel.CreateSobel9x9() ) {
+                    SL2_ERRORT( std::format( L"\"n9x9\": Out of memory allocating Sobel kernel." ).c_str(), sl2::SL2_E_OUTOFMEMORY );
+                }
+                oOptions.bNormalizeMips = true;
+                SL2_ADV( 1 );
+            }
+
+            if ( SL2_CHECK( 2, scale ) ) {
+				oOptions.dNormalScale = ::_wtof( _wcpArgV[1] );
+				SL2_ADV( 2 );
+			}
+
+
             
             if ( SL2_CHECK( 1, png_default ) ) {
                 oOptions.iPngSaveOption = (oOptions.iPngSaveOption & 0xFF00) | PNG_DEFAULT;
@@ -1099,6 +1149,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         iImage.SetTargetGamma( oOptions.dTargetGamma );
         iImage.SetSwizzle( oOptions.sSwizzle );
         iImage.SetSwap( oOptions.bSwap );
+        iImage.SetNormalMapParms( oOptions.kKernel, oOptions.dNormalScale, oOptions.caChannelAccess );
         oOptions.pkifdFinalFormat = pkifdFormat;
         if ( !oOptions.pkifdFinalFormat ) {
             oOptions.pkifdFinalFormat = iImage.Format();
