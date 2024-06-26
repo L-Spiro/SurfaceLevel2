@@ -21,6 +21,7 @@ namespace sl2 {
 		SL2_TA_CLAMP											= 2,	/**< The texture coordinates are clamped to the range [0,1]. Coordinates outside this range are clamped to the edge values. */
 		SL2_TA_BORDER											= 3,	/**< The texture coordinates outside the [0,1] range are set to a border color. */
 		SL2_TA_MIRROR_ONCE										= 4,	/**< Similar to SL2_TA_MIRROR, but it mirrors only once. Any further coordinates outside the range are clamped to the edges. */
+		SL2_TA_NULL_BORDER										= 5,	/**< No border at all.  Indexed as -2.  Resampler should not include this sample in convolution. */
 
 		SL2_TA_TOTAL
 	};
@@ -98,6 +99,18 @@ namespace sl2 {
 		static inline uint32_t									MirrorOnce( uint32_t _ui32TextureSize, int32_t _i32Idx ) {
 			if ( _i32Idx < 0 ) { _i32Idx = -_i32Idx; }
 			return (_i32Idx >= 0 && static_cast<uint32_t>(_i32Idx) < _ui32TextureSize) ? _i32Idx : _ui32TextureSize - 1;
+		}
+
+		/**
+		 * Returns the new texture index after applying the SL2_TA_MIRROR_ONCE texture-addressing mode.
+		 * 
+		 * \param _ui32TextureSize The number of texels along the texture’s axis.
+		 * \param _i32Idx The texel index to translate.
+		 * \return Returns the mirrored-once texel index.
+		 **/
+		static inline uint32_t									NullBorder( uint32_t _ui32TextureSize, int32_t _i32Idx ) {
+			if ( _i32Idx < 0 || static_cast<uint32_t>(_i32Idx) >= _ui32TextureSize ) { return -2; }
+			return static_cast<uint32_t>(_i32Idx);
 		}
 
 

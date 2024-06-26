@@ -187,7 +187,6 @@ namespace sl2 {
 		uint32_t ui32NewD = m_rResample.ui32NewD ? m_rResample.ui32NewD : Depth();
 		bool bResize = m_rResample.ui32W != ui32NewW || m_rResample.ui32H != ui32NewH || m_rResample.ui32D != ui32NewD;
 		bool bUseTmpBuffer = false;
-		
 		if ( bResize ) {
 			size_t sOldSize = m_rResample.ui32W * m_rResample.ui32H * m_rResample.ui32D;
 			size_t sNewSize = ui32NewW * ui32NewH * ui32NewD;
@@ -237,7 +236,14 @@ namespace sl2 {
 
 					if ( bResize ) {
 						CResampler rResampleMe;
-						if ( !rResampleMe.Resample( reinterpret_cast<double *>(pui8Dest), reinterpret_cast<double *>(iTmp.Data( M, 0, A, F )), m_rResample ) ) { return SL2_E_OUTOFMEMORY; }
+						CResampler::SL2_RESAMPLE rResampleCopy = m_rResample;
+						rResampleCopy.ui32W = m_vMipMaps[M]->Width();
+						rResampleCopy.ui32H = m_vMipMaps[M]->Height();
+						rResampleCopy.ui32D = m_vMipMaps[M]->Depth();
+						rResampleCopy.ui32NewW = std::max( m_rResample.ui32NewW >> M, 1U );
+						rResampleCopy.ui32NewH = std::max( m_rResample.ui32NewH >> M, 1U );
+						rResampleCopy.ui32NewD = std::max( m_rResample.ui32NewD >> M, 1U );
+						if ( !rResampleMe.Resample( reinterpret_cast<double *>(pui8Dest), reinterpret_cast<double *>(iTmp.Data( M, 0, A, F )), rResampleCopy ) ) { return SL2_E_OUTOFMEMORY; }
 					}
 					
 				}
@@ -373,14 +379,16 @@ namespace sl2 {
 	 * 
 	 * \param _kKernel The kernel to use.
 	 * \param _dScale The normal-map scale.
-	 * \param _caNormalChannel the channel to use.
+	 * \param _caNormalChannel The channel to use.
+	 * \param _dY The Y axis multiplier.
 	 * \return Returns true if the kernel copied successfully.  False indicates a memory failure.
 	 **/
-	bool CImage::SetNormalMapParms( const CKernel &_kKernel, double _dScale, SL2_CHANNEL_ACCESS _caNormalChannel ) {
+	bool CImage::SetNormalMapParms( const CKernel &_kKernel, double _dScale, SL2_CHANNEL_ACCESS _caNormalChannel, double _dY ) {
 		m_kKernel = _kKernel;
 		if ( m_kKernel.Size() != _kKernel.Size() ) { return false; }
 		m_dKernelScale = _dScale;
 		m_caKernelChannal = _caNormalChannel;
+		m_dKernelYAxis = _dY;
 
 		return true;
 	}
@@ -496,6 +504,7 @@ namespace sl2 {
 			CFormat::SwizzleIsDefault( m_sSwizzle ) &&
 			!m_bSwap &&
 			!(!m_bIsPreMultiplied && m_bNeedsPreMultiply) &&
+			m_kKernel.Size() == 0 &&
 			((_pkifFormat->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED && _pkifFormat->vfVulkanFormat == Format()->vfVulkanFormat) ||
 			(_pkifFormat->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN && _pkifFormat->dfDxFormat == Format()->dfDxFormat) ||
 			(_pkifFormat->mfMetalFormat != SL2_MTLPixelFormatInvalid && _pkifFormat->mfMetalFormat == Format()->mfMetalFormat) ||
@@ -1055,15 +1064,15 @@ namespace sl2 {
 						ui32Height,
 						ui32Depth ) );
 					if ( sBaseSize < dFile.Buffers()[sIdx].vTexture.size() ) { return SL2_E_INVALIDDATA; }
-
+					uint32_t ui32DataHeight = std::max( ui32Height >> 2, 1U );
 					for ( size_t D = 0; D < ui32Depth; ++D ) {
 						size_t sDstSliceOffset = D * ui32Height * aPitch;
-						size_t sSrcSliceOffset = D * ui32Height * dFile.Pitch();
-						for ( size_t H = 0; H < ui32Height; ++H ) {
+						size_t sSrcSliceOffset = D * ui32DataHeight * aPitch;
+						for ( size_t H = 0; H < ui32DataHeight; ++H ) {
 							size_t sDst = aPitch * H + sDstSliceOffset;
-							size_t sSrc = dFile.Pitch() * H + sSrcSliceOffset;
+							size_t sSrc = aPitch * H + sSrcSliceOffset;
 
-							std::memcpy( Data( M, 0, 0, F ) + sDst, dFile.Buffers()[sIdx].vTexture.data() + sSrc, dFile.Pitch() );
+							std::memcpy( Data( M, 0, 0, F ) + sDst, dFile.Buffers()[sIdx].vTexture.data() + sSrc, aPitch );
 						}
 					}
 
@@ -1085,15 +1094,15 @@ namespace sl2 {
 						ui32Height,
 						ui32Depth ) );
 					if ( sBaseSize < dFile.Buffers()[sIdx].vTexture.size() ) { return SL2_E_INVALIDDATA; }
-
+					uint32_t ui32DataHeight = std::max( ui32Height >> 2, 1U );
 					for ( size_t D = 0; D < ui32Depth; ++D ) {
 						size_t sDstSliceOffset = D * ui32Height * aPitch;
-						size_t sSrcSliceOffset = D * ui32Height * dFile.Pitch();
-						for ( size_t H = 0; H < ui32Height; ++H ) {
+						size_t sSrcSliceOffset = D * ui32DataHeight * aPitch;
+						for ( size_t H = 0; H < ui32DataHeight; ++H ) {
 							size_t sDst = aPitch * H + sDstSliceOffset;
-							size_t sSrc = dFile.Pitch() * H + sSrcSliceOffset;
+							size_t sSrc = aPitch * H + sSrcSliceOffset;
 
-							std::memcpy( Data( M, 0, A, 0 ) + sDst, dFile.Buffers()[sIdx].vTexture.data() + sSrc, dFile.Pitch() );
+							std::memcpy( Data( M, 0, A, 0 ) + sDst, dFile.Buffers()[sIdx].vTexture.data() + sSrc, aPitch );
 						}
 					}
 

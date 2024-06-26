@@ -19,6 +19,7 @@ namespace sl2 {
 		CTextureAddressing::Clamp,
 		CTextureAddressing::Border,
 		CTextureAddressing::MirrorOnce,
+		CTextureAddressing::NullBorder,
 	};
 
 }	// namespace sl2

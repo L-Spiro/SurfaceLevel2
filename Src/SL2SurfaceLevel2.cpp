@@ -477,6 +477,18 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_BSPLINE;
                 SL2_ADV( 1 );
             }
+            if ( SL2_CHECK( 1, ResampleCardinalUniform ) || SL2_CHECK( 1, ResampleCardinal ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_CARDINALSPLINEUNIFORM;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_CARDINALSPLINEUNIFORM;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_CARDINALSPLINEUNIFORM;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, ResampleHermite ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_HERMITE;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_HERMITE;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_HERMITE;
+                SL2_ADV( 1 );
+            }
             if ( SL2_CHECK( 1, RescaleBlackman ) || SL2_CHECK( 1, ResampleBlackman ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_BLACKMAN;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_BLACKMAN;
@@ -529,6 +541,9 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_BORDER;
                 }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"no_border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"nul_border" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
+                }
                 else {
                     SL2_ERRORT( std::format( L"Invalid \"textureaddressing\"|\"ta\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
@@ -553,6 +568,9 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_BORDER;
                 }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"no_border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"nul_border" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
+                }
                 else {
                     SL2_ERRORT( std::format( L"Invalid \"textureaddressingw\"|\"taw\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
@@ -576,6 +594,9 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
                     oOptions.rResample.taColorH = sl2::SL2_TA_BORDER;
                 }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"no_border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"nul_border" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
+                }
                 else {
                     SL2_ERRORT( std::format( L"Invalid \"textureaddressingh\"|\"tah\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
@@ -598,6 +619,9 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 }
                 else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
                     oOptions.rResample.taColorD = sl2::SL2_TA_BORDER;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"no_border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"nul_border" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
                 }
                 else {
                     SL2_ERRORT( std::format( L"Invalid \"textureaddressingd\"|\"tad\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
@@ -623,6 +647,9 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_BORDER;
                 }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"no_border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"nul_border" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
+                }
                 else {
                     SL2_ERRORT( std::format( L"Invalid \"textureaddressingw_opaque\"|\"taw_opaque\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
@@ -645,6 +672,9 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
                     oOptions.rResample.taColorH = sl2::SL2_TA_BORDER;
                 }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"no_border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"nul_border" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
+                }
                 else {
                     SL2_ERRORT( std::format( L"Invalid \"textureaddressingh_opaque\"|\"tah_opaque\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
@@ -666,6 +696,9 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 }
                 else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
                     oOptions.rResample.taColorD = sl2::SL2_TA_BORDER;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"no_border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"nul_border" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
                 }
                 else {
                     SL2_ERRORT( std::format( L"Invalid \"textureaddressingd_opaque\"|\"tad_opaque\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
@@ -690,6 +723,9 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
                     oOptions.rResample.taAlphaW = sl2::SL2_TA_BORDER;
                 }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"no_border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"nul_border" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
+                }
                 else {
                     SL2_ERRORT( std::format( L"Invalid \"textureaddressingw_alpha\"|\"taw_alpha\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
@@ -712,6 +748,9 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
                     oOptions.rResample.taAlphaH = sl2::SL2_TA_BORDER;
                 }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"no_border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"nul_border" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
+                }
                 else {
                     SL2_ERRORT( std::format( L"Invalid \"textureaddressingh_alpha\"|\"tah_alpha\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
@@ -733,6 +772,9 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 }
                 else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
                     oOptions.rResample.taAlphaD = sl2::SL2_TA_BORDER;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"no_border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"nul_border" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
                 }
                 else {
                     SL2_ERRORT( std::format( L"Invalid \"textureaddressingd_alpha\"|\"tad_alpha\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
@@ -774,11 +816,11 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.bNormalizeMips = true;
                 SL2_ADV( 1 );
             }
-            if ( SL2_CHECK( 1, opengl ) ) {
+            if ( SL2_CHECK( 1, opengl ) || SL2_CHECK( 1, unity ) || SL2_CHECK( 1, blender ) || SL2_CHECK( 1, maya ) ) {
                 oOptions.dNormalYAxis = 1.0;
                 SL2_ADV( 1 );
             }
-            if ( SL2_CHECK( 1, directx ) ) {
+            if ( SL2_CHECK( 1, directx ) || SL2_CHECK( 1, ue4 ) || SL2_CHECK( 1, unreal ) || SL2_CHECK( 1, unrealengine ) || SL2_CHECK( 1, ue ) || SL2_CHECK( 1, 3dsmax ) ) {
                 oOptions.dNormalYAxis = -1.0;
                 SL2_ADV( 1 );
             }
@@ -812,7 +854,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 SL2_ADV( 1 );
             }
 
-            if ( SL2_CHECK( 2, scale ) ) {
+            if ( SL2_CHECK( 2, scale ) || SL2_CHECK( 2, nm_z ) ) {
 				oOptions.dNormalScale = ::_wtof( _wcpArgV[1] );
 				SL2_ADV( 2 );
 			}
@@ -1149,7 +1191,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         iImage.SetTargetGamma( oOptions.dTargetGamma );
         iImage.SetSwizzle( oOptions.sSwizzle );
         iImage.SetSwap( oOptions.bSwap );
-        iImage.SetNormalMapParms( oOptions.kKernel, oOptions.dNormalScale, oOptions.caChannelAccess );
+        iImage.SetNormalMapParms( oOptions.kKernel, oOptions.dNormalScale, oOptions.caChannelAccess, oOptions.dNormalYAxis );
         oOptions.pkifdFinalFormat = pkifdFormat;
         if ( !oOptions.pkifdFinalFormat ) {
             oOptions.pkifdFinalFormat = iImage.Format();
@@ -1412,11 +1454,11 @@ namespace sl2 {
                     for ( uint32_t F = 0; F < _iImage.Faces(); ++F ) {
                         for ( uint32_t D = 0; D < _iImage.Depth(); ++D ) {
                             wchar_t * pwcBuf = szBuffer;
-                            if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_M%.2u", M ); }
-                            if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_A%.2u", A ); }
-                            if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_F%.2u", F ); }
-                            if ( _iImage.Depth() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_D%.2u", D ); }
-                            pwcBuf += ::wsprintfW( szBuffer, L".png" );
+                            if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_M%.2u", M ); }
+                            if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_A%.2u", A ); }
+                            if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_F%.2u", F ); }
+                            if ( _iImage.Depth() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_D%.2u", D ); }
+                            pwcBuf += ::wsprintfW( pwcBuf, L".png" );
                             //::wsprintfW( szBuffer, L"_M%.2u_A%.2u_F%.2u_D%.2u.png", M, A, F, D );
                            SL2_ERRORS eErr = ExportAsPng( _iImage, CUtilities::Append( sRoot, szBuffer ), _oOptions, M, A, F, D );
                            if ( eErr != SL2_E_SUCCESS ) { return eErr; }
@@ -1649,11 +1691,11 @@ namespace sl2 {
                     for ( uint32_t F = 0; F < _iImage.Faces(); ++F ) {
                         for ( uint32_t D = 0; D < _iImage.Depth(); ++D ) {
                             wchar_t * pwcBuf = szBuffer;
-                            if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_M%.2u", M ); }
-                            if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_A%.2u", A ); }
-                            if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_F%.2u", F ); }
-                            if ( _iImage.Depth() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_D%.2u", D ); }
-                            pwcBuf += ::wsprintfW( szBuffer, L".bmp" );
+                            if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_M%.2u", M ); }
+                            if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_A%.2u", A ); }
+                            if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_F%.2u", F ); }
+                            if ( _iImage.Depth() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_D%.2u", D ); }
+                            pwcBuf += ::wsprintfW( pwcBuf, L".bmp" );
                             //::wsprintfW( szBuffer, L"_M%.2u_A%.2u_F%.2u_D%.2u.png", M, A, F, D );
                            SL2_ERRORS eErr = ExportAsBmp( _iImage, CUtilities::Append( sRoot, szBuffer ), _oOptions, M, A, F, D );
                            if ( eErr != SL2_E_SUCCESS ) { return eErr; }
@@ -1946,11 +1988,11 @@ namespace sl2 {
                     for ( uint32_t F = 0; F < _iImage.Faces(); ++F ) {
                         for ( uint32_t D = 0; D < _iImage.Depth(); ++D ) {
                             wchar_t * pwcBuf = szBuffer;
-                            if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_M%.2u", M ); }
-                            if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_A%.2u", A ); }
-                            if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_F%.2u", F ); }
-                            if ( _iImage.Depth() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_D%.2u", D ); }
-                            pwcBuf += ::wsprintfW( szBuffer, L".exr" );
+                            if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_M%.2u", M ); }
+                            if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_A%.2u", A ); }
+                            if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_F%.2u", F ); }
+                            if ( _iImage.Depth() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_D%.2u", D ); }
+                            pwcBuf += ::wsprintfW( pwcBuf, L".exr" );
                             //::wsprintfW( szBuffer, L"_M%.2u_A%.2u_F%.2u_D%.2u.png", M, A, F, D );
                            SL2_ERRORS eErr = ExportAsExr( _iImage, CUtilities::Append( sRoot, szBuffer ), _oOptions, M, A, F, D );
                            if ( eErr != SL2_E_SUCCESS ) { return eErr; }
@@ -2102,11 +2144,11 @@ namespace sl2 {
                     for ( uint32_t F = 0; F < _iImage.Faces(); ++F ) {
                         for ( uint32_t D = 0; D < _iImage.Depth(); ++D ) {
                             wchar_t * pwcBuf = szBuffer;
-                            if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_M%.2u", M ); }
-                            if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_A%.2u", A ); }
-                            if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_F%.2u", F ); }
-                            if ( _iImage.Depth() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_D%.2u", D ); }
-                            pwcBuf += ::wsprintfW( szBuffer, L".j2k" );
+                            if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_M%.2u", M ); }
+                            if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_A%.2u", A ); }
+                            if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_F%.2u", F ); }
+                            if ( _iImage.Depth() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_D%.2u", D ); }
+                            pwcBuf += ::wsprintfW( pwcBuf, L".j2k" );
                             //::wsprintfW( szBuffer, L"_M%.2u_A%.2u_F%.2u_D%.2u.png", M, A, F, D );
                            SL2_ERRORS eErr = ExportAsJ2k( _iImage, CUtilities::Append( sRoot, szBuffer ), _oOptions, M, A, F, D );
                            if ( eErr != SL2_E_SUCCESS ) { return eErr; }
@@ -2280,11 +2322,11 @@ namespace sl2 {
                     for ( uint32_t F = 0; F < _iImage.Faces(); ++F ) {
                         for ( uint32_t D = 0; D < _iImage.Depth(); ++D ) {
                             wchar_t * pwcBuf = szBuffer;
-                            if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_M%.2u", M ); }
-                            if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_A%.2u", A ); }
-                            if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_F%.2u", F ); }
-                            if ( _iImage.Depth() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_D%.2u", D ); }
-                            pwcBuf += ::wsprintfW( szBuffer, L".jp2" );
+                            if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_M%.2u", M ); }
+                            if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_A%.2u", A ); }
+                            if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_F%.2u", F ); }
+                            if ( _iImage.Depth() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_D%.2u", D ); }
+                            pwcBuf += ::wsprintfW( pwcBuf, L".jp2" );
                             //::wsprintfW( szBuffer, L"_M%.2u_A%.2u_F%.2u_D%.2u.png", M, A, F, D );
                            SL2_ERRORS eErr = ExportAsJp2( _iImage, CUtilities::Append( sRoot, szBuffer ), _oOptions, M, A, F, D );
                            if ( eErr != SL2_E_SUCCESS ) { return eErr; }
@@ -2459,11 +2501,11 @@ namespace sl2 {
                     for ( uint32_t F = 0; F < _iImage.Faces(); ++F ) {
                         for ( uint32_t D = 0; D < _iImage.Depth(); ++D ) {
                             wchar_t * pwcBuf = szBuffer;
-                            if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_M%.2u", M ); }
-                            if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_A%.2u", A ); }
-                            if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_F%.2u", F ); }
-                            if ( _iImage.Depth() > 1 ) { pwcBuf += ::wsprintfW( szBuffer, L"_D%.2u", D ); }
-                            pwcBuf += ::wsprintfW( szBuffer, L"." );
+                            if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_M%.2u", M ); }
+                            if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_A%.2u", A ); }
+                            if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_F%.2u", F ); }
+                            if ( _iImage.Depth() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_D%.2u", D ); }
+                            pwcBuf += ::wsprintfW( pwcBuf, L"." );
                             //::wsprintfW( szBuffer, L"_M%.2u_A%.2u_F%.2u_D%.2u.png", M, A, F, D );
                            SL2_ERRORS eErr = ExportAsJpg( _iImage, CUtilities::Append( sRoot, szBuffer ) + sExt, _oOptions, M, A, F, D );
                            if ( eErr != SL2_E_SUCCESS ) { return eErr; }

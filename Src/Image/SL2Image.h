@@ -362,10 +362,11 @@ namespace sl2 {
 		 * 
 		 * \param _kKernel The kernel to use.
 		 * \param _dScale The normal-map scale.
-		 * \param _caNormalChannel the channel to use.
+		 * \param _caNormalChannel The channel to use.
+		 * \param _dY The Y axis multiplier.
 		 * \return Returns true if the kernel copied successfully.  False indicates a memory failure.
 		 **/
-		bool												SetNormalMapParms( const CKernel &_kKernel, double _dScale, SL2_CHANNEL_ACCESS _caNormalChannel );
+		bool												SetNormalMapParms( const CKernel &_kKernel, double _dScale, SL2_CHANNEL_ACCESS _caNormalChannel, double _dY );
 
 		/**
 		 * Gets the final size of a byte buffer to be used as a texture plane.  The plane will be over-allocated by 8 bytes and then rounded up to the nearest 8 bytes.

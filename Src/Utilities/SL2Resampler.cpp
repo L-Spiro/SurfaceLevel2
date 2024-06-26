@@ -35,6 +35,8 @@ namespace sl2 {
 		{ CResampler::MitchellFilterFunc,				2.0 },
 		{ CResampler::CatmullRomFilterFunc,				2.0 },
 		{ CResampler::BSplineFilterFunc,				2.0 },
+		{ CResampler::CardinalSplineUniformFilterFunc,	2.0 },
+		{ CResampler::HermiteFilterFunc,				1.0, },
 		{ CResampler::BlackmanFilterFunc,				3.0 },
 		{ CResampler::GaussianSharpFilterFunc,			1.25 },
 		{ CResampler::GaussianFilterFunc,				1.25 },
@@ -243,8 +245,10 @@ namespace sl2 {
 
 			double dTotalWeight = 0.0;
 			for ( int32_t J = i32Left; J <= i32Right; ++J ) {
-				//dTotalWeight += (*_pfFilter)( ((vBounds[I].dCenter - (J + dNudge))) * dScale * _fFilterScale );
-				dTotalWeight += (*_pfFilter)( (vBounds[I].dCenter - J) * dScale * _fFilterScale );
+				if ( CTextureAddressing::m_pfFuncs[_taAddressMode]( _ui32SrcSize, J ) != -2 ) {
+					//dTotalWeight += (*_pfFilter)( ((vBounds[I].dCenter - (J + dNudge))) * dScale * _fFilterScale );
+					dTotalWeight += (*_pfFilter)( (vBounds[I].dCenter - J) * dScale * _fFilterScale );
+				}
 			}
 
 			const double dNorm = 1.0 / dTotalWeight;
@@ -255,6 +259,9 @@ namespace sl2 {
 				double dThisWeight = (*_pfFilter)( (vBounds[I].dCenter - J) * dScale * _fFilterScale ) * dNorm;
 
 				m_cContribs[I].i32Indices[J-i32Left] = CTextureAddressing::m_pfFuncs[_taAddressMode]( _ui32SrcSize, J );
+				if ( m_cContribs[I].i32Indices[J-i32Left] == -2 ) {
+					dThisWeight = 0.0;
+				}
 
 				if ( dThisWeight == 0.0 ) { continue; }
 

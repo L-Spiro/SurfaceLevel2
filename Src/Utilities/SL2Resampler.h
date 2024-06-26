@@ -51,6 +51,8 @@ namespace sl2 {
 			SL2_FF_MITCHELL,
 			SL2_FF_CATMULLROM,
 			SL2_FF_BSPLINE,
+			SL2_FF_CARDINALSPLINEUNIFORM,
+			SL2_FF_HERMITE,
 			SL2_FF_BLACKMAN,
 			SL2_FF_GAUSSIANSHARP,
 			SL2_FF_GAUSSIAN,
@@ -81,12 +83,12 @@ namespace sl2 {
 			uint32_t											ui32NewW = 0;
 			uint32_t											ui32NewH = 0;
 			uint32_t											ui32NewD = 0;
-			SL2_TEXTURE_ADDRESSING								taColorW = SL2_TA_CLAMP;
-			SL2_TEXTURE_ADDRESSING								taColorH = SL2_TA_CLAMP;
-			SL2_TEXTURE_ADDRESSING								taColorD = SL2_TA_CLAMP;
-			SL2_TEXTURE_ADDRESSING								taAlphaW = SL2_TA_CLAMP;
-			SL2_TEXTURE_ADDRESSING								taAlphaH = SL2_TA_CLAMP;
-			SL2_TEXTURE_ADDRESSING								taAlphaD = SL2_TA_CLAMP;
+			SL2_TEXTURE_ADDRESSING								taColorW = SL2_TA_NULL_BORDER;
+			SL2_TEXTURE_ADDRESSING								taColorH = SL2_TA_NULL_BORDER;
+			SL2_TEXTURE_ADDRESSING								taColorD = SL2_TA_NULL_BORDER;
+			SL2_TEXTURE_ADDRESSING								taAlphaW = SL2_TA_NULL_BORDER;
+			SL2_TEXTURE_ADDRESSING								taAlphaH = SL2_TA_NULL_BORDER;
+			SL2_TEXTURE_ADDRESSING								taAlphaD = SL2_TA_NULL_BORDER;
 			PfFilterFunc										pfFilterW = BilinearFilterFunc;
 			PfFilterFunc										pfFilterH = BilinearFilterFunc;
 			PfFilterFunc										pfFilterD = BilinearFilterFunc;
@@ -387,6 +389,16 @@ namespace sl2 {
 		}
 
 		/**
+		 * The Cardinal Spline Uniform filter function.
+		 *
+		 * \param _dT The value to filter.
+		 * \return Returns the filtered value.
+		 */
+		static inline double									CardinalSplineUniformFilterFunc( double _dT ) {
+			return MitchellFilterHelper( _dT, 0.0, 1.0 );
+		}
+
+		/**
 		 * The Blackman filter function.
 		 *
 		 * \param _dT The value to filter.
@@ -443,6 +455,20 @@ namespace sl2 {
 			if ( _dT < 1.5 ) {
 				_dT = _dT - 1.5;
 				return 0.5 * _dT * _dT;
+			}
+			return 0.0;
+		}
+
+		/**
+		 * The Hermite filter function.
+		 *
+		 * \param _dT The value to filter.
+		 * \return Returns the filtered value.
+		 */
+		static inline double									HermiteFilterFunc( double _dT ) {
+			if ( _dT < 0.0 ) { _dT = -_dT; }
+			if ( _dT < 1.0 ) {
+				return (2.0 * _dT - 3.0) * _dT * _dT + 1.0;
 			}
 			return 0.0;
 		}
