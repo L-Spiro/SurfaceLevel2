@@ -37,6 +37,8 @@ namespace sl2 {
 		{ CResampler::BSplineFilterFunc,				2.0 },
 		{ CResampler::CardinalSplineUniformFilterFunc,	2.0 },
 		{ CResampler::HermiteFilterFunc,				1.0, },
+		{ CResampler::HammingFilterFunc,				1.0, },
+		{ CResampler::HanningFilterFunc,				1.0, },
 		{ CResampler::BlackmanFilterFunc,				3.0 },
 		{ CResampler::GaussianSharpFilterFunc,			1.25 },
 		{ CResampler::GaussianFilterFunc,				1.25 },
@@ -101,6 +103,10 @@ namespace sl2 {
 		uint32_t ui32DstW = ui32H;
 		uint32_t ui32DstH = ui32NewW;
 		for ( size_t I = 0; I < (_pParms.bAlpha ? 4 : 3); ++I ) {
+			if ( I == 3 ) {
+				// Alpha channel.
+				if ( !CreateContribList( ui32W, ui32NewW, _pParms.taAlphaW, _pParms.pfAlphaFilterW, _pParms.dAlphaFilterSupportW, _pParms.fFilterScale ) ) { return false; }
+			}
 			for ( size_t D = 0; D < ui32D; ++D ) {
 				for ( size_t H = 0; H < ui32H; ++H ) {
 					const double * pdRowStart = _pdIn + I + ((sPagesSize * D) + (H * ui32W * 4));
@@ -131,6 +137,10 @@ namespace sl2 {
 		uint32_t tH = ui32NewW;
 		//double * pdDst2[4] = { dBufferR2.data(), dBufferG2.data(), dBufferB2.data(), dBufferA2.data() };
 		for ( size_t I = 0; I < (_pParms.bAlpha ? 4 : 3); ++I ) {
+			if ( I == 3 ) {
+				// Alpha channel.
+				if ( !CreateContribList( ui32H, ui32NewH, _pParms.taAlphaH, _pParms.pfAlphaFilterH, _pParms.dAlphaFilterSupportH, _pParms.fFilterScale ) ) { return false; }
+			}
 			for ( size_t D = 0; D < ui32D; ++D ) {
 				for ( size_t H = 0; H < tH; ++H ) {
 					const double * pdRowStart = pdDst[I] + (sPagesSize * D) + (H * tW);
@@ -154,11 +164,8 @@ namespace sl2 {
 						if ( ui32D > 1 || ui32NewD > 1 ) {
 						}
 						else {
-							//size_t sDstIdx = ((sNewPagesSize * D) + (W * ui32NewH) + H) * 4 + I;
 							size_t sDstIdx = ((sNewPagesSize * D) + (W * ui32NewW) + H) * 4 + I;
 							_pdOut[sDstIdx] = dConvolved;
-							//_pdOut[sDstIdx] = double( W ) / ui32NewW;
-							//_pdOut[sDstIdx] = (*(pdRowStart + W));
 						}
 					}
 				}

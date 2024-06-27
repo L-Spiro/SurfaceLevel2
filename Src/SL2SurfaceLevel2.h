@@ -34,6 +34,9 @@ namespace sl2 {
 		CResampler::SL2_FILTER_FUNCS									fFilterFuncW = CResampler::SL2_FF_QUADRATICSHARP;		/**< The width filter. */
 		CResampler::SL2_FILTER_FUNCS									fFilterFuncH = CResampler::SL2_FF_QUADRATICSHARP;		/**< The height filter. */
 		CResampler::SL2_FILTER_FUNCS									fFilterFuncD = CResampler::SL2_FF_QUADRATICSHARP;		/**< The depth filter. */
+		CResampler::SL2_FILTER_FUNCS									fAlphaFilterFuncW = CResampler::SL2_FF_QUADRATICSHARP;	/**< The width filter. */
+		CResampler::SL2_FILTER_FUNCS									fAlphaFilterFuncH = CResampler::SL2_FF_QUADRATICSHARP;	/**< The height filter. */
+		CResampler::SL2_FILTER_FUNCS									fAlphaFilterFuncD = CResampler::SL2_FF_QUADRATICSHARP;	/**< The depth filter. */
 		uint32_t														ui32ClampW = 0;											/**< Width clamp. */
 		uint32_t														ui32ClampH = 0;											/**< Height clamp. */
 		uint32_t														ui32ClampD = 0;											/**< Depth clamp. */

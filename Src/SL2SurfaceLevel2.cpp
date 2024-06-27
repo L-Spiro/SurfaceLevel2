@@ -375,144 +375,258 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.dRelScaleD = ::_wtof( _wcpArgV[3] );
 				SL2_ADV( 4 );
 			}
+
             if ( SL2_CHECK( 1, RescaleBox ) || SL2_CHECK( 1, ResampleBox ) || SL2_CHECK( 1, ResamplePoint ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_POINT;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_POINT;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_POINT;
+
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleTent ) || SL2_CHECK( 1, ResampleTent ) || SL2_CHECK( 1, ResampleBilinear ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_BILINEAR;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_BILINEAR;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_BILINEAR;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleQuadraticSharp ) || SL2_CHECK( 1, ResampleQuadraticSharp ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_QUADRATICSHARP;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_QUADRATICSHARP;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_QUADRATICSHARP;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleQuadratic ) || SL2_CHECK( 1, ResampleQuadratic ) || SL2_CHECK( 1, ResampleQuad ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_QUADRATIC;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_QUADRATIC;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_QUADRATIC;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleQuadraticApprox ) || SL2_CHECK( 1, ResampleQuadraticApprox ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_QUADRATICAPPROX;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_QUADRATICAPPROX;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_QUADRATICAPPROX;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleQuadraticMix ) || SL2_CHECK( 1, ResampleQuadraticMix ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_QUADRATICMIX;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_QUADRATICMIX;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_QUADRATICMIX;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleKaiser ) || SL2_CHECK( 1, ResampleKaiser ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_KAISER;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_KAISER;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_KAISER;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleLanczos2 ) || SL2_CHECK( 1, ResampleLanczos2 ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS2;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_LANCZOS2;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_LANCZOS2;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleLanczos3 ) || SL2_CHECK( 1, ResampleLanczos3 ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS3;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_LANCZOS3;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_LANCZOS3;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleLanczos4 ) || SL2_CHECK( 1, ResampleLanczos4 ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS4;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_LANCZOS4;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_LANCZOS4;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleLanczos6 ) || SL2_CHECK( 1, ResampleLanczos6 ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS6;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_LANCZOS6;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_LANCZOS6;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleLanczos8 ) || SL2_CHECK( 1, ResampleLanczos8 ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS8;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_LANCZOS8;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_LANCZOS8;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleLanczos12 ) || SL2_CHECK( 1, ResampleLanczos12 ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS12;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_LANCZOS12;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_LANCZOS12;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleLanczos64 ) || SL2_CHECK( 1, ResampleLanczos64 ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS64;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_LANCZOS64;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_LANCZOS64;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleMitchell ) || SL2_CHECK( 1, ResampleMitchell ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_MITCHELL;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_MITCHELL;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_MITCHELL;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleCatrom ) || SL2_CHECK( 1, ResampleCatrom ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_CATMULLROM;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_CATMULLROM;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_CATMULLROM;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleBSpline ) || SL2_CHECK( 1, ResampleBSpline ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_BSPLINE;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_BSPLINE;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_BSPLINE;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, ResampleCardinalUniform ) || SL2_CHECK( 1, ResampleCardinal ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_CARDINALSPLINEUNIFORM;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_CARDINALSPLINEUNIFORM;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_CARDINALSPLINEUNIFORM;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, ResampleHermite ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_HERMITE;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_HERMITE;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_HERMITE;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, ResampleHamming ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_HAMMING;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_HAMMING;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_HAMMING;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, ResampleHanning ) ) {
+                oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_HANNING;
+                oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_HANNING;
+                oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_HANNING;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleBlackman ) || SL2_CHECK( 1, ResampleBlackman ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_BLACKMAN;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_BLACKMAN;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_BLACKMAN;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleGaussianSharp ) || SL2_CHECK( 1, ResampleGaussianSharp ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_GAUSSIANSHARP;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_GAUSSIANSHARP;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_GAUSSIANSHARP;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleGaussian ) || SL2_CHECK( 1, ResampleGaussian ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_GAUSSIAN;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_GAUSSIAN;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_GAUSSIAN;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, RescaleBell ) || SL2_CHECK( 1, ResampleBell ) ) {
                 oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_BELL;
                 oOptions.fFilterFuncH = sl2::CResampler::SL2_FF_BELL;
                 oOptions.fFilterFuncD = sl2::CResampler::SL2_FF_BELL;
+                
+                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
+                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
+                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
                 SL2_ADV( 1 );
             }
+
             if ( SL2_CHECK( 3, clamp ) || SL2_CHECK( 3, clamp2 ) ) {
 				oOptions.ui32ClampW = ::_wtoi( _wcpArgV[1] );
 				oOptions.ui32ClampH = ::_wtoi( _wcpArgV[2] );
@@ -1423,6 +1537,13 @@ namespace sl2 {
         _oOptions.rResample.dFilterSupportH = CResampler::m_fFilter[_oOptions.fFilterFuncH].dfSupport;
         _oOptions.rResample.pfFilterD = CResampler::m_fFilter[_oOptions.fFilterFuncD].pfFunc;
         _oOptions.rResample.dFilterSupportD = CResampler::m_fFilter[_oOptions.fFilterFuncD].dfSupport;
+
+        _oOptions.rResample.pfAlphaFilterW = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncW].pfFunc;
+        _oOptions.rResample.dAlphaFilterSupportW = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncW].dfSupport;
+        _oOptions.rResample.pfAlphaFilterH = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncH].pfFunc;
+        _oOptions.rResample.dAlphaFilterSupportH = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncH].dfSupport;
+        _oOptions.rResample.pfAlphaFilterD = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncD].pfFunc;
+        _oOptions.rResample.dAlphaFilterSupportD = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncD].dfSupport;
     }
 
     /**

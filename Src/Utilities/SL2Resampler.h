@@ -53,6 +53,8 @@ namespace sl2 {
 			SL2_FF_BSPLINE,
 			SL2_FF_CARDINALSPLINEUNIFORM,
 			SL2_FF_HERMITE,
+			SL2_FF_HAMMING,
+			SL2_FF_HANNING,
 			SL2_FF_BLACKMAN,
 			SL2_FF_GAUSSIANSHARP,
 			SL2_FF_GAUSSIAN,
@@ -75,6 +77,9 @@ namespace sl2 {
 			double												dFilterSupportW = 1.0;
 			double												dFilterSupportH = 1.0;
 			double												dFilterSupportD = 1.0;
+			double												dAlphaFilterSupportW = 1.0;
+			double												dAlphaFilterSupportH = 1.0;
+			double												dAlphaFilterSupportD = 1.0;
 			double												dBorderColor[4] = { 0.0, 0.0, 0.0, 1.0 };
 			float												fFilterScale = 1.0;
 			uint32_t											ui32W = 0;
@@ -92,6 +97,9 @@ namespace sl2 {
 			PfFilterFunc										pfFilterW = BilinearFilterFunc;
 			PfFilterFunc										pfFilterH = BilinearFilterFunc;
 			PfFilterFunc										pfFilterD = BilinearFilterFunc;
+			PfFilterFunc										pfAlphaFilterW = BilinearFilterFunc;
+			PfFilterFunc										pfAlphaFilterH = BilinearFilterFunc;
+			PfFilterFunc										pfAlphaFilterD = BilinearFilterFunc;
 			bool												bAlpha = true;
 		};
 
@@ -469,6 +477,34 @@ namespace sl2 {
 			if ( _dT < 0.0 ) { _dT = -_dT; }
 			if ( _dT < 1.0 ) {
 				return (2.0 * _dT - 3.0) * _dT * _dT + 1.0;
+			}
+			return 0.0;
+		}
+
+		/**
+		 * The Hamming filter function.
+		 *
+		 * \param _dT The value to filter.
+		 * \return Returns the filtered value.
+		 */
+		static inline double									HammingFilterFunc( double _dT ) {
+			if ( _dT < 0.0 ) { _dT = -_dT; }
+			if ( _dT < 1.0 ) {
+				return 0.54 + 0.46 * std::cos( 2.0 * std::numbers::pi * _dT );
+			}
+			return 0.0;
+		}
+
+		/**
+		 * The Hanning filter function.
+		 *
+		 * \param _dT The value to filter.
+		 * \return Returns the filtered value.
+		 */
+		static inline double									HanningFilterFunc( double _dT ) {
+			if ( _dT < 0.0 ) { _dT = -_dT; }
+			if ( _dT < 1.0 ) {
+				return 0.5 + 0.5 * std::cos( 2.0 * std::numbers::pi * _dT );
 			}
 			return 0.0;
 		}

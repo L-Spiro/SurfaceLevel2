@@ -415,21 +415,23 @@ namespace sl2 {
 		const uint32_t ui32Size = _kKernel.Size();
 		const int32_t i32KernelOffset = static_cast<int32_t>(ui32Size >> 1);
 		double dSum = 0.0;
-
+		double dDivisor = 0.0;
 		for ( uint32_t Y = 0; Y < ui32Size; ++Y ) {
 			int32_t i32IdxH = CTextureAddressing::m_pfFuncs[_taAddressH]( _ui32H, static_cast<int32_t>(Y + _ui32Y) - i32KernelOffset );
 			for ( uint32_t X = 0; X < ui32Size; ++X ) {
 				int32_t i32IdxW = CTextureAddressing::m_pfFuncs[_taAddressW]( _ui32W, static_cast<int32_t>(X + _ui32X) - i32KernelOffset );
 				if ( i32IdxH == -1 || i32IdxW == -1 ) {
 					dSum += _kKernel[Y][X] * _dBorder;
+					++dDivisor;
 				}
-				else {
+				else if ( i32IdxH != -2 && i32IdxW != -2 ) {
 					size_t sIdx = (sPageSize * _ui32D) + (i32IdxH * _ui32W) + i32IdxW;
 					dSum += _kKernel[Y][X] * _pdImage[sIdx];
+					++dDivisor;
 				}
 			}
 		}
-		return dSum;
+		return dSum / dDivisor;
 	}
 
 	/**
