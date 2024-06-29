@@ -1216,6 +1216,13 @@ namespace sl2 {
 		SL2_CA_MAX,																	/**< Maximum between the RGB channels. */
 	};
 
+	/** Mipmap handling. */
+	enum SL2_MIPMAP_HANDLING {
+		SL2_MH_REMOVE_EXISTING,														/**< Removes existing mipmaps, if any. */
+		SL2_MH_KEEP_EXISTING,														/**< Keep existing mipmaps, although some could be removed or new ones generated depending on how many mipmaps the user wants. */
+		SL2_MH_GENERATE_NEW,														/**< Generate new mipmaps, overwriting any existing ones. */
+	};
+
 	/**
 	 * Class CFormat
 	 * \brief All of the image formats, along with conversion routines and functions for working with the formats (encoding, decoding, etc.)

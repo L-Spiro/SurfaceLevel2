@@ -34,12 +34,15 @@ namespace sl2 {
 		CResampler::SL2_FILTER_FUNCS									fFilterFuncW = CResampler::SL2_FF_QUADRATICSHARP;		/**< The width filter. */
 		CResampler::SL2_FILTER_FUNCS									fFilterFuncH = CResampler::SL2_FF_QUADRATICSHARP;		/**< The height filter. */
 		CResampler::SL2_FILTER_FUNCS									fFilterFuncD = CResampler::SL2_FF_QUADRATICSHARP;		/**< The depth filter. */
-		CResampler::SL2_FILTER_FUNCS									fAlphaFilterFuncW = CResampler::SL2_FF_QUADRATICSHARP;	/**< The width filter. */
-		CResampler::SL2_FILTER_FUNCS									fAlphaFilterFuncH = CResampler::SL2_FF_QUADRATICSHARP;	/**< The height filter. */
-		CResampler::SL2_FILTER_FUNCS									fAlphaFilterFuncD = CResampler::SL2_FF_QUADRATICSHARP;	/**< The depth filter. */
+		CResampler::SL2_FILTER_FUNCS									fAlphaFilterFuncW = CResampler::SL2_FF_QUADRATICSHARP;	/**< The width alpha-channel filter. */
+		CResampler::SL2_FILTER_FUNCS									fAlphaFilterFuncH = CResampler::SL2_FF_QUADRATICSHARP;	/**< The height alpha-channel filter. */
+		CResampler::SL2_FILTER_FUNCS									fAlphaFilterFuncD = CResampler::SL2_FF_QUADRATICSHARP;	/**< The depth alpha-channel filter. */
 		uint32_t														ui32ClampW = 0;											/**< Width clamp. */
 		uint32_t														ui32ClampH = 0;											/**< Height clamp. */
 		uint32_t														ui32ClampD = 0;											/**< Depth clamp. */
+
+		SL2_MIPMAP_HANDLING												mhMipHandling = SL2_MH_GENERATE_NEW;					/**< Fully generate a new set. */
+		size_t															sTotalMips = 0;											/**< How many mipmaps to put into the final result, or 0 to keep existing mipmaps or to generate a full set. */
 
 		CKernel															kKernel;												/**< Normal-map Sobel kernel. */
 		uint32_t														ui32NormalKernelSize = 0;								/**< Normal-map generation kernel size. */

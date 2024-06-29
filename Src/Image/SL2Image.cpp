@@ -38,7 +38,9 @@ namespace sl2 {
 		m_bFlipX( false ),
 		m_bFlipY( false ), 
 		m_bFlipZ( false ),
-		m_bSwap( false ) {
+		m_bSwap( false ),
+		m_mhMipHandling( SL2_MH_GENERATE_NEW ),
+		m_sTotalMips( 0 ) {
 		m_sSwizzle = CFormat::DefaultSwizzle();
 	}
 	CImage::~CImage() {
@@ -72,6 +74,8 @@ namespace sl2 {
 			m_bFlipY = _iOther.m_bFlipZ;
 			m_bFlipZ = _iOther.m_bFlipY;
 			m_bSwap = _iOther.m_bSwap;
+			m_mhMipHandling = _iOther.m_mhMipHandling;
+			m_sTotalMips = _iOther.m_sTotalMips;
 			m_rResample = _iOther.m_rResample;
 			_iOther.m_sArraySize = 0;
 			_iOther.m_kKernel.SetSize( 0 );
@@ -90,6 +94,8 @@ namespace sl2 {
 			_iOther.m_dKernelScale = 1.0;
 			_iOther.m_dKernelYAxis = 1.0;
 			_iOther.m_rResample = CResampler::SL2_RESAMPLE();
+			_iOther.m_mhMipHandling = SL2_MH_GENERATE_NEW;
+			_iOther.m_sTotalMips = 0;
 		}
 
 		return (*this);
@@ -121,6 +127,9 @@ namespace sl2 {
 		m_bFlipY = false;
 		m_bFlipZ = false;
 		m_bSwap = false;
+
+		m_mhMipHandling = SL2_MH_GENERATE_NEW;
+		m_sTotalMips = 0;
 	}
 
 	/**
@@ -193,16 +202,48 @@ namespace sl2 {
 			if ( sNewSize < sOldSize ) { bUseTmpBuffer = true; }
 		}
 		
-		if ( !iTmp.AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), ui32NewW, ui32NewH, ui32NewD, Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
+		
+		
+
+		size_t sSrcMips = Mipmaps();
+		size_t sDstMips = Mipmaps();
+		switch ( m_mhMipHandling ) {
+			case SL2_MH_REMOVE_EXISTING : {
+				sSrcMips = sDstMips = 1;
+				break;
+			}
+			case SL2_MH_KEEP_EXISTING : {
+				sSrcMips = std::max( std::min( Mipmaps(), m_sTotalMips ), size_t( 1 ) );
+				sDstMips = std::max( m_sTotalMips, Mipmaps() );
+				break;
+			}
+			case SL2_MH_GENERATE_NEW : {
+				sSrcMips = 1;
+				if ( !m_sTotalMips ) {
+					sDstMips = CUtilities::Max( size_t( std::round( std::log2( ui32NewW ) ) ), size_t( std::round( std::log2( ui32NewH ) ) ) );
+					sDstMips = CUtilities::Max( size_t( std::round( std::log2( ui32NewH ) ) ), sDstMips ) + 1;
+				}
+				else {
+					sDstMips = m_sTotalMips;
+				}
+				break;
+			}
+		}
+		if ( sDstMips > sSrcMips ) {
+			bUseTmpBuffer = true;
+		}
+
+		if ( !iTmp.AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), ui32NewW, ui32NewH, ui32NewD, sDstMips, ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
+
 		std::vector<double> vTmp;
 		if ( bUseTmpBuffer ) {
 			try {
-				vTmp.resize( m_rResample.ui32W * m_rResample.ui32H * m_rResample.ui32D * 4 + 2 );
+				vTmp.resize( m_rResample.ui32W * m_rResample.ui32H * m_rResample.ui32D * 4 );
 			}
 			catch ( ... ) { return SL2_E_OUTOFMEMORY; }
 		}
 
-		for ( size_t M = 0; M < Mipmaps(); ++M ) {
+		for ( size_t M = 0; M < sSrcMips; ++M ) {
 			for ( size_t A = 0; A < ArraySize(); ++A ) {
 				for ( size_t F = 0; F < Faces(); ++F ) {
 					uint8_t * pui8Dest = iTmp.Data( M, 0, A, F );
@@ -245,13 +286,26 @@ namespace sl2 {
 						rResampleCopy.ui32NewD = std::max( m_rResample.ui32NewD >> M, 1U );
 						if ( !rResampleMe.Resample( reinterpret_cast<double *>(pui8Dest), reinterpret_cast<double *>(iTmp.Data( M, 0, A, F )), rResampleCopy ) ) { return SL2_E_OUTOFMEMORY; }
 					}
+					if ( M == 0 ) {
+						for ( size_t N = sSrcMips; N < sDstMips; ++N ) {
+							CResampler rResampleMe;
+							CResampler::SL2_RESAMPLE rResampleCopy = m_rResample;
+							rResampleCopy.ui32W = m_vMipMaps[M]->Width();
+							rResampleCopy.ui32H = m_vMipMaps[M]->Height();
+							rResampleCopy.ui32D = m_vMipMaps[M]->Depth();
+							rResampleCopy.ui32NewW = std::max( m_rResample.ui32NewW >> N, 1U );
+							rResampleCopy.ui32NewH = std::max( m_rResample.ui32NewH >> N, 1U );
+							rResampleCopy.ui32NewD = std::max( m_rResample.ui32NewD >> N, 1U );
+							if ( !rResampleMe.Resample( reinterpret_cast<double *>(pui8Dest), reinterpret_cast<double *>(iTmp.Data( N, 0, A, F )), rResampleCopy ) ) { return SL2_E_OUTOFMEMORY; }
+						}
+					}
 					
 				}
 			}
 		}
-		for ( size_t M = 0; M < Mipmaps(); ++M ) {
-			for ( size_t A = 0; A < ArraySize(); ++A ) {
-				for ( size_t F = 0; F < Faces(); ++F ) {
+		for ( size_t M = 0; M < iTmp.Mipmaps(); ++M ) {
+			for ( size_t A = 0; A < iTmp.ArraySize(); ++A ) {
+				for ( size_t F = 0; F < iTmp.Faces(); ++F ) {
 					if ( m_kKernel.Size() ) {
 						if ( !ConvertToNormalMap( reinterpret_cast<CFormat::SL2_RGBA64F *>(iTmp.Data( M, 0, A, F )), iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() ) ) { return SL2_E_OUTOFMEMORY; }
 					}
@@ -270,11 +324,11 @@ namespace sl2 {
 		}
 		if ( !_pkifFormat->pfFromRgba64F ) { return SL2_E_BADFORMAT; }
 		_iDst.Reset();
-		if ( !_iDst.AllocateTexture( _pkifFormat, ui32NewW, ui32NewH, ui32NewD, Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
+		if ( !_iDst.AllocateTexture( _pkifFormat, ui32NewW, ui32NewH, ui32NewD, iTmp.Mipmaps(), iTmp.ArraySize(), iTmp.Faces() ) ) { return SL2_E_OUTOFMEMORY; }
 		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*_pkifFormat);
-		for ( size_t M = 0; M < Mipmaps(); ++M ) {
-			for ( size_t A = 0; A < ArraySize(); ++A ) {
-				for ( size_t F = 0; F < Faces(); ++F ) {
+		for ( size_t M = 0; M < iTmp.Mipmaps(); ++M ) {
+			for ( size_t A = 0; A < iTmp.ArraySize(); ++A ) {
+				for ( size_t F = 0; F < iTmp.Faces(); ++F ) {
 					if ( !_pkifFormat->pfFromRgba64F( iTmp.Data( M, 0, A, F ), _iDst.Data( M, 0, A, F ), iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth(), &ifdData ) ) {
 						return SL2_E_INTERNALERROR;
 					}

@@ -418,6 +418,9 @@ namespace sl2 {
 
 		CResampler::SL2_RESAMPLE							m_rResample;							/**< Resample parameters. */
 
+		SL2_MIPMAP_HANDLING									m_mhMipHandling;						/**< How to handle mimaps. */
+		size_t												m_sTotalMips;							/**< How many mipmaps to put into the final result, or 0 to keep existing mipmaps or to generate a full set. */
+
 
 		// == Functions.
 		/**
