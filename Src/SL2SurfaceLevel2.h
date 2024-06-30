@@ -58,6 +58,7 @@ namespace sl2 {
 		sl2::SL2_VKFORMAT												vkBmpFormatNoMask = SL2_VK_FORMAT_UNDEFINED;			/**< The BMP format when not using a mask. */
 		int																iBmpSaveOption = BMP_DEFAULT;							/**< Option for saving as BMP. */
 		bool															bBmpHasAlpha = true;									/**< Does the BMP file have alpha? */
+		bool															bIgnoreAlpha = false;									/**< Ignore alpha? */
 		bool															bBmpStoreBitmask = true;								/**< Try to store the bitmask? */
 
 		sl2::SL2_VKFORMAT												vkExrFormat = SL2_VK_FORMAT_UNDEFINED;					/**< The EXR format. */

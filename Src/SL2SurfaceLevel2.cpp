@@ -313,6 +313,10 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 SL2_ADV( 1 );
             }
 
+            if ( SL2_CHECK( 1, ignore_alpha ) ) {
+                oOptions.bIgnoreAlpha = true;
+                SL2_ADV( 1 );
+            }
             if ( SL2_CHECK( 2, alpha_threshold ) ) {
                 double dVal = ::_wtof( _wcpArgV[1] );
                 if ( dVal < 0.0 || dVal > 255 ) {
@@ -342,7 +346,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.rResample.ui32NewH = ::_wtoi( _wcpArgV[2] );
                 SL2_ADV( 3 );
             }
-            if ( SL2_CHECK( 4, resample ) || SL2_CHECK( 4, prescale3 ) ) {
+            if ( SL2_CHECK( 4, resample_size ) || SL2_CHECK( 4, prescale3 ) ) {
                 oOptions.rResample.ui32NewW = ::_wtoi( _wcpArgV[1] );
                 oOptions.rResample.ui32NewH = ::_wtoi( _wcpArgV[2] );
                 oOptions.rResample.ui32NewD = ::_wtoi( _wcpArgV[3] );
@@ -415,94 +419,116 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 
 #undef SL2_RESAMPLE
 
-            if ( SL2_CHECK( 2, resample ) ) {
-                if ( ::_wcsicmp( _wcpArgV[1], L"box" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"point" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_POINT;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"tent" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bilinear" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_BILINEAR;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"quadraticsharp" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"quadratic_sharp" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_QUADRATICSHARP;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"quadratic" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_QUADRATIC;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"quadraticapprox" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"quadraticapproximate" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"quadratic_approximate" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_QUADRATICAPPROX;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"quadraticmix" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"quadratic_mix" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_QUADRATICMIX;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"kaiser" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_KAISER;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"lanczos2" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS2;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"lanczos3" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS3;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"lanczos4" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS4;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"lanczos6" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS6;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"lanczos8" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS8;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"lanczos12" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS12;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"lanczos64" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_LANCZOS64;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"mitchell" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_MITCHELL;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"catmul" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"catmulrom" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"catmul_rom" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"catmul-rom" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_CATMULLROM;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"bspline" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"b-spline" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"b_spline" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_BSPLINE;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"cardinal" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"card" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"cardinaluniform" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"cardinal_uniform" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_CARDINALSPLINEUNIFORM;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"hermite" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_HERMITE;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"hamming" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_HAMMING;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"hanning" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_HANNING;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"blackman" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_BLACKMAN;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"gaussiansharp" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"gaussian_sharp" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_GAUSSIANSHARP;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"gaussian" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_GAUSSIAN;
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"bell" ) == 0 ) {
-                    oOptions.fFilterFuncW = sl2::CResampler::SL2_FF_BELL;
-                }
-                else {
-                    SL2_ERRORT( std::format( L"Invalid \"resample\": \"{}\". Must be box, tent, quadraticsharp, quadratic, quadraticapprox, quadraticmix, kaiser, lanczos2, lanczos3, lanczos4, lanczos6, lanczos8, lanczos12, lanczos64, "
-                        "mitchell, catmul, bspline, cardinal, hermite, hamming, hanning, blackman, gaussiansharp, gaussian, or bell.",
-                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
-                }
-                oOptions.fFilterFuncH = oOptions.fFilterFuncW;
-                oOptions.fFilterFuncD = oOptions.fFilterFuncW;
+#define SL2_RESAMPLE( COND, ASSIGN, COPY )                                                                                                                                                                                          \
+    if ( SL2_CHECK( 2, COND ) ) {                                                                                                                                                                                                   \
+        if ( ::_wcsicmp( _wcpArgV[1], L"box" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"point" ) == 0 ) {                                                                                                                                 \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_POINT;                                                                                                                                                                        \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"tent" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bilinear" ) == 0 ) {                                                                                                                        \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_BILINEAR;                                                                                                                                                                     \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"quadraticsharp" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"quadratic_sharp" ) == 0 ) {                                                                                                       \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_QUADRATICSHARP;                                                                                                                                                               \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"quadratic" ) == 0 ) {                                                                                                                                                                  \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_QUADRATIC;                                                                                                                                                                    \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"quadraticapprox" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"quadraticapproximate" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"quadratic_approximate" ) == 0 ) {                                     \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_QUADRATICAPPROX;                                                                                                                                                              \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"quadraticmix" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"quadratic_mix" ) == 0 ) {                                                                                                           \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_QUADRATICMIX;                                                                                                                                                                 \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"kaiser" ) == 0 ) {                                                                                                                                                                     \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_KAISER;                                                                                                                                                                       \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"lanczos2" ) == 0 ) {                                                                                                                                                                   \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_LANCZOS2;                                                                                                                                                                     \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"lanczos3" ) == 0 ) {                                                                                                                                                                   \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_LANCZOS3;                                                                                                                                                                     \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"lanczos4" ) == 0 ) {                                                                                                                                                                   \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_LANCZOS4;                                                                                                                                                                     \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"lanczos6" ) == 0 ) {                                                                                                                                                                   \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_LANCZOS6;                                                                                                                                                                     \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"lanczos8" ) == 0 ) {                                                                                                                                                                   \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_LANCZOS8;                                                                                                                                                                     \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"lanczos12" ) == 0 ) {                                                                                                                                                                  \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_LANCZOS12;                                                                                                                                                                    \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"lanczos64" ) == 0 ) {                                                                                                                                                                  \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_LANCZOS64;                                                                                                                                                                    \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"mitchell" ) == 0 ) {                                                                                                                                                                   \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_MITCHELL;                                                                                                                                                                     \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"catmul" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"catmulrom" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"catmul_rom" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"catmul-rom" ) == 0 ) {                   \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_CATMULLROM;                                                                                                                                                                   \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"bspline" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"b-spline" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"b_spline" ) == 0 ) {                                                                      \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_BSPLINE;                                                                                                                                                                      \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"cardinal" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"card" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"cardinaluniform" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"cardinal_uniform" ) == 0 ) {           \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_CARDINALSPLINEUNIFORM;                                                                                                                                                        \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"hermite" ) == 0 ) {                                                                                                                                                                    \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_HERMITE;                                                                                                                                                                      \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"hamming" ) == 0 ) {                                                                                                                                                                    \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_HAMMING;                                                                                                                                                                      \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"hanning" ) == 0 ) {                                                                                                                                                                    \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_HANNING;                                                                                                                                                                      \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"blackman" ) == 0 ) {                                                                                                                                                                   \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_BLACKMAN;                                                                                                                                                                     \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"gaussiansharp" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"gaussian_sharp" ) == 0 ) {                                                                                                         \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_GAUSSIANSHARP;                                                                                                                                                                \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"gaussian" ) == 0 ) {                                                                                                                                                                   \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_GAUSSIAN;                                                                                                                                                                     \
+        }                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"bell" ) == 0 ) {                                                                                                                                                                       \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_BELL;                                                                                                                                                                         \
+        }                                                                                                                                                                                                                           \
+        else {                                                                                                                                                                                                                      \
+            SL2_ERRORT( std::format( L"Invalid \"" #COND "\": \"{}\". Must be box, tent, quadraticsharp, quadratic, quadraticapprox, quadraticmix, kaiser, lanczos2, lanczos3, lanczos4, lanczos6, lanczos8, lanczos12, lanczos64, "\
+                "mitchell, catmul, bspline, cardinal, hermite, hamming, hanning, blackman, gaussiansharp, gaussian, or bell.",                                                                                                      \
+                _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );                                                                                                                                                                    \
+        }                                                                                                                                                                                                                           \
+        COPY = oOptions.ASSIGN;                                                                                                                                                                                                     \
+        SL2_ADV( 2 );                                                                                                                                                                                                               \
+    }
 
-                oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;
-                oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;
-                oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;
+            SL2_RESAMPLE( resample, fFilterFuncW, oOptions.fFilterFuncH = oOptions.fFilterFuncD = oOptions.fAlphaFilterFuncW = oOptions.fAlphaFilterFuncH = oOptions.fAlphaFilterFuncD );
+            SL2_RESAMPLE( resamplew, fFilterFuncW, oOptions.fAlphaFilterFuncW );
+            SL2_RESAMPLE( resampleh, fFilterFuncH, oOptions.fAlphaFilterFuncH );
+            SL2_RESAMPLE( resampled, fFilterFuncD, oOptions.fAlphaFilterFuncD );
+            SL2_RESAMPLE( resamplew_color, fFilterFuncW, oOptions.fFilterFuncW );
+            SL2_RESAMPLE( resampleh_color, fFilterFuncH, oOptions.fFilterFuncH );
+            SL2_RESAMPLE( resampled_color, fFilterFuncD, oOptions.fFilterFuncD );
+            SL2_RESAMPLE( resamplew_alpha, fAlphaFilterFuncW, oOptions.fAlphaFilterFuncW );
+            SL2_RESAMPLE( resampleh_alpha, fAlphaFilterFuncH, oOptions.fAlphaFilterFuncH );
+            SL2_RESAMPLE( resampled_alpha, fAlphaFilterFuncD, oOptions.fAlphaFilterFuncD );
+                
+#undef SL2_RESAMPLE
+
+            if ( SL2_CHECK( 1, nomips ) || SL2_CHECK( 1, nomipmapss ) || SL2_CHECK( 1, no_mips ) || SL2_CHECK( 1, no_mipmapss ) ) {
+                oOptions.mhMipHandling = sl2::SL2_MH_REMOVE_EXISTING;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 2, nmips ) ) {
+                oOptions.sTotalMips = ::_wtoi( _wcpArgV[1] );
                 SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 1, keepmips ) || SL2_CHECK( 1, keepmipmapss ) || SL2_CHECK( 1, keep_mips ) || SL2_CHECK( 1, keep_mipmapss ) ) {
+                oOptions.mhMipHandling = sl2::SL2_MH_KEEP_EXISTING;
+                SL2_ADV( 1 );
             }
 
             if ( SL2_CHECK( 3, clamp ) || SL2_CHECK( 3, clamp2 ) ) {
@@ -623,7 +649,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 SL2_ADV( 2 );
             }
 
-            if ( SL2_CHECK( 2, textureaddressingw_opaque ) || SL2_CHECK( 2, taw_opaque ) ) {
+            if ( SL2_CHECK( 2, textureaddressingw_opaque ) || SL2_CHECK( 2, taw_opaque ) || SL2_CHECK( 2, textureaddressingu_opaque ) || SL2_CHECK( 2, tau_opaque ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_CLAMP;
                 }
@@ -648,7 +674,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 }
                 SL2_ADV( 2 );
             }
-            if ( SL2_CHECK( 2, textureaddressingh_opaque ) || SL2_CHECK( 2, tah_opaque ) ) {
+            if ( SL2_CHECK( 2, textureaddressingh_opaque ) || SL2_CHECK( 2, tah_opaque ) || SL2_CHECK( 2, textureaddressingv_opaque ) || SL2_CHECK( 2, tav_opaque ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
                     oOptions.rResample.taColorH = sl2::SL2_TA_CLAMP;
                 }
@@ -673,7 +699,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 }
                 SL2_ADV( 2 );
             }
-            if ( SL2_CHECK( 2, textureaddressingd_opaque ) || SL2_CHECK( 2, tad_opaque ) ) {
+            if ( SL2_CHECK( 2, textureaddressingd_opaque ) || SL2_CHECK( 2, tad_opaque ) || SL2_CHECK( 2, textureaddressingw_opaque ) || SL2_CHECK( 2, taw_opaque ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
                     oOptions.rResample.taColorD = sl2::SL2_TA_CLAMP;
                 }
@@ -699,7 +725,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 SL2_ADV( 2 );
             }
 
-            if ( SL2_CHECK( 2, textureaddressingw_alpha ) || SL2_CHECK( 2, taw_alpha ) ) {
+            if ( SL2_CHECK( 2, textureaddressingw_alpha ) || SL2_CHECK( 2, taw_alpha ) || SL2_CHECK( 2, textureaddressingu_alpha ) || SL2_CHECK( 2, tau_alpha ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
                     oOptions.rResample.taAlphaW = sl2::SL2_TA_CLAMP;
                 }
@@ -724,7 +750,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 }
                 SL2_ADV( 2 );
             }
-            if ( SL2_CHECK( 2, textureaddressingh_alpha ) || SL2_CHECK( 2, tah_alpha ) ) {
+            if ( SL2_CHECK( 2, textureaddressingh_alpha ) || SL2_CHECK( 2, tah_alpha ) || SL2_CHECK( 2, textureaddressingv_alpha ) || SL2_CHECK( 2, tav_alpha ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
                     oOptions.rResample.taAlphaH = sl2::SL2_TA_CLAMP;
                 }
@@ -749,7 +775,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 }
                 SL2_ADV( 2 );
             }
-            if ( SL2_CHECK( 2, textureaddressingd_alpha ) || SL2_CHECK( 2, tad_alpha ) ) {
+            if ( SL2_CHECK( 2, textureaddressingd_alpha ) || SL2_CHECK( 2, tad_alpha ) || SL2_CHECK( 2, textureaddressingw_alpha ) || SL2_CHECK( 2, taw_alpha ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
                     oOptions.rResample.taAlphaD = sl2::SL2_TA_CLAMP;
                 }
@@ -1183,6 +1209,8 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         iImage.SetTargetGamma( oOptions.dTargetGamma );
         iImage.SetSwizzle( oOptions.sSwizzle );
         iImage.SetSwap( oOptions.bSwap );
+        iImage.SetMipParms( oOptions.mhMipHandling, oOptions.sTotalMips );
+        iImage.SetIgnoreAlpha( oOptions.bIgnoreAlpha );
         iImage.SetNormalMapParms( oOptions.kKernel, oOptions.dNormalScale, oOptions.caChannelAccess, oOptions.dNormalYAxis );
         oOptions.pkifdFinalFormat = pkifdFormat;
         if ( !oOptions.pkifdFinalFormat ) {

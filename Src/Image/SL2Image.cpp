@@ -34,6 +34,7 @@ namespace sl2 {
 		m_dKernelScale( 1.0 ),
 		m_dKernelYAxis( 1.0 ),
 		m_bIsPreMultiplied( false ),
+		m_bIgnoreAlpha( false ),
 		m_bNeedsPreMultiply( false ),
 		m_bFlipX( false ),
 		m_bFlipY( false ), 
@@ -69,6 +70,7 @@ namespace sl2 {
 			m_dKernelScale = _iOther.m_dKernelScale;
 			m_dKernelYAxis = _iOther.m_dKernelYAxis;
 			m_bIsPreMultiplied = _iOther.m_bIsPreMultiplied;
+			m_bIgnoreAlpha = _iOther.m_bIgnoreAlpha;
 			m_bNeedsPreMultiply = _iOther.m_bNeedsPreMultiply;
 			m_bFlipX = _iOther.m_bFlipX;
 			m_bFlipY = _iOther.m_bFlipZ;
@@ -85,6 +87,7 @@ namespace sl2 {
 			_iOther.m_dTargetGamma = 0.0;
 			_iOther.m_sSwizzle = CFormat::DefaultSwizzle();
 			_iOther.m_bIsPreMultiplied = false;
+			_iOther.m_bIgnoreAlpha = false;
 			_iOther.m_bNeedsPreMultiply = false;
 			_iOther.m_bFlipX = false;
 			_iOther.m_bFlipY = false;
@@ -122,6 +125,7 @@ namespace sl2 {
 		m_kKernel.SetSize( 0 );
 		m_pkifFormat = nullptr;
 		m_bIsPreMultiplied = false;
+		m_bIgnoreAlpha = false;
 		m_bNeedsPreMultiply = false;
 		m_bFlipX = false;
 		m_bFlipY = false;
@@ -213,8 +217,8 @@ namespace sl2 {
 				break;
 			}
 			case SL2_MH_KEEP_EXISTING : {
-				sSrcMips = std::max( std::min( Mipmaps(), m_sTotalMips ), size_t( 1 ) );
-				sDstMips = std::max( m_sTotalMips, Mipmaps() );
+				sSrcMips = std::max( std::min( Mipmaps(), m_sTotalMips + 1 ), size_t( 1 ) );
+				sDstMips = std::max( m_sTotalMips + 1, Mipmaps() );
 				break;
 			}
 			case SL2_MH_GENERATE_NEW : {
@@ -224,7 +228,7 @@ namespace sl2 {
 					sDstMips = CUtilities::Max( size_t( std::round( std::log2( ui32NewH ) ) ), sDstMips ) + 1;
 				}
 				else {
-					sDstMips = m_sTotalMips;
+					sDstMips = m_sTotalMips + 1;
 				}
 				break;
 			}
@@ -255,9 +259,12 @@ namespace sl2 {
 						return SL2_E_INTERNALERROR;
 					}
 					BakeGamma( pui8Dest, m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					if ( m_bIgnoreAlpha ) {
+						m_bIsPreMultiplied = m_bNeedsPreMultiply = false;
+						SetAlpha( pui8Dest, 1.0, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					}
 					if ( !m_bIsPreMultiplied && m_bNeedsPreMultiply ) {
 						CFormat::ApplyPreMultiply( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
-						iTmp.m_bIsPreMultiplied = true;
 					}
 					if ( m_bFlipX && m_vMipMaps[M]->Width() > 1 ) {
 						CFormat::FlipX( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
@@ -287,6 +294,7 @@ namespace sl2 {
 						if ( !rResampleMe.Resample( reinterpret_cast<double *>(pui8Dest), reinterpret_cast<double *>(iTmp.Data( M, 0, A, F )), rResampleCopy ) ) { return SL2_E_OUTOFMEMORY; }
 					}
 					if ( M == 0 ) {
+						// Generate mipmaps using the original full-sized non-scaled image.
 						for ( size_t N = sSrcMips; N < sDstMips; ++N ) {
 							CResampler rResampleMe;
 							CResampler::SL2_RESAMPLE rResampleCopy = m_rResample;
@@ -560,6 +568,7 @@ namespace sl2 {
 			CFormat::SwizzleIsDefault( m_sSwizzle ) &&
 			!m_bSwap &&
 			!(!m_bIsPreMultiplied && m_bNeedsPreMultiply) &&
+			!m_bIgnoreAlpha &&
 			m_kKernel.Size() == 0 &&
 			((_pkifFormat->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED && _pkifFormat->vfVulkanFormat == Format()->vfVulkanFormat) ||
 			(_pkifFormat->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN && _pkifFormat->dfDxFormat == Format()->dfDxFormat) ||
@@ -630,6 +639,29 @@ namespace sl2 {
 						prThis->dRgba[SL2_PC_G] = std::pow( prThis->dRgba[SL2_PC_G], _dGamma );
 						prThis->dRgba[SL2_PC_B] = std::pow( prThis->dRgba[SL2_PC_B], _dGamma );
 					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Sets alpha to 1.0.
+	 *
+	 * \param _pui8Buffer The texture texels.
+	 * \param _dValue The value to apply.
+	 * \param _ui32Width The width of the image.
+	 * \param _ui32Height The height of the image.
+	 * \param _ui32Depth The depth of the image.
+	 **/
+	void CImage::SetAlpha( uint8_t * _pui8Buffer, double _dValue, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) {
+		CFormat::SL2_RGBA64F * prDst = reinterpret_cast<CFormat::SL2_RGBA64F *>(_pui8Buffer);
+		for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+			uint32_t ui32Slice = _ui32Width * _ui32Height * D;
+			for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+				uint32_t ui32Row = _ui32Width * H;
+				for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+					CFormat::SL2_RGBA64F * prThis = &prDst[ui32Slice+ui32Row+W];
+					prThis->dRgba[SL2_PC_A] = _dValue;
 				}
 			}
 		}

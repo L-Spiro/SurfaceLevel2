@@ -351,6 +351,24 @@ namespace sl2 {
 		inline void											SetSwap( bool _bSwap ) { m_bSwap = _bSwap; }
 
 		/**
+		 * Sets whether to ignore alpha or not.
+		 * 
+		 * \param _bIgnore If true, alpha will be ignored.
+		 **/
+		inline void											SetIgnoreAlpha( bool _bIgnore ) { m_bIgnoreAlpha = _bIgnore; }
+
+		/**
+		 * Sets mipmap parameters.
+		 * 
+		 * \param _mhMipHandling How to handle mipmaps.
+		 * \param _sTotal The number of mipmaps to generate or keep.
+		 **/
+		inline void											SetMipParms( SL2_MIPMAP_HANDLING _mhMipHandling, size_t _sTotal ) {
+			m_mhMipHandling = _mhMipHandling;
+			m_sTotalMips = _sTotal;
+		}
+
+		/**
 		 * Gets a read/write reference to the resampling parameters.
 		 * 
 		 * \return Returns a read/write reference to the resampling parameters.
@@ -410,6 +428,7 @@ namespace sl2 {
 		CFormat::SL2_SWIZZLE								m_sSwizzle;								/**< Swizzle setting. */
 		SL2_CHANNEL_ACCESS									m_caKernelChannal;						/**< The channel for the kernel to access. */
 		bool												m_bIsPreMultiplied;						/**< Is the image already pre-multiplied? */
+		bool												m_bIgnoreAlpha;							/**< Ignore alpha?  Sets alpha channel to 1.0. */
 		bool												m_bNeedsPreMultiply;					/**< Does the image need to be pre-multiplied? */
 		bool												m_bFlipX;								/**< Flip horizontally? */
 		bool												m_bFlipY;								/**< Flip vertically? */
@@ -459,6 +478,17 @@ namespace sl2 {
 		 * \param _ui32Depth The depth of the image.
 		 **/
 		void												BakeGamma( uint8_t * _pui8Buffer, double _dGamma, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth );
+
+		/**
+		 * Sets alpha to _dValue.
+		 * 
+		 * \param _pui8Buffer The texture texels.
+		 * \param _dValue The value to apply.
+		 * \param _ui32Width The width of the image.
+		 * \param _ui32Height The height of the image.
+		 * \param _ui32Depth The depth of the image.
+		 **/
+		void												SetAlpha( uint8_t * _pui8Buffer, double _dValue, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth );
 
 		/**
 		 * Converts a given RGBA64F buffer to a normal map.
