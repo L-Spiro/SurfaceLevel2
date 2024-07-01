@@ -293,6 +293,10 @@ namespace sl2 {
 						rResampleCopy.ui32NewD = std::max( m_rResample.ui32NewD >> M, 1U );
 						if ( !rResampleMe.Resample( reinterpret_cast<double *>(pui8Dest), reinterpret_cast<double *>(iTmp.Data( M, 0, A, F )), rResampleCopy ) ) { return SL2_E_OUTOFMEMORY; }
 					}
+					else if ( bUseTmpBuffer ) {
+						// Using the temporary buffer but not resizing?  Copy it over.
+						std::memcpy( iTmp.Data( M, 0, A, F ), pui8Dest, m_vMipMaps[M]->Width() * m_vMipMaps[M]->Height() * m_vMipMaps[M]->Depth() * 4 * sizeof( double ) );
+					}
 					if ( M == 0 ) {
 						// Generate mipmaps using the original full-sized non-scaled image.
 						for ( size_t N = sSrcMips; N < sDstMips; ++N ) {
