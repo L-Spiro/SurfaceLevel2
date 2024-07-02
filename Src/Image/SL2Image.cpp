@@ -41,7 +41,8 @@ namespace sl2 {
 		m_bFlipZ( false ),
 		m_bSwap( false ),
 		m_mhMipHandling( SL2_MH_GENERATE_NEW ),
-		m_sTotalMips( 0 ) {
+		m_sTotalMips( 0 ),
+		m_ttType( SL2_TT_2D ) {
 		m_sSwizzle = CFormat::DefaultSwizzle();
 	}
 	CImage::~CImage() {
@@ -79,6 +80,8 @@ namespace sl2 {
 			m_mhMipHandling = _iOther.m_mhMipHandling;
 			m_sTotalMips = _iOther.m_sTotalMips;
 			m_rResample = _iOther.m_rResample;
+			m_ttType = _iOther.m_ttType;
+			
 			_iOther.m_sArraySize = 0;
 			_iOther.m_kKernel.SetSize( 0 );
 			_iOther.m_sFaces = 0;
@@ -99,6 +102,7 @@ namespace sl2 {
 			_iOther.m_rResample = CResampler::SL2_RESAMPLE();
 			_iOther.m_mhMipHandling = SL2_MH_GENERATE_NEW;
 			_iOther.m_sTotalMips = 0;
+			_iOther.m_ttType = SL2_TT_2D;
 		}
 
 		return (*this);
@@ -134,6 +138,8 @@ namespace sl2 {
 
 		m_mhMipHandling = SL2_MH_GENERATE_NEW;
 		m_sTotalMips = 0;
+
+		m_ttType = SL2_TT_2D;
 	}
 
 	/**
@@ -246,7 +252,7 @@ namespace sl2 {
 			}
 			catch ( ... ) { return SL2_E_OUTOFMEMORY; }
 		}
-
+		bool bTargetIsPremulAlpha = m_bIsPreMultiplied;
 		for ( size_t M = 0; M < sSrcMips; ++M ) {
 			for ( size_t A = 0; A < ArraySize(); ++A ) {
 				for ( size_t F = 0; F < Faces(); ++F ) {
@@ -265,6 +271,7 @@ namespace sl2 {
 					}
 					if ( !m_bIsPreMultiplied && m_bNeedsPreMultiply ) {
 						CFormat::ApplyPreMultiply( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+						bTargetIsPremulAlpha = true;
 					}
 					if ( m_bFlipX && m_vMipMaps[M]->Width() > 1 ) {
 						CFormat::FlipX( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
@@ -332,6 +339,8 @@ namespace sl2 {
 		if ( _pkifFormat->vfVulkanFormat == SL2_VK_FORMAT_R64G64B64A64_SFLOAT ) {
 			// We already did the conversion.
 			_iDst = std::move( iTmp );
+			_iDst.m_bIsPreMultiplied = bTargetIsPremulAlpha;
+			_iDst.m_ttType = m_ttType;
 			return SL2_E_SUCCESS;
 		}
 		if ( !_pkifFormat->pfFromRgba64F ) { return SL2_E_BADFORMAT; }
@@ -347,6 +356,8 @@ namespace sl2 {
 				}
 			}
 		}
+		_iDst.m_bIsPreMultiplied = bTargetIsPremulAlpha;
+		_iDst.m_ttType = m_ttType;
 		return SL2_E_SUCCESS;
 	}
 
@@ -1203,6 +1214,31 @@ namespace sl2 {
 			}
 		}
 
+		if ( dFile.Header().ui32Caps2 & SL2_DDSCAPS2_CUBEMAP ) {
+			m_ttType = SL2_TT_CUBE;
+		}
+		else if ( dFile.UsesExtHeader() && dFile.Header10().ui32ResourceDimension >= SL2_DDS_DIMENSION_TEXTURE1D && dFile.Header10().ui32ResourceDimension <= SL2_DDS_DIMENSION_TEXTURE3D ) {
+			switch ( dFile.Header10().ui32ResourceDimension ) {
+				case SL2_DDS_DIMENSION_TEXTURE1D : {
+					m_ttType = SL2_TT_1D;
+					break;
+				}
+				case SL2_DDS_DIMENSION_TEXTURE2D : {
+					m_ttType = SL2_TT_2D;
+					break;
+				}
+				case SL2_DDS_DIMENSION_TEXTURE3D : {
+					m_ttType = SL2_TT_3D;
+					break;
+				}
+			}
+		}
+		else if ( Depth() > 1 ) {
+			m_ttType = SL2_TT_3D;
+		}
+		else if ( Height() > 1 ) {
+			m_ttType = SL2_TT_2D;
+		}
 		return SL2_E_SUCCESS;
 	}
 

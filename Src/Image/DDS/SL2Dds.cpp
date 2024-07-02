@@ -11,129 +11,134 @@
 
 
 namespace sl2 {
-
+#define SL2_TYPE( D3D, DXGI, OGL_IF, OGL_TYPE, OGL_BIF )		SL2_ ## D3D, SL2_ ## DXGI, #D3D, #DXGI, #OGL_IF, #OGL_TYPE, #OGL_BIF
 	/** Format data. */
 	CDds::SL2_FORMAT_DATA CDds::m_fdData[] = {
-		{ SL2_D3DFMT_DXT1,				SL2_DXGI_FORMAT_BC1_UNORM,						64, 0, true, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_BC1_UNORM_SRGB,					64, 0, true, false, false },
-		{ SL2_D3DFMT_DXT2,				SL2_DXGI_FORMAT_BC2_UNORM,						128, 0, true, true, false },
-		{ SL2_D3DFMT_DXT3,				SL2_DXGI_FORMAT_BC2_UNORM,						128, 0, true, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_BC2_UNORM_SRGB,					128, 0, true, false, false },
-		{ SL2_D3DFMT_DXT4,				SL2_DXGI_FORMAT_BC3_UNORM,						128, 0, true, true, false },
-		{ SL2_D3DFMT_DXT5,				SL2_DXGI_FORMAT_BC3_UNORM,						128, 0, true, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_BC3_UNORM_SRGB,					128, 0, true, false, false },
+		{ SL2_TYPE( D3DFMT_DXT1,			DXGI_FORMAT_BC1_UNORM,							GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, GL_UNSIGNED_BYTE, GL_RGBA ),							64, 0,	SL2_DPFF_FOURCC,	true, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_BC1_UNORM_SRGB,						GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT, GL_UNSIGNED_BYTE, GL_RGBA ),					64, 0,	SL2_DPFF_FOURCC,	true, false, false },
+		{ SL2_TYPE( D3DFMT_DXT2,			DXGI_FORMAT_BC2_UNORM,							GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_UNSIGNED_BYTE, GL_RGBA ),							128, 0,	SL2_DPFF_FOURCC,	true, true, false },
+		{ SL2_TYPE( D3DFMT_DXT3,			DXGI_FORMAT_BC2_UNORM,							GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_UNSIGNED_BYTE, GL_RGBA ),							128, 0, SL2_DPFF_FOURCC,	true, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_BC2_UNORM_SRGB,						GL_INVALID, GL_INVALID, GL_INVALID ),													128, 0, SL2_DPFF_FOURCC,	true, false, false },
+		{ SL2_TYPE( D3DFMT_DXT4,			DXGI_FORMAT_BC3_UNORM,							GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_UNSIGNED_BYTE, GL_RGBA ),							128, 0, SL2_DPFF_FOURCC,	true, true, false },
+		{ SL2_TYPE( D3DFMT_DXT5,			DXGI_FORMAT_BC3_UNORM,							GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_UNSIGNED_BYTE, GL_RGBA ),							128, 0, SL2_DPFF_FOURCC,	true, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_BC3_UNORM_SRGB,						GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT, GL_UNSIGNED_BYTE, GL_RGBA ),					128, 0, SL2_DPFF_FOURCC,	true, false, false },
 
-		{ SL2_D3DFMT_BC4U,				SL2_DXGI_FORMAT_BC4_UNORM,						64, 0, true, false, false },
-		{ SL2_D3DFMT_BC4S,				SL2_DXGI_FORMAT_BC4_SNORM,						64, 0, true, false, false },
+		{ SL2_TYPE( D3DFMT_BC4U,			DXGI_FORMAT_BC4_UNORM,							GL_COMPRESSED_RED_RGTC1, GL_UNSIGNED_BYTE, GL_RED ),									64, 0,	SL2_DPFF_FOURCC,	true, false, false },
+		{ SL2_TYPE( D3DFMT_BC4S,			DXGI_FORMAT_BC4_SNORM,							GL_COMPRESSED_SIGNED_RED_RGTC1, GL_UNSIGNED_BYTE, GL_RED ),								64, 0,	SL2_DPFF_FOURCC,	true, false, false },
 
-		{ SL2_D3DFMT_BC5U,				SL2_DXGI_FORMAT_BC5_UNORM,						128, 0, true, false, false },
-		{ SL2_D3DFMT_BC5S,				SL2_DXGI_FORMAT_BC5_SNORM,						128, 0, true, false, false },
+		{ SL2_TYPE( D3DFMT_BC5U,			DXGI_FORMAT_BC5_UNORM,							GL_COMPRESSED_RG_RGTC2, GL_UNSIGNED_BYTE, GL_RG ),										128, 0, SL2_DPFF_FOURCC,	true, false, false },
+		{ SL2_TYPE( D3DFMT_BC5S,			DXGI_FORMAT_BC5_SNORM,							GL_COMPRESSED_SIGNED_RG_RGTC2, GL_UNSIGNED_BYTE, GL_RG ),								128, 0, SL2_DPFF_FOURCC,	true, false, false },
 
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_BC6H_UF16,						128, 0, true, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_BC6H_SF16,						128, 0, true, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_BC6H_UF16,							GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT, GL_FLOAT, GL_RGB ),								128, 0, SL2_DPFF_FOURCC,	true, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_BC6H_SF16,							GL_INVALID, GL_INVALID, GL_INVALID /** TODO. */ ),										128, 0, SL2_DPFF_FOURCC,	true, false, false },
 
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_BC7_UNORM,						128, 0, true, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_BC7_UNORM_SRGB,					128, 0, true, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_BC7_UNORM,							GL_COMPRESSED_RGBA_BPTC_UNORM, GL_UNSIGNED_BYTE, GL_RGBA ),								128, 0, SL2_DPFF_FOURCC,	true, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_BC7_UNORM_SRGB,						GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM, GL_UNSIGNED_BYTE, GL_RGBA ),						128, 0, SL2_DPFF_FOURCC,	true, false, false },
 
 
-		{ SL2_D3DFMT_R8G8_B8G8,			SL2_DXGI_FORMAT_R8G8_B8G8_UNORM,				32, 0, false, false, true },
-		{ SL2_D3DFMT_G8R8_G8B8,			SL2_DXGI_FORMAT_G8R8_G8B8_UNORM,				32, 0, false, false, true },
+		{ SL2_TYPE( D3DFMT_R8G8_B8G8,		DXGI_FORMAT_R8G8_B8G8_UNORM,					GL_INVALID, GL_INVALID, GL_INVALID /** TODO. */ ),										32, 0,	SL2_DPFF_FOURCC,	false, false, true },
+		{ SL2_TYPE( D3DFMT_G8R8_G8B8,		DXGI_FORMAT_G8R8_G8B8_UNORM,					GL_INVALID, GL_INVALID, GL_INVALID /** TODO. */ ),										32, 0,	SL2_DPFF_FOURCC,	false, false, true },
 
-		{ SL2_D3DFMT_A16B16G16R16,		SL2_DXGI_FORMAT_R16G16B16A16_UNORM,				64, 0, false, false, false },
-		{ SL2_D3DFMT_Q16W16V16U16,		SL2_DXGI_FORMAT_R16G16B16A16_SNORM,				64, 0, false, false, false },
+		{ SL2_TYPE( D3DFMT_A16B16G16R16,	DXGI_FORMAT_R16G16B16A16_UNORM,					GL_RGBA16, GL_UNSIGNED_SHORT, GL_RGBA ),												64, 0,	SL2_DPFF_FOURCC,	false, false, false },
+		{ SL2_TYPE( D3DFMT_Q16W16V16U16,	DXGI_FORMAT_R16G16B16A16_SNORM,					GL_RGBA16_SNORM, GL_SHORT, GL_RGBA ),													64, 0,	SL2_DPFF_FOURCC,	false, false, false },
 
-		{ SL2_D3DFMT_R16F,				SL2_DXGI_FORMAT_R16_FLOAT,						16, 0, false, false, false },
-		{ SL2_D3DFMT_G16R16F,			SL2_DXGI_FORMAT_R16G16_FLOAT,					32, 0, false, false, false },
-		{ SL2_D3DFMT_A16B16G16R16F,		SL2_DXGI_FORMAT_R16G16B16A16_FLOAT,				64, 0, false, false, false },
-		{ SL2_D3DFMT_R32F,				SL2_DXGI_FORMAT_R32_FLOAT,						32, 0, false, false, false },
-		{ SL2_D3DFMT_G32R32F,			SL2_DXGI_FORMAT_R32G32_FLOAT,					64, 0, false, false, false },
-		{ SL2_D3DFMT_A32B32G32R32F,		SL2_DXGI_FORMAT_R32G32B32A32_FLOAT,				128, 0, false, false, false },
+		{ SL2_TYPE( D3DFMT_R16F,			DXGI_FORMAT_R16_FLOAT,							GL_R16F, GL_HALF_FLOAT, GL_RED ),														16, 0,	SL2_DPFF_FOURCC,	false, false, false },
+		{ SL2_TYPE( D3DFMT_G16R16F,			DXGI_FORMAT_R16G16_FLOAT,						GL_RG16F, GL_HALF_FLOAT, GL_RG ),														32, 0,	SL2_DPFF_FOURCC,	false, false, false },
+		{ SL2_TYPE( D3DFMT_A16B16G16R16F,	DXGI_FORMAT_R16G16B16A16_FLOAT,					GL_RGBA16F, GL_HALF_FLOAT, GL_RGBA ),													64, 0,	SL2_DPFF_FOURCC,	false, false, false },
+		{ SL2_TYPE( D3DFMT_R32F,			DXGI_FORMAT_R32_FLOAT,							GL_R32F, GL_FLOAT, GL_RED ),															32, 0,	SL2_DPFF_FOURCC,	false, false, false },
+		{ SL2_TYPE( D3DFMT_G32R32F,			DXGI_FORMAT_R32G32_FLOAT,						GL_RG32F, GL_FLOAT, GL_RG ),															64, 0,	SL2_DPFF_FOURCC,	false, false, false },
+		{ SL2_TYPE( D3DFMT_A32B32G32R32F,	DXGI_FORMAT_R32G32B32A32_FLOAT,					GL_RGBA32F, GL_FLOAT, GL_RGBA ),														128, 0, SL2_DPFF_FOURCC,	false, false, false },
 
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,			32, 0, false, false, false },
-		{ SL2_D3DFMT_G16R16,			SL2_DXGI_FORMAT_R16G16_UNORM,					32, 0, false, false, false },
-		{ SL2_D3DFMT_A1R5G5B5,			SL2_DXGI_FORMAT_B5G5R5A1_UNORM,					16, 0, false, false, false },
-		{ SL2_D3DFMT_R5G6B5,			SL2_DXGI_FORMAT_B5G6R5_UNORM,					16, 0, false, false, false },
-		{ SL2_D3DFMT_A8,				SL2_DXGI_FORMAT_A8_UNORM,						8, 0, false, false, false },
-		{ SL2_D3DFMT_R8G8B8,			SL2_DXGI_FORMAT_UNKNOWN,						24, 0, false, false, false },
-		{ SL2_D3DFMT_X1R5G5B5,			SL2_DXGI_FORMAT_UNKNOWN,						16, 0, false, false, false },
-		{ SL2_D3DFMT_A4R4G4B4,			SL2_DXGI_FORMAT_B4G4R4A4_UNORM,					16, 0, false, false, false },
-		{ SL2_D3DFMT_X4R4G4B4,			SL2_DXGI_FORMAT_UNKNOWN,						16, 0, false, false, false },
-		{ SL2_D3DFMT_A8R3G3B2,			SL2_DXGI_FORMAT_UNKNOWN,						16, 0, false, false, false },
-		{ SL2_D3DFMT_A8L8,				SL2_DXGI_FORMAT_UNKNOWN,						16, 0, false, false, false },
-		{ SL2_D3DFMT_L16,				SL2_DXGI_FORMAT_UNKNOWN,						16, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R32G32B32A32_UINT,				128, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R32G32B32A32_SINT,				128, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R32G32B32_FLOAT,				96, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R32G32B32_UINT,					96, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R32G32B32_SINT,					96, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R16G16B16A16_UINT,				64, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R16G16B16A16_SINT,				64, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R32G32_UINT,					64, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R32G32_SINT,					64, 0, false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,				GL_SRGB8_ALPHA8, GL_UNSIGNED_BYTE, GL_RGBA ),											32, 0,	SL2_DPFF_RGBA,		false, false, false },
+		{ SL2_TYPE( D3DFMT_G16R16,			DXGI_FORMAT_R16G16_UNORM,						GL_RG16, GL_UNSIGNED_SHORT, GL_RG ),													32, 0,	SL2_DPFF_FOURCC,	false, false, false },
+		{ SL2_TYPE( D3DFMT_A1R5G5B5,		DXGI_FORMAT_B5G5R5A1_UNORM,						GL_RGB5_A1, GL_UNSIGNED_SHORT_1_5_5_5_REV, GL_BGRA ),									16, 0,	SL2_DPFF_RGBA,		false, false, false },
+		{ SL2_TYPE( D3DFMT_R5G6B5,			DXGI_FORMAT_B5G6R5_UNORM,						GL_RGB565, GL_UNSIGNED_SHORT_5_6_5, GL_RGB ),											16, 0,	SL2_DPFF_RGB,		false, false, false },
+		{ SL2_TYPE( D3DFMT_A8,				DXGI_FORMAT_A8_UNORM,							GL_ALPHA8, GL_UNSIGNED_BYTE, GL_ALPHA ),												8, 0,	SL2_DPFF_ALPHA,		false, false, false },
 		
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R10G10B10A2_UINT,				32, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R11G11B10_FLOAT,				32, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R8G8B8A8_UINT,					32, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R8G8B8A8_SNORM,					32, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R8G8B8A8_SINT,					32, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R16G16_UINT,					32, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R16G16_SNORM,					32, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R16G16_SINT,					32, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_D32_FLOAT,						32, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R32_UINT,						32, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R32_SINT,						32, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R8G8_UNORM,						16, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R8G8_UINT,						16, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R8G8_SNORM,						16, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R8G8_SINT,						16, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_D16_UNORM,						16, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R16_UNORM,						16, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R16_UINT,						16, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R16_SNORM,						16, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R16_SINT,						16, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R8_UNORM,						8, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R8_UINT,						8, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R8_SNORM,						8, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R8_SINT,						8, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R1_UNORM,						1, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R9G9B9E5_SHAREDEXP,				32, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_B5G5R5A1_UNORM,					16, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM,		32, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_B8G8R8A8_UNORM_SRGB,			32, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_B8G8R8X8_UNORM_SRGB,			32, 0, false, false, false },
+		{ SL2_TYPE( D3DFMT_X1R5G5B5,		DXGI_FORMAT_UNKNOWN,							GL_RGB5, GL_UNSIGNED_SHORT_1_5_5_5_REV, GL_RGB ),										16, 0,	SL2_DPFF_RGB,		false, false, false },
+		{ SL2_TYPE( D3DFMT_A4R4G4B4,		DXGI_FORMAT_B4G4R4A4_UNORM,						GL_RGBA4, GL_UNSIGNED_SHORT_4_4_4_4_REV, GL_BGRA ),										16, 0,	SL2_DPFF_RGBA,		false, false, false },
+		{ SL2_TYPE( D3DFMT_X4R4G4B4,		DXGI_FORMAT_UNKNOWN,							GL_RGB4, GL_UNSIGNED_SHORT_4_4_4_4_REV, GL_RGB ),										16, 0,	SL2_DPFF_RGB,		false, false, false },
+		{ SL2_TYPE( D3DFMT_A8R3G3B2,		DXGI_FORMAT_UNKNOWN,							GL_RGBA8, GL_UNSIGNED_BYTE_3_3_2, GL_BGRA ),											16, 0,	SL2_DPFF_RGBA,		false, false, false },
+		
+		{ SL2_TYPE( D3DFMT_A8L8,			DXGI_FORMAT_UNKNOWN,							GL_LUMINANCE8_ALPHA8, GL_UNSIGNED_BYTE, GL_LUMINANCE_ALPHA ),							16, 0,	SL2_DPFF_LUMINANCE,	false, false, false },
+		{ SL2_TYPE( D3DFMT_L16,				DXGI_FORMAT_UNKNOWN,							GL_LUMINANCE16, GL_UNSIGNED_SHORT, GL_LUMINANCE ),										16, 0,	SL2_DPFF_LUMINANCE,	false, false, false },
+		{ SL2_TYPE( D3DFMT_A4L4,			DXGI_FORMAT_UNKNOWN,							GL_LUMINANCE4_ALPHA4, GL_UNSIGNED_BYTE, GL_LUMINANCE_ALPHA ),							8, 0,	SL2_DPFF_LUMINANCE,	false, false, false },
+		{ SL2_TYPE( D3DFMT_L8,				DXGI_FORMAT_UNKNOWN,							GL_LUMINANCE8, GL_UNSIGNED_BYTE, GL_LUMINANCE ),										8, 0,	SL2_DPFF_LUMINANCE,	false, false, false },
+		
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R32G32B32A32_UINT,					GL_RGBA32UI, GL_UNSIGNED_INT, GL_RGBA_INTEGER ),										128, 0, SL2_DPFF_RGBA,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R32G32B32A32_SINT,					GL_RGBA32I, GL_INT, GL_RGBA_INTEGER ),													128, 0, SL2_DPFF_RGBA,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R32G32B32_FLOAT,					GL_RGB32F, GL_FLOAT, GL_RGB ),															96, 0,	SL2_DPFF_RGB,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R32G32B32_UINT,						GL_RGB32UI, GL_UNSIGNED_INT, GL_RGB_INTEGER ),											96, 0,	SL2_DPFF_RGB,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R32G32B32_SINT,						GL_RGB32I, GL_INT, GL_RGB_INTEGER ),													96, 0,	SL2_DPFF_RGB,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R16G16B16A16_UINT,					GL_RGBA16UI, GL_UNSIGNED_SHORT, GL_RGBA_INTEGER ),										64, 0,	SL2_DPFF_RGBA,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R16G16B16A16_SINT,					GL_RGBA16I, GL_SHORT, GL_RGBA_INTEGER ),												64, 0,	SL2_DPFF_RGBA,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R32G32_UINT,						GL_RG32UI, GL_UNSIGNED_INT, GL_RG_INTEGER ),											64, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R32G32_SINT,						GL_RG32I, GL_INT, GL_RG_INTEGER ),														64, 0,	SL2_DPFF_NULL,		false, false, false },
+		
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R10G10B10A2_UINT,					GL_RGB10_A2UI, GL_UNSIGNED_INT_2_10_10_10_REV, GL_RGBA_INTEGER ),						32, 0,	SL2_DPFF_RGBA,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R11G11B10_FLOAT,					GL_R11F_G11F_B10F, GL_UNSIGNED_INT_10F_11F_11F_REV, GL_RGB ),							32, 0,	SL2_DPFF_RGB,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R8G8B8A8_UINT,						GL_RGBA8UI, GL_UNSIGNED_BYTE, GL_RGBA_INTEGER ),										32, 0,	SL2_DPFF_RGBA,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R8G8B8A8_SNORM,						GL_RGBA8_SNORM, GL_BYTE, GL_RGBA ),														32, 0,	SL2_DPFF_RGBA,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R8G8B8A8_SINT,						GL_RGBA8I, GL_UNSIGNED_BYTE, GL_RGBA_INTEGER ),											32, 0,	SL2_DPFF_RGBA,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R16G16_UINT,						GL_RG16UI, GL_UNSIGNED_SHORT, GL_RG_INTEGER ),											32, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R16G16_SNORM,						GL_RG16_SNORM, GL_SHORT, GL_RG ),														32, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R16G16_SINT,						GL_RG16I, GL_SHORT, GL_RG_INTEGER ),													32, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_D32_FLOAT,							GL_DEPTH_COMPONENT32F, GL_FLOAT, GL_DEPTH_COMPONENT ),									32, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R32_UINT,							GL_R32UI, GL_UNSIGNED_INT, GL_RED_INTEGER ),											32, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R32_SINT,							GL_R32I, GL_INT, GL_RED_INTEGER ),														32, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R8G8_UNORM,							GL_RG8, GL_UNSIGNED_BYTE, GL_RG ),														16, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R8G8_UINT,							GL_RG8UI, GL_UNSIGNED_BYTE, GL_RG_INTEGER ),											16, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R8G8_SNORM,							GL_RG8_SNORM, GL_BYTE, GL_RG ),															16, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R8G8_SINT,							GL_RG8I, GL_BYTE, GL_RG_INTEGER ),														16, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_D16_UNORM,							GL_DEPTH_COMPONENT16, GL_UNSIGNED_SHORT, GL_DEPTH_COMPONENT ),							16, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R16_UNORM,							GL_R16, GL_UNSIGNED_SHORT, GL_RED ),													16, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R16_UINT,							GL_R16UI, GL_UNSIGNED_SHORT, GL_RED_INTEGER ),											16, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R16_SNORM,							GL_R16_SNORM, GL_SHORT, GL_RED ),														16, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R16_SINT,							GL_R16I, GL_SHORT, GL_RED_INTEGER ),													16, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R8_UNORM,							GL_R8, GL_UNSIGNED_BYTE, GL_RED ),														8, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R8_UINT,							GL_R8UI, GL_UNSIGNED_BYTE, GL_RED_INTEGER ),											8, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R8_SNORM,							GL_R8_SNORM, GL_BYTE, GL_RED ),															8, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R8_SINT,							GL_R8I, GL_BYTE, GL_RED_INTEGER ),														8, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R1_UNORM,							GL_INVALID, GL_INVALID, GL_INVALID /** TODO. */ ),										1, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R9G9B9E5_SHAREDEXP,					GL_RGB9_E5, GL_UNSIGNED_INT_5_9_9_9_REV, GL_RGB ),										32, 0,	SL2_DPFF_RGB,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_B5G5R5A1_UNORM,						GL_RGB5_A1, GL_UNSIGNED_SHORT_1_5_5_5_REV, GL_BGRA ),									16, 0,	SL2_DPFF_RGBA,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM,			GL_RGB10_A2, GL_UNSIGNED_INT_2_10_10_10_REV, GL_BGRA ),									32, 0,	SL2_DPFF_RGBA,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_B8G8R8A8_UNORM_SRGB,				GL_SRGB8_ALPHA8, GL_UNSIGNED_BYTE, GL_BGRA ),											32, 0,	SL2_DPFF_RGBA,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_B8G8R8X8_UNORM_SRGB,				GL_INVALID, GL_INVALID, GL_INVALID ),													32, 0,	SL2_DPFF_RGB,		false, false, false },
 
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_X32_TYPELESS_G8X24_UINT,		64, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_D32_FLOAT_S8X24_UINT,			64, 0, false, false, false },
-		{ SL2_D3DFMT_D24S8,				SL2_DXGI_FORMAT_D24_UNORM_S8_UINT,				32, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_X24_TYPELESS_G8_UINT,			32, 0, false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_X32_TYPELESS_G8X24_UINT,			GL_INVALID, GL_INVALID, GL_INVALID ),													64, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_D32_FLOAT_S8X24_UINT,				GL_DEPTH32F_STENCIL8, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, GL_DEPTH_STENCIL ),			64, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_D24S8,			DXGI_FORMAT_D24_UNORM_S8_UINT,					GL_DEPTH24_STENCIL8, GL_UNSIGNED_INT_24_8, GL_DEPTH_STENCIL ),							32, 0,	SL2_DPFF_NULL,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_X24_TYPELESS_G8_UINT,				GL_INVALID, GL_INVALID, GL_INVALID ),													32, 0,	SL2_DPFF_NULL,		false, false, false },
 
 		// Order matters here.
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R8G8B8A8_UNORM,					32, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_B8G8R8A8_UNORM,					32, 0, false, false, false },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_B8G8R8X8_UNORM,					32, 0, false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R8G8B8A8_UNORM,						GL_RGBA8, GL_UNSIGNED_BYTE, GL_RGBA ),													32, 0,	SL2_DPFF_RGBA,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_B8G8R8A8_UNORM,						GL_RGBA8, GL_UNSIGNED_BYTE, GL_BGRA ),													32, 0,	SL2_DPFF_RGBA,		false, false, false },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_B8G8R8X8_UNORM,						GL_INVALID, GL_INVALID, GL_INVALID ),													32, 0,	SL2_DPFF_RGB,		false, false, false },
 
-		{ SL2_D3DFMT_R8G8B8,			SL2_DXGI_FORMAT_R8G8B8A8_UNORM,					24, 32, false, false, false, Convert_RGB24_to_RGBA32 },
-		{ SL2_D3DFMT_A8R8G8B8,			SL2_DXGI_FORMAT_R8G8B8A8_UNORM,					32, 0, false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_RGBA8, true> },
-		{ SL2_D3DFMT_X8R8G8B8,			SL2_DXGI_FORMAT_R8G8B8A8_UNORM,					32, 0, false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_RGBA8, false> },
-		{ SL2_D3DFMT_A8B8G8R8,			SL2_DXGI_FORMAT_B8G8R8A8_UNORM,					32, 0, false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_BGRA8, true> },
-		{ SL2_D3DFMT_X8B8G8R8,			SL2_DXGI_FORMAT_B8G8R8X8_UNORM,					32, 0, false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_BGRA8, false> },
+		{ SL2_TYPE( D3DFMT_R8G8B8,			DXGI_FORMAT_R8G8B8A8_UNORM,						GL_RGBA8, GL_UNSIGNED_BYTE, GL_RGBA ),													24, 32,	SL2_DPFF_RGB,		false, false, false, Convert_RGB24_to_RGBA32 },
+		{ SL2_TYPE( D3DFMT_A8R8G8B8,		DXGI_FORMAT_R8G8B8A8_UNORM,						GL_RGBA8, GL_UNSIGNED_BYTE, GL_RGBA ),													32, 0,	SL2_DPFF_RGBA,		false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_RGBA8, true> },
+		{ SL2_TYPE( D3DFMT_X8R8G8B8,		DXGI_FORMAT_R8G8B8A8_UNORM,						GL_RGBA8, GL_UNSIGNED_BYTE, GL_RGBA ),													32, 0,	SL2_DPFF_RGB,		false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_RGBA8, false> },
+		{ SL2_TYPE( D3DFMT_A8B8G8R8,		DXGI_FORMAT_B8G8R8A8_UNORM,						GL_RGBA8, GL_UNSIGNED_BYTE, GL_BGRA ),													32, 0,	SL2_DPFF_RGBA,		false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_BGRA8, true> },
+		{ SL2_TYPE( D3DFMT_X8B8G8R8,		DXGI_FORMAT_B8G8R8X8_UNORM,						GL_INVALID, GL_INVALID, GL_INVALID ),													32, 0,	SL2_DPFF_RGB,		false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_BGRA8, false> },
 
+		// Order matters here.
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R10G10B10A2_UNORM,					GL_RGB10_A2, GL_UNSIGNED_INT_2_10_10_10_REV, GL_RGBA ),									32, 0,	SL2_DPFF_RGBA,		false, false, false },
 
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_R10G10B10A2_UNORM,				32, 0, false, false, false },
+		{ SL2_TYPE( D3DFMT_A2B10G10R10,		DXGI_FORMAT_R10G10B10A2_UNORM,					GL_RGB10_A2, GL_UNSIGNED_INT_2_10_10_10_REV, GL_RGBA ),									32, 0,	SL2_DPFF_RGBA,		false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_RGB10A2, true> },
+		{ SL2_TYPE( D3DFMT_A2R10G10B10,		DXGI_FORMAT_R10G10B10A2_UNORM,					GL_RGB10_A2, GL_UNSIGNED_INT_2_10_10_10_REV, GL_RGBA ),									32, 0,	SL2_DPFF_RGBA,		false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_RGB10A2, true> },
 
-		{ SL2_D3DFMT_A2B10G10R10,		SL2_DXGI_FORMAT_R10G10B10A2_UNORM,				32, 0, false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_RGB10A2, true> },
-		{ SL2_D3DFMT_A2R10G10B10,		SL2_DXGI_FORMAT_R10G10B10A2_UNORM,				32, 0, false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_RGB10A2, true> },
+		// Order matters here.
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_YUY2,								GL_RGB, GL_UNSIGNED_SHORT_8_8_APPLE, GL_YCBCR_422_APPLE ),								32, 0,	SL2_DPFF_YUV,		false, false, true },
+		{ SL2_TYPE( D3DFMT_YUY2,			DXGI_FORMAT_YUY2,								GL_RGB, GL_UNSIGNED_SHORT_8_8_APPLE, GL_YCBCR_422_APPLE ),								32, 0,	SL2_DPFF_FOURCC,	false, false, true },
+		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_V208,								GL_INVALID, GL_INVALID, GL_INVALID ),													24, 0,	SL2_DPFF_YUV,		false, false, true },
 
-
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_YUY2,							32, 0, false, false, true },
-		{ SL2_D3DFMT_YUY2,				SL2_DXGI_FORMAT_YUY2,							32, 0, false, false, true },
-		{ SL2_D3DFMT_UNKNOWN,			SL2_DXGI_FORMAT_V208,							24, 0, false, false, true },
-
-		{ SL2_D3DFMT_UYVY,				SL2_DXGI_FORMAT_YUY2,							32, 0, false, false, true, Convert_UYVY_to_YUY2 },
-		{ SL2_D3DFMT_CxV8U8,			SL2_DXGI_FORMAT_V208,							16, 24, false, false, true },		// Add conversion.
+		{ SL2_TYPE( D3DFMT_UYVY,			DXGI_FORMAT_YUY2,								GL_RGB, GL_UNSIGNED_SHORT_8_8_APPLE, GL_YCBCR_422_APPLE ),								32, 0,	SL2_DPFF_FOURCC,	false, false, true, Convert_UYVY_to_YUY2 },
+		{ SL2_TYPE( D3DFMT_CxV8U8,			DXGI_FORMAT_V208,								GL_INVALID, GL_INVALID, GL_INVALID ),													16, 24, SL2_DPFF_FOURCC,	false, false, true },		// Add conversion.
 
 		
 	};
+#undef SL2_TYPE
 
 
 	CDds::CDds() {
@@ -159,10 +164,10 @@ namespace sl2 {
 		
 		if ( m_dhHeader.dpPixelFormat.ui32Size != sizeof( m_dhHeader.dpPixelFormat ) ) { return false; }
 
-		if ( (m_dhHeader.ui32Flags & (LSI_DF_CAPS | LSI_DF_HEIGHT | LSI_DF_WIDTH | LSI_DF_PIXELFORMAT)) !=
-			(LSI_DF_CAPS | LSI_DF_HEIGHT | LSI_DF_WIDTH | LSI_DF_PIXELFORMAT) ) {
-			if ( (m_dhHeader.ui32Flags & (LSI_DF_HEIGHT | LSI_DF_WIDTH)) !=
-				(LSI_DF_HEIGHT | LSI_DF_WIDTH) ) {
+		if ( (m_dhHeader.ui32Flags & (SL2_DF_CAPS | SL2_DF_HEIGHT | SL2_DF_WIDTH | SL2_DF_PIXELFORMAT)) !=
+			(SL2_DF_CAPS | SL2_DF_HEIGHT | SL2_DF_WIDTH | SL2_DF_PIXELFORMAT) ) {
+			if ( (m_dhHeader.ui32Flags & (SL2_DF_HEIGHT | SL2_DF_WIDTH)) !=
+				(SL2_DF_HEIGHT | SL2_DF_WIDTH) ) {
 				return false;
 			}
 		}
@@ -172,7 +177,7 @@ namespace sl2 {
 		m_ui32ArraySize = 1;
 
 		bool bUseDx10 = false;
-		if ( m_dhHeader.dpPixelFormat.ui32Flags & LSI_DPFF_FOURCC ) {
+		if ( m_dhHeader.dpPixelFormat.ui32Flags & SL2_DPFF_FOURCC ) {
 			switch ( m_dhHeader.dpPixelFormat.ui32FourCC ) {
 				case SL2_MAKEFOURCC( 'D', 'X', '1', '0' ) : {
 					bUseDx10 = true;
@@ -251,6 +256,36 @@ namespace sl2 {
 	}
 
 	/**
+	 * Checks if the given DXGI format is supported in DDS.
+	 * 
+	 * \param _pcDxgiFormat The name of the DXGI format to verify.
+	 * \return Returns a pointer to the given format by DXGI if available.
+	 **/
+	const CDds::SL2_FORMAT_DATA * CDds::DxgiIsSupported( const char * _pcDxgiFormat ) {
+		for ( size_t I = 0; I < SL2_ELEMENTS( m_fdData ); ++I ) {
+			if ( ::_stricmp( m_fdData[I].pcDxgiName, _pcDxgiFormat ) == 0 ) { return &m_fdData[I]; }
+		}
+		return nullptr;
+	}
+
+	/**
+	 * Finds a fall-back using OpenGL formats.
+	 * 
+	 * \param _pcFormat The internal format to find by name.
+	 * \param _pcType The type to find by name.
+	 * \param _pcBaseFormat The base internal format to find by name.
+	 * \return Returns a pointer to the given format by OpenGL if available.
+	 **/
+	const CDds::SL2_FORMAT_DATA * CDds::FindByOgl( const char * _pcFormat, const char * _pcType, const char * _pcBaseFormat ) {
+		for ( size_t I = 0; I < SL2_ELEMENTS( m_fdData ); ++I ) {
+			if ( ::_stricmp( m_fdData[I].pcOglInternalFormat, _pcFormat ) == 0 &&
+				::_stricmp( m_fdData[I].pcOglType, _pcType ) == 0 &&
+				::_stricmp( m_fdData[I].pcOglBaseInternalFormat, _pcBaseFormat ) == 0 ) { return &m_fdData[I]; }
+		}
+		return nullptr;
+	}
+
+	/**
 	 * Converts D3DFMT_UYVY to DXGI_FORMAT_YUY2.
 	 * 
 	 * \param _pui8Src The data to convert.
@@ -261,7 +296,7 @@ namespace sl2 {
 	 * \param _ui32Pitch The row width in bytes of the given data.
 	 * \param _dpfPixelFormat The pixel format data.
 	 **/
-	void CDds::Convert_UYVY_to_YUY2( uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Pitch, const LSI_DDS_PIXELFORMAT &/*_dpfPixelFormat*/ ) {
+	void CDds::Convert_UYVY_to_YUY2( uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Pitch, const SL2_DDS_PIXELFORMAT &/*_dpfPixelFormat*/ ) {
 		struct SL2_TEXELS {
 			uint8_t				ui8U;
 			uint8_t				ui8Y0;
@@ -297,7 +332,7 @@ namespace sl2 {
 	 * \param _ui32Pitch The row width in bytes of the given data.
 	 * \param _dpfPixelFormat The pixel format data.
 	 **/
-	void CDds::Convert_RGB24_to_RGBA32( uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Pitch, const LSI_DDS_PIXELFORMAT &_dpfPixelFormat ) {
+	void CDds::Convert_RGB24_to_RGBA32( uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Pitch, const SL2_DDS_PIXELFORMAT &_dpfPixelFormat ) {
 		struct SL2_TEXELS {
 			uint8_t				ui8R;
 			uint8_t				ui8G;

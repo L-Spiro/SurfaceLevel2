@@ -337,6 +337,13 @@ namespace sl2 {
 		inline void											SetIsPreMultiply( bool _bPreMult ) { m_bIsPreMultiplied = _bPreMult; }
 
 		/**
+		 * Is the texture alpha-pre-multiplied?
+		 *
+		 * \return Returns true if the texutre is pre-multiplied.
+		 **/
+		inline bool											IsPremultiplied() const { return m_bIsPreMultiplied; }
+
+		/**
 		 * Sets the swizzle to apply.
 		 * 
 		 * \param _sSwizzle The swizzle to set.
@@ -356,6 +363,13 @@ namespace sl2 {
 		 * \param _bIgnore If true, alpha will be ignored.
 		 **/
 		inline void											SetIgnoreAlpha( bool _bIgnore ) { m_bIgnoreAlpha = _bIgnore; }
+
+		/**
+		 * Gets the texture type.
+		 *
+		 * \return Returns the the texture type.
+		 **/
+		inline SL2_TEXTURE_TYPES							TextureType() const { return m_ttType; }
 
 		/**
 		 * Sets mipmap parameters.
@@ -439,6 +453,8 @@ namespace sl2 {
 
 		SL2_MIPMAP_HANDLING									m_mhMipHandling;						/**< How to handle mimaps. */
 		size_t												m_sTotalMips;							/**< How many mipmaps to put into the final result, or 0 to keep existing mipmaps or to generate a full set. */
+
+		SL2_TEXTURE_TYPES									m_ttType;								/**< The type of texture. */
 
 
 		// == Functions.

@@ -9,6 +9,7 @@
 #include "SL2SurfaceLevel2.h"
 #include "Files/SL2StdFile.h"
 #include "Image/detex/misc.h"
+#include "Image/DDS/SL2Dds.h"
 #include "Image/SL2Image.h"
 #include "Time/SL2Clock.h"
 #include "Utilities/SL2Stream.h"
@@ -2625,6 +2626,180 @@ namespace sl2 {
                 return SL2_E_INVALIDWRITEPERMISSIONS;
             }
             if ( !sfFile.WriteToFile( vConverted ) ) {
+                return SL2_E_FILEWRITEERROR;
+            }
+        }
+
+        return SL2_E_SUCCESS;
+    }
+
+    /**
+	 * Exports as DDS.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS ExportAsDds( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions ) {
+        // Is the format supported?
+        const sl2::CDds::SL2_FORMAT_DATA * pfdDdsData = nullptr;
+        
+        if ( _iImage.Format()->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN ) {
+            pfdDdsData = sl2::CDds::DxgiIsSupported( _iImage.Format()->pcDxName );
+        }
+        if ( nullptr == pfdDdsData && _iImage.Format()->kifInternalFormat != SL2_KIF_GL_INVALID ) {
+            pfdDdsData = sl2::CDds::FindByOgl( _iImage.Format()->pcOglInternalFormat, _iImage.Format()->pcOglType, _iImage.Format()->pcOglBaseInternalFormat );
+        }
+        if ( nullptr == pfdDdsData ) {
+            return SL2_E_BADFORMAT;
+        }
+        std::vector<uint8_t> vBuffer;
+        sl2::CStream sFile( vBuffer );
+
+
+        sFile.WriteI32( 0x20534444 );       // DDS .
+
+        sl2::CDds::SL2_DDS_HEADER dhHeader = {
+            .ui32Size                                           = sizeof( sl2::CDds::SL2_DDS_HEADER ),
+            .ui32Flags                                          = SL2_DF_CAPS | SL2_DF_HEIGHT | SL2_DF_WIDTH | SL2_DF_PIXELFORMAT,
+            .ui32Height                                         = _iImage.Height(),
+            .ui32Width                                          = _iImage.Height(),
+            .ui32PitchOrLinearSize                              = 0,
+            .ui32Depth                                          = 0,
+            .ui32MipMapCount                                    = static_cast<uint32_t>(_iImage.Mipmaps()),
+            .dpPixelFormat                                      = {
+                .ui32Size                                       = sizeof( sl2::CDds::SL2_DDS_PIXELFORMAT ),
+                .ui32Flags                                      = 0,
+                .ui32FourCC                                     = 0,
+                .ui32RGBBitCount                                = 0,
+                .ui32RBitMask                                   = 0,
+                .ui32GBitMask                                   = 0,
+                .ui32BBitMask                                   = 0,
+                .ui32ABitMask                                   = 0,
+            },
+            .ui32Caps                                           = SL2_DDSCAPS_TEXTURE,
+            .ui32Caps2                                          = 0,
+            .ui32Caps3                                          = 0,
+            .ui32Caps4                                          = 0,
+            .ui32Reserved2                                      = 0,
+        };
+
+        sl2::SL2_TEXTURE_TYPES ttTexType = _iImage.TextureType();
+        if ( _iImage.Depth() > 1 ) {
+            if ( _iImage.ArraySize() != 1 ) { return SL2_E_INVALIDDATA; }
+            ttTexType = SL2_TT_3D;
+        }
+        else if ( ttTexType == SL2_TT_CUBE ) {
+            if ( (_iImage.ArraySize() % 6) != 0 ) { return SL2_E_INVALIDDATA; }
+        }
+
+        // ui32PitchOrLinearSize
+        // The pitch or number of bytes per scan line in an uncompressed texture; the total number of bytes in the top level texture for a compressed texture.
+        if ( _iImage.Format()->bCompressed ) {
+            dhHeader.ui32PitchOrLinearSize = static_cast<uint32_t>(sl2::CFormat::GetRowSize( _iImage.Format(), _iImage.Width() ));
+            dhHeader.ui32Flags |= SL2_DF_LINEARSIZE;                        // Required when pitch is provided for a compressed texture.
+        }
+        else {
+            dhHeader.ui32PitchOrLinearSize = static_cast<uint32_t>(sl2::CFormat::GetRowSize( _iImage.Format(), _iImage.Width() ));
+            dhHeader.ui32Flags |= SL2_DF_PITCH;                             // Required when pitch is provided for an uncompressed texture.
+        }
+
+        // ui32Depth
+        // Depth of a volume texture (in pixels), otherwise unused.
+        if ( _iImage.Depth() > 1 ) {
+            dhHeader.ui32Depth = _iImage.Depth();
+            dhHeader.ui32Flags |= SL2_DF_DEPTH;                             // Required in a depth texture.
+        }
+
+        // DDSD_MIPMAPCOUNT	Required in a mipmapped texture.
+        if ( dhHeader.ui32MipMapCount > 1 ) {
+            dhHeader.ui32Flags |= SL2_DF_MIPMAPCOUNT;                       // Required in a mipmapped texture.
+            dhHeader.ui32Caps |= SL2_DDSCAPS_COMPLEX;                       // Optional; must be used on any file that contains more than one surface (a mipmap, a cubic environment map, or mipmapped volume texture).
+            dhHeader.ui32Caps |= SL2_DDSCAPS_MIPMAP;                        // Optional; should be used for a mipmap.
+        }
+
+        // ui32Caps
+        if ( dhHeader.ui32MipMapCount > 1 || _iImage.ArraySize() > 1 || _iImage.Faces() > 1 ) {
+            dhHeader.ui32Caps |= SL2_DDSCAPS_COMPLEX;                       // Optional; must be used on any file that contains more than one surface (a mipmap, a cubic environment map, or mipmapped volume texture).
+        }
+
+        // ui32Caps2
+        if ( _iImage.TextureType() == SL2_TT_CUBE ) {
+            dhHeader.ui32Caps2 |= SL2_DDSCAPS2_CUBEMAP;                     // Required for a cube map.
+            dhHeader.ui32Caps2 |= SL2_DDSCAPS2_CUBEMAP_POSITIVEX;           // Required when these surfaces are stored in a cube map.
+            dhHeader.ui32Caps2 |= SL2_DDSCAPS2_CUBEMAP_NEGATIVEX;           // Required when these surfaces are stored in a cube map.
+            dhHeader.ui32Caps2 |= SL2_DDSCAPS2_CUBEMAP_POSITIVEY;           // Required when these surfaces are stored in a cube map.
+            dhHeader.ui32Caps2 |= SL2_DDSCAPS2_CUBEMAP_NEGATIVEY;           // Required when these surfaces are stored in a cube map.
+            dhHeader.ui32Caps2 |= SL2_DDSCAPS2_CUBEMAP_POSITIVEZ;           // Required when these surfaces are stored in a cube map.
+            dhHeader.ui32Caps2 |= SL2_DDSCAPS2_CUBEMAP_NEGATIVEZ;           // Required when these surfaces are stored in a cube map.
+        }
+        if ( _iImage.Depth() > 1 ) {
+            if ( _iImage.ArraySize() != 1 ) { return SL2_E_INVALIDDATA; }
+            dhHeader.ui32Caps2 |= SL2_DDSCAPS2_VOLUME;                      // Required for a volume texture.
+        }
+        if ( (dhHeader.ui32Caps2 & (SL2_DDSCAPS2_CUBEMAP | SL2_DDSCAPS2_VOLUME)) == (SL2_DDSCAPS2_CUBEMAP | SL2_DDSCAPS2_VOLUME) ) {
+            return SL2_E_INVALIDDATA;
+        }
+
+
+        if ( pfdDdsData->dfFormat != CDds::SL2_DXGI_FORMAT_UNKNOWN ) {
+            // Extended header.
+            sl2::CDds::SL2_DDS_HEADER_DXT10 dhdHeaderEx = {
+                .ui32DxgiFormat                                             = 0,
+                .ui32ResourceDimension                                      = 0,
+                .ui32MiscFlag                                               = static_cast<uint32_t>((dhHeader.ui32Caps2 & SL2_DDSCAPS2_CUBEMAP) ? SL2_DDS_RESOURCE_MISC_TEXTURECUBE : 0),
+                .ui32ArraySize                                              = static_cast<uint32_t>(_iImage.ArraySize()),
+                .ui32MiscFlags2                                             = 0
+            };
+
+            if ( dhdHeaderEx.ui32MiscFlag == SL2_DDS_RESOURCE_MISC_TEXTURECUBE ) {
+                dhdHeaderEx.ui32ArraySize /= 6;
+            }
+
+            // Extended header.
+            dhHeader.dpPixelFormat.ui32FourCC = SL2_MAKEFOURCC( 'D', 'X', '1', '0' );
+            dhHeader.dpPixelFormat.ui32Flags |= SL2_DPFF_FOURCC;
+            
+            switch ( ttTexType ) {
+                case SL2_TT_1D : {
+                    dhdHeaderEx.ui32ResourceDimension = SL2_DDS_DIMENSION_TEXTURE1D;
+                    break;
+                }
+                case SL2_TT_2D : {
+                    dhdHeaderEx.ui32ResourceDimension = SL2_DDS_DIMENSION_TEXTURE2D;
+                    break;
+                }
+                case SL2_TT_3D : {
+                    dhdHeaderEx.ui32ResourceDimension = SL2_DDS_DIMENSION_TEXTURE3D;
+                    break;
+                }
+            }
+        }
+        else {
+            dhHeader.dpPixelFormat.ui32Flags = pfdDdsData->pfFormatFlags;
+            if ( dhHeader.dpPixelFormat.ui32Flags & SL2_DPFF_FOURCC ) {
+                dhHeader.dpPixelFormat.ui32FourCC = pfdDdsData->fD3dFormat;
+            }
+            else {
+                if ( dhHeader.dpPixelFormat.ui32Flags & (SL2_DPFF_RGB | SL2_DPFF_LUMINANCE | SL2_DPFF_YUV) ) {
+                    dhHeader.dpPixelFormat.ui32RGBBitCount = pfdDdsData->ui8BitsPerBlock;
+                    dhHeader.dpPixelFormat.ui32RBitMask = ((1 << _iImage.Format()->ui8RBits) - 1) << _iImage.Format()->ui8RShift;
+                    dhHeader.dpPixelFormat.ui32GBitMask = ((1 << _iImage.Format()->ui8GBits) - 1) << _iImage.Format()->ui8GShift;
+                    dhHeader.dpPixelFormat.ui32BBitMask = ((1 << _iImage.Format()->ui8BBits) - 1) << _iImage.Format()->ui8BShift;
+                    dhHeader.dpPixelFormat.ui32ABitMask = ((1 << _iImage.Format()->ui8ABits) - 1) << _iImage.Format()->ui8AShift;
+                }
+            }
+        }
+
+
+
+        {
+            CStdFile sfFile;
+            if ( !sfFile.Create( _sPath.c_str() ) ) {
+                return SL2_E_INVALIDWRITEPERMISSIONS;
+            }
+            if ( !sfFile.WriteToFile( vBuffer ) ) {
                 return SL2_E_FILEWRITEERROR;
             }
         }

@@ -1223,6 +1223,14 @@ namespace sl2 {
 		SL2_MH_GENERATE_NEW,														/**< Generate new mipmaps, overwriting any existing ones. */
 	};
 
+	/** Texture types. */
+	enum SL2_TEXTURE_TYPES {
+		SL2_TT_1D,																	/**< A 1-D texture.  W and H are set to 1. */
+		SL2_TT_2D,																	/**< A 2-D texture.  H is set to 1. */
+		SL2_TT_CUBE,																/**< A cube texture. 6 textures in 1.  Array() must be a multiple of 6. */
+		SL2_TT_3D,																	/**< A 3-D texture. */
+	};
+
 	/**
 	 * Class CFormat
 	 * \brief All of the image formats, along with conversion routines and functions for working with the formats (encoding, decoding, etc.)
@@ -1501,6 +1509,16 @@ namespace sl2 {
 		 * \return Returns the matching SL2_KTX_INTERNAL_FORMAT_DATA data, or nullptr.
 		 **/
 		static const SL2_KTX_INTERNAL_FORMAT_DATA *									FindFormatDataByOgl( const char * _pcFormat );
+
+		/**
+		 * Finds format data given its OpenGL format string.
+		 * 
+		 * \param _pcFormat The internal format to find by name.
+		 * \param _pcType The type to find by name.
+		 * \param _pcBaseFormat The base internal format to find by name.
+		 * \return Returns the matching SL2_KTX_INTERNAL_FORMAT_DATA data, or nullptr.
+		 **/
+		static const SL2_KTX_INTERNAL_FORMAT_DATA *									FindFormatDataByOgl( const char * _pcFormat, const char * _pcType, const char * _pcBaseFormat );
 
 		/**
 		 * Finds format data given its Metal format identifier.
