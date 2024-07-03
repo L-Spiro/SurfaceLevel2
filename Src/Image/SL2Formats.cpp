@@ -745,6 +745,23 @@ namespace sl2 {
 	}
 
 	/**
+	 * Gets the pitch of a format without any extra padding.
+	 * 
+	 * \param _pkifFormat Format of the texel data.
+	 * \param _ui32RowLen Number of texels in a row.
+	 * \return Returns the length of a row of the given format without padding.
+	 **/
+	size_t SL2_FASTCALL CFormat::GetRowSize_NoPadding( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32RowLen ) {
+		if ( _pkifFormat ) {
+			if ( _pkifFormat->pfCompSizeFunc ) {
+				return _pkifFormat->pfCompSizeFunc( _ui32RowLen, 1, 1, _pkifFormat->ui32BlockSizeInBits, _pkifFormat );
+			}
+			return static_cast<size_t>((static_cast<uint64_t>(_pkifFormat->ui32BlockSizeInBits) * _ui32RowLen) >> 3);
+		}
+		return 0;
+	}
+
+	/**
 	 * Applies settings based on the current value of m_ui32Perf.
 	 * 
 	 * \param _bAlpha Determines whether the current texture has an alpha channel.

@@ -1150,62 +1150,85 @@ namespace sl2 {
 		CDds dFile;
 		if ( !dFile.LoadDds( _vData ) ) { return SL2_E_INVALIDFILETYPE; }
 
-		if ( !AllocateTexture( CFormat::FindFormatDataByDx( static_cast<SL2_DXGI_FORMAT>(dFile.Format()) ),
+		auto aFmt = CFormat::FindFormatDataByDx( static_cast<SL2_DXGI_FORMAT>(dFile.Format()) );
+		if ( !AllocateTexture( aFmt,
 			dFile.Width(), dFile.Height(), dFile.Depth(),
 			dFile.Mips(), dFile.Array(), dFile.Faces() ) ) { return SL2_E_OUTOFMEMORY; }
 		if ( dFile.Faces() > 1 ) {
-			for ( uint32_t M = 0; M < dFile.Mips(); ++M ) {
-				for ( uint32_t F = 0; F < dFile.Faces(); ++F ) {
+			for ( uint32_t F = 0; F < dFile.Faces(); ++F ) {
+				for ( uint32_t M = 0; M < dFile.Mips(); ++M ) {
 					size_t sIdx = F * dFile.Mips() + M;
 					if ( sIdx >= dFile.Buffers().size() ) { return SL2_E_INVALIDDATA; }
-
-					auto aPitch = CFormat::GetRowSize( static_cast<SL2_DXGI_FORMAT>(dFile.Format()), std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
+					uint32_t ui32Width = std::max( dFile.Width() >> M, static_cast<uint32_t>(1) );
 					uint32_t ui32Height = std::max( dFile.Height() >> M, static_cast<uint32_t>(1) );
 					uint32_t ui32Depth = std::max( dFile.Depth() >> M, static_cast<uint32_t>(1) );
-					size_t sBaseSize = GetActualPlaneSize( CFormat::GetFormatSize( static_cast<SL2_DXGI_FORMAT>(dFile.Format()),
-						std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ),
-						ui32Height,
-						ui32Depth ) );
-					if ( sBaseSize < dFile.Buffers()[sIdx].vTexture.size() ) { return SL2_E_INVALIDDATA; }
-					uint32_t ui32DataHeight = std::max( ui32Height >> 2, 1U );
-					for ( size_t D = 0; D < ui32Depth; ++D ) {
-						size_t sDstSliceOffset = D * ui32Height * aPitch;
-						size_t sSrcSliceOffset = D * ui32DataHeight * aPitch;
-						for ( size_t H = 0; H < ui32DataHeight; ++H ) {
-							size_t sDst = aPitch * H + sDstSliceOffset;
-							size_t sSrc = aPitch * H + sSrcSliceOffset;
 
-							std::memcpy( Data( M, 0, 0, F ) + sDst, dFile.Buffers()[sIdx].vTexture.data() + sSrc, aPitch );
+					if ( dFile.Header().ui32Flags & SL2_DF_LINEARSIZE ) {
+						// Compressed texture.
+						size_t sPageSize = CFormat::GetFormatSize( aFmt, ui32Width,
+							ui32Height,
+							1 );
+						size_t sBaseSize = sPageSize * ui32Depth;
+						for ( uint32_t D = 0; D < ui32Depth; ++D ) {
+							if ( dFile.Buffers()[sIdx].vTexture.size() - (sPageSize * D) < sPageSize ) { return SL2_E_INVALIDDATA; }
+							std::memcpy( Data( M, D, 0, F ), dFile.Buffers()[sIdx].vTexture.data() + sPageSize * D, sPageSize );
 						}
 					}
+					else {
+						size_t sSrcPitch = CFormat::GetRowSize_NoPadding( aFmt, std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
+						auto aPitch = CFormat::GetRowSize( aFmt, std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
 
+						for ( uint32_t D = 0; D < ui32Depth; ++D ) {
+							size_t sDstSliceOffset = D * ui32Height * aPitch;
+							size_t sSrcSliceOffset = D * ui32Height * sSrcPitch;
+							for ( uint32_t H = 0; H < ui32Height; ++H ) {
+								size_t sDst = aPitch * H + sDstSliceOffset;
+								size_t sSrc = sSrcPitch * H + sSrcSliceOffset;
+
+								if ( dFile.Buffers()[sIdx].vTexture.size() - sSrc < sSrcPitch ) { return SL2_E_INVALIDDATA; }
+								std::memcpy( Data( M, 0, 0, F ) + sDst, dFile.Buffers()[sIdx].vTexture.data() + sSrc, sSrcPitch );
+							}
+						}
+					}
 					//std::memcpy( Data( M, 0, 0, F ), dFile.Buffers()[sIdx].vTexture.data(), dFile.Buffers()[sIdx].vTexture.size() );
 				}
 			}
 		}
 		else {
-			for ( uint32_t M = 0; M < dFile.Mips(); ++M ) {
-				for ( uint32_t A = 0; A < dFile.Array(); ++A ) {
+			for ( uint32_t A = 0; A < dFile.Array(); ++A ) {
+				for ( uint32_t M = 0; M < dFile.Mips(); ++M ) {
 					size_t sIdx = A * dFile.Mips() + M;
 					if ( sIdx >= dFile.Buffers().size() ) { return SL2_E_INVALIDDATA; }
 					
-					auto aPitch = CFormat::GetRowSize( static_cast<SL2_DXGI_FORMAT>(dFile.Format()), std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
+					uint32_t ui32Width = std::max( dFile.Width() >> M, static_cast<uint32_t>(1) );
 					uint32_t ui32Height = std::max( dFile.Height() >> M, static_cast<uint32_t>(1) );
 					uint32_t ui32Depth = std::max( dFile.Depth() >> M, static_cast<uint32_t>(1) );
-					size_t sBaseSize = GetActualPlaneSize( CFormat::GetFormatSize( static_cast<SL2_DXGI_FORMAT>(dFile.Format()),
-						std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ),
-						ui32Height,
-						ui32Depth ) );
-					if ( sBaseSize < dFile.Buffers()[sIdx].vTexture.size() ) { return SL2_E_INVALIDDATA; }
-					uint32_t ui32DataHeight = std::max( ui32Height >> 2, 1U );
-					for ( size_t D = 0; D < ui32Depth; ++D ) {
-						size_t sDstSliceOffset = D * ui32Height * aPitch;
-						size_t sSrcSliceOffset = D * ui32DataHeight * aPitch;
-						for ( size_t H = 0; H < ui32DataHeight; ++H ) {
-							size_t sDst = aPitch * H + sDstSliceOffset;
-							size_t sSrc = aPitch * H + sSrcSliceOffset;
 
-							std::memcpy( Data( M, 0, A, 0 ) + sDst, dFile.Buffers()[sIdx].vTexture.data() + sSrc, aPitch );
+					if ( dFile.Header().ui32Flags & SL2_DF_LINEARSIZE ) {
+						// Compressed texture.
+						size_t sPageSize = CFormat::GetFormatSize( aFmt, ui32Width,
+							ui32Height,
+							1 );
+						size_t sBaseSize = sPageSize * ui32Depth;
+						for ( uint32_t D = 0; D < ui32Depth; ++D ) {
+							if ( dFile.Buffers()[sIdx].vTexture.size() - (sPageSize * D) < sPageSize ) { return SL2_E_INVALIDDATA; }
+							std::memcpy( Data( M, D, A, 0 ), dFile.Buffers()[sIdx].vTexture.data() + sPageSize * D, sPageSize );
+						}
+					}
+					else {
+						size_t sSrcPitch = CFormat::GetRowSize_NoPadding( aFmt, std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
+						auto aPitch = CFormat::GetRowSize( aFmt, std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
+
+						for ( uint32_t D = 0; D < ui32Depth; ++D ) {
+							size_t sDstSliceOffset = D * ui32Height * aPitch;
+							size_t sSrcSliceOffset = D * ui32Height * sSrcPitch;
+							for ( uint32_t H = 0; H < ui32Height; ++H ) {
+								size_t sDst = aPitch * H + sDstSliceOffset;
+								size_t sSrc = sSrcPitch * H + sSrcSliceOffset;
+
+								if ( dFile.Buffers()[sIdx].vTexture.size() - sSrc < sSrcPitch ) { return SL2_E_INVALIDDATA; }
+								std::memcpy( Data( M, 0, A, 0 ) + sDst, dFile.Buffers()[sIdx].vTexture.data() + sSrc, sSrcPitch );
+							}
 						}
 					}
 

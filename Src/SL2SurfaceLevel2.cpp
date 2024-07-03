@@ -1345,6 +1345,9 @@ namespace sl2 {
             case SL2_E_BADFORMAT : {
                 return std::u16string( u"Bad data format." );
             }
+            case SL2_E_UNSUPPORTEDSIZE : {
+                return std::u16string( u"A value is too large for the type required by a given file format." );
+            }
         }
         return std::u16string();
     }
@@ -2658,7 +2661,9 @@ namespace sl2 {
         sl2::CStream sFile( vBuffer );
 
 
-        sFile.WriteI32( 0x20534444 );       // DDS .
+        if ( !sFile.WriteI32( 0x20534444 ) ) {       // DDS .
+            return SL2_E_OUTOFMEMORY;
+        }
 
         sl2::CDds::SL2_DDS_HEADER dhHeader = {
             .ui32Size                                           = sizeof( sl2::CDds::SL2_DDS_HEADER ),
@@ -2688,20 +2693,26 @@ namespace sl2 {
         sl2::SL2_TEXTURE_TYPES ttTexType = _iImage.TextureType();
         if ( _iImage.Depth() > 1 ) {
             if ( _iImage.ArraySize() != 1 ) { return SL2_E_INVALIDDATA; }
+            if ( _iImage.Faces() != 1 ) { return SL2_E_INVALIDDATA; }
             ttTexType = SL2_TT_3D;
         }
         else if ( ttTexType == SL2_TT_CUBE ) {
-            if ( (_iImage.ArraySize() % 6) != 0 ) { return SL2_E_INVALIDDATA; }
+            if ( (_iImage.Faces() % 6) != 0 ) { return SL2_E_INVALIDDATA; }
         }
+        else if ( _iImage.Faces() != 1 ) { return SL2_E_INVALIDDATA; }
 
         // ui32PitchOrLinearSize
         // The pitch or number of bytes per scan line in an uncompressed texture; the total number of bytes in the top level texture for a compressed texture.
         if ( _iImage.Format()->bCompressed ) {
-            dhHeader.ui32PitchOrLinearSize = static_cast<uint32_t>(sl2::CFormat::GetRowSize( _iImage.Format(), _iImage.Width() ));
+            size_t sTmp = sl2::CFormat::GetFormatSize( _iImage.Format(), _iImage.Width(), _iImage.Height(), 1 );
+            if ( static_cast<size_t>(static_cast<uint32_t>(sTmp)) != sTmp ) { return SL2_E_UNSUPPORTEDSIZE; }
+            dhHeader.ui32PitchOrLinearSize = static_cast<uint32_t>(sTmp);
             dhHeader.ui32Flags |= SL2_DF_LINEARSIZE;                        // Required when pitch is provided for a compressed texture.
         }
         else {
-            dhHeader.ui32PitchOrLinearSize = static_cast<uint32_t>(sl2::CFormat::GetRowSize( _iImage.Format(), _iImage.Width() ));
+            size_t sTmp = sl2::CFormat::GetRowSize_NoPadding( _iImage.Format(), _iImage.Width() );
+            if ( static_cast<size_t>(static_cast<uint32_t>(sTmp)) != sTmp ) { return SL2_E_UNSUPPORTEDSIZE; }
+            dhHeader.ui32PitchOrLinearSize = static_cast<uint32_t>(sTmp);
             dhHeader.ui32Flags |= SL2_DF_PITCH;                             // Required when pitch is provided for an uncompressed texture.
         }
 
@@ -2735,7 +2746,6 @@ namespace sl2 {
             dhHeader.ui32Caps2 |= SL2_DDSCAPS2_CUBEMAP_NEGATIVEZ;           // Required when these surfaces are stored in a cube map.
         }
         if ( _iImage.Depth() > 1 ) {
-            if ( _iImage.ArraySize() != 1 ) { return SL2_E_INVALIDDATA; }
             dhHeader.ui32Caps2 |= SL2_DDSCAPS2_VOLUME;                      // Required for a volume texture.
         }
         if ( (dhHeader.ui32Caps2 & (SL2_DDSCAPS2_CUBEMAP | SL2_DDSCAPS2_VOLUME)) == (SL2_DDSCAPS2_CUBEMAP | SL2_DDSCAPS2_VOLUME) ) {
@@ -2749,7 +2759,7 @@ namespace sl2 {
                 .ui32DxgiFormat                                             = 0,
                 .ui32ResourceDimension                                      = 0,
                 .ui32MiscFlag                                               = static_cast<uint32_t>((dhHeader.ui32Caps2 & SL2_DDSCAPS2_CUBEMAP) ? SL2_DDS_RESOURCE_MISC_TEXTURECUBE : 0),
-                .ui32ArraySize                                              = static_cast<uint32_t>(_iImage.ArraySize()),
+                .ui32ArraySize                                              = static_cast<uint32_t>(_iImage.ArraySize() * _iImage.Faces()),
                 .ui32MiscFlags2                                             = 0
             };
 
@@ -2775,6 +2785,13 @@ namespace sl2 {
                     break;
                 }
             }
+
+            if ( !sFile.Write( reinterpret_cast<uint8_t *>(&dhHeader), sizeof( dhHeader ) ) ) {
+                return SL2_E_OUTOFMEMORY;
+            }
+            if ( !sFile.Write( reinterpret_cast<uint8_t *>(&dhdHeaderEx), sizeof( dhdHeaderEx ) ) ) {
+                return SL2_E_OUTOFMEMORY;
+            }
         }
         else {
             dhHeader.dpPixelFormat.ui32Flags = pfdDdsData->pfFormatFlags;
@@ -2790,8 +2807,46 @@ namespace sl2 {
                     dhHeader.dpPixelFormat.ui32ABitMask = ((1 << _iImage.Format()->ui8ABits) - 1) << _iImage.Format()->ui8AShift;
                 }
             }
+            if ( !sFile.Write( reinterpret_cast<uint8_t *>(&dhHeader), sizeof( dhHeader ) ) ) {
+                return SL2_E_OUTOFMEMORY;
+            }
         }
 
+        // Add the texel data.
+        
+        //size_t sSrcPageSize = sSrcPitch * _iImage.Height();
+        // For each/face.
+        for ( size_t A = 0; A < _iImage.ArraySize(); ++A ) {
+            for ( size_t F = 0; F < _iImage.Faces(); ++F ) {
+                // For each level.
+                for ( size_t M = 0; M < _iImage.Mipmaps(); ++M ) {
+                    if ( dhHeader.ui32Flags & SL2_DF_LINEARSIZE ) {
+                        size_t sSrcPitch = sl2::CFormat::GetFormatSize( _iImage.Format(), _iImage.GetMipmaps()[M]->Width(), _iImage.GetMipmaps()[M]->Height(), 1 );
+                        // For each slice.
+                        for ( uint32_t D = 0; D < _iImage.Depth(); ++D ) {
+                            const uint8_t * pui8Src = _iImage.Data( M, D, A, F );
+                            if ( !sFile.Write( pui8Src, sSrcPitch ) ) { return SL2_E_OUTOFMEMORY; }
+                        }
+                    }
+                    else {
+                        size_t sSrcPitch = sl2::CFormat::GetRowSize( _iImage.Format(), _iImage.GetMipmaps()[M]->Width() );
+                        size_t sDstPitch = sl2::CFormat::GetRowSize_NoPadding( _iImage.Format(), _iImage.GetMipmaps()[M]->Width() );
+                        // For each slice.
+                        for ( uint32_t D = 0; D < _iImage.Depth(); ++D ) {
+                            const uint8_t * pui8Src = _iImage.Data( M, D, A, F );
+                            // For each row.
+                            for ( uint32_t H = 0; H < _iImage.Height(); ++H ) {
+                                if ( !sFile.Write( pui8Src, sDstPitch ) ) {
+                                    return SL2_E_OUTOFMEMORY;
+                                }
+                                pui8Src += sSrcPitch;
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
 
 
         {

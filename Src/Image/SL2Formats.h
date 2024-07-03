@@ -107,6 +107,7 @@ namespace sl2 {
 		SL2_E_FILEOVERFLOW															= -12,							/**< The file exceeded the maximum size supported by the system. */
 		SL2_E_FILEWRITEERROR														= -13,							/**< An error occurred while writing the file. */
 		SL2_E_BADFORMAT																= -14,							/**< Bad data format. */
+		SL2_E_UNSUPPORTEDSIZE														= -15,							/**< A value is too large for the type required by a given file format. */
 	};
 
 	/**
@@ -1630,6 +1631,15 @@ namespace sl2 {
 		 * \return Returns the size of the given format in bytes.
 		 */
 		static inline size_t SL2_FASTCALL											GetFormatSize( SL2_MTLPIXELFORMAT _mpfFormat ) { return GetFormatSize( FindFormatDataByMetal( _mpfFormat ) ); }
+
+		/**
+		 * Gets the pitch of a format without any extra padding.
+		 * 
+		 * \param _pkifFormat Format of the texel data.
+		 * \param _ui32RowLen Number of texels in a row.
+		 * \return Returns the length of a row of the given format without padding.
+		 **/
+		static size_t SL2_FASTCALL													GetRowSize_NoPadding( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32RowLen );
 
 		/**
 		 * Gets the width of a row of texels in bytes.
@@ -3664,8 +3674,8 @@ namespace sl2 {
 			if ( _pkifFormat->pfCompSizeFunc ) {
 				return _pkifFormat->pfCompSizeFunc( _ui32Width, _ui32Height, _ui32Depth, _pkifFormat->ui32BlockSizeInBits, _pkifFormat );
 			}
-			size_t sRow = (_pkifFormat->ui32BlockSizeInBits * _ui32Width) >> 3;
-			return (SL2_ROUND_UP( sRow, 4ULL ) * _ui32Height * _ui32Depth);
+			size_t sRow = static_cast<size_t>((static_cast<uint64_t>(_pkifFormat->ui32BlockSizeInBits) * _ui32Width) >> 3);
+			return SL2_ROUND_UP( sRow, 4ULL ) * _ui32Height * _ui32Depth;
 		}
 		return 0;
 	}

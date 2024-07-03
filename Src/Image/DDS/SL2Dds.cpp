@@ -162,6 +162,7 @@ namespace sl2 {
 
 		if ( !sStream.Read( m_dhHeader ) ) { return false; }
 		
+		if ( m_dhHeader.ui32Size != sizeof( m_dhHeader ) ) { return false; }
 		if ( m_dhHeader.dpPixelFormat.ui32Size != sizeof( m_dhHeader.dpPixelFormat ) ) { return false; }
 
 		if ( (m_dhHeader.ui32Flags & (SL2_DF_CAPS | SL2_DF_HEIGHT | SL2_DF_WIDTH | SL2_DF_PIXELFORMAT)) !=
@@ -173,7 +174,7 @@ namespace sl2 {
 		}
 
 
-		m_pfdFormat = FormatByD3DFORMAT( static_cast<SL2_D3DFORMAT>(m_dhHeader.dpPixelFormat.ui32FourCC) );
+		
 		m_ui32ArraySize = 1;
 
 		bool bUseDx10 = false;
@@ -186,7 +187,13 @@ namespace sl2 {
 					m_ui32ArraySize = m_dh10Header10.ui32ArraySize;
 					break;
 				}
+				default : {
+					m_pfdFormat = FormatByD3DFORMAT( static_cast<SL2_D3DFORMAT>(m_dhHeader.dpPixelFormat.ui32FourCC) );
+				}
 			}
+		}
+		else {
+			// Have to figure out the format based off m_dhHeader.dpPixelFormat.ui32Flags, masks, and bit counts.
 		}
 
 		uint32_t ui32Array = m_ui32ArraySize;
