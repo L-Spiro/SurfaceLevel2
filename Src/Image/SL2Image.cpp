@@ -1150,7 +1150,31 @@ namespace sl2 {
 		CDds dFile;
 		if ( !dFile.LoadDds( _vData ) ) { return SL2_E_INVALIDFILETYPE; }
 
-		auto aFmt = CFormat::FindFormatDataByDx( static_cast<SL2_DXGI_FORMAT>(dFile.Format()) );
+		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * aFmt = nullptr;
+		if ( static_cast<SL2_DXGI_FORMAT>(dFile.Format()) == SL2_DXGI_FORMAT_UNKNOWN ) {
+			for ( size_t I = 0; I < CFormat::TotalFormats(); ++I ) {
+				auto aTmp = CFormat::FormatByIdx( I );
+				if ( aTmp->ui32BlockSizeInBits == dFile.Header().dpPixelFormat.ui32RGBBitCount ) {
+					uint32_t ui32RMask = ((1 << aTmp->ui8RBits) - 1) << aTmp->ui8RShift;
+                    uint32_t ui32GMask = ((1 << aTmp->ui8GBits) - 1) << aTmp->ui8GShift;
+                    uint32_t ui32BMask = ((1 << aTmp->ui8BBits) - 1) << aTmp->ui8BShift;
+                    uint32_t ui32AMask = ((1 << aTmp->ui8ABits) - 1) << aTmp->ui8AShift;
+
+					if ( ui32RMask == dFile.Header().dpPixelFormat.ui32RBitMask &&
+						ui32GMask == dFile.Header().dpPixelFormat.ui32GBitMask &&
+						ui32BMask == dFile.Header().dpPixelFormat.ui32BBitMask &&
+						ui32AMask == dFile.Header().dpPixelFormat.ui32ABitMask ) {
+						// TODO: Handle YUV etc.
+						aFmt = aTmp;
+						break;
+					}
+				}
+			}
+		}
+		else {
+			aFmt = CFormat::FindFormatDataByDx( static_cast<SL2_DXGI_FORMAT>(dFile.Format()) );
+		}
+		if ( !aFmt ) { return SL2_E_INVALIDFILETYPE; }
 		if ( !AllocateTexture( aFmt,
 			dFile.Width(), dFile.Height(), dFile.Depth(),
 			dFile.Mips(), dFile.Array(), dFile.Faces() ) ) { return SL2_E_OUTOFMEMORY; }

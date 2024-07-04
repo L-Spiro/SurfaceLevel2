@@ -51,6 +51,7 @@ namespace sl2 {
 
 		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,				GL_SRGB8_ALPHA8, GL_UNSIGNED_BYTE, GL_RGBA ),											32, 0,	SL2_DPFF_RGBA,		false, false, false },
 		{ SL2_TYPE( D3DFMT_G16R16,			DXGI_FORMAT_R16G16_UNORM,						GL_RG16, GL_UNSIGNED_SHORT, GL_RG ),													32, 0,	SL2_DPFF_FOURCC,	false, false, false },
+		{ SL2_TYPE( D3DFMT_R8G8B8,			DXGI_FORMAT_UNKNOWN,							GL_RGB8, GL_UNSIGNED_BYTE, GL_RGB ),													24, 0,	SL2_DPFF_RGB,		false, false, false },
 		{ SL2_TYPE( D3DFMT_A1R5G5B5,		DXGI_FORMAT_B5G5R5A1_UNORM,						GL_RGB5_A1, GL_UNSIGNED_SHORT_1_5_5_5_REV, GL_BGRA ),									16, 0,	SL2_DPFF_RGBA,		false, false, false },
 		{ SL2_TYPE( D3DFMT_R5G6B5,			DXGI_FORMAT_B5G6R5_UNORM,						GL_RGB565, GL_UNSIGNED_SHORT_5_6_5, GL_RGB ),											16, 0,	SL2_DPFF_RGB,		false, false, false },
 		{ SL2_TYPE( D3DFMT_A8,				DXGI_FORMAT_A8_UNORM,							GL_ALPHA8, GL_UNSIGNED_BYTE, GL_ALPHA ),												8, 0,	SL2_DPFF_ALPHA,		false, false, false },
@@ -115,8 +116,7 @@ namespace sl2 {
 		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_R8G8B8A8_UNORM,						GL_RGBA8, GL_UNSIGNED_BYTE, GL_RGBA ),													32, 0,	SL2_DPFF_RGBA,		false, false, false },
 		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_B8G8R8A8_UNORM,						GL_RGBA8, GL_UNSIGNED_BYTE, GL_BGRA ),													32, 0,	SL2_DPFF_RGBA,		false, false, false },
 		{ SL2_TYPE( D3DFMT_UNKNOWN,			DXGI_FORMAT_B8G8R8X8_UNORM,						GL_INVALID, GL_INVALID, GL_INVALID ),													32, 0,	SL2_DPFF_RGB,		false, false, false },
-
-		{ SL2_TYPE( D3DFMT_R8G8B8,			DXGI_FORMAT_R8G8B8A8_UNORM,						GL_RGBA8, GL_UNSIGNED_BYTE, GL_RGBA ),													24, 32,	SL2_DPFF_RGB,		false, false, false, Convert_RGB24_to_RGBA32 },
+		
 		{ SL2_TYPE( D3DFMT_A8R8G8B8,		DXGI_FORMAT_R8G8B8A8_UNORM,						GL_RGBA8, GL_UNSIGNED_BYTE, GL_RGBA ),													32, 0,	SL2_DPFF_RGBA,		false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_RGBA8, true> },
 		{ SL2_TYPE( D3DFMT_X8R8G8B8,		DXGI_FORMAT_R8G8B8A8_UNORM,						GL_RGBA8, GL_UNSIGNED_BYTE, GL_RGBA ),													32, 0,	SL2_DPFF_RGB,		false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_RGBA8, false> },
 		{ SL2_TYPE( D3DFMT_A8B8G8R8,		DXGI_FORMAT_B8G8R8A8_UNORM,						GL_RGBA8, GL_UNSIGNED_BYTE, GL_BGRA ),													32, 0,	SL2_DPFF_RGBA,		false, false, false, Convert_RGBA32_to_RGBA32<SL2_TEXEL_BGRA8, true> },
@@ -191,6 +191,7 @@ namespace sl2 {
 					m_pfdFormat = FormatByD3DFORMAT( static_cast<SL2_D3DFORMAT>(m_dhHeader.dpPixelFormat.ui32FourCC) );
 				}
 			}
+			if ( nullptr == m_pfdFormat ) { return false; }
 		}
 		else {
 			// Have to figure out the format based off m_dhHeader.dpPixelFormat.ui32Flags, masks, and bit counts.
@@ -201,64 +202,100 @@ namespace sl2 {
 			ui32Array = m_ui32Faces = 6;
 		}
 
-		if ( nullptr == m_pfdFormat ) { return false; }
-
-		uint32_t ui32Pitch = m_dhHeader.ui32PitchOrLinearSize;
-		uint32_t ui32PitchAfter = m_dhHeader.ui32PitchOrLinearSize;
-		size_t sSrcSize = 0;
-		if ( m_pfdFormat->bIsCompressed ) {
-			ui32Pitch = (m_dhHeader.ui32Width + 3) / 4 * m_pfdFormat->ui8BitsPerBlock / 8;
-			ui32PitchAfter = (m_dhHeader.ui32Width + 3) / 4 * m_pfdFormat->ui8BitsAfterConvert / 8;
+		if ( m_pfdFormat ) {
+			// We have known metadata regarding the format.  This might require conversions.
+			//	Convert (optionally) and load the data.
+			uint32_t ui32Pitch = m_dhHeader.ui32PitchOrLinearSize;
+			uint32_t ui32PitchAfter = m_dhHeader.ui32PitchOrLinearSize;
+			size_t sSrcSize = 0;
+			if ( m_pfdFormat->bIsCompressed ) {
+				ui32Pitch = (m_dhHeader.ui32Width + 3) / 4 * m_pfdFormat->ui8BitsPerBlock / 8;
+				ui32PitchAfter = (m_dhHeader.ui32Width + 3) / 4 * m_pfdFormat->ui8BitsAfterConvert / 8;
 			
-		}
-		else if ( m_pfdFormat->bPacked ) {
-			ui32Pitch = ((m_dhHeader.ui32Width + 1) >> 1) * 4;
-			ui32PitchAfter = ((m_dhHeader.ui32Width + 1) >> 1) * 4;
+			}
+			else if ( m_pfdFormat->bPacked ) {
+				ui32Pitch = ((m_dhHeader.ui32Width + 1) >> 1) * 4;
+				ui32PitchAfter = ((m_dhHeader.ui32Width + 1) >> 1) * 4;
+			}
+			else {
+				ui32Pitch = (m_dhHeader.ui32Width * m_pfdFormat->ui8BitsPerBlock + 7) / 8;
+				ui32PitchAfter = (m_dhHeader.ui32Width * m_pfdFormat->ui8BitsAfterConvert + 7) / 8;
+			}
+			if ( !m_pfdFormat->ui8BitsAfterConvert ) {
+				ui32PitchAfter = ui32Pitch;
+			}
+
+			size_t iIndex = 0;
+			uint8_t * pui8Src = sStream.Data();
+			for ( uint32_t J = 0; J < ui32Array; J++ ) {
+				uint32_t ui32W = std::max( m_dhHeader.ui32Width, static_cast<uint32_t>(1) );
+				uint32_t ui32H = std::max( m_dhHeader.ui32Height, static_cast<uint32_t>(1) );
+				uint32_t ui32D = std::max( m_dhHeader.ui32Depth, static_cast<uint32_t>(1) );
+				for ( uint32_t I = 0; I < m_dhHeader.ui32MipMapCount; I++ ) {
+					size_t sSrcSize = ui32D * ui32H * ui32Pitch;
+					if ( m_pfdFormat->bIsCompressed ) {
+						sSrcSize = GetCompressedSizeBc( ui32W,
+							ui32H,
+							ui32D, m_pfdFormat->ui8BitsPerBlock );
+					}
+
+					SL2_TEX tTexture;
+					tTexture.ui32Pitch = ui32PitchAfter;
+					try {
+						tTexture.vTexture.resize( sSrcSize );
+					}
+					catch ( ... ) { return false; }
+					if ( m_pfdFormat->pfConverter ) {
+						m_pfdFormat->pfConverter( pui8Src, tTexture.vTexture.data(), ui32W, ui32H, ui32D, ui32Pitch, m_dhHeader.dpPixelFormat );
+						if ( sStream.Read( nullptr, sSrcSize ) != sSrcSize ) { return false; };
+					}
+					else {
+						if ( sStream.Read( tTexture.vTexture.data(), tTexture.vTexture.size() ) != tTexture.vTexture.size() ) { return false; }
+					}
+					tTexture.ui32W = ui32W;
+					tTexture.ui32H = ui32H;
+					tTexture.ui32D = ui32D;
+					m_vTextures.push_back( std::move( tTexture ) );
+
+					ui32W = std::max( ui32W >> 1, static_cast<uint32_t>(1) );
+					ui32H = std::max( ui32H >> 1, static_cast<uint32_t>(1) );
+					ui32D = std::max( ui32D >> 1, static_cast<uint32_t>(1) );
+				}
+			}
+			m_dhHeader.ui32PitchOrLinearSize = ui32Pitch;
 		}
 		else {
-			ui32Pitch = (m_dhHeader.ui32Width * m_pfdFormat->ui8BitsPerBlock + 7) / 8;
-			ui32PitchAfter = (m_dhHeader.ui32Width * m_pfdFormat->ui8BitsAfterConvert + 7) / 8;
-		}
-		if ( !m_pfdFormat->ui8BitsAfterConvert ) {
-			ui32PitchAfter = ui32Pitch;
-		}
+			// Going based on the pixel format data using bit sizes and assuming tight packing.
+			size_t iIndex = 0;
+			//uint32_t ui32Pitch = m_dhHeader.ui32PitchOrLinearSize;
+			uint8_t * pui8Src = sStream.Data();
+			for ( uint32_t J = 0; J < ui32Array; J++ ) {
+				uint32_t ui32W = std::max( m_dhHeader.ui32Width, static_cast<uint32_t>(1) );
+				uint32_t ui32H = std::max( m_dhHeader.ui32Height, static_cast<uint32_t>(1) );
+				uint32_t ui32D = std::max( m_dhHeader.ui32Depth, static_cast<uint32_t>(1) );
+				
+				for ( uint32_t I = 0; I < m_dhHeader.ui32MipMapCount; I++ ) {
+					size_t sPitch = static_cast<size_t>(static_cast<uint64_t>(m_dhHeader.dpPixelFormat.ui32RGBBitCount) * ui32W);
+					size_t sSrcSize = static_cast<size_t>(static_cast<uint64_t>(ui32D) * ui32H * sPitch / 8ULL);
+					SL2_TEX tTexture;
+					tTexture.ui32Pitch = static_cast<uint32_t>(sPitch);
+					try {
+						tTexture.vTexture.resize( sSrcSize );
+					}
+					catch ( ... ) { return false; }
 
-		size_t iIndex = 0;
-		uint8_t * pui8Src = sStream.Data();
-		for ( uint32_t J = 0; J < ui32Array; J++ ) {
-			uint32_t ui32W = std::max( m_dhHeader.ui32Width, static_cast<uint32_t>(1) );
-			uint32_t ui32H = std::max( m_dhHeader.ui32Height, static_cast<uint32_t>(1) );
-			uint32_t ui32D = std::max( m_dhHeader.ui32Depth, static_cast<uint32_t>(1) );
-			for ( uint32_t I = 0; I < m_dhHeader.ui32MipMapCount; I++ ) {
-				size_t sSrcSize = ui32D * ui32H * ui32Pitch;
-				if ( m_pfdFormat->bIsCompressed ) {
-					sSrcSize = GetCompressedSizeBc( ui32W,
-						ui32H,
-						ui32D, m_pfdFormat->ui8BitsPerBlock );
-				}
+					if ( sStream.Read( tTexture.vTexture.data(), tTexture.vTexture.size() ) != tTexture.vTexture.size() ) { return false; }
+					tTexture.ui32W = ui32W;
+					tTexture.ui32H = ui32H;
+					tTexture.ui32D = ui32D;
+					m_vTextures.push_back( std::move( tTexture ) );
 
-				SL2_TEX tTexture;
-				tTexture.ui32Pitch = ui32PitchAfter;
-				try {
-					tTexture.vTexture.resize( sSrcSize );
+					ui32W = std::max( ui32W >> 1, static_cast<uint32_t>(1) );
+					ui32H = std::max( ui32H >> 1, static_cast<uint32_t>(1) );
+					ui32D = std::max( ui32D >> 1, static_cast<uint32_t>(1) );
 				}
-				catch( ... ) {}
-				if ( m_pfdFormat->pfConverter ) {
-					m_pfdFormat->pfConverter( pui8Src, tTexture.vTexture.data(), ui32W, ui32H, ui32D, ui32Pitch, m_dhHeader.dpPixelFormat );
-					sStream.Read( nullptr, sSrcSize );
-				}
-				else {
-					sStream.Read( tTexture.vTexture.data(), tTexture.vTexture.size() );
-				}
-
-				m_vTextures.push_back( std::move( tTexture ) );
-
-				ui32W = std::max( ui32W >> 1, static_cast<uint32_t>(1) );
-				ui32H = std::max( ui32H >> 1, static_cast<uint32_t>(1) );
-				ui32D = std::max( ui32D >> 1, static_cast<uint32_t>(1) );
 			}
 		}
-		m_dhHeader.ui32PitchOrLinearSize = ui32Pitch;
 		return true;
 	}
 

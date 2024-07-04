@@ -1538,6 +1538,21 @@ namespace sl2 {
 		static const SL2_KTX_INTERNAL_FORMAT_DATA *									FindFormatDataByMetal( const char * _pcFormat );
 
 		/**
+		 * Gets the total number of formats recognized by this library.
+		 *
+		 * \return Returns the total number of formats recognized by this library.
+		 **/
+		static size_t																TotalFormats();
+
+		/**
+		 * Gets a format by index.
+		 * 
+		 * \param _sIdx The index of the format to get.
+		 * \return Returns the requested format by index.  The index bounds are not checked.
+		 **/
+		static const SL2_KTX_INTERNAL_FORMAT_DATA *									FormatByIdx( size_t _sIdx ) { return &m_kifdInternalFormats[_sIdx]; }
+
+		/**
 		 * Gets the size, in bytes, of a texel format.
 		 *
 		 * \param _pkifFormat The texel format.
@@ -5182,7 +5197,7 @@ namespace sl2 {
 				pui8Src = vResized.data();
 			}
 
-			if ( !((_ui32Width % 4) || (_ui32Height % 4)) ) {
+			if ( ((_ui32Width % 4) || (_ui32Height % 4)) ) {
 				::rgba_surface rsSurface;
 				rsSurface.ptr = const_cast<uint8_t *>(pui8Src);
 				rsSurface.width = ui32X;
@@ -5302,7 +5317,7 @@ namespace sl2 {
 				pui8Src = vResized.data();
 			}
 
-			if ( !((_ui32Width % 4) || (_ui32Height % 4)) ) {
+			if ( ((_ui32Width % 4) || (_ui32Height % 4)) ) {
 				::rgba_surface rsSurface;
 				rsSurface.ptr = const_cast<uint8_t *>(pui8Src);
 				rsSurface.width = ui32X;
@@ -5547,7 +5562,7 @@ namespace sl2 {
 				pui8Src = vResized.data();
 			}
 
-			if ( !((_ui32Width % 4) || (_ui32Height % 4)) ) {
+			if ( ((_ui32Width % 4) || (_ui32Height % 4)) ) {
 				::rgba_surface rsSurface;
 				rsSurface.ptr = const_cast<uint8_t *>(pui8Src);
 				rsSurface.width = ui32X;

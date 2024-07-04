@@ -1274,6 +1274,13 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
             }
         }
+        else if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"dds" ) == 0 ) {
+            eError = sl2::ExportAsDds( iConverted, oOptions.vOutputs[I], oOptions );
+            if ( sl2::SL2_E_SUCCESS != eError ) {
+                SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
+                    reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
+            }
+        }
         
         ui64Time = cClock.GetRealTick() - cClock.GetStartTick();
         ::sprintf_s( szPrintfMe, "Save time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
@@ -2756,7 +2763,7 @@ namespace sl2 {
         if ( pfdDdsData->dfFormat != CDds::SL2_DXGI_FORMAT_UNKNOWN ) {
             // Extended header.
             sl2::CDds::SL2_DDS_HEADER_DXT10 dhdHeaderEx = {
-                .ui32DxgiFormat                                             = 0,
+                .ui32DxgiFormat                                             = static_cast<uint32_t>(pfdDdsData->dfFormat),
                 .ui32ResourceDimension                                      = 0,
                 .ui32MiscFlag                                               = static_cast<uint32_t>((dhHeader.ui32Caps2 & SL2_DDSCAPS2_CUBEMAP) ? SL2_DDS_RESOURCE_MISC_TEXTURECUBE : 0),
                 .ui32ArraySize                                              = static_cast<uint32_t>(_iImage.ArraySize() * _iImage.Faces()),
@@ -2823,7 +2830,7 @@ namespace sl2 {
                     if ( dhHeader.ui32Flags & SL2_DF_LINEARSIZE ) {
                         size_t sSrcPitch = sl2::CFormat::GetFormatSize( _iImage.Format(), _iImage.GetMipmaps()[M]->Width(), _iImage.GetMipmaps()[M]->Height(), 1 );
                         // For each slice.
-                        for ( uint32_t D = 0; D < _iImage.Depth(); ++D ) {
+                        for ( uint32_t D = 0; D < _iImage.GetMipmaps()[M]->Depth(); ++D ) {
                             const uint8_t * pui8Src = _iImage.Data( M, D, A, F );
                             if ( !sFile.Write( pui8Src, sSrcPitch ) ) { return SL2_E_OUTOFMEMORY; }
                         }
@@ -2832,10 +2839,10 @@ namespace sl2 {
                         size_t sSrcPitch = sl2::CFormat::GetRowSize( _iImage.Format(), _iImage.GetMipmaps()[M]->Width() );
                         size_t sDstPitch = sl2::CFormat::GetRowSize_NoPadding( _iImage.Format(), _iImage.GetMipmaps()[M]->Width() );
                         // For each slice.
-                        for ( uint32_t D = 0; D < _iImage.Depth(); ++D ) {
+                        for ( uint32_t D = 0; D < _iImage.GetMipmaps()[M]->Depth(); ++D ) {
                             const uint8_t * pui8Src = _iImage.Data( M, D, A, F );
                             // For each row.
-                            for ( uint32_t H = 0; H < _iImage.Height(); ++H ) {
+                            for ( uint32_t H = 0; H < _iImage.GetMipmaps()[M]->Height(); ++H ) {
                                 if ( !sFile.Write( pui8Src, sDstPitch ) ) {
                                     return SL2_E_OUTOFMEMORY;
                                 }

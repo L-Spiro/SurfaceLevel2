@@ -745,6 +745,13 @@ namespace sl2 {
 	}
 
 	/**
+	 * Gets the total number of formats recognized by this library.
+	 *
+	 * \return Returns the total number of formats recognized by this library.
+	 **/
+	size_t CFormat::TotalFormats() { return SL2_ELEMENTS( m_kifdInternalFormats ); }
+
+	/**
 	 * Gets the pitch of a format without any extra padding.
 	 * 
 	 * \param _pkifFormat Format of the texel data.
