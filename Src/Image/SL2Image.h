@@ -372,6 +372,13 @@ namespace sl2 {
 		inline SL2_TEXTURE_TYPES							TextureType() const { return m_ttType; }
 
 		/**
+		 * Is this texture fully opaque?
+		 *
+		 * \return Returns true if all alpha values across all faces, arrays, and mipmaps are set to 1.0.
+		 **/
+		inline bool											IsFullyOpaque() const { return m_bFullyOpaque; }
+
+		/**
 		 * Sets mipmap parameters.
 		 * 
 		 * \param _mhMipHandling How to handle mipmaps.
@@ -455,6 +462,7 @@ namespace sl2 {
 		size_t												m_sTotalMips;							/**< How many mipmaps to put into the final result, or 0 to keep existing mipmaps or to generate a full set. */
 
 		SL2_TEXTURE_TYPES									m_ttType;								/**< The type of texture. */
+		bool												m_bFullyOpaque;							/**< Is the alpha channel just 1.0's? */
 
 
 		// == Functions.
@@ -505,6 +513,18 @@ namespace sl2 {
 		 * \param _ui32Depth The depth of the image.
 		 **/
 		void												SetAlpha( uint8_t * _pui8Buffer, double _dValue, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth );
+
+		/**
+		 * Tests alpha for being entirely of a given value.
+		 *
+		 * \param _pui8Buffer The texture texels.
+		 * \param _dValue The value to check.
+		 * \param _ui32Width The width of the image.
+		 * \param _ui32Height The height of the image.
+		 * \param _ui32Depth The depth of the image.
+		 * \return Returns true if all values in the alpha channel are euqal to _dValue.
+		 **/
+		bool												AlphaIsFullyEqualTo( uint8_t * _pui8Buffer, double _dValue, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth );
 
 		/**
 		 * Converts a given RGBA64F buffer to a normal map.

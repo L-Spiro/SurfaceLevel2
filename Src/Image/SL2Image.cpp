@@ -42,7 +42,8 @@ namespace sl2 {
 		m_bSwap( false ),
 		m_mhMipHandling( SL2_MH_GENERATE_NEW ),
 		m_sTotalMips( 0 ),
-		m_ttType( SL2_TT_2D ) {
+		m_ttType( SL2_TT_2D ),
+		m_bFullyOpaque( false ) {
 		m_sSwizzle = CFormat::DefaultSwizzle();
 	}
 	CImage::~CImage() {
@@ -81,6 +82,7 @@ namespace sl2 {
 			m_sTotalMips = _iOther.m_sTotalMips;
 			m_rResample = _iOther.m_rResample;
 			m_ttType = _iOther.m_ttType;
+			m_bFullyOpaque = _iOther.m_bFullyOpaque;
 			
 			_iOther.m_sArraySize = 0;
 			_iOther.m_kKernel.SetSize( 0 );
@@ -103,6 +105,7 @@ namespace sl2 {
 			_iOther.m_mhMipHandling = SL2_MH_GENERATE_NEW;
 			_iOther.m_sTotalMips = 0;
 			_iOther.m_ttType = SL2_TT_2D;
+			_iOther.m_bFullyOpaque = false;
 		}
 
 		return (*this);
@@ -140,6 +143,7 @@ namespace sl2 {
 		m_sTotalMips = 0;
 
 		m_ttType = SL2_TT_2D;
+		m_bFullyOpaque = false;
 	}
 
 	/**
@@ -322,6 +326,7 @@ namespace sl2 {
 				}
 			}
 		}
+		bool bOpaque = true;
 		for ( size_t M = 0; M < iTmp.Mipmaps(); ++M ) {
 			for ( size_t A = 0; A < iTmp.ArraySize(); ++A ) {
 				for ( size_t F = 0; F < iTmp.Faces(); ++F ) {
@@ -333,6 +338,7 @@ namespace sl2 {
 							BakeGamma( iTmp.Data( M, 0, A, F ), 1.0 / m_dTargetGamma, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );
 						}
 					}
+					bOpaque = m_bFullyOpaque && AlphaIsFullyEqualTo( iTmp.Data( M, 0, A, F ), 1.0, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );
 				}
 			}
 		}
@@ -341,6 +347,7 @@ namespace sl2 {
 			_iDst = std::move( iTmp );
 			_iDst.m_bIsPreMultiplied = bTargetIsPremulAlpha;
 			_iDst.m_ttType = m_ttType;
+			_iDst.m_bFullyOpaque = bOpaque;
 			return SL2_E_SUCCESS;
 		}
 		if ( !_pkifFormat->pfFromRgba64F ) { return SL2_E_BADFORMAT; }
@@ -358,6 +365,7 @@ namespace sl2 {
 		}
 		_iDst.m_bIsPreMultiplied = bTargetIsPremulAlpha;
 		_iDst.m_ttType = m_ttType;
+		_iDst.m_bFullyOpaque = bOpaque;
 		return SL2_E_SUCCESS;
 	}
 
@@ -680,6 +688,31 @@ namespace sl2 {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Tests alpha for being entirely of a given value.
+	 *
+	 * \param _pui8Buffer The texture texels.
+	 * \param _dValue The value to check.
+	 * \param _ui32Width The width of the image.
+	 * \param _ui32Height The height of the image.
+	 * \param _ui32Depth The depth of the image.
+	 * \return Returns true if all values in the alpha channel are euqal to _dValue.
+	 **/
+	bool CImage::AlphaIsFullyEqualTo( uint8_t * _pui8Buffer, double _dValue, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) {
+		CFormat::SL2_RGBA64F * prDst = reinterpret_cast<CFormat::SL2_RGBA64F *>(_pui8Buffer);
+		for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+			uint32_t ui32Slice = _ui32Width * _ui32Height * D;
+			for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+				uint32_t ui32Row = _ui32Width * H;
+				for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+					CFormat::SL2_RGBA64F * prThis = &prDst[ui32Slice+ui32Row+W];
+					if ( prThis->dRgba[SL2_PC_A] != _dValue ) { return false; }
+				}
+			}
+		}
+		return true;
 	}
 
 	/**

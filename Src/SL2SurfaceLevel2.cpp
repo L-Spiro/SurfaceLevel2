@@ -155,121 +155,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 sl2::CFormat::PrintFormats_List();
                 SL2_ADV( 1 );
             }
-
-            if ( SL2_CHECK( 1, dxt1c ) || SL2_CHECK( 1, bc1 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGB_S3TC_DXT1_EXT );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, dxt1a ) || SL2_CHECK( 1, bc1a ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGBA_S3TC_DXT1_EXT );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, dxt2 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGBA_S3TC_DXT3_EXT );
-                oOptions.bNeedsPreMultiply = true;
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, dxt3 ) || SL2_CHECK( 1, bc2 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGBA_S3TC_DXT3_EXT );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, dxt4 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGBA_S3TC_DXT5_EXT );
-                oOptions.bNeedsPreMultiply = true;
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, dxt5 ) || SL2_CHECK( 1, bc3 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGBA_S3TC_DXT5_EXT );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, bc4 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_BC4_UNORM );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, bc5 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_BC5_UNORM );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, bc6 ) || SL2_CHECK( 1, bc6h ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_BC6H_UF16 );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, bc7 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_BC7_UNORM );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, A8B8G8R8 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_A8B8G8R8_UNORM_PACK32 );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, R8G8B8A8 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8A8_UNORM );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, R16G16 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R16G16_UNORM );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, A2B10G10R10 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_A2B10G10R10_UNORM_PACK32 );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, R10G10B10A2 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_R10G10B10A2_UNORM );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, A1R5G5B5 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_A1R5G5B5_UNORM_PACK16 );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, R5G5B5A1 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R5G5B5A1_UNORM_PACK16 );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, R5G5B5X1 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_RGB5 );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, R5G6B5 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R5G6B5_UNORM_PACK16 );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, A8 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_ALPHA8 );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, B8G8R8X8 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_B8G8R8X8_UNORM );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, R8G8B8 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8_UNORM );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, A4R4G4B4 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_A4R4G4B4_UNORM_PACK16 );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, R4G4B4A4 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R4G4B4A4_UNORM_PACK16 );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, L8A8 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE8_ALPHA8 );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, L16 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE16 );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, L8 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE8 );
-                SL2_ADV( 1 );
-            }
-            if ( SL2_CHECK( 1, L4A4 ) ) {
-                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE4_ALPHA4 );
-                SL2_ADV( 1 );
-            }
+            
             if ( SL2_CHECK( 2, format ) ) {
                 std::string sString = sl2::CUtilities::Utf16ToUtf8( reinterpret_cast<const char16_t *>((_wcpArgV[1])) );
                 oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sString.c_str() );
@@ -380,45 +266,6 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.dRelScaleD = ::_wtof( _wcpArgV[3] );
 				SL2_ADV( 4 );
 			}
-
-#define SL2_RESAMPLE( CONDITION, FILTER )                                                                                   \
-    if ( CONDITION ) {                                                                                                      \
-        oOptions.fFilterFuncW = sl2::CResampler::FILTER;                                                                    \
-        oOptions.fFilterFuncH = oOptions.fFilterFuncW;                                                                      \
-        oOptions.fFilterFuncD = oOptions.fFilterFuncW;                                                                      \
-                                                                                                                            \
-        oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;                                                                 \
-        oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;                                                                 \
-        oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;                                                                 \
-        SL2_ADV( 1 );                                                                                                       \
-    }
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleBox ) || SL2_CHECK( 1, ResampleBox ) || SL2_CHECK( 1, ResamplePoint ), SL2_FF_POINT )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleTent ) || SL2_CHECK( 1, ResampleTent ) || SL2_CHECK( 1, ResampleBilinear ), SL2_FF_BILINEAR )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleQuadraticSharp ) || SL2_CHECK( 1, ResampleQuadraticSharp ), SL2_FF_QUADRATICSHARP )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleQuadratic ) || SL2_CHECK( 1, ResampleQuadratic ) || SL2_CHECK( 1, ResampleQuad ), SL2_FF_QUADRATIC )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleQuadraticApprox ) || SL2_CHECK( 1, ResampleQuadraticApprox ), SL2_FF_QUADRATICAPPROX )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleQuadraticMix ) || SL2_CHECK( 1, ResampleQuadraticMix ), SL2_FF_QUADRATICMIX )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleKaiser ) || SL2_CHECK( 1, ResampleKaiser ), SL2_FF_KAISER )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleLanczos2 ) || SL2_CHECK( 1, ResampleLanczos2 ), SL2_FF_LANCZOS2 )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleLanczos3 ) || SL2_CHECK( 1, ResampleLanczos3 ), SL2_FF_LANCZOS3 )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleLanczos4 ) || SL2_CHECK( 1, ResampleLanczos4 ), SL2_FF_LANCZOS4 )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleLanczos6 ) || SL2_CHECK( 1, ResampleLanczos6 ), SL2_FF_LANCZOS6 )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleLanczos8 ) || SL2_CHECK( 1, ResampleLanczos8 ), SL2_FF_LANCZOS8 )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleLanczos12 ) || SL2_CHECK( 1, ResampleLanczos12 ), SL2_FF_LANCZOS12 )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleLanczos64 ) || SL2_CHECK( 1, ResampleLanczos64 ), SL2_FF_LANCZOS64 )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleMitchell ) || SL2_CHECK( 1, ResampleMitchell ), SL2_FF_MITCHELL )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleCatrom ) || SL2_CHECK( 1, ResampleCatrom ), SL2_FF_CATMULLROM )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleBSpline ) || SL2_CHECK( 1, ResampleBSpline ), SL2_FF_BSPLINE )
-            SL2_RESAMPLE( SL2_CHECK( 1, ResampleCardinalUniform ) || SL2_CHECK( 1, ResampleCardinal ), SL2_FF_CARDINALSPLINEUNIFORM )
-            SL2_RESAMPLE( SL2_CHECK( 1, ResampleHermite ), SL2_FF_HERMITE )
-            SL2_RESAMPLE( SL2_CHECK( 1, ResampleHamming ), SL2_FF_HAMMING )
-            SL2_RESAMPLE( SL2_CHECK( 1, ResampleHanning ), SL2_FF_HANNING )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleBlackman ) || SL2_CHECK( 1, ResampleBlackman ), SL2_FF_BLACKMAN )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleGaussianSharp ) || SL2_CHECK( 1, ResampleGaussianSharp ), SL2_FF_GAUSSIANSHARP )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleGaussian ) || SL2_CHECK( 1, ResampleGaussian ), SL2_FF_GAUSSIAN )
-            SL2_RESAMPLE( SL2_CHECK( 1, RescaleBell ) || SL2_CHECK( 1, ResampleBell ), SL2_FF_BELL )
-
-#undef SL2_RESAMPLE
 
 #define SL2_RESAMPLE( COND, ASSIGN, COPY )                                                                                                                                                                                          \
     if ( SL2_CHECK( 2, COND ) ) {                                                                                                                                                                                                   \
@@ -1183,6 +1030,167 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
             if ( SL2_CHECK( 1, jpg_baseline ) ) {
                 oOptions.iJpgSaveOption |= JPEG_BASELINE;
                 SL2_ADV( 1 );
+            }
+
+
+
+            // ============
+            // == LEGACY ==
+            // ============
+            {
+#define SL2_RESAMPLE( CONDITION, FILTER )                                                                                   \
+    if ( CONDITION ) {                                                                                                      \
+        oOptions.fFilterFuncW = sl2::CResampler::FILTER;                                                                    \
+        oOptions.fFilterFuncH = oOptions.fFilterFuncW;                                                                      \
+        oOptions.fFilterFuncD = oOptions.fFilterFuncW;                                                                      \
+                                                                                                                            \
+        oOptions.fAlphaFilterFuncW = oOptions.fFilterFuncW;                                                                 \
+        oOptions.fAlphaFilterFuncH = oOptions.fFilterFuncH;                                                                 \
+        oOptions.fAlphaFilterFuncD = oOptions.fFilterFuncD;                                                                 \
+        SL2_ADV( 1 );                                                                                                       \
+    }
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleBox ) || SL2_CHECK( 1, ResampleBox ) || SL2_CHECK( 1, ResamplePoint ), SL2_FF_POINT )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleTent ) || SL2_CHECK( 1, ResampleTent ) || SL2_CHECK( 1, ResampleBilinear ), SL2_FF_BILINEAR )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleQuadraticSharp ) || SL2_CHECK( 1, ResampleQuadraticSharp ), SL2_FF_QUADRATICSHARP )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleQuadratic ) || SL2_CHECK( 1, ResampleQuadratic ) || SL2_CHECK( 1, ResampleQuad ), SL2_FF_QUADRATIC )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleQuadraticApprox ) || SL2_CHECK( 1, ResampleQuadraticApprox ), SL2_FF_QUADRATICAPPROX )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleQuadraticMix ) || SL2_CHECK( 1, ResampleQuadraticMix ), SL2_FF_QUADRATICMIX )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleKaiser ) || SL2_CHECK( 1, ResampleKaiser ), SL2_FF_KAISER )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleLanczos2 ) || SL2_CHECK( 1, ResampleLanczos2 ), SL2_FF_LANCZOS2 )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleLanczos3 ) || SL2_CHECK( 1, ResampleLanczos3 ), SL2_FF_LANCZOS3 )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleLanczos4 ) || SL2_CHECK( 1, ResampleLanczos4 ), SL2_FF_LANCZOS4 )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleLanczos6 ) || SL2_CHECK( 1, ResampleLanczos6 ), SL2_FF_LANCZOS6 )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleLanczos8 ) || SL2_CHECK( 1, ResampleLanczos8 ), SL2_FF_LANCZOS8 )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleLanczos12 ) || SL2_CHECK( 1, ResampleLanczos12 ), SL2_FF_LANCZOS12 )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleLanczos64 ) || SL2_CHECK( 1, ResampleLanczos64 ), SL2_FF_LANCZOS64 )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleMitchell ) || SL2_CHECK( 1, ResampleMitchell ), SL2_FF_MITCHELL )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleCatrom ) || SL2_CHECK( 1, ResampleCatrom ), SL2_FF_CATMULLROM )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleBSpline ) || SL2_CHECK( 1, ResampleBSpline ), SL2_FF_BSPLINE )
+                SL2_RESAMPLE( SL2_CHECK( 1, ResampleCardinalUniform ) || SL2_CHECK( 1, ResampleCardinal ), SL2_FF_CARDINALSPLINEUNIFORM )
+                SL2_RESAMPLE( SL2_CHECK( 1, ResampleHermite ), SL2_FF_HERMITE )
+                SL2_RESAMPLE( SL2_CHECK( 1, ResampleHamming ), SL2_FF_HAMMING )
+                SL2_RESAMPLE( SL2_CHECK( 1, ResampleHanning ), SL2_FF_HANNING )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleBlackman ) || SL2_CHECK( 1, ResampleBlackman ), SL2_FF_BLACKMAN )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleGaussianSharp ) || SL2_CHECK( 1, ResampleGaussianSharp ), SL2_FF_GAUSSIANSHARP )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleGaussian ) || SL2_CHECK( 1, ResampleGaussian ), SL2_FF_GAUSSIAN )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleBell ) || SL2_CHECK( 1, ResampleBell ), SL2_FF_BELL )
+
+#undef SL2_RESAMPLE
+
+                if ( SL2_CHECK( 1, dxt1c ) || SL2_CHECK( 1, bc1 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGB_S3TC_DXT1_EXT );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, dxt1a ) || SL2_CHECK( 1, bc1a ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGBA_S3TC_DXT1_EXT );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, dxt2 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGBA_S3TC_DXT3_EXT );
+                    oOptions.bNeedsPreMultiply = true;
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, dxt3 ) || SL2_CHECK( 1, bc2 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGBA_S3TC_DXT3_EXT );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, dxt4 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGBA_S3TC_DXT5_EXT );
+                    oOptions.bNeedsPreMultiply = true;
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, dxt5 ) || SL2_CHECK( 1, bc3 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGBA_S3TC_DXT5_EXT );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, bc4 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_BC4_UNORM );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, bc5 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_BC5_UNORM );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, bc6 ) || SL2_CHECK( 1, bc6h ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_BC6H_UF16 );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, bc7 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_BC7_UNORM );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, A8B8G8R8 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_A8B8G8R8_UNORM_PACK32 );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, R8G8B8A8 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8A8_UNORM );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, R16G16 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R16G16_UNORM );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, A2B10G10R10 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_A2B10G10R10_UNORM_PACK32 );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, R10G10B10A2 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_R10G10B10A2_UNORM );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, A1R5G5B5 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_A1R5G5B5_UNORM_PACK16 );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, R5G5B5A1 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R5G5B5A1_UNORM_PACK16 );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, R5G5B5X1 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_RGB5 );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, R5G6B5 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R5G6B5_UNORM_PACK16 );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, A8 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_ALPHA8 );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, B8G8R8X8 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_B8G8R8X8_UNORM );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, R8G8B8 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8_UNORM );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, A4R4G4B4 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_A4R4G4B4_UNORM_PACK16 );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, R4G4B4A4 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R4G4B4A4_UNORM_PACK16 );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, L8A8 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE8_ALPHA8 );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, L16 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE16 );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, L8 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE8 );
+                    SL2_ADV( 1 );
+                }
+                if ( SL2_CHECK( 1, L4A4 ) ) {
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE4_ALPHA4 );
+                    SL2_ADV( 1 );
+                }
             }
         }
 
@@ -2778,6 +2786,7 @@ namespace sl2 {
             dhHeader.dpPixelFormat.ui32FourCC = SL2_MAKEFOURCC( 'D', 'X', '1', '0' );
             dhHeader.dpPixelFormat.ui32Flags |= SL2_DPFF_FOURCC;
             
+            // Resource type.
             switch ( ttTexType ) {
                 case SL2_TT_1D : {
                     dhdHeaderEx.ui32ResourceDimension = SL2_DDS_DIMENSION_TEXTURE1D;
@@ -2791,6 +2800,17 @@ namespace sl2 {
                     dhdHeaderEx.ui32ResourceDimension = SL2_DDS_DIMENSION_TEXTURE3D;
                     break;
                 }
+            }
+
+            // Misc2 flags: Alpha.
+            if ( _iImage.IsFullyOpaque() ) {
+                dhdHeaderEx.ui32MiscFlags2 = (dhdHeaderEx.ui32MiscFlags2 & ~0b111) | SL2_DDS_ALPHA_MODE_OPAQUE;
+            }
+            else if ( _iImage.IsPremultiplied() ) {
+                dhdHeaderEx.ui32MiscFlags2 = (dhdHeaderEx.ui32MiscFlags2 & ~0b111) | SL2_DDS_ALPHA_MODE_PREMULTIPLIED;
+            }
+            else {
+                dhdHeaderEx.ui32MiscFlags2 = (dhdHeaderEx.ui32MiscFlags2 & ~0b111) | SL2_DDS_ALPHA_MODE_STRAIGHT;
             }
 
             if ( !sFile.Write( reinterpret_cast<uint8_t *>(&dhHeader), sizeof( dhHeader ) ) ) {

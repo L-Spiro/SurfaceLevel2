@@ -977,6 +977,9 @@ namespace sl2 {
 		if ( _pkifFormat->bSrgb && _pkifTest->bSrgb ) {
 			fScore += 0.125f;
 		}
+		else if ( _pkifFormat->bSrgb != _pkifTest->bSrgb ) {
+			fScore -= 0.0125f;
+		}
 
 		return fScore;
 	}
