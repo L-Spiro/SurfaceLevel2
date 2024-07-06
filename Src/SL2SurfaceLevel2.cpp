@@ -11,6 +11,7 @@
 #include "Image/detex/misc.h"
 #include "Image/DDS/SL2Dds.h"
 #include "Image/SL2Image.h"
+#include "Image/SL2KtxTexture.h"
 #include "Time/SL2Clock.h"
 #include "Utilities/SL2Stream.h"
 
@@ -173,6 +174,18 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 4, ogl_format ) ) {
+                std::string sStringIf = sl2::CUtilities::Utf16ToUtf8( reinterpret_cast<const char16_t *>((_wcpArgV[1])) );
+                std::string sStringType = sl2::CUtilities::Utf16ToUtf8( reinterpret_cast<const char16_t *>((_wcpArgV[2])) );
+                std::string sStringBif = sl2::CUtilities::Utf16ToUtf8( reinterpret_cast<const char16_t *>((_wcpArgV[3])) );
+
+                oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sStringIf.c_str(), sStringType.c_str(), sStringBif.c_str() );
+                if ( !oOptions.pkifdFinalFormat ) {
+                    SL2_ERRORT( std::format( L"Invalid \"ogl_format\": \"{}\".",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 4 );
             }
 
             if ( SL2_CHECK( 1, quality_highest ) || SL2_CHECK( 1, very_slow ) ) {
@@ -363,6 +376,17 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
             SL2_RESAMPLE( resamplew_alpha, fAlphaFilterFuncW, oOptions.fAlphaFilterFuncW );
             SL2_RESAMPLE( resampleh_alpha, fAlphaFilterFuncH, oOptions.fAlphaFilterFuncH );
             SL2_RESAMPLE( resampled_alpha, fAlphaFilterFuncD, oOptions.fAlphaFilterFuncD );
+
+            SL2_RESAMPLE( mip_resample, fMipFilterFuncW, oOptions.fMipFilterFuncH = oOptions.fMipFilterFuncD = oOptions.fMipAlphaFilterFuncW = oOptions.fMipAlphaFilterFuncH = oOptions.fMipAlphaFilterFuncD );
+            SL2_RESAMPLE( mip_resamplew, fMipFilterFuncW, oOptions.fMipAlphaFilterFuncW );
+            SL2_RESAMPLE( mip_resampleh, fMipFilterFuncH, oOptions.fMipAlphaFilterFuncH );
+            SL2_RESAMPLE( mip_resampled, fMipFilterFuncD, oOptions.fMipAlphaFilterFuncD );
+            SL2_RESAMPLE( mip_resamplew_color, fMipFilterFuncW, oOptions.fMipFilterFuncW );
+            SL2_RESAMPLE( mip_resampleh_color, fMipFilterFuncH, oOptions.fMipFilterFuncH );
+            SL2_RESAMPLE( mip_resampled_color, fMipFilterFuncD, oOptions.fMipFilterFuncD );
+            SL2_RESAMPLE( mip_resamplew_alpha, fMipAlphaFilterFuncW, oOptions.fMipAlphaFilterFuncW );
+            SL2_RESAMPLE( mip_resampleh_alpha, fMipAlphaFilterFuncH, oOptions.fMipAlphaFilterFuncH );
+            SL2_RESAMPLE( mip_resampled_alpha, fMipAlphaFilterFuncD, oOptions.fMipAlphaFilterFuncD );
                 
 #undef SL2_RESAMPLE
 
@@ -648,6 +672,10 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 }
                 SL2_ADV( 2 );
             }
+
+            // TODO: bake_tex_mapping_u, bake_tex_mapping_v, bake_tex_mapping_w.
+            //  bake_tex_mapping_u ADDRESSING_MODE REPEATS
+            //  bake_tex_mapping_u mirror 1
 
             if ( SL2_CHECK( 2, nm_channel ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"r" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"red" ) == 0 ) {
@@ -1213,6 +1241,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         }
         FixResampling( oOptions, iImage );
         iImage.Resampling() = oOptions.rResample;
+        iImage.MipResampling() = oOptions.rMipResample;
         iImage.SetNeedsPreMultiply( oOptions.bNeedsPreMultiply );
         iImage.SetGamma( oOptions.dGamma );
         iImage.SetTargetGamma( oOptions.dTargetGamma );
@@ -1469,6 +1498,21 @@ namespace sl2 {
         _oOptions.rResample.dAlphaFilterSupportH = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncH].dfSupport;
         _oOptions.rResample.pfAlphaFilterD = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncD].pfFunc;
         _oOptions.rResample.dAlphaFilterSupportD = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncD].dfSupport;
+
+
+        _oOptions.rMipResample.pfFilterW = CResampler::m_fFilter[_oOptions.fMipFilterFuncW].pfFunc;
+        _oOptions.rMipResample.dFilterSupportW = CResampler::m_fFilter[_oOptions.fMipFilterFuncW].dfSupport;
+        _oOptions.rMipResample.pfFilterH = CResampler::m_fFilter[_oOptions.fMipFilterFuncH].pfFunc;
+        _oOptions.rMipResample.dFilterSupportH = CResampler::m_fFilter[_oOptions.fMipFilterFuncH].dfSupport;
+        _oOptions.rMipResample.pfFilterD = CResampler::m_fFilter[_oOptions.fMipFilterFuncD].pfFunc;
+        _oOptions.rMipResample.dFilterSupportD = CResampler::m_fFilter[_oOptions.fMipFilterFuncD].dfSupport;
+
+        _oOptions.rMipResample.pfAlphaFilterW = CResampler::m_fFilter[_oOptions.fMipAlphaFilterFuncW].pfFunc;
+        _oOptions.rMipResample.dAlphaFilterSupportW = CResampler::m_fFilter[_oOptions.fMipAlphaFilterFuncW].dfSupport;
+        _oOptions.rMipResample.pfAlphaFilterH = CResampler::m_fFilter[_oOptions.fMipAlphaFilterFuncH].pfFunc;
+        _oOptions.rMipResample.dAlphaFilterSupportH = CResampler::m_fFilter[_oOptions.fMipAlphaFilterFuncH].dfSupport;
+        _oOptions.rMipResample.pfAlphaFilterD = CResampler::m_fFilter[_oOptions.fMipAlphaFilterFuncD].pfFunc;
+        _oOptions.rMipResample.dAlphaFilterSupportD = CResampler::m_fFilter[_oOptions.fMipAlphaFilterFuncD].dfSupport;
     }
 
     /**
@@ -2684,7 +2728,7 @@ namespace sl2 {
             .ui32Size                                           = sizeof( sl2::CDds::SL2_DDS_HEADER ),
             .ui32Flags                                          = SL2_DF_CAPS | SL2_DF_HEIGHT | SL2_DF_WIDTH | SL2_DF_PIXELFORMAT,
             .ui32Height                                         = _iImage.Height(),
-            .ui32Width                                          = _iImage.Height(),
+            .ui32Width                                          = _iImage.Width(),
             .ui32PitchOrLinearSize                              = 0,
             .ui32Depth                                          = 0,
             .ui32MipMapCount                                    = static_cast<uint32_t>(_iImage.Mipmaps()),
@@ -2733,7 +2777,7 @@ namespace sl2 {
 
         // ui32Depth
         // Depth of a volume texture (in pixels), otherwise unused.
-        if ( _iImage.Depth() > 1 ) {
+        if ( _iImage.Depth() > 1 || ttTexType == SL2_TT_3D ) {
             dhHeader.ui32Depth = _iImage.Depth();
             dhHeader.ui32Flags |= SL2_DF_DEPTH;                             // Required in a depth texture.
         }
@@ -2751,7 +2795,7 @@ namespace sl2 {
         }
 
         // ui32Caps2
-        if ( _iImage.TextureType() == SL2_TT_CUBE ) {
+        if ( ttTexType == SL2_TT_CUBE ) {
             dhHeader.ui32Caps2 |= SL2_DDSCAPS2_CUBEMAP;                     // Required for a cube map.
             dhHeader.ui32Caps2 |= SL2_DDSCAPS2_CUBEMAP_POSITIVEX;           // Required when these surfaces are stored in a cube map.
             dhHeader.ui32Caps2 |= SL2_DDSCAPS2_CUBEMAP_NEGATIVEX;           // Required when these surfaces are stored in a cube map.
@@ -2841,7 +2885,6 @@ namespace sl2 {
 
         // Add the texel data.
         
-        //size_t sSrcPageSize = sSrcPitch * _iImage.Height();
         // For each/face.
         for ( size_t A = 0; A < _iImage.ArraySize(); ++A ) {
             for ( size_t F = 0; F < _iImage.Faces(); ++F ) {
@@ -2887,6 +2930,70 @@ namespace sl2 {
         }
 
         return SL2_E_SUCCESS;
+    }
+
+    /**
+	 * Exports as KTX 1.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS ExportAsKtx1( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions ) {
+        //if ( _iImage.Format()->vfVulkanFormat == SL2_VK_FORMAT_UNDEFINED
+        if ( _iImage.Format()->kifInternalFormat == SL2_KIF_GL_INVALID || _iImage.Format()->ktType == SL2_KT_GL_INVALID || _iImage.Format()->kbifBaseInternalFormat == SL2_KBIF_GL_INVALID ) { return SL2_E_BADFORMAT; }
+
+        ::ktxTextureCreateInfo createInfo;
+        createInfo.glInternalformat = _iImage.Format()->kifInternalFormat;
+        createInfo.baseWidth = _iImage.Width();
+        createInfo.baseHeight = _iImage.Height();
+        createInfo.baseDepth = _iImage.Depth();
+        switch ( _iImage.TextureType() ) {
+            case SL2_TT_1D : {
+                createInfo.numDimensions = 1;
+                break;
+            }
+            case SL2_TT_3D : {
+                createInfo.numDimensions = 3;
+                break;
+            }
+            default : { createInfo.numDimensions = 2; }
+        }
+        createInfo.numLevels = static_cast<ktx_uint32_t>(_iImage.Mipmaps());
+        createInfo.numLayers = static_cast<ktx_uint32_t>(_iImage.ArraySize());
+        createInfo.numFaces = static_cast<ktx_uint32_t>(_iImage.Faces());
+        createInfo.isArray = _iImage.ArraySize() > 1 ? KTX_TRUE : KTX_FALSE;
+        createInfo.generateMipmaps = KTX_FALSE;
+
+        sl2::CKtxTexture<ktxTexture1> kt1Tex;
+        ::KTX_error_code ecErr = ::ktxTexture1_Create( &createInfo, KTX_TEXTURE_CREATE_ALLOC_STORAGE, kt1Tex.HandlePointer() );
+        if ( KTX_SUCCESS != ecErr || kt1Tex.Handle() == nullptr ) { return SL2_E_OUTOFMEMORY; }
+
+        (*kt1Tex.HandlePointer())->glInternalformat = _iImage.Format()->kifInternalFormat;
+        (*kt1Tex.HandlePointer())->glType = _iImage.Format()->ktType;
+        (*kt1Tex.HandlePointer())->glBaseInternalformat = _iImage.Format()->kbifBaseInternalFormat;
+
+        // For each/face.
+        for ( size_t A = 0; A < _iImage.ArraySize(); ++A ) {
+            for ( size_t F = 0; F < _iImage.Faces(); ++F ) {
+                // For each level.
+                for ( size_t M = 0; M < _iImage.Mipmaps(); ++M ) {
+                    if ( _iImage.Format()->bCompressed ) {
+                        //ecErr = ktxTexture_SetImageFromMemory( ktxTexture( kt1Tex.Handle() ), M, static_cast<uint32_t>(A), KTX_FACESLICE_WHOLE_LEVEL, _iImage.Data(), imageData.size() );
+                        if ( ecErr != KTX_SUCCESS ) {
+                        }
+                    }
+                    else {
+                        size_t sPitch = sl2::CFormat::GetRowSize_NoPadding( _iImage.Format(), _iImage.GetMipmaps()[M]->Width() );
+                    }
+                }
+            }
+        }
+
+
+        return SL2_E_SUCCESS;
+
     }
 
 }   // namespace sl2

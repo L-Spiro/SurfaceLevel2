@@ -81,6 +81,7 @@ namespace sl2 {
 			m_mhMipHandling = _iOther.m_mhMipHandling;
 			m_sTotalMips = _iOther.m_sTotalMips;
 			m_rResample = _iOther.m_rResample;
+			m_rMipResample = _iOther.m_rMipResample;
 			m_ttType = _iOther.m_ttType;
 			m_bFullyOpaque = _iOther.m_bFullyOpaque;
 			
@@ -101,7 +102,7 @@ namespace sl2 {
 			_iOther.m_caKernelChannal = SL2_CA_R;
 			_iOther.m_dKernelScale = 1.0;
 			_iOther.m_dKernelYAxis = 1.0;
-			_iOther.m_rResample = CResampler::SL2_RESAMPLE();
+			_iOther.m_rResample = _iOther.m_rMipResample = CResampler::SL2_RESAMPLE();
 			_iOther.m_mhMipHandling = SL2_MH_GENERATE_NEW;
 			_iOther.m_sTotalMips = 0;
 			_iOther.m_ttType = SL2_TT_2D;
@@ -215,7 +216,7 @@ namespace sl2 {
 			size_t sNewSize = ui32NewW * ui32NewH * ui32NewD;
 			if ( sNewSize < sOldSize ) { bUseTmpBuffer = true; }
 		}
-		
+		m_rMipResample.bAlpha = m_rResample.bAlpha;
 		
 		
 
@@ -257,6 +258,7 @@ namespace sl2 {
 			catch ( ... ) { return SL2_E_OUTOFMEMORY; }
 		}
 		bool bTargetIsPremulAlpha = m_bIsPreMultiplied;
+		bool bOpaque = true;
 		for ( size_t M = 0; M < sSrcMips; ++M ) {
 			for ( size_t A = 0; A < ArraySize(); ++A ) {
 				for ( size_t F = 0; F < Faces(); ++F ) {
@@ -293,6 +295,8 @@ namespace sl2 {
 						CFormat::ApplySwizzle( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), m_sSwizzle );
 					}
 
+					bool bThisIsOpuaqe = AlphaIsFullyEqualTo( pui8Dest, 1.0, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					bOpaque = bOpaque && bThisIsOpuaqe;
 					if ( bResize ) {
 						CResampler rResampleMe;
 						CResampler::SL2_RESAMPLE rResampleCopy = m_rResample;
@@ -302,6 +306,7 @@ namespace sl2 {
 						rResampleCopy.ui32NewW = std::max( m_rResample.ui32NewW >> M, 1U );
 						rResampleCopy.ui32NewH = std::max( m_rResample.ui32NewH >> M, 1U );
 						rResampleCopy.ui32NewD = std::max( m_rResample.ui32NewD >> M, 1U );
+						rResampleCopy.bAlpha = rResampleCopy.bAlpha && !bThisIsOpuaqe;
 						if ( !rResampleMe.Resample( reinterpret_cast<double *>(pui8Dest), reinterpret_cast<double *>(iTmp.Data( M, 0, A, F )), rResampleCopy ) ) { return SL2_E_OUTOFMEMORY; }
 					}
 					else if ( bUseTmpBuffer ) {
@@ -312,13 +317,14 @@ namespace sl2 {
 						// Generate mipmaps using the original full-sized non-scaled image.
 						for ( size_t N = sSrcMips; N < sDstMips; ++N ) {
 							CResampler rResampleMe;
-							CResampler::SL2_RESAMPLE rResampleCopy = m_rResample;
+							CResampler::SL2_RESAMPLE rResampleCopy = m_rMipResample;
 							rResampleCopy.ui32W = m_vMipMaps[M]->Width();
 							rResampleCopy.ui32H = m_vMipMaps[M]->Height();
 							rResampleCopy.ui32D = m_vMipMaps[M]->Depth();
 							rResampleCopy.ui32NewW = std::max( m_rResample.ui32NewW >> N, 1U );
 							rResampleCopy.ui32NewH = std::max( m_rResample.ui32NewH >> N, 1U );
 							rResampleCopy.ui32NewD = std::max( m_rResample.ui32NewD >> N, 1U );
+							rResampleCopy.bAlpha = rResampleCopy.bAlpha && !bThisIsOpuaqe;
 							if ( !rResampleMe.Resample( reinterpret_cast<double *>(pui8Dest), reinterpret_cast<double *>(iTmp.Data( N, 0, A, F )), rResampleCopy ) ) { return SL2_E_OUTOFMEMORY; }
 						}
 					}
@@ -326,7 +332,7 @@ namespace sl2 {
 				}
 			}
 		}
-		bool bOpaque = true;
+		
 		for ( size_t M = 0; M < iTmp.Mipmaps(); ++M ) {
 			for ( size_t A = 0; A < iTmp.ArraySize(); ++A ) {
 				for ( size_t F = 0; F < iTmp.Faces(); ++F ) {
@@ -338,7 +344,6 @@ namespace sl2 {
 							BakeGamma( iTmp.Data( M, 0, A, F ), 1.0 / m_dTargetGamma, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );
 						}
 					}
-					bOpaque = m_bFullyOpaque && AlphaIsFullyEqualTo( iTmp.Data( M, 0, A, F ), 1.0, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );
 				}
 			}
 		}
@@ -1318,6 +1323,15 @@ namespace sl2 {
 		}
 		else if ( Height() > 1 ) {
 			m_ttType = SL2_TT_2D;
+		}
+
+		if ( dFile.UsesExtHeader() ) {
+			switch ( dFile.Header10().ui32MiscFlags2 & 0b111 ) {
+				case SL2_DDS_ALPHA_MODE_PREMULTIPLIED : {
+					m_bIsPreMultiplied = true;
+					break;
+				}
+			}
 		}
 		return SL2_E_SUCCESS;
 	}

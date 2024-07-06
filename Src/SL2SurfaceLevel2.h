@@ -20,62 +20,72 @@ namespace sl2 {
 	// == Types.
 	/** The conversion options. */
 	struct SL2_OPTIONS {
-		std::vector<std::u16string>										vInputs;												/**< The input files. */
-		std::vector<std::u16string>										vOutputs;												/**< The output files. */
-		const sl2::CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *				pkifdFinalFormat = nullptr;								/**< Actual final format.  If not manually specified, vfAutoFormat is used. */
-		sl2::CFormat::SL2_SWIZZLE										sSwizzle = CFormat::DefaultSwizzle();					/**< The swizzle to apply. */
-		double															dGamma = 1.0 / -2.2;									/**< User-supplied gamma. */
-		double															dTargetGamma = 1.0 / -2.2;								/**< User-supplied target gamma. */
-		sl2::CResampler::SL2_RESAMPLE									rResample;												/**< Resampling parameters. */
-		sl2::SL2_RESAMPLE_TO											rtResampleTo = SL2_RT_NONE;								/**< Resample size for -rescale. */
-		double															dRelScaleW = 1.0;										/**< Relative width scale. */
-		double															dRelScaleH = 1.0;										/**< Relative height scale. */
-		double															dRelScaleD = 1.0;										/**< Relative depth scale. */
-		CResampler::SL2_FILTER_FUNCS									fFilterFuncW = CResampler::SL2_FF_QUADRATICSHARP;		/**< The width filter. */
-		CResampler::SL2_FILTER_FUNCS									fFilterFuncH = CResampler::SL2_FF_QUADRATICSHARP;		/**< The height filter. */
-		CResampler::SL2_FILTER_FUNCS									fFilterFuncD = CResampler::SL2_FF_QUADRATICSHARP;		/**< The depth filter. */
-		CResampler::SL2_FILTER_FUNCS									fAlphaFilterFuncW = CResampler::SL2_FF_QUADRATICSHARP;	/**< The width alpha-channel filter. */
-		CResampler::SL2_FILTER_FUNCS									fAlphaFilterFuncH = CResampler::SL2_FF_QUADRATICSHARP;	/**< The height alpha-channel filter. */
-		CResampler::SL2_FILTER_FUNCS									fAlphaFilterFuncD = CResampler::SL2_FF_QUADRATICSHARP;	/**< The depth alpha-channel filter. */
-		uint32_t														ui32ClampW = 0;											/**< Width clamp. */
-		uint32_t														ui32ClampH = 0;											/**< Height clamp. */
-		uint32_t														ui32ClampD = 0;											/**< Depth clamp. */
+		std::vector<std::u16string>										vInputs;														/**< The input files. */
+		std::vector<std::u16string>										vOutputs;														/**< The output files. */
+		const sl2::CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *				pkifdFinalFormat = nullptr;										/**< Actual final format.  If not manually specified, vfAutoFormat is used. */
+		sl2::CFormat::SL2_SWIZZLE										sSwizzle = CFormat::DefaultSwizzle();							/**< The swizzle to apply. */
+		double															dGamma = 1.0 / -2.2;											/**< User-supplied gamma. */
+		double															dTargetGamma = 1.0 / -2.2;										/**< User-supplied target gamma. */
+		sl2::CResampler::SL2_RESAMPLE									rResample;														/**< Resampling parameters. */
+		sl2::CResampler::SL2_RESAMPLE									rMipResample;													/**< Mipmap resampling parameters. */
+		sl2::SL2_RESAMPLE_TO											rtResampleTo = SL2_RT_NONE;										/**< Resample size for -rescale. */
+		double															dRelScaleW = 1.0;												/**< Relative width scale. */
+		double															dRelScaleH = 1.0;												/**< Relative height scale. */
+		double															dRelScaleD = 1.0;												/**< Relative depth scale. */
 
-		SL2_MIPMAP_HANDLING												mhMipHandling = SL2_MH_GENERATE_NEW;					/**< Fully generate a new set. */
-		size_t															sTotalMips = 0;											/**< How many mipmaps to put into the final result, or 0 to keep existing mipmaps or to generate a full set. */
+		CResampler::SL2_FILTER_FUNCS									fFilterFuncW = CResampler::SL2_FF_QUADRATICSHARP;				/**< The width filter. */
+		CResampler::SL2_FILTER_FUNCS									fFilterFuncH = CResampler::SL2_FF_QUADRATICSHARP;				/**< The height filter. */
+		CResampler::SL2_FILTER_FUNCS									fFilterFuncD = CResampler::SL2_FF_QUADRATICSHARP;				/**< The depth filter. */
+		CResampler::SL2_FILTER_FUNCS									fAlphaFilterFuncW = CResampler::SL2_FF_QUADRATICSHARP;			/**< The width alpha-channel filter. */
+		CResampler::SL2_FILTER_FUNCS									fAlphaFilterFuncH = CResampler::SL2_FF_QUADRATICSHARP;			/**< The height alpha-channel filter. */
+		CResampler::SL2_FILTER_FUNCS									fAlphaFilterFuncD = CResampler::SL2_FF_QUADRATICSHARP;			/**< The depth alpha-channel filter. */
 
-		CKernel															kKernel;												/**< Normal-map Sobel kernel. */
-		uint32_t														ui32NormalKernelSize = 0;								/**< Normal-map generation kernel size. */
-		SL2_CHANNEL_ACCESS												caChannelAccess = SL2_CA_MAX;							/**< Normal-map channel access. */
-		double															dNormalScale = 0.35;									/**< Normal-map scalar. */
-		double															dNormalYAxis = 1.0;										/**< Normal map Y axis.  1.0 for OpenGL, -1.0 for DirectX. */
-		bool															bNormalizeMips = false;									/**< If mipmaps should be normalized or not. */
+		CResampler::SL2_FILTER_FUNCS									fMipFilterFuncW = CResampler::SL2_FF_CARDINALSPLINEUNIFORM;		/**< The width filter. */
+		CResampler::SL2_FILTER_FUNCS									fMipFilterFuncH = CResampler::SL2_FF_CARDINALSPLINEUNIFORM;		/**< The height filter. */
+		CResampler::SL2_FILTER_FUNCS									fMipFilterFuncD = CResampler::SL2_FF_CARDINALSPLINEUNIFORM;		/**< The depth filter. */
+		CResampler::SL2_FILTER_FUNCS									fMipAlphaFilterFuncW = CResampler::SL2_FF_QUADRATICSHARP;		/**< The width alpha-channel filter. */
+		CResampler::SL2_FILTER_FUNCS									fMipAlphaFilterFuncH = CResampler::SL2_FF_QUADRATICSHARP;		/**< The height alpha-channel filter. */
+		CResampler::SL2_FILTER_FUNCS									fMipAlphaFilterFuncD = CResampler::SL2_FF_QUADRATICSHARP;		/**< The depth alpha-channel filter. */
 
-		int																iPngSaveOption = PNG_Z_BEST_SPEED;						/**< Option for saving as PNG. */
-		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *					pkifdPngFormat = nullptr;								/**< The PNG format. */
+		uint32_t														ui32ClampW = 0;													/**< Width clamp. */
+		uint32_t														ui32ClampH = 0;													/**< Height clamp. */
+		uint32_t														ui32ClampD = 0;													/**< Depth clamp. */
 
-		sl2::SL2_VKFORMAT												vkBmpFormat = SL2_VK_FORMAT_UNDEFINED;					/**< The BMP format. */
-		sl2::SL2_VKFORMAT												vkBmpFormatNoMask = SL2_VK_FORMAT_UNDEFINED;			/**< The BMP format when not using a mask. */
-		int																iBmpSaveOption = BMP_DEFAULT;							/**< Option for saving as BMP. */
-		bool															bBmpHasAlpha = true;									/**< Does the BMP file have alpha? */
-		bool															bIgnoreAlpha = false;									/**< Ignore alpha? */
-		bool															bBmpStoreBitmask = true;								/**< Try to store the bitmask? */
+		SL2_MIPMAP_HANDLING												mhMipHandling = SL2_MH_GENERATE_NEW;							/**< Fully generate a new set. */
+		size_t															sTotalMips = 0;													/**< How many mipmaps to put into the final result, or 0 to keep existing mipmaps or to generate a full set. */
 
-		sl2::SL2_VKFORMAT												vkExrFormat = SL2_VK_FORMAT_UNDEFINED;					/**< The EXR format. */
-		int																iExrSaveOption = EXR_DEFAULT;							/**< Options for saving as EXR. */
+		CKernel															kKernel;														/**< Normal-map Sobel kernel. */
+		uint32_t														ui32NormalKernelSize = 0;										/**< Normal-map generation kernel size. */
+		SL2_CHANNEL_ACCESS												caChannelAccess = SL2_CA_MAX;									/**< Normal-map channel access. */
+		double															dNormalScale = 0.35;											/**< Normal-map scalar. */
+		double															dNormalYAxis = 1.0;												/**< Normal map Y axis.  1.0 for OpenGL, -1.0 for DirectX. */
+		bool															bNormalizeMips = false;											/**< If mipmaps should be normalized or not. */
 
-		sl2::SL2_VKFORMAT												vkJ2kFormat = SL2_VK_FORMAT_UNDEFINED;					/**< The J2K format. */
-		int																iJ2kSaveOption = J2K_DEFAULT;							/**< J2K compression amount. */
+		int																iPngSaveOption = PNG_Z_BEST_SPEED;								/**< Option for saving as PNG. */
+		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *					pkifdPngFormat = nullptr;										/**< The PNG format. */
 
-		sl2::SL2_VKFORMAT												vkJp2Format = SL2_VK_FORMAT_UNDEFINED;					/**< The JP2 format. */
-		int																iJp2SaveOption = JP2_DEFAULT;							/**< JP2 compression amount. */
+		sl2::SL2_VKFORMAT												vkBmpFormat = SL2_VK_FORMAT_UNDEFINED;							/**< The BMP format. */
+		sl2::SL2_VKFORMAT												vkBmpFormatNoMask = SL2_VK_FORMAT_UNDEFINED;					/**< The BMP format when not using a mask. */
+		int																iBmpSaveOption = BMP_DEFAULT;									/**< Option for saving as BMP. */
+		bool															bBmpHasAlpha = true;											/**< Does the BMP file have alpha? */
+		bool															bIgnoreAlpha = false;											/**< Ignore alpha? */
+		bool															bBmpStoreBitmask = true;										/**< Try to store the bitmask? */
 
-		int																iJpgSaveOption = JPEG_DEFAULT;							/**< JPG compression amount. */
+		sl2::SL2_VKFORMAT												vkExrFormat = SL2_VK_FORMAT_UNDEFINED;							/**< The EXR format. */
+		int																iExrSaveOption = EXR_DEFAULT;									/**< Options for saving as EXR. */
 
-		bool															bNeedsPreMultiply = false;								/**< Does the target format, or user request, demand pre-multiplied alpha? */
-		bool															bSwap = false;											/**< Swap R and B? */
-		bool															bPause = false;											/**< If true, the program pauses before closing the command window. */
-		bool															bShowTime = true;										/**< If true, the time taken to perform the conversion is printed. */
+		sl2::SL2_VKFORMAT												vkJ2kFormat = SL2_VK_FORMAT_UNDEFINED;							/**< The J2K format. */
+		int																iJ2kSaveOption = J2K_DEFAULT;									/**< J2K compression amount. */
+
+		sl2::SL2_VKFORMAT												vkJp2Format = SL2_VK_FORMAT_UNDEFINED;							/**< The JP2 format. */
+		int																iJp2SaveOption = JP2_DEFAULT;									/**< JP2 compression amount. */
+
+		int																iJpgSaveOption = JPEG_DEFAULT;									/**< JPG compression amount. */
+
+		bool															bNeedsPreMultiply = false;										/**< Does the target format, or user request, demand pre-multiplied alpha? */
+		bool															bSwap = false;													/**< Swap R and B? */
+		bool															bPause = false;													/**< If true, the program pauses before closing the command window. */
+		bool															bShowTime = true;												/**< If true, the time taken to perform the conversion is printed. */
 		
 	};
 
@@ -279,5 +289,15 @@ namespace sl2 {
 	 * \return Returns an error code.
 	 **/
 	SL2_ERRORS															ExportAsDds( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions );
+
+	/**
+	 * Exports as KTX 1.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS															ExportAsKtx1( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions );
 
 }	// namespace sl2

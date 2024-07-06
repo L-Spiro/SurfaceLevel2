@@ -369,7 +369,7 @@ namespace sl2 {
 		 *
 		 * \return Returns the the texture type.
 		 **/
-		inline SL2_TEXTURE_TYPES							TextureType() const { return m_ttType; }
+		inline SL2_TEXTURE_TYPES							TextureType() const { return Depth() > 1 ? SL2_TT_3D : m_ttType; }
 
 		/**
 		 * Is this texture fully opaque?
@@ -395,6 +395,13 @@ namespace sl2 {
 		 * \return Returns a read/write reference to the resampling parameters.
 		 **/
 		inline CResampler::SL2_RESAMPLE &					Resampling() { return m_rResample; }
+
+		/**
+		 * Gets a read/write reference to the mipmapping resampling parameters.
+		 * 
+		 * \return Returns a read/write reference to the mipmapping resampling parameters.
+		 **/
+		inline CResampler::SL2_RESAMPLE &					MipResampling() { return m_rMipResample; }
 
 		/**
 		 * Sets normal-map parameters.
@@ -457,6 +464,7 @@ namespace sl2 {
 		bool												m_bSwap;								/**< Swap R and B? */
 
 		CResampler::SL2_RESAMPLE							m_rResample;							/**< Resample parameters. */
+		CResampler::SL2_RESAMPLE							m_rMipResample;							/**< Resample parameters. */
 
 		SL2_MIPMAP_HANDLING									m_mhMipHandling;						/**< How to handle mimaps. */
 		size_t												m_sTotalMips;							/**< How many mipmaps to put into the final result, or 0 to keep existing mipmaps or to generate a full set. */

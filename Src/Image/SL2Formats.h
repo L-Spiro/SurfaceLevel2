@@ -209,7 +209,9 @@ namespace sl2 {
 		SL2_KIF_GL_RGB8I															= 0x8D8F, /** GL_RGB8I */
 		SL2_KIF_GL_RGBA8I															= 0x8D8E, /** GL_RGBA8I */
 		SL2_KIF_GL_SR8																= 0x8FBD, /** GL_SR8 */
+		SL2_KIF_GL_SR8_EXT															= 0x8FBD, /** GL_SR8_EXT */
 		SL2_KIF_GL_SRG8																= 0x8FBE, /** GL_SRG8 */
+		SL2_KIF_GL_SRG8_EXT															= 0x8FBE, /** GL_SRG8_EXT */
 		SL2_KIF_GL_SRGB8															= 0x8C41, /** GL_SRGB8 */
 		SL2_KIF_GL_SRGB8_ALPHA8														= 0x8C43, /** GL_SRGB8_ALPHA8 */
 		//

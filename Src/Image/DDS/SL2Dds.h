@@ -524,7 +524,7 @@ namespace sl2 {
 		 *
 		 * \return Returns true if the SL2_DDS_HEADER_DXT10 structure is used.
 		 **/
-		inline bool											UsesExtHeader() const { return m_dhHeader.dpPixelFormat.ui32FourCC == SL2_MAKEFOURCC( 'D', 'X', '1', '0' ); }
+		inline bool											UsesExtHeader() const { return (m_dhHeader.ui32Flags & SL2_DPFF_FOURCC) && m_dhHeader.dpPixelFormat.ui32FourCC == SL2_MAKEFOURCC( 'D', 'X', '1', '0' ); }
 
 		/**
 		 * Gets a constant reference to the DDS header.
