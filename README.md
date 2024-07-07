@@ -685,3 +685,4 @@ These image formats supported:
 …and more!
 YUV and indexed formats coming soon.
 As well as a proper help file/documentation.
+Wow!
