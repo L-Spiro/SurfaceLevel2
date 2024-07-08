@@ -1318,6 +1318,13 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
             }
         }
+        else if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"ktx" ) == 0 ) {
+            eError = sl2::ExportAsKtx1( iConverted, oOptions.vOutputs[I], oOptions );
+            if ( sl2::SL2_E_SUCCESS != eError ) {
+                SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
+                    reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
+            }
+        }
         
         ui64Time = cClock.GetRealTick() - cClock.GetStartTick();
         ::sprintf_s( szPrintfMe, "Save time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
@@ -2970,9 +2977,17 @@ namespace sl2 {
         ::KTX_error_code ecErr = ::ktxTexture1_Create( &createInfo, KTX_TEXTURE_CREATE_ALLOC_STORAGE, kt1Tex.HandlePointer() );
         if ( KTX_SUCCESS != ecErr || kt1Tex.Handle() == nullptr ) { return SL2_E_OUTOFMEMORY; }
 
-        (*kt1Tex.HandlePointer())->glInternalformat = _iImage.Format()->kifInternalFormat;
-        (*kt1Tex.HandlePointer())->glType = _iImage.Format()->ktType;
-        (*kt1Tex.HandlePointer())->glBaseInternalformat = _iImage.Format()->kbifBaseInternalFormat;
+        if ( _iImage.Format()->bCompressed ) {
+            (*kt1Tex).glInternalformat = _iImage.Format()->kifInternalFormat;
+            (*kt1Tex).glType = 0;
+            (*kt1Tex).glBaseInternalformat = _iImage.Format()->kbifBaseInternalFormat;
+            (*kt1Tex).glFormat = 0;
+        }
+        else {
+            (*kt1Tex).glInternalformat = _iImage.Format()->kifInternalFormat;
+            (*kt1Tex).glType = _iImage.Format()->ktType;
+            (*kt1Tex).glBaseInternalformat = _iImage.Format()->kbifBaseInternalFormat;
+        }
 
         // For each/face.
         for ( size_t A = 0; A < _iImage.ArraySize(); ++A ) {
@@ -2982,18 +2997,57 @@ namespace sl2 {
                     if ( _iImage.Format()->bCompressed ) {
                         //ecErr = ktxTexture_SetImageFromMemory( ktxTexture( kt1Tex.Handle() ), M, static_cast<uint32_t>(A), KTX_FACESLICE_WHOLE_LEVEL, _iImage.Data(), imageData.size() );
                         if ( ecErr != KTX_SUCCESS ) {
+                            size_t sPageSize = CFormat::GetFormatSize( _iImage.Format(), _iImage.GetMipmaps()[M]->Width(), _iImage.GetMipmaps()[M]->Height(), 1 );
+                            for ( uint32_t D = 0; D < _iImage.GetMipmaps()[M]->Depth(); ++D ) {
+                                ecErr = ktxTexture_SetImageFromMemory( ktxTexture( kt1Tex.Handle() ), static_cast<ktx_uint32_t>(M), static_cast<ktx_uint32_t>(A), static_cast<ktx_uint32_t>(D), _iImage.Data( M, D, A, F ), static_cast<ktx_size_t>(sPageSize) );
+                                if ( ecErr != KTX_SUCCESS ) { return SL2_E_OUTOFMEMORY; }
+                            }
                         }
                     }
                     else {
-                        size_t sPitch = sl2::CFormat::GetRowSize_NoPadding( _iImage.Format(), _iImage.GetMipmaps()[M]->Width() );
+                        size_t sDstPitch = sl2::CFormat::GetRowSize_NoPadding( _iImage.Format(), _iImage.GetMipmaps()[M]->Width() );
+                        size_t sPitch = sl2::CFormat::GetRowSize( _iImage.Format(), _iImage.GetMipmaps()[M]->Width() );
+                        size_t sSrcPageSize = sPitch * _iImage.GetMipmaps()[M]->Height();
+                        std::vector<uint8_t> vTmp;
+                        try {
+                            vTmp.resize( sDstPitch * _iImage.GetMipmaps()[M]->Height() );
+                        }
+                        catch ( ... ) { return SL2_E_OUTOFMEMORY; }
+                        for ( uint32_t D = 0; D < _iImage.GetMipmaps()[M]->Depth(); ++D ) {
+                            uint8_t * pui8Dst = vTmp.data();
+                            for ( uint32_t H = 0; H < _iImage.GetMipmaps()[M]->Height(); ++H ) {
+                                std::memcpy( pui8Dst, _iImage.Data( M, D, A, F ) + sPitch * H, sDstPitch );
+                                pui8Dst += sDstPitch;
+                            }
+                            ecErr = ktxTexture_SetImageFromMemory( ktxTexture( kt1Tex.Handle() ), static_cast<ktx_uint32_t>(M), static_cast<ktx_uint32_t>(A), static_cast<ktx_uint32_t>(D), vTmp.data(), static_cast<ktx_size_t>(vTmp.size()) );
+                            if ( ecErr != KTX_SUCCESS ) { return SL2_E_OUTOFMEMORY; }
+                        }
                     }
                 }
             }
         }
 
+        // Write to memory.
+        ktx_uint8_t * fileData = nullptr;
+        ktx_size_t fileSize = 0;
+        ecErr = ktxTexture_WriteToMemory( ktxTexture( kt1Tex.Handle() ), &fileData, &fileSize );
+        SL2_ERRORS eRet = SL2_E_SUCCESS;
+        if ( ecErr != KTX_SUCCESS ) { eRet = SL2_E_OUTOFMEMORY; }
+        else {
+            CStdFile sfFile;
+            if ( !sfFile.Create( _sPath.c_str() ) ) {
+                // Free the memory allocated by ktxTexture_WriteToMemory.
+                eRet = SL2_E_INVALIDWRITEPERMISSIONS;
+            }
+            else if ( !sfFile.WriteToFile( fileData, fileSize ) ) {
+                // Free the memory allocated by ktxTexture_WriteToMemory.
+                eRet = SL2_E_FILEWRITEERROR;
+            }
+            // Free the memory allocated by ktxTexture_WriteToMemory.
+            std::free( fileData );
+        }
 
-        return SL2_E_SUCCESS;
-
+        return eRet;
     }
 
 }   // namespace sl2
