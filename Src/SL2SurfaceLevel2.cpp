@@ -2995,7 +2995,6 @@ namespace sl2 {
                 // For each level.
                 for ( size_t M = 0; M < _iImage.Mipmaps(); ++M ) {
                     if ( _iImage.Format()->bCompressed ) {
-                        //ecErr = ktxTexture_SetImageFromMemory( ktxTexture( kt1Tex.Handle() ), M, static_cast<uint32_t>(A), KTX_FACESLICE_WHOLE_LEVEL, _iImage.Data(), imageData.size() );
                         if ( ecErr != KTX_SUCCESS ) {
                             size_t sPageSize = CFormat::GetFormatSize( _iImage.Format(), _iImage.GetMipmaps()[M]->Width(), _iImage.GetMipmaps()[M]->Height(), 1 );
                             for ( uint32_t D = 0; D < _iImage.GetMipmaps()[M]->Depth(); ++D ) {
