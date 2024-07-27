@@ -344,8 +344,8 @@ namespace sl2 {
 		static inline double									KaiserFilterFunc( double _dT ) {
 			_dT = std::fabs( _dT );
 			if ( _dT < 3.0 ) {
-				static const float fAtt = 40.0;
-				static const double dAlpha = std::exp( std::log( 0.58417 * (fAtt - 20.96) ) * 0.4 ) + 0.07886 * (fAtt - 20.96);
+				static const double dAtt = 40.0;
+				static const double dAlpha = std::exp( std::log( 0.58417 * (dAtt - 20.96) ) * 0.4 ) + 0.07886 * (dAtt - 20.96);
 				return static_cast<float>(Clean( Sinc( _dT ) * KaiserHelper( dAlpha, 3.0, _dT ) ));
 			}
 			return 0.0;

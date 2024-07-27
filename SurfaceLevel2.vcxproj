@@ -45,6 +45,8 @@
     <ClInclude Include="Src\Image\detex\hdr.h" />
     <ClInclude Include="Src\Image\detex\misc.h" />
     <ClInclude Include="Src\Image\ETCPACK\etcpack.h" />
+    <ClInclude Include="Src\Image\ICC\SL2Icc.h" />
+    <ClInclude Include="Src\Image\ICC\SL2IccDefs.h" />
     <ClInclude Include="Src\Image\ISPC\ispc_texcomp.h" />
     <ClInclude Include="Src\Image\KTX-Software\include\ktx.h" />
     <ClInclude Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu.h" />
@@ -164,6 +166,7 @@
     <ClCompile Include="Src\Image\detex\misc.c" />
     <ClCompile Include="Src\Image\ETCPACK\etcdec_.cxx" />
     <ClCompile Include="Src\Image\ETCPACK\etcpack.cxx" />
+    <ClCompile Include="Src\Image\ICC\SL2Icc.cpp" />
     <ClCompile Include="Src\Image\ISPC\ispc_texcomp.cpp" />
     <ClCompile Include="Src\Image\ISPC\ispc_texcomp_astc.cpp" />
     <ClCompile Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder.cpp">

@@ -26,12 +26,16 @@ namespace sl2 {
 		sl2::CFormat::SL2_SWIZZLE										sSwizzle = CFormat::DefaultSwizzle();							/**< The swizzle to apply. */
 		double															dGamma = 1.0 / -2.2;											/**< User-supplied gamma. */
 		double															dTargetGamma = 1.0 / -2.2;										/**< User-supplied target gamma. */
+		bool															bManuallySetGamma = false;										/**< Have we used -g or -gamma or -srgb or _rgbe? */
+		SL2_COLORSPACE_GAMMA_CURVES										cgcInputGammaCurve = SL2_CGC_sRGB_PRECISE;						/**< The input gamma curve. */
+		SL2_COLORSPACE_GAMMA_CURVES										cgcOutputGammaCurve = SL2_CGC_sRGB_PRECISE;						/**< The output gamma curve. */
 		sl2::CResampler::SL2_RESAMPLE									rResample;														/**< Resampling parameters. */
 		sl2::CResampler::SL2_RESAMPLE									rMipResample;													/**< Mipmap resampling parameters. */
 		sl2::SL2_RESAMPLE_TO											rtResampleTo = SL2_RT_NONE;										/**< Resample size for -rescale. */
 		double															dRelScaleW = 1.0;												/**< Relative width scale. */
 		double															dRelScaleH = 1.0;												/**< Relative height scale. */
 		double															dRelScaleD = 1.0;												/**< Relative depth scale. */
+		int32_t															i32ScaleDims = 2;												/**< Which scaling dimension was specified (prescale or prescale3). */
 
 		CResampler::SL2_FILTER_FUNCS									fFilterFuncW = CResampler::SL2_FF_QUADRATICSHARP;				/**< The width filter. */
 		CResampler::SL2_FILTER_FUNCS									fFilterFuncH = CResampler::SL2_FF_QUADRATICSHARP;				/**< The height filter. */

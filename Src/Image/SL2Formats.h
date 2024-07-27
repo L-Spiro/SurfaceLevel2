@@ -1208,6 +1208,28 @@ namespace sl2 {
 		SL2_LS_TOTAL
 	};
 
+	/** Colorspace transfer functions. */
+	enum SL2_COLORSPACE_GAMMA_CURVES {
+		SL2_CGC_sRGB_STANDARD = 0,													/**< IEC 61966-2-1 standard (V4L2_COLORSPACE_SRGB). */
+		SL2_CGC_sRGB_PRECISE = 1,													/**< sRGB in high precision, without the discontinuities in the standard. */
+		SL2_CGC_SMPTE_170M_1999 = 2,												/**< SMPTE 170M-1999 standard (V4L2_COLORSPACE_SMPTE170M). */
+		SL2_CGC_SMPTE_170M_1999_PRECISE = 3,										/**< SMPTE 170M-1999 in high precision, without the discontinuities in the standard. */
+		SL2_CGC_ITU_BT_709 = 4,														/**< ITU-R Recommendation BT.709-5 standard (V4L2_COLORSPACE_REC709). */
+		SL2_CGC_ITU_BT_709_PRECISE = 5,												/**< ITU-R Recommendation BT.709-5 in high precision, without the discontinuities in the standard. */
+		SL2_CGC_ADOBE_RGB = 6,														/**< Adobe RGB (1998) Color Image Encoding Version 2005-05 (V4L2_COLORSPACE_ADOBERGB). */
+		SL2_CGC_ITU_BT_2020 = 7,													/**< ITU-R Recommendation BT.2020 standard (V4L2_COLORSPACE_BT2020). */
+		SL2_CGC_ITU_BT_2020_PRECISE = 8,											/**< ITU-R Recommendation BT.2020 in high precision, without the discontinuities in the standard. */
+		SL2_CGC_DCI_P3 = 9,															/**< SMPTE RP 431-2:2011 standard (V4L2_COLORSPACE_DCI_P3). */
+		SL2_CGC_SMPTE_240M_1999 = 10,												/**< SMPTE 240M-1999 standard (V4L2_COLORSPACE_SMPTE240M). */
+		SL2_CGC_SMPTE_240M_1999_PRECISE = 11,										/**< SMPTE 240M-1999 in high precision, without the discontinuities in the standard. */
+		SL2_CGC_NTSC_1953 = 12,														/**< NTSC 1953 standard (V4L2_COLORSPACE_470_SYSTEM_M). */
+		SL2_CGC_NTSC_1953_PRECISE = 13,												/**< NTSC 1953 in high precision, without the discontinuities in the standard. */
+		SL2_CGC_EBU_TECH_3213 = 14,													/**< EBU Tech. 3213 standard (V4L2_COLORSPACE_470_SYSTEM_BG). */
+		SL2_CGC_EBU_TECH_3213_PRECISE = 15,											/**< EBU Tech. 3213 in high precision, without the discontinuities in the standard. */
+		SL2_CGC_EBU_DISPLAY_P3 = 16,												/**< Display P3 Color Encoding (v 1.0) standard. */
+		SL2_CGC_EBU_DISPLAY_P3_PRECISE = 17,										/**< Display P3 Color Encoding (v 1.0) in high precision, without the discontinuities in the standard. */
+	};
+
 	/** Channel access. */
 	enum SL2_CHANNEL_ACCESS {
 		SL2_CA_R,																	/**< The red channel. */
@@ -1251,6 +1273,9 @@ namespace sl2 {
 
 		/** Function type for converting from RGBA64F to an SL2_KTX_INTERNAL_FORMATformat. */
 		typedef bool																(* PfFromRgba64F)( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms );
+
+		/** A transfer function. */
+		typedef double																(* PfTransferFunc)( double _dVal );
 
 		/** Internal format data. */
 		typedef struct SL2_KTX_INTERNAL_FORMAT_DATA {
@@ -1339,6 +1364,14 @@ namespace sl2 {
 			/** Extra parameter. */
 			void *																	pvParm2;
 		} * LPSL2_BEST_INTERNAL_FORMAT, * const LPCSL2_BEST_INTERNAL_FORMAT;
+
+		/** Table of transfer functions. */
+		struct SL2_TRANSFER_FUNCS {
+			/** Inverse transfer function. */
+			PfTransferFunc															pfXtoLinear;
+			/** TRansfer function. */
+			PfTransferFunc															pfLinearToX;
+		};
 
 		/** An RGBA color component. */
 		typedef struct SL2_RGBA {
@@ -2100,6 +2133,62 @@ namespace sl2 {
 			_dB = std::min( _dB, 1.0 );
 		}
 
+		/**
+		 * Does a proper RGB -> YUV conversion.
+		 * 
+		 * \param _dR R.
+		 * \param _dG G.
+		 * \param _dB B.
+		 * \param _ui32Y Output Y.
+		 * \param _ui32U Output U.
+		 * \param _ui32V Output V.
+		 * \param _dKr Kr.
+		 * \param _dKb Kb.
+		 * \param _sM The number of bits per YUV sample (M >= 8).
+		 * \param _ui32BlackLevel The black-level variable. For computer RGB, Z equals 0. For studio video RGB, Z equals 16*2^(N-8), where N is the number of bits per RGB sample (N >= 8).
+		 * \param _ui32S The scaling variable. For computer RGB, S equals 255. For studio video RGB, S equals 219*2^(N-8).
+		 **/
+		static void																	RgbToYuv( double _dR, double _dG, double _dB,
+			uint32_t &_ui32Y, uint32_t &_ui32U, uint32_t &_ui32V,
+			double _dKr, double _dKb,
+			size_t _sM = 8, uint32_t _ui32BlackLevel = 0, uint32_t _ui32S = 255 );
+
+		/**
+		 * Does a proper YUV -> RGB conversion.
+		 *
+		 * \param _ui32Y Input Y.
+		 * \param _ui32U Input U.
+		 * \param _ui32V Input V.
+		 * \param _dR R.
+		 * \param _dG G.
+		 * \param _dB B.
+		 * \param _dKr Kr.
+		 * \param _dKb Kb.
+		 * \param _sM The number of bits per YUV sample (M >= 8).
+		 * \param _ui32BlackLevel The black-level variable. For computer RGB, Z equals 0. For studio video RGB, Z equals 16*2^(N-8), where N is the number of bits per RGB sample (N >= 8).
+		 * \param _ui32S The scaling variable. For computer RGB, S equals 255. For studio video RGB, S equals 219*2^(N-8).
+		 **/
+		static void																	YuvToRgb( uint32_t _ui32Y, uint32_t _ui32U, uint32_t _ui32V,
+			double &_dR, double &_dG, double &_dB,
+			double _dKr, double _dKb,
+			size_t _sM = 8, uint32_t _ui32BlackLevel = 0, uint32_t _ui32S = 255 );
+
+		/**
+		 * Gets a constant reference to the current transfer functions.
+		 *
+		 * \return Returns a constant reference to the current transfer functions.
+		 **/
+		static const SL2_TRANSFER_FUNCS &											TransferFunc() { return m_tfColorspaceTransfers[m_sTransferFunc]; }
+
+		/**
+		 * Gets a constant reference to a transfer function.
+		 * 
+		 * \param _cgcCurve The transfer function pair index.
+		 * \return Returns a constant reference to a transfer function.
+		 **/
+		static const SL2_TRANSFER_FUNCS &											TransferFunc( SL2_COLORSPACE_GAMMA_CURVES _cgcCurve ) { return m_tfColorspaceTransfers[_cgcCurve]; }
+
+
 	protected :
 		// == Types.
 		/** A block of texels for DDS encoding. */
@@ -2190,6 +2279,10 @@ namespace sl2 {
 		static uint32_t																m_ui32Perf;
 		/** Alpha cut-off. */
 		static uint8_t																m_ui8AlphaThresh;
+		/** Colorspace transfer functions. */
+		static SL2_TRANSFER_FUNCS													m_tfColorspaceTransfers[];
+		/** Which transfer function are we using? */
+		static size_t																m_sTransferFunc;
 		
 
 

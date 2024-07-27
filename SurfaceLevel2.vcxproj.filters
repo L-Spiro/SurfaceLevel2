@@ -139,6 +139,12 @@
     <Filter Include="Source Files\Image\DDS">
       <UniqueIdentifier>{3f445931-a3b3-4bc3-801b-e3dbaa689b48}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Image\ICC">
+      <UniqueIdentifier>{589c1f66-c73c-4b90-b6ee-9bb552e10641}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Image\ICC">
+      <UniqueIdentifier>{03cb37c7-6454-4cdd-861e-3a051c36c8ba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\SL2SurfaceLevel2.h">
@@ -416,6 +422,12 @@
     </ClInclude>
     <ClInclude Include="Src\Utilities\SL2Vector.h">
       <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\ICC\SL2Icc.h">
+      <Filter>Header Files\Image\ICC</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\ICC\SL2IccDefs.h">
+      <Filter>Header Files\Image\ICC</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -715,6 +727,9 @@
     </ClCompile>
     <ClCompile Include="Src\Image\SL2Kernel.cpp">
       <Filter>Source Files\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\ICC\SL2Icc.cpp">
+      <Filter>Source Files\Image\ICC</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

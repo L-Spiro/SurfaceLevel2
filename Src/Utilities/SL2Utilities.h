@@ -10,6 +10,7 @@
 #pragma once
 
 #include "SL2FeatureSet.h"
+#include "../OS/SL2Os.h"
 
 #include <cmath>
 #include <string>
@@ -17,7 +18,7 @@
 
 
 #ifndef SL2_ELEMENTS
-#define SL2_ELEMENTS( x )									((sizeof( x ) / sizeof( 0[x] )) / (static_cast<size_t>(!(sizeof( x ) % sizeof(0[x])))))
+#define SL2_ELEMENTS( X )									((sizeof( X ) / sizeof( 0[X] )) / (static_cast<size_t>(!(sizeof( X ) % sizeof(0[X])))))
 #endif	// #ifndef SL2_ELEMENTS
 
 #ifndef SL2_PI
@@ -277,20 +278,204 @@ namespace sl2 {
 		}
 
 		/**
-		 * Converts a single double value from sRGB space to linear space.  Performs an accurate conversion.
+		 * Converts a single double value from sRGB space to linear space.  Performs a conversion according to the standard.
 		 *
 		 * \param _dVal The value to convert.
 		 * \return Returns the converted value.
 		 */
-		static inline double __fastcall						SRgbToLinear( double _dVal );
+		static inline double SL2_FASTCALL					SRgbToLinear( double _dVal ) {
+			if ( _dVal < -0.04045 ) { return -std::pow( (-_dVal + 0.055) / 1.055, 2.4 ); }
+			return _dVal <= 0.04045 ?
+				_dVal / 12.92 :
+				std::pow( (_dVal + 0.055) / 1.055, 2.4 );
+		}
 
 		/**
-		 * Converts a single double value from linear space to sRGB space.  Performs an accurate conversion.
+		 * Converts a single double value from linear space to sRGB space.  Performs a conversion according to the standard.
 		 *
 		 * \param _dVal The value to convert.
 		 * \return Returns the converted value.
 		 */
-		static inline double __fastcall						LinearToSRgb( double _dVal );
+		static inline double SL2_FASTCALL					LinearToSRgb( double _dVal ) {
+			if ( _dVal < -0.0031308 ) { return -1.055 * std::pow( -_dVal, 1.0 / 2.4 ) + 0.055; }
+			return _dVal <= 0.0031308 ?
+				_dVal * 12.92 :
+				1.055 * std::pow( _dVal, 1.0 / 2.4 ) - 0.055;
+		}
+
+		/**
+		 * Converts a single double value from sRGB space to linear space.  Performs a precise conversion without a gap.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the converted value.
+		 */
+		static inline double SL2_FASTCALL					SRgbToLinear_Precise( double _dVal ) {
+			if ( _dVal < -0.039285714285714291860163172032116563059389591217041015625 ) { return -std::pow( (-_dVal + 0.055) / 1.055, 2.4 ); }
+			return _dVal <= 0.039285714285714291860163172032116563059389591217041015625 ?
+				_dVal / 12.92321018078785499483274179510772228240966796875 :
+				std::pow( (_dVal + 0.055) / 1.055, 2.4 );
+		}
+
+		/**
+		 * Converts a single double value from linear space to sRGB space.  Performs a precise conversion without a gap.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the converted value.
+		 */
+		static inline double SL2_FASTCALL					LinearToSRgb_Precise( double _dVal ) {
+			if ( _dVal < -0.003039934639778431833823102437008856213651597499847412109375 ) { return -1.055 * std::pow( -_dVal, 1.0 / 2.4 ) + 0.055; }
+			return _dVal <= 0.003039934639778431833823102437008856213651597499847412109375 ?
+				_dVal * 12.92321018078785499483274179510772228240966796875 :
+				1.055 * std::pow( _dVal, 1.0 / 2.4 ) - 0.055;
+		}
+
+		/**
+		 * Converts from SMPTE 170M-2004 to linear.  Performs a conversion according to the standard.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					SMPTE170MtoLinear( double _dVal ) {
+			if ( _dVal < -0.081 ) { return -std::pow( (-_dVal + 0.099) / 1.099, 1.0 / 0.45 ); }
+			return _dVal <= 0.081 ?
+				_dVal / 4.5 :
+				std::pow( (_dVal + 0.099) / 1.099, 1.0 / 0.45 );
+		}
+
+		/**
+		 * Converts from linear to SMPTE 170M-2004.  Performs a conversion according to the standard.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to SMPTE 170M-2004 space.
+		 */
+		static inline double SL2_FASTCALL					LinearToSMPTE170M( double _dVal ) {
+			if ( _dVal < -0.018 ) { return -1.099 * std::pow( -_dVal, 0.45 ) + 0.099; }
+			return _dVal <= 0.018 ?
+				_dVal * 4.5 :
+				1.099 * std::pow( _dVal, 0.45 ) - 0.099;
+		}
+
+		/**
+		 * Converts from SMPTE 170M-2004 to linear.  Performs a precise conversion without a gap.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					SMPTE170MtoLinear_Precise( double _dVal ) {
+			if ( _dVal < -0.081 ) { return -std::pow( (-_dVal + 0.099) / 1.099, 1.0 / 0.45 ); }
+			return _dVal <= 0.081 ?
+				_dVal / 4.51378626511533997955893937614746391773223876953125 :
+				std::pow( (_dVal + 0.099) / 1.099, 1.0 / 0.45 );
+		}
+
+		/**
+		 * Converts from linear to SMPTE 170M-2004.  Performs a precise conversion without a gap.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to SMPTE 170M-2004 space.
+		 */
+		static inline double SL2_FASTCALL					LinearToSMPTE170M_Precise( double _dVal ) {
+			if ( _dVal < -0.01794502336674778930625251405217568390071392059326171875 ) { return -1.099 * std::pow( -_dVal, 0.45 ) + 0.099; }
+			return _dVal <= 0.01794502336674778930625251405217568390071392059326171875 ?
+				_dVal * 4.51378626511533997955893937614746391773223876953125 :
+				1.099 * std::pow( _dVal, 0.45 ) - 0.099;
+		}
+
+		/**
+		 * Converts from DCI-P3 to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					DCIP3toLinear( double _dVal ) {
+			if ( _dVal < 0 ) { return -std::pow( -_dVal, 2.6 ); }
+			return std::pow( _dVal, 2.6 );
+		}
+
+		/**
+		 * Converts from linear to DCI-P3.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to DCI-P3 space.
+		 */
+		static inline double SL2_FASTCALL					LinearToDCIP3( double _dVal ) {
+			if ( _dVal < 0 ) { return -std::pow( -_dVal, 1.0 / 2.6 ); }
+			return std::pow( _dVal, 1.0 / 2.6 );
+		}
+
+		/**
+		 * Converts from Adobe RGB to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					AdobeRGBtoLinear( double _dVal ) {
+			if ( _dVal < 0 ) { return -std::pow( -_dVal, 2.19921875 ); }
+			return std::pow( _dVal, 2.19921875 );
+		}
+
+		/**
+		 * Converts from linear to Adobe RGB.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to Adobe RGB space.
+		 */
+		static inline double SL2_FASTCALL					LinearToAdobeRGB( double _dVal ) {
+			if ( _dVal < 0 ) { return -std::pow( -_dVal, 1.0 / 2.19921875 ); }
+			return std::pow( _dVal, 1.0 / 2.19921875 );
+		}
+
+		/**
+		 * Converts from SMPTE 240M to linear.  Performs a conversion according to the standard.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					SMPTE240MtoLinear( double _dVal ) {
+			if ( _dVal <= -0.0913 ) { return -std::pow( (-_dVal + 0.1115) / 1.1115, 1.0 / 0.45 ); }
+			return _dVal < 0.0913 ?
+				_dVal / 4.0 :
+				std::pow( (_dVal + 0.1115) / 1.1115, 1.0 / 0.45 );
+		}
+
+		/**
+		 * Converts from linear to SMPTE 240M.  Performs a conversion according to the standard.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to SMPTE 240M space.
+		 */
+		static inline double SL2_FASTCALL					LinearToSMPTE240M( double _dVal ) {
+			if ( _dVal <= -0.0228 ) { return -1.1115 * std::pow( -_dVal, 0.45 ) + 0.1115; }
+			return _dVal < 0.0228 ?
+				_dVal * 4.0 :
+				1.1115 * std::pow( _dVal, 0.45 ) - 0.1115;
+		}
+
+		/**
+		 * Converts from SMPTE 240M to linear.  Performs a precise conversion without a gap.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					SMPTE240MtoLinear_Precise( double _dVal ) {
+			if ( _dVal <= -0.09122727272727272629371242373963468708097934722900390625 ) { return -std::pow( (-_dVal + 0.1115) / 1.1115, 1.0 / 0.45 ); }
+			return _dVal < 0.09122727272727272629371242373963468708097934722900390625 ?
+				_dVal / 4.00258800708078954500024337903596460819244384765625 :
+				std::pow( (_dVal + 0.1115) / 1.1115, 1.0 / 0.45 );
+		}
+
+		/**
+		 * Converts from linear to SMPTE 240M.  Performs a precise conversion without a gap.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to SMPTE 240M space.
+		 */
+		static inline double SL2_FASTCALL					LinearToSMPTE240M_Precise( double _dVal ) {
+			if ( _dVal <= -0.022792071671100512519902991925846436060965061187744140625 ) { return -1.1115 * std::pow( -_dVal, 0.45 ) + 0.1115; }
+			return _dVal < 0.022792071671100512519902991925846436060965061187744140625 ?
+				_dVal * 4.00258800708078954500024337903596460819244384765625 :
+				1.1115 * std::pow( _dVal, 0.45 ) - 0.1115;
+		}
 
 		/**
 		 * Minimum between 2 values.
@@ -337,7 +522,10 @@ namespace sl2 {
 		 * \param _ui32Val The value.
 		 * \return Returns true if the given value is a power of 2.
 		 **/
-		static inline bool									IsPo2( uint32_t _ui32Val );
+		static inline bool									IsPo2( uint32_t _ui32Val ) {
+			if ( !_ui32Val ) { return false; }
+			return (_ui32Val & (_ui32Val - 1UL)) == 0;
+		}
 
 		/**
 		 * Gets the lowest power-of-2 value not below the given input value.
@@ -532,39 +720,5 @@ namespace sl2 {
 	// DEFINITIONS
 	// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 	// == Functions.
-	/**
-	 * Converts a single double value from sRGB space to linear space.  Performs an accurate conversion.
-	 *
-	 * \param _dVal The value to convert.
-	 * \return Returns the converted value.
-	 */
-	inline double __fastcall CUtilities::SRgbToLinear( double _dVal ) {
-		return _dVal <= 0.04045 ?
-			_dVal * (1.0 / 12.92) :
-			std::pow( (_dVal + 0.055) * (1.0 / 1.055), 2.4 );
-	}
-
-	/**
-	 * Converts a single double value from linear space to sRGB space.  Performs an accurate conversion.
-	 *
-	 * \param _dVal The value to convert.
-	 * \return Returns the converted value.
-	 */
-	inline double __fastcall CUtilities::LinearToSRgb( double _dVal ) {
-		return _dVal <= 0.0031308 ?
-			_dVal * 12.92 :
-			1.055 * std::pow( _dVal, 1.0 / 2.4 ) - 0.055;
-	}
-
-	/**
-	 * Is the given value a power of 2?
-	 * 
-	 * \param _ui32Val The value.
-	 * \return Returns true if the given value is a power of 2.
-	 **/
-	inline bool CUtilities::IsPo2( uint32_t _ui32Val ) {
-		if ( !_ui32Val ) { return false; }
-		return (_ui32Val & (_ui32Val - 1UL)) == 0;
-	}
 
 }	// namespace sl2

@@ -132,15 +132,18 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
             }
             if ( SL2_CHECK( 2, gamma ) || SL2_CHECK( 2, g ) ) {
                 oOptions.dGamma = ::_wtof( _wcpArgV[1] );
+                oOptions.bManuallySetGamma = true;
                 SL2_ADV( 2 );
             }
             if ( SL2_CHECK( 1, rgbe ) || SL2_CHECK( 1, linear ) ) {
                 oOptions.dGamma = 0.0;
+                oOptions.bManuallySetGamma = true;
                 oOptions.dTargetGamma = 0.0;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, srgb ) ) {
                 oOptions.dGamma = 1.0 / -2.2;
+                oOptions.bManuallySetGamma = true;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 2, targetgamma ) ) {
@@ -244,12 +247,14 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
             if ( SL2_CHECK( 3, prescale ) ) {
                 oOptions.rResample.ui32NewW = ::_wtoi( _wcpArgV[1] );
                 oOptions.rResample.ui32NewH = ::_wtoi( _wcpArgV[2] );
+                oOptions.i32ScaleDims = 2;
                 SL2_ADV( 3 );
             }
             if ( SL2_CHECK( 4, resample_size ) || SL2_CHECK( 4, prescale3 ) ) {
                 oOptions.rResample.ui32NewW = ::_wtoi( _wcpArgV[1] );
                 oOptions.rResample.ui32NewH = ::_wtoi( _wcpArgV[2] );
                 oOptions.rResample.ui32NewD = ::_wtoi( _wcpArgV[3] );
+                oOptions.i32ScaleDims = 3;
                 SL2_ADV( 4 );
             }
             if ( SL2_CHECK( 2, rescale ) || SL2_CHECK( 2, rescale_to ) ) {
@@ -1022,13 +1027,13 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 2, jpg_quality ) ) {
-                int iPrior = oOptions.iJ2kSaveOption;
-                oOptions.iJ2kSaveOption = ::_wtoi( _wcpArgV[1] );
+                int iPrior = oOptions.iJpgSaveOption;
+                oOptions.iJpgSaveOption = ::_wtoi( _wcpArgV[1] );
                 if ( oOptions.iJpgSaveOption < 0 || oOptions.iJpgSaveOption > 100 ) {
                     SL2_ERRORT( std::format( L"Invalid \"jpg_quality\": \"{}\". Must be between 0 and 100.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
-                oOptions.iJ2kSaveOption = oOptions.iJ2kSaveOption | (oOptions.iJ2kSaveOption & 0x2000);
+                oOptions.iJpgSaveOption = oOptions.iJpgSaveOption | (oOptions.iJpgSaveOption & 0x2000);
                 SL2_ADV( 2 );
             }
             if ( SL2_CHECK( 1, jpg_progressive ) ) {
@@ -1243,8 +1248,11 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         iImage.Resampling() = oOptions.rResample;
         iImage.MipResampling() = oOptions.rMipResample;
         iImage.SetNeedsPreMultiply( oOptions.bNeedsPreMultiply );
-        iImage.SetGamma( oOptions.dGamma );
+        if ( oOptions.bManuallySetGamma == true ) {
+            iImage.SetGamma( oOptions.dGamma );
+        }
         iImage.SetTargetGamma( oOptions.dTargetGamma );
+        iImage.SetTransferFunctions( oOptions.cgcInputGammaCurve, oOptions.cgcOutputGammaCurve );
         iImage.SetSwizzle( oOptions.sSwizzle );
         iImage.SetSwap( oOptions.bSwap );
         iImage.SetMipParms( oOptions.mhMipHandling, oOptions.sTotalMips );
@@ -1435,6 +1443,17 @@ namespace sl2 {
 		uint32_t ui32NewWidth = _oOptions.rResample.ui32NewW;
 		uint32_t ui32NewHeight = _oOptions.rResample.ui32NewH;
         uint32_t ui32NewDepth = _oOptions.rResample.ui32NewD;
+        if ( _oOptions.i32ScaleDims == 2 ) {
+            if ( ui32NewWidth && !ui32NewHeight ) {
+                ui32NewHeight = static_cast<uint32_t>(std::round( double( ui32NewWidth ) / _iImage.Width() * _iImage.Height() ));
+            }
+            else if ( !ui32NewWidth && ui32NewHeight ) {
+                ui32NewWidth = static_cast<uint32_t>(std::round( double( ui32NewHeight ) / _iImage.Height() * _iImage.Width() ));
+            }
+        }
+        else if ( _oOptions.i32ScaleDims == 3 ) {
+        }
+
 		if ( !ui32NewWidth ) { ui32NewWidth = _iImage.Width(); }
         if ( !ui32NewHeight ) { ui32NewHeight = _iImage.Height(); }
         if ( !ui32NewDepth ) { ui32NewDepth = _iImage.Depth(); }
@@ -2663,9 +2682,13 @@ namespace sl2 {
                 prgbDst->rgbtGreen = static_cast<uint8_t>(std::round( CUtilities::SRgbToLinear( prgbSrc->fRgb[SL2_PC_G] ) * 255.0 ));
                 prgbDst->rgbtBlue = static_cast<uint8_t>(std::round( CUtilities::SRgbToLinear( prgbSrc->fRgb[SL2_PC_B] ) * 255.0 ));*/
 
-                prgbDst->rgbtRed = static_cast<uint8_t>(std::round( std::pow( prgbSrc->fRgb[SL2_PC_R], 2.2 ) * 255.0 ));
+                /*prgbDst->rgbtRed = static_cast<uint8_t>(std::round( std::pow( prgbSrc->fRgb[SL2_PC_R], 2.2 ) * 255.0 ));
                 prgbDst->rgbtGreen = static_cast<uint8_t>(std::round( std::pow( prgbSrc->fRgb[SL2_PC_G], 2.2 ) * 255.0 ));
-                prgbDst->rgbtBlue = static_cast<uint8_t>(std::round( std::pow( prgbSrc->fRgb[SL2_PC_B], 2.2 ) * 255.0 ));
+                prgbDst->rgbtBlue = static_cast<uint8_t>(std::round( std::pow( prgbSrc->fRgb[SL2_PC_B], 2.2 ) * 255.0 ));*/
+
+                prgbDst->rgbtRed = static_cast<uint8_t>(std::round( prgbSrc->fRgb[SL2_PC_R] * 255.0 ));
+                prgbDst->rgbtGreen = static_cast<uint8_t>(std::round( prgbSrc->fRgb[SL2_PC_G] * 255.0 ));
+                prgbDst->rgbtBlue = static_cast<uint8_t>(std::round( prgbSrc->fRgb[SL2_PC_B] * 255.0 ));
             }
         }
         //::FreeImage_AdjustGamma( fiImage.pbBitmap, 1.0 / 2.2 );
@@ -2978,10 +3001,10 @@ namespace sl2 {
         if ( KTX_SUCCESS != ecErr || kt1Tex.Handle() == nullptr ) { return SL2_E_OUTOFMEMORY; }
 
         if ( _iImage.Format()->bCompressed ) {
-            (*kt1Tex).glInternalformat = _iImage.Format()->kifInternalFormat;
-            (*kt1Tex).glType = 0;
-            (*kt1Tex).glBaseInternalformat = _iImage.Format()->kbifBaseInternalFormat;
-            (*kt1Tex).glFormat = 0;
+            //(*kt1Tex).glInternalformat = _iImage.Format()->kifInternalFormat;
+            //(*kt1Tex).glType = 0;
+            //(*kt1Tex).glBaseInternalformat = _iImage.Format()->kbifBaseInternalFormat;
+            //(*kt1Tex).glFormat = 0;
         }
         else {
             (*kt1Tex).glInternalformat = _iImage.Format()->kifInternalFormat;

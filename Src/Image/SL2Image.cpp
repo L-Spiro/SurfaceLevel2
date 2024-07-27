@@ -17,6 +17,7 @@
 #include "../Utilities/SL2Stream.h"
 #include "../Utilities/SL2Vector.h"
 #include "DDS/SL2Dds.h"
+#include "ICC/SL2Icc.h"
 #include "SL2KtxTexture.h"
 
 #include <basisu_transcoder.h>
@@ -25,8 +26,10 @@
 namespace sl2 {
 
 	CImage::CImage() :
-		m_dGamma( 0.0 ),
-		m_dTargetGamma( 0.0 ),
+		m_dGamma( 1.0 / -2.2 ),
+		m_dTargetGamma( 1.0 / -2.2 ),
+		m_cgcInputCurve( SL2_CGC_sRGB_PRECISE ),
+		m_cgcOutputCurve( SL2_CGC_sRGB_PRECISE ),
 		m_sArraySize( 0 ),
 		m_sFaces( 0 ),
 		m_pkifFormat( nullptr ),
@@ -67,6 +70,8 @@ namespace sl2 {
 			m_pkifFormat = _iOther.m_pkifFormat;
 			m_dGamma = _iOther.m_dGamma;
 			m_dTargetGamma = _iOther.m_dTargetGamma;
+			m_cgcInputCurve = _iOther.m_cgcInputCurve;
+			m_cgcOutputCurve = _iOther.m_cgcOutputCurve;
 			m_sSwizzle = _iOther.m_sSwizzle;
 			m_caKernelChannal = _iOther.m_caKernelChannal;
 			m_dKernelScale = _iOther.m_dKernelScale;
@@ -89,8 +94,10 @@ namespace sl2 {
 			_iOther.m_kKernel.SetSize( 0 );
 			_iOther.m_sFaces = 0;
 			_iOther.m_pkifFormat = nullptr;
-			_iOther.m_dGamma = 0.0;
-			_iOther.m_dTargetGamma = 0.0;
+			_iOther.m_dGamma = 1.0 / -2.2;
+			_iOther.m_dTargetGamma = 1.0 / -2.2;
+			_iOther.m_cgcInputCurve = SL2_CGC_sRGB_PRECISE;
+			_iOther.m_cgcOutputCurve = SL2_CGC_sRGB_PRECISE;
 			_iOther.m_sSwizzle = CFormat::DefaultSwizzle();
 			_iOther.m_bIsPreMultiplied = false;
 			_iOther.m_bIgnoreAlpha = false;
@@ -117,8 +124,10 @@ namespace sl2 {
 	 * Resets the object to scratch.  It can be reused after this.
 	 **/
 	void CImage::Reset() {
-		m_dGamma = 0.0,
-		m_dTargetGamma = 0.0;
+		m_dGamma = 1.0 / -2.2,
+		m_dTargetGamma = 1.0 / -2.2;
+		m_cgcInputCurve = SL2_CGC_sRGB_PRECISE;
+		m_cgcOutputCurve = SL2_CGC_sRGB_PRECISE;
 		m_sArraySize = 0;
 		m_sFaces = 0;
 		for ( auto I = m_vMipMaps.size(); I--; ) {
@@ -270,7 +279,7 @@ namespace sl2 {
 					if ( !Format()->pfToRgba64F( Data( M, 0, A, F ), pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), Format() ) ) {
 						return SL2_E_INTERNALERROR;
 					}
-					BakeGamma( pui8Dest, m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					BakeGamma( pui8Dest, m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), CFormat::TransferFunc( m_cgcInputCurve ) );
 					if ( m_bIgnoreAlpha ) {
 						m_bIsPreMultiplied = m_bNeedsPreMultiply = false;
 						SetAlpha( pui8Dest, 1.0, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
@@ -341,7 +350,7 @@ namespace sl2 {
 					}
 					else {
 						if ( m_dTargetGamma ) {
-							BakeGamma( iTmp.Data( M, 0, A, F ), 1.0 / m_dTargetGamma, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );
+							BakeGamma( iTmp.Data( M, 0, A, F ), 1.0 / m_dTargetGamma, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth(), CFormat::TransferFunc( m_cgcOutputCurve ) );
 						}
 					}
 				}
@@ -350,9 +359,12 @@ namespace sl2 {
 		if ( _pkifFormat->vfVulkanFormat == SL2_VK_FORMAT_R64G64B64A64_SFLOAT ) {
 			// We already did the conversion.
 			_iDst = std::move( iTmp );
-			_iDst.m_bIsPreMultiplied = bTargetIsPremulAlpha;
+			_iDst.m_bNeedsPreMultiply = _iDst.m_bIsPreMultiplied = bTargetIsPremulAlpha;
 			_iDst.m_ttType = m_ttType;
 			_iDst.m_bFullyOpaque = bOpaque;
+			_iDst.m_dGamma = _iDst.m_dTargetGamma = m_dTargetGamma;
+			_iDst.m_cgcInputCurve = _iDst.m_cgcOutputCurve = m_cgcOutputCurve;
+			_iDst.m_bIsPreMultiplied = _iDst.m_bNeedsPreMultiply = false;
 			return SL2_E_SUCCESS;
 		}
 		if ( !_pkifFormat->pfFromRgba64F ) { return SL2_E_BADFORMAT; }
@@ -368,9 +380,11 @@ namespace sl2 {
 				}
 			}
 		}
-		_iDst.m_bIsPreMultiplied = bTargetIsPremulAlpha;
+		_iDst.m_bNeedsPreMultiply = _iDst.m_bIsPreMultiplied = bTargetIsPremulAlpha;
 		_iDst.m_ttType = m_ttType;
 		_iDst.m_bFullyOpaque = bOpaque;
+		_iDst.m_dGamma = _iDst.m_dTargetGamma = m_dTargetGamma;
+		_iDst.m_cgcInputCurve = _iDst.m_cgcOutputCurve = m_cgcOutputCurve;
 		return SL2_E_SUCCESS;
 	}
 
@@ -436,7 +450,7 @@ namespace sl2 {
 		if ( !Format()->pfToRgba64F( Data( _sMip, 0, _sArray, _sFace ), vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), Format() ) ) {
 			return SL2_E_INTERNALERROR;
 		}
-		BakeGamma( vTmp.data(), m_dGamma, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
+		BakeGamma( vTmp.data(), m_dGamma, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), CFormat::TransferFunc( m_cgcInputCurve ) );
 		if ( !m_bIsPreMultiplied && m_bNeedsPreMultiply ) {
 			CFormat::ApplyPreMultiply( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
 		}
@@ -455,6 +469,11 @@ namespace sl2 {
 		}
 		if ( !CFormat::SwizzleIsDefault( m_sSwizzle ) ) {
 			CFormat::ApplySwizzle( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), m_sSwizzle );
+		}
+
+
+		if ( m_dTargetGamma ) {
+			BakeGamma( vTmp.data(), 1.0 / m_dTargetGamma, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), CFormat::TransferFunc( m_cgcOutputCurve ) );
 		}
 
 		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*_pkifFormat);
@@ -548,7 +567,6 @@ namespace sl2 {
 		m_sArraySize = _sArray;
 		m_sFaces = _sFaces;
 		m_pkifFormat = _pkifFormat;
-		m_dGamma = m_dTargetGamma = 0.0;
 		
 		size_t sSrcBaseSize = CFormat::GetFormatSize( _pkifFormat, _ui32Width, _ui32Height, _ui32Depth );
 		if ( !sSrcBaseSize ) { Reset(); return false; }
@@ -619,8 +637,9 @@ namespace sl2 {
 	 * \param _ui32Width The width of the image.
 	 * \param _ui32Height The height of the image.
 	 * \param _ui32Depth The depth of the image.
+	 * \param _ptfGamma The gamma transfer functions.
 	 **/
-	void CImage::BakeGamma( uint8_t * _pui8Buffer, double _dGamma, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) {
+	void CImage::BakeGamma( uint8_t * _pui8Buffer, double _dGamma, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, CFormat::SL2_TRANSFER_FUNCS _ptfGamma ) {
 		if ( !_pui8Buffer ) { return; }
 		if ( _dGamma == 0.0 || _dGamma == 1.0 ) { return; }
 		CFormat::SL2_RGBA64F * prDst = reinterpret_cast<CFormat::SL2_RGBA64F *>(_pui8Buffer);
@@ -632,9 +651,9 @@ namespace sl2 {
 					uint32_t ui32Row = _ui32Width * H;
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						CFormat::SL2_RGBA64F * prThis = &prDst[ui32Slice+ui32Row+W];
-						prThis->dRgba[SL2_PC_R] = CUtilities::LinearToSRgb( prThis->dRgba[SL2_PC_R] );
-						prThis->dRgba[SL2_PC_G] = CUtilities::LinearToSRgb( prThis->dRgba[SL2_PC_G] );
-						prThis->dRgba[SL2_PC_B] = CUtilities::LinearToSRgb( prThis->dRgba[SL2_PC_B] );
+						prThis->dRgba[SL2_PC_R] = _ptfGamma.pfLinearToX( prThis->dRgba[SL2_PC_R] );
+						prThis->dRgba[SL2_PC_G] = _ptfGamma.pfLinearToX( prThis->dRgba[SL2_PC_G] );
+						prThis->dRgba[SL2_PC_B] = _ptfGamma.pfLinearToX( prThis->dRgba[SL2_PC_B] );
 					}
 				}
 			}
@@ -647,9 +666,9 @@ namespace sl2 {
 					uint32_t ui32Row = _ui32Width * H;
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						CFormat::SL2_RGBA64F * prThis = &prDst[ui32Slice+ui32Row+W];
-						prThis->dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( prThis->dRgba[SL2_PC_R] );
-						prThis->dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( prThis->dRgba[SL2_PC_G] );
-						prThis->dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( prThis->dRgba[SL2_PC_B] );
+						prThis->dRgba[SL2_PC_R] = _ptfGamma.pfXtoLinear( prThis->dRgba[SL2_PC_R] );
+						prThis->dRgba[SL2_PC_G] = _ptfGamma.pfXtoLinear( prThis->dRgba[SL2_PC_G] );
+						prThis->dRgba[SL2_PC_B] = _ptfGamma.pfXtoLinear( prThis->dRgba[SL2_PC_B] );
 					}
 				}
 			}
@@ -810,9 +829,18 @@ namespace sl2 {
 
 		FREE_IMAGE_TYPE fitType = ::FreeImage_GetImageType( flfmData.pbBitmap );
 
-		if ( flfmData.pbBitmap && (::FreeImage_GetICCProfile( flfmData.pbBitmap )->flags &
+		FIICCPROFILE * pProfile = flfmData.pbBitmap ? ::FreeImage_GetICCProfile( flfmData.pbBitmap ) : nullptr;
+		if ( pProfile && (pProfile->flags &
 			FIICC_COLOR_IS_CMYK) == FIICC_COLOR_IS_CMYK ) {
-			return SL2_E_SUCCESS;
+			return SL2_E_BADFORMAT;
+		}
+		if ( pProfile ) {
+			size_t sSize;
+			size_t sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigRedTRCTag, sSize );
+			if ( sOffset ) {
+				uint8_t * pui8Data = static_cast<uint8_t *>(pProfile->data) + sOffset;
+				//return SL2_E_BADFORMAT;
+			}
 		}
 
 		switch ( fitType ) {

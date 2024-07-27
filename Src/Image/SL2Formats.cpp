@@ -613,6 +613,40 @@ namespace sl2 {
 	/** Alpha cut-off. */
 	uint8_t CFormat::m_ui8AlphaThresh = 128;
 
+	/** Colorspace transfer functions. */
+	CFormat::SL2_TRANSFER_FUNCS CFormat::m_tfColorspaceTransfers[] = {
+		{ CUtilities::SRgbToLinear,						CUtilities::LinearToSRgb },								// SL2_CGC_sRGB_STANDARD
+		{ CUtilities::SRgbToLinear_Precise,				CUtilities::LinearToSRgb_Precise },						// SL2_CGC_sRGB_PRECISE
+
+		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M },						// SL2_CGC_SMPTE_170M_1999
+		{ CUtilities::SMPTE170MtoLinear_Precise,		CUtilities::LinearToSMPTE170M_Precise },				// SL2_CGC_SMPTE_170M_1999_PRECISE
+
+		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M },						// SL2_CGC_ITU_BT_709
+		{ CUtilities::SMPTE170MtoLinear_Precise,		CUtilities::LinearToSMPTE170M_Precise },				// SL2_CGC_ITU_BT_709_PRECISE
+
+		{ CUtilities::AdobeRGBtoLinear,					CUtilities::LinearToAdobeRGB },							// SL2_CGC_ADOBE_RGB
+
+		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M },						// SL2_CGC_ITU_BT_2020
+		{ CUtilities::SMPTE170MtoLinear_Precise,		CUtilities::LinearToSMPTE170M_Precise },				// SL2_CGC_ITU_BT_2020_PRECISE
+
+		{ CUtilities::DCIP3toLinear,					CUtilities::LinearToDCIP3 },							// SL2_CGC_DCI_P3
+
+		{ CUtilities::SMPTE240MtoLinear,				CUtilities::LinearToSMPTE240M },						// SL2_CGC_SMPTE_240M_1999
+		{ CUtilities::SMPTE240MtoLinear_Precise,		CUtilities::LinearToSMPTE240M_Precise },				// SL2_CGC_SMPTE_240M_1999_PRECISE
+
+		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M },						// SL2_CGC_NTSC_1953
+		{ CUtilities::SMPTE170MtoLinear_Precise,		CUtilities::LinearToSMPTE170M_Precise },				// SL2_CGC_NTSC_1953_PRECISE
+
+		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M },						// SL2_CGC_EBU_TECH_3213
+		{ CUtilities::SMPTE170MtoLinear_Precise,		CUtilities::LinearToSMPTE170M_Precise },				// SL2_CGC_EBU_TECH_3213_PRECISE
+
+		{ CUtilities::SRgbToLinear,						CUtilities::LinearToSRgb },								// SL2_CGC_EBU_DISPLAY_P3
+		{ CUtilities::SRgbToLinear_Precise,				CUtilities::LinearToSRgb_Precise },						// SL2_CGC_EBU_DISPLAY_P3_PRECISE
+	};
+
+	/** Which transfer function are we using? */
+	size_t CFormat::m_sTransferFunc = SL2_CGC_sRGB_PRECISE;
+
 
 	// == Functions.
 	/**
@@ -1724,6 +1758,98 @@ namespace sl2 {
 
 		::printf( "%s", sTmp.c_str() );
 		::OutputDebugStringA( sTmp.c_str() );
+	}
+
+	/**
+	 * Does a proper RGB -> YUV conversion.
+	 * 
+	 * \param _dR R.
+	 * \param _dG G.
+	 * \param _dB B.
+	 * \param _ui32Y Output Y.
+	 * \param _ui32U Output U.
+	 * \param _ui32V Output V.
+	 * \param _dKr Kr.
+	 * \param _dKb Kb.
+	 * \param _sM The number of bits per YUV sample (M >= 8).
+	 * \param _ui32BlackLevel The black-level variable. For computer RGB, Z equals 0. For studio video RGB, Z equals 16*2^(N-8), where N is the number of bits per RGB sample (N >= 8).
+	 * \param _ui32S The scaling variable. For computer RGB, S equals 255. For studio video RGB, S equals 219*2^(N-8).
+	 **/
+	void CFormat::RgbToYuv( double _dR, double _dG, double _dB,
+		uint32_t &_ui32Y, uint32_t &_ui32U, uint32_t &_ui32V,
+		double _dKr, double _dKb,
+		size_t _sM, uint32_t _ui32BlackLevel, uint32_t _ui32S ) {
+		double dL = _dKr * _dR + _dKb * _dB + (1.0 - _dKr - _dKb) * _dG;
+
+		double dMult = double( 1 << (_sM - 8) );
+		double dMax = double( (1 << _sM) - 1 );
+
+		double dZ = double( _ui32BlackLevel ) / dMax;
+		double dS = double( _ui32S ) / dMax;
+		// Avoid division by 0.
+		_dKr = std::min( _dKr, 1.0 - FLT_EPSILON );
+		_dKb = std::min( _dKb, 1.0 - FLT_EPSILON );
+		dS = std::max( dS, double( FLT_EPSILON ) );
+
+		double dY = std::floor( dMult * (219.0 * (dL - dZ) / dS + 16.0) + 0.5 );
+		double dU = std::floor( dMult * (112.0 * (_dB - dL) / ((1.0 - _dKb) * dS) + 128.0) + 0.5 );
+		double dV = std::floor( dMult * (112.0 * (_dR - dL) / ((1.0 - _dKr) * dS) + 128.0) + 0.5 );
+
+		dY = std::max( dY, 0.0 );
+		dU = std::max( dU, 0.0 );
+		dV = std::max( dV, 0.0 );
+		dY = std::min( dY, dMax );
+		dU = std::min( dU, dMax );
+		dV = std::min( dV, dMax );
+
+		_ui32Y = uint32_t( dY );
+		_ui32U = uint32_t( dU );
+		_ui32V = uint32_t( dV );
+
+		/*
+		 * L = Kr * R + Kb * B + (1 - Kr - Kb) * G
+		 * 
+		 * Y =                   floor(2^(M-8) * (219*(L-Z)/S + 16) + 0.5)
+		 * U = clip3(0, (2^M)-1, floor(2^(M-8) * (112*(B-L) / ((1-Kb)*S) + 128) + 0.5))
+		 * V = clip3(0, (2^M)-1, floor(2^(M-8) * (112*(R-L) / ((1-Kr)*S) + 128) + 0.5))
+		 */
+	}
+
+	/**
+	 * Does a proper YUV -> RGB conversion.
+	 *
+	 * \param _ui32Y Input Y.
+	 * \param _ui32U Input U.
+	 * \param _ui32V Input V.
+	 * \param _dR R.
+	 * \param _dG G.
+	 * \param _dB B.
+	 * \param _dKr Kr.
+	 * \param _dKb Kb.
+	 * \param _sM The number of bits per YUV sample (M >= 8).
+	 * \param _ui32BlackLevel The black-level variable. For computer RGB, Z equals 0. For studio video RGB, Z equals 16*2^(N-8), where N is the number of bits per RGB sample (N >= 8).
+	 * \param _ui32S The scaling variable. For computer RGB, S equals 255. For studio video RGB, S equals 219*2^(N-8).
+	 **/
+	void CFormat::YuvToRgb( uint32_t _ui32Y, uint32_t _ui32U, uint32_t _ui32V,
+		double &_dR, double &_dG, double &_dB,
+		double _dKr, double _dKb,
+		size_t _sM, uint32_t _ui32BlackLevel, uint32_t _ui32S ) {
+		double dMult = double( 1 << (_sM - 8) );
+		double dMax = double( (1 << _sM) - 1 );
+
+		double dZ = double( _ui32BlackLevel ) / dMax;
+		double dS = double( _ui32S ) / dMax;
+
+		double dY = double( _ui32Y ) / dMult;
+		double dU = double( _ui32U ) / dMult;
+		double dV = double( _ui32V ) / dMult;
+
+		double dL_ = _dKr * _dR + _dKb * _dB + (1.0 - _dKr - _dKb) * _dG;
+		double dL = dZ + (dS / 219.0) * (dY - 16.0);
+
+		_dB = dL + (dU - 128.0) * (1.0 - _dKb) * dS / 112.0;
+		_dR = dL + (dV - 128.0) * (1.0 - _dKr) * dS / 112.0;
+		_dG = (dL - _dKr * _dR - _dKb * _dB) / (1.0 - _dKr - _dKb);
 	}
 
 	/**

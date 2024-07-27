@@ -323,6 +323,17 @@ namespace sl2 {
 		inline void											SetTargetGamma( double _dGamma ) { m_dTargetGamma = _dGamma; }
 
 		/**
+		 * Stes the input and output gamma transfer functions.
+		 * 
+		 * \param _cgcInput The input gamma curve.
+		 * \param _cgcOutput The output gamma curve.
+		 **/
+		inline void											SetTransferFunctions( SL2_COLORSPACE_GAMMA_CURVES _cgcInput, SL2_COLORSPACE_GAMMA_CURVES _cgcOutput ) {
+			m_cgcInputCurve = _cgcInput;
+			m_cgcOutputCurve = _cgcOutput;
+		}
+
+		/**
 		 * Sets whether or not alpha needs to be pre-multiplied.
 		 * 
 		 * \param _bPreMult If true, alpha will be premultiplied.
@@ -446,6 +457,8 @@ namespace sl2 {
 		// == Members.
 		double												m_dGamma;								/**< The gamma curve.  Negative values indicate the IEC 61966-2-1:1999 sRGB curve. */
 		double												m_dTargetGamma;							/**< The target gamma curve. */
+		SL2_COLORSPACE_GAMMA_CURVES							m_cgcInputCurve;						/**< The input gamma curve. */
+		SL2_COLORSPACE_GAMMA_CURVES							m_cgcOutputCurve;						/**< The output gamma curve. */
 		CKernel												m_kKernel;								/**< The kernel to apply. */
 		double												m_dKernelScale;							/**< Kernel scale. */
 		double												m_dKernelYAxis;							/**< Kernel Y axis. */
@@ -508,8 +521,9 @@ namespace sl2 {
 		 * \param _ui32Width The width of the image.
 		 * \param _ui32Height The height of the image.
 		 * \param _ui32Depth The depth of the image.
+		 * \param _ptfGamma The gamma transfer functions.
 		 **/
-		void												BakeGamma( uint8_t * _pui8Buffer, double _dGamma, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth );
+		void												BakeGamma( uint8_t * _pui8Buffer, double _dGamma, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, CFormat::SL2_TRANSFER_FUNCS _ptfGamma );
 
 		/**
 		 * Sets alpha to _dValue.
