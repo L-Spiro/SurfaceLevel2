@@ -35,7 +35,7 @@ namespace sl2 {
 		/** Filter functions. */
 		enum SL2_FILTER_FUNCS : size_t {
 			SL2_FF_POINT,
-			SL2_FF_BILINEAR,
+			SL2_FF_LINEAR,
 			SL2_FF_QUADRATICSHARP,
 			SL2_FF_QUADRATIC,
 			SL2_FF_QUADRATICAPPROX,

@@ -290,8 +290,8 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         if ( ::_wcsicmp( _wcpArgV[1], L"box" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"point" ) == 0 ) {                                                                                                                                 \
             oOptions.ASSIGN = sl2::CResampler::SL2_FF_POINT;                                                                                                                                                                        \
         }                                                                                                                                                                                                                           \
-        else if ( ::_wcsicmp( _wcpArgV[1], L"tent" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bilinear" ) == 0 ) {                                                                                                                        \
-            oOptions.ASSIGN = sl2::CResampler::SL2_FF_BILINEAR;                                                                                                                                                                     \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"tent" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bilinear" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"linear" ) == 0 ) {                                                                           \
+            oOptions.ASSIGN = sl2::CResampler::SL2_FF_LINEAR;                                                                                                                                                                       \
         }                                                                                                                                                                                                                           \
         else if ( ::_wcsicmp( _wcpArgV[1], L"quadraticsharp" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"quadratic_sharp" ) == 0 ) {                                                                                                       \
             oOptions.ASSIGN = sl2::CResampler::SL2_FF_QUADRATICSHARP;                                                                                                                                                               \
@@ -1083,7 +1083,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         SL2_ADV( 1 );                                                                                                       \
     }
                 SL2_RESAMPLE( SL2_CHECK( 1, RescaleBox ) || SL2_CHECK( 1, ResampleBox ) || SL2_CHECK( 1, ResamplePoint ), SL2_FF_POINT )
-                SL2_RESAMPLE( SL2_CHECK( 1, RescaleTent ) || SL2_CHECK( 1, ResampleTent ) || SL2_CHECK( 1, ResampleBilinear ), SL2_FF_BILINEAR )
+                SL2_RESAMPLE( SL2_CHECK( 1, RescaleTent ) || SL2_CHECK( 1, ResampleTent ) || SL2_CHECK( 1, ResampleBilinear ), SL2_FF_LINEAR )
                 SL2_RESAMPLE( SL2_CHECK( 1, RescaleQuadraticSharp ) || SL2_CHECK( 1, ResampleQuadraticSharp ), SL2_FF_QUADRATICSHARP )
                 SL2_RESAMPLE( SL2_CHECK( 1, RescaleQuadratic ) || SL2_CHECK( 1, ResampleQuadratic ) || SL2_CHECK( 1, ResampleQuad ), SL2_FF_QUADRATIC )
                 SL2_RESAMPLE( SL2_CHECK( 1, RescaleQuadraticApprox ) || SL2_CHECK( 1, ResampleQuadraticApprox ), SL2_FF_QUADRATICAPPROX )
