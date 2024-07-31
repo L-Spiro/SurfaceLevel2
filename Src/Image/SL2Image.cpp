@@ -839,7 +839,7 @@ namespace sl2 {
 			size_t sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigRedTRCTag, sSize );
 			if ( sOffset ) {
 				uint8_t * pui8Data = static_cast<uint8_t *>(pProfile->data) + sOffset;
-				//return SL2_E_BADFORMAT;
+				return SL2_E_BADFORMAT;
 			}
 		}
 

@@ -30,6 +30,21 @@ namespace sl2 {
 		~CIcc() {}
 
 
+		// == Types.
+		/** A parametric equation. */
+		struct SL2_PARA {
+			double												dParms[7];
+		};
+
+		/** A curve equation. */
+		struct SL2_CURV {
+			std::vector<uint8_t>								vTable;
+		};
+
+		/** Function prototype. */
+		typedef double (*										PfX_to_Linear)( double _dIn, const void * _pvParm );
+
+
 		// == Functions.
 		/**
 		 * Gets the offset and size of the given tag.
@@ -42,6 +57,24 @@ namespace sl2 {
 		 **/
 		static size_t											GetTagDataOffset( const uint8_t * _pui8Profile, size_t _sProfileSize,
 			uint32_t _ui32Sig, size_t &_sSize );
+
+		/**
+		 * A type-3 "para" handler.
+		 * 
+		 * \param _dIn The value to convert.
+		 * \param _pvParm Associated structure data (SL2_PARA).
+		 * \return Returns the linear value of the _dIn.
+		 **/
+		static double											Type3_Para_To_Linear( double _dIn, const void * _pvParm );
+
+		/**
+		 * A type-3 "para" handler.
+		 * 
+		 * \param _dIn The value to convert.
+		 * \param _pvParm Associated structure data (SL2_PARA).
+		 * \return Returns the adjusted value of the _dIn.
+		 **/
+		static double											Type3_Para_To_ColorSpace( double _dIn, const void * _pvParm );
 
 	};
 

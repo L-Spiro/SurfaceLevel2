@@ -320,6 +320,11 @@ namespace sl2 {
 		 * data is used with a given tag.
 		 */
 	} icCurve;
+	typedef struct {
+		uint16_t funcType;  /* Function type */
+		uint16_t reserved;  /* Reserved for future use */
+		uint32_t parameters[icAny]; /* Variable array of parameter values */
+	} icPara;
 	/* Data */
 	typedef struct {
 		 uint32_t dataFlag;/* 0 = ascii, 1 = binary */
