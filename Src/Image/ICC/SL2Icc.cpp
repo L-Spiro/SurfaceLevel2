@@ -46,6 +46,25 @@ namespace sl2 {
 	}
 
 	/**
+	 * Fills out a SL2_TRANSFER_FUNC structure given a curv/para tag.
+	 * 
+	 * \param _tfFunc The structure to fill out.
+	 * \param _pui8Data The parametrc/curve data.
+	 * \param _sSize Size of the data.
+	 * \return Returns true if the curve was recognized and the structure could be filled out.
+	 **/
+	bool CIcc::FillOutTransferFunc( SL2_TRANSFER_FUNC &_tfFunc, const uint8_t * _pui8Data, size_t _sSize ) {
+		if ( _sSize >= sizeof( icTagBase ) ) {
+			const icTagBase * ptbTag = reinterpret_cast<const icTagBase *>(_pui8Data);
+			if ( ::_byteswap_ulong( ptbTag->sig ) == icSigCurveType ) {
+			}
+			else if ( ::_byteswap_ulong( ptbTag->sig ) == icSigParaType ) {
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * A type-3 "para" handler.
 	 * 
 	 * \param _dIn The value to convert.
@@ -62,12 +81,6 @@ namespace sl2 {
 		return _dIn <= dD ?
 			_dIn * dC :
 			std::pow( dA * _dIn + dB, dG );
-
-		/*
-			return _dVal <= 0.08124285829863515939752716121802222914993762969970703125 ?
-				_dVal / 4.5 :
-				std::pow( (_dVal + 0.09929682680944297568093048766968422569334506988525390625) / 1.09929682680944296180314267985522747039794921875, 1.0 / 0.45 );
-		*/
 	}
 
 	/**
@@ -86,12 +99,7 @@ namespace sl2 {
 		double dD = ppPara->dParms[4];
 		return _dIn <= dD / (1.0 / dC) ?
 			_dIn / dC :
-			(1.0 / dA) * std::pow( _dIn, 1.0 / dG ) - (dB / dA);
-		/*
-			return _dVal <= 0.018 ?
-				_dVal * 4.5 :
-				1.099 * std::pow( _dVal, 0.45 ) - 0.099;
-		*/
+			(std::pow( _dIn, 1.0 / dG ) - dB) / dA;
 	}
 
 }	// namespace sl2

@@ -41,8 +41,44 @@ namespace sl2 {
 			std::vector<uint8_t>								vTable;
 		};
 
-		/** Function prototype. */
+		/** Function prototype (X -> Linear). */
 		typedef double (*										PfX_to_Linear)( double _dIn, const void * _pvParm );
+
+		/** Function prototype (Linear -> X). */
+		typedef double (*										PfLinear_to_X)( double _dIn, const void * _pvParm );
+
+		/** The structure for holding the transfer-function data. */
+		struct SL2_TRANSFER_FUNC {
+			PfX_to_Linear										pfXtoLinear = PassThrough;						/**< X-to-linear function. */
+			PfLinear_to_X										pfLinearToX = PassThrough;						/**< Linear-to-X function. */
+			SL2_PARA											pPara;											/**< Parametric parameters. */
+			SL2_CURV											cCurv;											/**< Curve parameters. */
+			void *												pvParm = nullptr;								/**< Points to either pPara or cCurv. */
+
+
+			// == Operators.
+			/**
+			 * Safely copies from another object into this one.
+			 * 
+			 * \param _tfOther The object to copy.
+			 * \return Returns a reference to this object following the copy.
+			 **/
+			SL2_TRANSFER_FUNC &									operator = ( const SL2_TRANSFER_FUNC &_tfOther ) {
+				if ( &_tfOther != this ) {
+					pfXtoLinear = _tfOther.pfLinearToX;
+					pfLinearToX = _tfOther.pfLinearToX;
+					if ( _tfOther.pvParm == &_tfOther.pPara ) {
+						pPara = _tfOther.pPara;
+						pvParm = &pPara;
+					}
+					else {
+						cCurv = _tfOther.cCurv;
+						pvParm = &cCurv;
+					}
+				}
+				return (*this);
+			}
+		};
 
 
 		// == Functions.
@@ -57,6 +93,25 @@ namespace sl2 {
 		 **/
 		static size_t											GetTagDataOffset( const uint8_t * _pui8Profile, size_t _sProfileSize,
 			uint32_t _ui32Sig, size_t &_sSize );
+
+		/**
+		 * Fills out a SL2_TRANSFER_FUNC structure given a curv/para tag.
+		 * 
+		 * \param _tfFunc The structure to fill out.
+		 * \param _pui8Data The parametrc/curve data.
+		 * \param _sSize Size of the data.
+		 * \return Returns true if the curve was recognized and the structure could be filled out.
+		 **/
+		static bool												FillOutTransferFunc( SL2_TRANSFER_FUNC &_tfFunc, const uint8_t * _pui8Data, size_t _sSize );
+
+		/**
+		 * A pass-through handler.
+		 * 
+		 * \param _dIn The value to convert.
+		 * \param _pvParm Not used.
+		 * \return Returns _dIn.
+		 **/
+		static double											PassThrough( double _dIn, const void * /*_pvParm*/ ) { return _dIn; }
 
 		/**
 		 * A type-3 "para" handler.

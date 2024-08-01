@@ -15,6 +15,7 @@
 #pragma once
 
 #include "../Utilities/SL2Resampler.h"
+#include "ICC/SL2Icc.h"
 #include "SL2Formats.h"
 #include "SL2Kernel.h"
 #include "SL2Surface.h"
@@ -459,6 +460,8 @@ namespace sl2 {
 		double												m_dTargetGamma;							/**< The target gamma curve. */
 		SL2_COLORSPACE_GAMMA_CURVES							m_cgcInputCurve;						/**< The input gamma curve. */
 		SL2_COLORSPACE_GAMMA_CURVES							m_cgcOutputCurve;						/**< The output gamma curve. */
+		CIcc::SL2_TRANSFER_FUNC								m_tfInColorSpaceTransferFunc[4];		/**< The transfer functions for inputs. */
+		CIcc::SL2_TRANSFER_FUNC								m_tfOutColorSpaceTransferFunc[4];		/**< The transfer functions for outputs. */
 		CKernel												m_kKernel;								/**< The kernel to apply. */
 		double												m_dKernelScale;							/**< Kernel scale. */
 		double												m_dKernelYAxis;							/**< Kernel Y axis. */

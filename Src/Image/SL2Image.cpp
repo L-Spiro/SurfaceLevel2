@@ -17,7 +17,6 @@
 #include "../Utilities/SL2Stream.h"
 #include "../Utilities/SL2Vector.h"
 #include "DDS/SL2Dds.h"
-#include "ICC/SL2Icc.h"
 #include "SL2KtxTexture.h"
 
 #include <basisu_transcoder.h>
@@ -72,6 +71,12 @@ namespace sl2 {
 			m_dTargetGamma = _iOther.m_dTargetGamma;
 			m_cgcInputCurve = _iOther.m_cgcInputCurve;
 			m_cgcOutputCurve = _iOther.m_cgcOutputCurve;
+			for ( size_t I = SL2_ELEMENTS( m_tfInColorSpaceTransferFunc ); I--; ) {
+				m_tfInColorSpaceTransferFunc[I] = _iOther.m_tfInColorSpaceTransferFunc[I];
+			}
+			for ( size_t I = SL2_ELEMENTS( m_tfOutColorSpaceTransferFunc ); I--; ) {
+				m_tfOutColorSpaceTransferFunc[I] = _iOther.m_tfOutColorSpaceTransferFunc[I];
+			}
 			m_sSwizzle = _iOther.m_sSwizzle;
 			m_caKernelChannal = _iOther.m_caKernelChannal;
 			m_dKernelScale = _iOther.m_dKernelScale;
@@ -98,6 +103,12 @@ namespace sl2 {
 			_iOther.m_dTargetGamma = 1.0 / -2.2;
 			_iOther.m_cgcInputCurve = SL2_CGC_sRGB_PRECISE;
 			_iOther.m_cgcOutputCurve = SL2_CGC_sRGB_PRECISE;
+			for ( size_t I = SL2_ELEMENTS( m_tfInColorSpaceTransferFunc ); I--; ) {
+				_iOther.m_tfInColorSpaceTransferFunc[I] = CIcc::SL2_TRANSFER_FUNC();
+			}
+			for ( size_t I = SL2_ELEMENTS( m_tfOutColorSpaceTransferFunc ); I--; ) {
+				_iOther.m_tfOutColorSpaceTransferFunc[I] = CIcc::SL2_TRANSFER_FUNC();
+			}
 			_iOther.m_sSwizzle = CFormat::DefaultSwizzle();
 			_iOther.m_bIsPreMultiplied = false;
 			_iOther.m_bIgnoreAlpha = false;
@@ -135,6 +146,12 @@ namespace sl2 {
 			m_vMipMaps[I].reset();
 		}
 		m_vMipMaps = std::vector<std::unique_ptr<CSurface>>();
+		for ( size_t I = SL2_ELEMENTS( m_tfInColorSpaceTransferFunc ); I--; ) {
+			m_tfInColorSpaceTransferFunc[I] = CIcc::SL2_TRANSFER_FUNC();
+		}
+		for ( size_t I = SL2_ELEMENTS( m_tfOutColorSpaceTransferFunc ); I--; ) {
+			m_tfOutColorSpaceTransferFunc[I] = CIcc::SL2_TRANSFER_FUNC();
+		}
 		m_sSwizzle = CFormat::DefaultSwizzle();
 		m_caKernelChannal = SL2_CA_R;
 		m_dKernelScale = 1.0;
@@ -364,7 +381,9 @@ namespace sl2 {
 			_iDst.m_bFullyOpaque = bOpaque;
 			_iDst.m_dGamma = _iDst.m_dTargetGamma = m_dTargetGamma;
 			_iDst.m_cgcInputCurve = _iDst.m_cgcOutputCurve = m_cgcOutputCurve;
-			_iDst.m_bIsPreMultiplied = _iDst.m_bNeedsPreMultiply = false;
+			for ( size_t I = SL2_ELEMENTS( m_tfOutColorSpaceTransferFunc ); I--; ) {
+				_iDst.m_tfOutColorSpaceTransferFunc[I] = m_tfOutColorSpaceTransferFunc[I];
+			}
 			return SL2_E_SUCCESS;
 		}
 		if ( !_pkifFormat->pfFromRgba64F ) { return SL2_E_BADFORMAT; }
@@ -385,6 +404,9 @@ namespace sl2 {
 		_iDst.m_bFullyOpaque = bOpaque;
 		_iDst.m_dGamma = _iDst.m_dTargetGamma = m_dTargetGamma;
 		_iDst.m_cgcInputCurve = _iDst.m_cgcOutputCurve = m_cgcOutputCurve;
+		for ( size_t I = SL2_ELEMENTS( m_tfOutColorSpaceTransferFunc ); I--; ) {
+			_iDst.m_tfOutColorSpaceTransferFunc[I] = m_tfOutColorSpaceTransferFunc[I];
+		}
 		return SL2_E_SUCCESS;
 	}
 

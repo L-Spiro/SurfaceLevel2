@@ -132,6 +132,7 @@ namespace sl2 {
 		icSigMeasurementType = 0x6D656173L,/* ‘meas’ */
 		icSigNamedColorType = 0x6E636f6CL,/* ‘ncol’
 		* OBSOLETE, use ncl2 */
+		icSigParaType = 0x70617261L,/* ‘para’ */
 		icSigProfileSequenceDescType = 0x70736571L,/* ‘pseq’ */
 		icSigS15Fixed16ArrayType = 0x73663332L,/* ‘sf32’ */
 		icSigScreeningType = 0x7363726EL,/* ‘scrn’ */
