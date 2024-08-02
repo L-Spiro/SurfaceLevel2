@@ -861,7 +861,20 @@ namespace sl2 {
 			size_t sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigRedTRCTag, sSize );
 			if ( sOffset ) {
 				uint8_t * pui8Data = static_cast<uint8_t *>(pProfile->data) + sOffset;
-				return SL2_E_BADFORMAT;
+				CIcc::FillOutTransferFunc( m_tfInColorSpaceTransferFunc[SL2_PC_R], pui8Data, sSize );
+				//return SL2_E_BADFORMAT;
+			}
+			sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigGreenTRCTag, sSize );
+			if ( sOffset ) {
+				uint8_t * pui8Data = static_cast<uint8_t *>(pProfile->data) + sOffset;
+				CIcc::FillOutTransferFunc( m_tfInColorSpaceTransferFunc[SL2_PC_G], pui8Data, sSize );
+				//return SL2_E_BADFORMAT;
+			}
+			sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigBlueTRCTag, sSize );
+			if ( sOffset ) {
+				uint8_t * pui8Data = static_cast<uint8_t *>(pProfile->data) + sOffset;
+				CIcc::FillOutTransferFunc( m_tfInColorSpaceTransferFunc[SL2_PC_B], pui8Data, sSize );
+				//return SL2_E_BADFORMAT;
 			}
 		}
 
