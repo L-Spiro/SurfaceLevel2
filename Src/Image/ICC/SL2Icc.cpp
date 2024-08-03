@@ -7,7 +7,9 @@
  */
 
 #include "SL2Icc.h"
+#include "../../Utilities//SL2Utilities.h"
 
+#include <algorithm>
 #include <cmath>
 
 
@@ -64,6 +66,8 @@ namespace sl2 {
 					case 0 : {
 						_tfFunc.pfXtoLinear = PassThrough;
 						_tfFunc.pfLinearToX = PassThrough;
+						::OutputDebugStringA( "XtoLinear: X = X;\r\n" );
+						::OutputDebugStringA( "LinearToX: X = X;\r\n" );
 						return true;
 					}
 					default : {
@@ -71,6 +75,7 @@ namespace sl2 {
 						size_t sElemSize = _sSize / aCnt;
 						try {
 							_tfFunc.cCurv.vTable.resize( aCnt );
+							_tfFunc.cCurv.vInvTable.resize( aCnt );
 							_tfFunc.pvParm = &_tfFunc.cCurv;
 						}
 						catch ( ... ) { return false; }
@@ -104,8 +109,17 @@ namespace sl2 {
 						if ( aCnt == 1 ) {
 							_tfFunc.pfXtoLinear = Len1_Curve_To_Linear;
 							_tfFunc.pfLinearToX = Len1_Linear_To_Curve;
+
+							char szBuffer[256];
+							::sprintf_s( szBuffer, "XtoLinear: X * %.19g;\r\n", _tfFunc.cCurv.vTable[0] );
+							::OutputDebugStringA( szBuffer );
+							::sprintf_s( szBuffer, "LinearToX: X / %.19g;\r\n", _tfFunc.cCurv.vTable[0] );
+							::OutputDebugStringA( szBuffer );
 						}
 						else {
+							_tfFunc.pfXtoLinear = LenX_Curve_To_Linear;
+							_tfFunc.pfLinearToX = LenX_Linear_To_Curve;
+
 							char szBuffer[256];
 							::sprintf_s( szBuffer, "XtoLinear: LUT[%u] = {\r\n\t", uint32_t( _tfFunc.cCurv.vTable.size() ) );
 							::OutputDebugStringA( szBuffer );
@@ -122,7 +136,8 @@ namespace sl2 {
 							::OutputDebugStringA( szBuffer );
 							for ( size_t I = 0; I < _tfFunc.cCurv.vTable.size(); ++I ) {
 								double dVal = double( I ) / (_tfFunc.cCurv.vTable.size() - 1.0);
-								::sprintf_s( szBuffer, "%24.19g %24.19g %24.19g, ", 1.0 - dVal, (dVal - _tfFunc.cCurv.vTable[I]), (dVal - _tfFunc.cCurv.vTable[I]) + dVal );
+								_tfFunc.cCurv.vInvTable[I] = InverseLut( &_tfFunc.cCurv, dVal );
+								::sprintf_s( szBuffer, "%24.19g, ", _tfFunc.cCurv.vInvTable[I] );
 								::OutputDebugStringA( szBuffer );
 								if ( I % 16 == 15 ) {
 									::OutputDebugStringA( "\r\n\t" );
@@ -195,12 +210,87 @@ namespace sl2 {
 						return true;
 					}
 					case 4 : {
+						::OutputDebugStringA( "\tICC TYPE 4:\r\n" );
 						return true;
 					}
 				}
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * An X-length "curve" handler.
+	 * 
+	 * \param _dIn The value to convert.
+	 * \param _pvParm Associated structure data (SL2_CURV).
+	 * \return Returns the linear value of the _dIn.
+	 **/
+	double CIcc::LenX_Curve_To_Linear( double _dIn, const void * _pvParm ) {
+		const SL2_CURV * pcCurv = reinterpret_cast<const SL2_CURV *>(_pvParm);
+
+		double dIdx = _dIn * (pcCurv->vTable.size() - 1.0);
+		if ( pcCurv->vTable.size() == 0 ) { return 0.0; }
+		if ( pcCurv->vTable.size() == 1 ) { return _dIn * pcCurv->vTable[0]; }
+
+		if ( dIdx <= 0.0 ) { return pcCurv->vTable[0]; }
+		size_t sEnd = pcCurv->vTable.size() - 1;
+		
+		size_t sIdx = static_cast<size_t>(dIdx);
+		if ( sIdx >= sEnd ) { return pcCurv->vTable[sEnd]; }
+
+		
+		double dFrac = dIdx - static_cast<double>(sIdx);
+		if ( pcCurv->vTable.size() >= 6 ) {
+			size_t sClampedIdx = std::max( sIdx, size_t( 2 ) );
+			sClampedIdx = std::min( sClampedIdx, size_t( sEnd - 3 ) );
+			dFrac = dIdx - static_cast<double>(sClampedIdx);
+			return CUtilities::Sample_6Point_5thOrder_Hermite_X( &pcCurv->vTable[sClampedIdx-2], dFrac );
+		}
+		if ( pcCurv->vTable.size() >= 4 ) {
+			size_t sClampedIdx = std::max( sIdx, size_t( 1 ) );
+			sClampedIdx = std::min( sClampedIdx, size_t( sEnd - 2 ) );
+			dFrac = dIdx - static_cast<double>(sClampedIdx);
+			return CUtilities::Sample_4Point_3rdhOrder_Hermite_X( &pcCurv->vTable[sClampedIdx-1], dFrac );
+		}
+		return ((pcCurv->vTable[sIdx+1] - pcCurv->vTable[sIdx]) * dFrac) + pcCurv->vTable[sIdx];
+	}
+
+	/**
+	 * An X-length "curve" handler.
+	 * 
+	 * \param _dIn The value to convert.
+	 * \param _pvParm Associated structure data (SL2_CURV).
+	 * \return Returns the colorspace value of the _dIn.
+	 **/
+	double CIcc::LenX_Linear_To_Curve( double _dIn, const void * _pvParm ) {
+		const SL2_CURV * pcCurv = reinterpret_cast<const SL2_CURV *>(_pvParm);
+
+		double dIdx = _dIn * (pcCurv->vInvTable.size() - 1.0);
+		if ( pcCurv->vInvTable.size() == 0 ) { return 0.0; }
+		if ( pcCurv->vInvTable.size() == 1 ) { return _dIn * pcCurv->vInvTable[0]; }
+
+		if ( dIdx <= 0.0 ) { return pcCurv->vInvTable[0]; }
+		size_t sEnd = pcCurv->vInvTable.size() - 1;
+		
+		size_t sIdx = static_cast<size_t>(dIdx);
+		if ( sIdx >= sEnd ) { return pcCurv->vInvTable[sEnd]; }
+
+		
+		double dFrac = dIdx - static_cast<double>(sIdx);
+		if ( pcCurv->vInvTable.size() >= 6 ) {
+			size_t sClampedIdx = std::max( sIdx, size_t( 2 ) );
+			sClampedIdx = std::min( sClampedIdx, size_t( sEnd - 3 ) );
+			dFrac = dIdx - static_cast<double>(sClampedIdx);
+			return CUtilities::Sample_6Point_5thOrder_Hermite_X( &pcCurv->vInvTable[sClampedIdx-2], dFrac );
+		}
+		if ( pcCurv->vInvTable.size() >= 4 ) {
+			size_t sClampedIdx = std::max( sIdx, size_t( 1 ) );
+			sClampedIdx = std::min( sClampedIdx, size_t( sEnd - 2 ) );
+			dFrac = dIdx - static_cast<double>(sClampedIdx);
+			return CUtilities::Sample_4Point_3rdhOrder_Hermite_X( &pcCurv->vInvTable[sClampedIdx-1], dFrac );
+		}
+		return ((pcCurv->vInvTable[sIdx+1] - pcCurv->vInvTable[sIdx]) * dFrac) + pcCurv->vInvTable[sIdx];
 	}
 
 	/**
@@ -264,5 +354,103 @@ namespace sl2 {
 			_dIn / dC :
 			(std::pow( _dIn, 1.0 / dG ) - dB) / dA;
 	}
+
+	/**
+	 * Finds the inverse of a LUT index.
+	 *
+	 * \param _pcCurv The curve of points.
+	 * \param _dPoint The point to reverse look-up.
+	 * \return Returns the inverse look-up value for a given point in a table.
+	 **/
+	double CIcc::InverseLut( const SL2_CURV * _pcCurv, double _dPoint ) {
+		size_t sTotal = _pcCurv->vTable.size();
+		if ( !sTotal ) { return _dPoint; }
+
+		const double * pdPoints = _pcCurv->vTable.data();
+		if ( sTotal == 1 ) { return 1.0 / pdPoints[0]; }
+
+		if ( _dPoint <= pdPoints[0] ) { return 0.0; }
+		if ( _dPoint >= pdPoints[sTotal-1] ) { return 1.0; }
+
+		double dTarget = _dPoint;
+
+		double dJump = 0.5;
+		double dOffset = dJump;
+		double dThis = LenX_Curve_To_Linear( dOffset, _pcCurv );
+		while ( dThis != dTarget ) {
+			if ( dThis < dTarget ) {
+				double dPrevOffset = dOffset;
+				dOffset += dJump;
+				if ( dPrevOffset == dOffset ) { break; }
+				dThis = LenX_Curve_To_Linear( dOffset, _pcCurv );
+			}
+			else {
+				double dPrevOffset = dOffset;
+				dOffset -= dJump;
+				dJump /= 2.0;
+				dOffset += dJump;
+				if ( dPrevOffset == dOffset ) { break; }
+				dThis = LenX_Curve_To_Linear( dOffset, _pcCurv );
+			}
+		}
+		return dOffset;
+
+
+		/*double dLinVal = _dPoint;
+		auto aClosestIt = std::min_element( _pcCurv->vTable.begin(), _pcCurv->vTable.end(), 
+			[dLinVal]( double _dA, double _dB ) {
+				return std::abs( _dA - dLinVal ) < std::abs( _dB - dLinVal );
+			});
+		return std::distance( _pcCurv->vTable.begin(), aClosestIt ) / (sTotal / 1.0);*/
+	}
+
+	/**
+	 * An X-length "curve" handler.
+	 * 
+	 * \param _dIn The value to convert.
+	 * \param _pvParm Associated structure data (SL2_CURV).
+	 * \param dIdx The index in the array where the conversion took place.
+	 * \return Returns the linear value of the _dIn.
+	 **/
+	//double CIcc::LenX_Curve_To_Linear( double _dIn, const void * _pvParm, double &dIdx ) {
+	//	const SL2_CURV * pcCurv = reinterpret_cast<const SL2_CURV *>(_pvParm);
+
+	//	dIdx = _dIn * (pcCurv->vTable.size() - 1.0);
+	//	if ( pcCurv->vTable.size() == 0 ) { dIdx = 0.0; return 0.0; }
+	//	if ( pcCurv->vTable.size() == 1 ) { dIdx = 0.0; return _dIn * pcCurv->vTable[0]; }
+
+	//	if ( dIdx <= 0.0 ) { dIdx = 0.0; return pcCurv->vTable[0]; }
+	//	size_t sEnd = pcCurv->vTable.size() - 1;
+	//	
+	//	size_t sIdx = static_cast<size_t>(dIdx);
+	//	if ( sIdx >= sEnd ) { dIdx = double( sEnd ); return pcCurv->vTable[sEnd]; }
+
+	//	
+	//	double dFrac = dIdx - static_cast<double>(sIdx);
+	//	if ( pcCurv->vTable.size() >= 6 ) {
+	//		size_t sClampedIdx = std::max( sIdx, size_t( 2 ) );
+	//		sClampedIdx = std::min( sClampedIdx, size_t( sEnd - 3 ) );
+	//		dFrac = dIdx - static_cast<double>(sClampedIdx);
+	//		return CUtilities::Sample_6Point_5thOrder_Hermite_X( &pcCurv->vTable[sClampedIdx-2], dFrac );
+	//	}
+	//	if ( pcCurv->vTable.size() >= 4 ) {
+	//		size_t sClampedIdx = std::max( sIdx, size_t( 1 ) );
+	//		sClampedIdx = std::min( sClampedIdx, size_t( sEnd - 2 ) );
+	//		dFrac = dIdx - static_cast<double>(sClampedIdx);
+	//		return CUtilities::Sample_4Point_3rdhOrder_Hermite_X( &pcCurv->vTable[sClampedIdx-1], dFrac );
+	//	}
+	//	return ((pcCurv->vTable[sIdx+1] - pcCurv->vTable[sIdx]) * dFrac) + pcCurv->vTable[sIdx];
+
+
+	//	/*if ( sIdx >= 2 && (sEnd - sIdx) > 2 ) {
+	//		return CUtilities::Sample_6Point_5thOrder_Hermite_X( &pcCurv->vTable[sIdx-2], dFrac );
+	//	}
+	//	else if ( sIdx >= 1 && (sEnd - sIdx) > 1 ) {
+	//		return CUtilities::Sample_4Point_3rdhOrder_Hermite_X( &pcCurv->vTable[sIdx-1], dFrac );
+	//	}
+	//	else {
+	//		return ((pcCurv->vTable[sIdx+1] - pcCurv->vTable[sIdx]) * dFrac) + pcCurv->vTable[sIdx];
+	//	}*/
+	//}
 
 }	// namespace sl2

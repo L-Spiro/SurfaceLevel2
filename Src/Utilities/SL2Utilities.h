@@ -478,6 +478,47 @@ namespace sl2 {
 		}
 
 		/**
+		 * 6-point, 5th-order Hermite X-form sampling.
+		 *
+		 * \param _pfsSamples The array of 6 input samples, indices -2, -1, 0, 1, 2, and 3.
+		 * \param _dFrac The interpolation amount.
+		 * \return Returns the interpolated point.
+		 */
+		static inline double								Sample_6Point_5thOrder_Hermite_X( const double * _pfsSamples, double _dFrac ) {
+			// 6-point, 5th-order Hermite (X-form).
+			double dEightThym2 = 1.0 / 8.0 * _pfsSamples[-2+2];
+			double dElevenTwentyFourThy2 = 11.0 / 24.0 * _pfsSamples[2+2];
+			double dTwelvThy3 = 1.0 / 12.0 * _pfsSamples[3+2];
+			double dC0 = _pfsSamples[0+2];
+			double dC1 = 1.0 / 12.0 * (_pfsSamples[-2+2] - _pfsSamples[2+2]) + 2.0 / 3.0 * (_pfsSamples[1+2] - _pfsSamples[-1+2]);
+			double dC2 = 13.0 / 12.0 * _pfsSamples[-1+2] - 25.0 / 12.0 * _pfsSamples[0+2] + 3.0 / 2.0 * _pfsSamples[1+2] -
+				dElevenTwentyFourThy2 + dTwelvThy3 - dEightThym2;
+			double dC3 = 5.0 / 12.0 * _pfsSamples[0+2] - 7.0 / 12.0 * _pfsSamples[1+2] + 7.0 / 24.0 * _pfsSamples[2+2] -
+				1.0 / 24.0 * (_pfsSamples[-2+2] + _pfsSamples[-1+2] + _pfsSamples[3+2]);
+			double dC4 = dEightThym2 - 7.0 / 12.0 * _pfsSamples[-1+2] + 13.0 / 12.0 * _pfsSamples[0+2] - _pfsSamples[1+2] +
+				dElevenTwentyFourThy2 - dTwelvThy3;
+			double dC5 = 1.0 / 24.0 * (_pfsSamples[3+2] - _pfsSamples[-2+2]) + 5.0 / 24.0 * (_pfsSamples[-1+2] - _pfsSamples[2+2]) +
+				5.0 / 12.0 * (_pfsSamples[1+2] - _pfsSamples[0+2]);
+			return ((((dC5 * _dFrac + dC4) * _dFrac + dC3) * _dFrac + dC2) * _dFrac + dC1) * _dFrac + dC0;
+		}
+
+		/**
+		 * 4-point, 3rd-order Hermite X-form sampling.
+		 *
+		 * \param _pfsSamples The array of 6 input samples, indices -1, 0, 1, and 2.
+		 * \param _dFrac The interpolation amount.
+		 * \return Returns the interpolated point.
+		 */
+		static inline double								Sample_4Point_3rdhOrder_Hermite_X( const double * _pfsSamples, double _dFrac ) {
+			// 4-point, 5th-order Hermite (X-form).
+			double dC0 = _pfsSamples[0+1];
+			double dC1 = 1.0 / 2.0 * (_pfsSamples[1+1] - _pfsSamples[-1+1]);
+			double dC2 = _pfsSamples[-1+1] - 5.0 / 2.0 * _pfsSamples[0+1] + 2.0 * _pfsSamples[1+1] - 1.0 / 2.0 * _pfsSamples[2+1];
+			double dC3 = 1.0 / 2.0 * (_pfsSamples[2+1] - _pfsSamples[-1+1]) + 3.0 / 2.0 * (_pfsSamples[0+1] - _pfsSamples[1+1]);
+			return ((dC3 * _dFrac + dC2) * _dFrac + dC1) * _dFrac + dC0;
+		}
+
+		/**
 		 * Minimum between 2 values.
 		 *
 		 * \param _tLeft Left value.

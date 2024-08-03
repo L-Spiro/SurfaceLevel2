@@ -94,6 +94,7 @@ namespace sl2 {
 			m_rMipResample = _iOther.m_rMipResample;
 			m_ttType = _iOther.m_ttType;
 			m_bFullyOpaque = _iOther.m_bFullyOpaque;
+			m_vIccProfile = std::move( _iOther.m_vIccProfile );
 			
 			_iOther.m_sArraySize = 0;
 			_iOther.m_kKernel.SetSize( 0 );
@@ -171,6 +172,8 @@ namespace sl2 {
 
 		m_ttType = SL2_TT_2D;
 		m_bFullyOpaque = false;
+		m_vIccProfile.clear();
+		m_vIccProfile = std::vector<uint8_t>();
 	}
 
 	/**
@@ -381,6 +384,7 @@ namespace sl2 {
 			_iDst.m_bFullyOpaque = bOpaque;
 			_iDst.m_dGamma = _iDst.m_dTargetGamma = m_dTargetGamma;
 			_iDst.m_cgcInputCurve = _iDst.m_cgcOutputCurve = m_cgcOutputCurve;
+			_iDst.m_vIccProfile = m_vIccProfile;
 			for ( size_t I = SL2_ELEMENTS( m_tfOutColorSpaceTransferFunc ); I--; ) {
 				_iDst.m_tfOutColorSpaceTransferFunc[I] = m_tfOutColorSpaceTransferFunc[I];
 			}
@@ -404,6 +408,7 @@ namespace sl2 {
 		_iDst.m_bFullyOpaque = bOpaque;
 		_iDst.m_dGamma = _iDst.m_dTargetGamma = m_dTargetGamma;
 		_iDst.m_cgcInputCurve = _iDst.m_cgcOutputCurve = m_cgcOutputCurve;
+		_iDst.m_vIccProfile = m_vIccProfile;
 		for ( size_t I = SL2_ELEMENTS( m_tfOutColorSpaceTransferFunc ); I--; ) {
 			_iDst.m_tfOutColorSpaceTransferFunc[I] = m_tfOutColorSpaceTransferFunc[I];
 		}
@@ -852,11 +857,15 @@ namespace sl2 {
 		FREE_IMAGE_TYPE fitType = ::FreeImage_GetImageType( flfmData.pbBitmap );
 
 		FIICCPROFILE * pProfile = flfmData.pbBitmap ? ::FreeImage_GetICCProfile( flfmData.pbBitmap ) : nullptr;
-		if ( pProfile && (pProfile->flags &
-			FIICC_COLOR_IS_CMYK) == FIICC_COLOR_IS_CMYK ) {
+		if ( pProfile && (pProfile->flags & FIICC_COLOR_IS_CMYK) == FIICC_COLOR_IS_CMYK ) {
 			return SL2_E_BADFORMAT;
 		}
 		if ( pProfile ) {
+			try {
+				m_vIccProfile.resize( pProfile->size );
+				std::memcpy( m_vIccProfile.data(), pProfile->data, pProfile->size );
+			}
+			catch ( ... ) { return SL2_E_OUTOFMEMORY; }
 			size_t sSize;
 			size_t sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigRedTRCTag, sSize );
 			if ( sOffset ) {

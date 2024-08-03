@@ -488,6 +488,8 @@ namespace sl2 {
 		SL2_TEXTURE_TYPES									m_ttType;								/**< The type of texture. */
 		bool												m_bFullyOpaque;							/**< Is the alpha channel just 1.0's? */
 
+		std::vector<uint8_t>								m_vIccProfile;							/**, The ICC profile. */
+
 
 		// == Functions.
 		/**

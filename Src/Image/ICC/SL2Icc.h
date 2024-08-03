@@ -39,6 +39,7 @@ namespace sl2 {
 		/** A curve equation. */
 		struct SL2_CURV {
 			std::vector<double>									vTable;
+			std::vector<double>									vInvTable;
 		};
 
 		/** Function prototype (X -> Linear). */
@@ -138,6 +139,24 @@ namespace sl2 {
 		}
 
 		/**
+		 * An X-length "curve" handler.
+		 * 
+		 * \param _dIn The value to convert.
+		 * \param _pvParm Associated structure data (SL2_CURV).
+		 * \return Returns the linear value of the _dIn.
+		 **/
+		static double											LenX_Curve_To_Linear( double _dIn, const void * _pvParm );
+
+		/**
+		 * An X-length "curve" handler.
+		 * 
+		 * \param _dIn The value to convert.
+		 * \param _pvParm Associated structure data (SL2_CURV).
+		 * \return Returns the colorspace value of the _dIn.
+		 **/
+		static double											LenX_Linear_To_Curve( double _dIn, const void * _pvParm );
+
+		/**
 		 * A type-0 "para" handler.
 		 * 
 		 * \param _dIn The value to convert.
@@ -172,6 +191,25 @@ namespace sl2 {
 		 * \return Returns the adjusted value of the _dIn.
 		 **/
 		static double											Type3_Para_To_ColorSpace( double _dIn, const void * _pvParm );
+
+		/**
+		 * Finds the inverse of a LUT index.
+		 *
+		 * \param _pcCurv The curve of points.
+		 * \param _dPoint The point to reverse look-up.
+		 * \return Returns the inverse look-up value for a given point in a table.
+		 **/
+		static double											InverseLut( const SL2_CURV * _pcCurv, double _dPoint );
+
+		/**
+		 * An X-length "curve" handler.
+		 * 
+		 * \param _dIn The value to convert.
+		 * \param _pvParm Associated structure data (SL2_CURV).
+		 * \param _dIdx The index in the array where the conversion took place.
+		 * \return Returns the linear value of the _dIn.
+		 **/
+		//static double											LenX_Curve_To_Linear( double _dIn, const void * _pvParm, double &_dIdx );
 
 	};
 
