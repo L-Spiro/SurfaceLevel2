@@ -429,6 +429,12 @@
     <ClInclude Include="Src\Image\ICC\SL2IccDefs.h">
       <Filter>Header Files\Image\ICC</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Utilities\SL2Matrix4x4.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Utilities\SL2SimdTypes.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\SL2SurfaceLevel2.cpp">

@@ -10,7 +10,6 @@
 #include "../../Utilities//SL2Utilities.h"
 
 #include <algorithm>
-#include <cmath>
 
 
 namespace sl2 {
@@ -89,10 +88,17 @@ namespace sl2 {
 								break;
 							}
 							case sizeof( uint16_t ) : {
-								// Byte-swap in-place.
-								const uint16_t * pui16Data = reinterpret_cast<const uint16_t *>(pcCurve->data);
-								for ( auto I = aCnt; I--; ) {
-									_tfFunc.cCurv.vTable[I] = ::_byteswap_ushort( pui16Data[I] ) / double( 0xFFFF );
+								if ( aCnt == 1 ) {
+									const uint16_t * pui16Data = reinterpret_cast<const uint16_t *>(pcCurve->data);
+									_tfFunc.cCurv.vTable[0] = ::_byteswap_ushort( pui16Data[0] ) / 256.0;
+									_tfFunc.cCurv.vInvTable[0] = 1.0 / _tfFunc.cCurv.vTable[0];
+								}
+								else {
+									// Byte-swap in-place.
+									const uint16_t * pui16Data = reinterpret_cast<const uint16_t *>(pcCurve->data);
+									for ( auto I = aCnt; I--; ) {
+										_tfFunc.cCurv.vTable[I] = ::_byteswap_ushort( pui16Data[I] ) / double( 0xFFFF );
+									}
 								}
 								break;
 							}
@@ -111,9 +117,9 @@ namespace sl2 {
 							_tfFunc.pfLinearToX = Len1_Linear_To_Curve;
 
 							char szBuffer[256];
-							::sprintf_s( szBuffer, "XtoLinear: X * %.19g;\r\n", _tfFunc.cCurv.vTable[0] );
+							::sprintf_s( szBuffer, "XtoLinear: std::pow( X, %.19g );\r\n", _tfFunc.cCurv.vTable[0] );
 							::OutputDebugStringA( szBuffer );
-							::sprintf_s( szBuffer, "LinearToX: X / %.19g;\r\n", _tfFunc.cCurv.vTable[0] );
+							::sprintf_s( szBuffer, "LinearToX: std::pow( X, 1.0 / %.19g );\r\n", _tfFunc.cCurv.vTable[0] );
 							::OutputDebugStringA( szBuffer );
 						}
 						else {
@@ -175,11 +181,11 @@ namespace sl2 {
 					}
 					case 1 : {
 						::OutputDebugStringA( "\tICC TYPE 1:\r\n" );
-						return true;
+						return false;
 					}
 					case 2 : {
 						::OutputDebugStringA( "\tICC TYPE 2:\r\n" );
-						return true;
+						return false;
 					}
 					case 3 : {
 						_tfFunc.pPara.dParms[0] = static_cast<int32_t>(::_byteswap_ulong( ppPara->parameters[0] )) / 65536.0;
@@ -211,7 +217,7 @@ namespace sl2 {
 					}
 					case 4 : {
 						::OutputDebugStringA( "\tICC TYPE 4:\r\n" );
-						return true;
+						return false;
 					}
 				}
 			}

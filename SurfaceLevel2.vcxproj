@@ -109,7 +109,9 @@
     <ClInclude Include="Src\Utilities\SL2FeatureSet.h" />
     <ClInclude Include="Src\Utilities\SL2Float16.h" />
     <ClInclude Include="Src\Utilities\SL2FloatX.h" />
+    <ClInclude Include="Src\Utilities\SL2Matrix4x4.h" />
     <ClInclude Include="Src\Utilities\SL2Resampler.h" />
+    <ClInclude Include="Src\Utilities\SL2SimdTypes.h" />
     <ClInclude Include="Src\Utilities\SL2Stream.h" />
     <ClInclude Include="Src\Utilities\SL2Utilities.h" />
     <ClInclude Include="Src\Utilities\SL2Vector.h" />

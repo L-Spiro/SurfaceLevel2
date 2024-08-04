@@ -45,7 +45,9 @@ namespace sl2 {
 		m_mhMipHandling( SL2_MH_GENERATE_NEW ),
 		m_sTotalMips( 0 ),
 		m_ttType( SL2_TT_2D ),
-		m_bFullyOpaque( false ) {
+		m_bFullyOpaque( false ),
+		m_bApplyInputColorSpaceTransfer( true ),
+		m_bApplyOutputColorSpaceTransfer( false ) {
 		m_sSwizzle = CFormat::DefaultSwizzle();
 	}
 	CImage::~CImage() {
@@ -95,6 +97,8 @@ namespace sl2 {
 			m_ttType = _iOther.m_ttType;
 			m_bFullyOpaque = _iOther.m_bFullyOpaque;
 			m_vIccProfile = std::move( _iOther.m_vIccProfile );
+			m_bApplyInputColorSpaceTransfer = _iOther.m_bApplyInputColorSpaceTransfer;
+			m_bApplyOutputColorSpaceTransfer = _iOther.m_bApplyOutputColorSpaceTransfer;
 			
 			_iOther.m_sArraySize = 0;
 			_iOther.m_kKernel.SetSize( 0 );
@@ -126,6 +130,8 @@ namespace sl2 {
 			_iOther.m_sTotalMips = 0;
 			_iOther.m_ttType = SL2_TT_2D;
 			_iOther.m_bFullyOpaque = false;
+			_iOther.m_bApplyInputColorSpaceTransfer = true;
+			_iOther.m_bApplyOutputColorSpaceTransfer = false;
 		}
 
 		return (*this);
@@ -174,6 +180,8 @@ namespace sl2 {
 		m_bFullyOpaque = false;
 		m_vIccProfile.clear();
 		m_vIccProfile = std::vector<uint8_t>();
+		m_bApplyInputColorSpaceTransfer = true;
+		m_bApplyOutputColorSpaceTransfer = false;
 	}
 
 	/**
@@ -299,6 +307,12 @@ namespace sl2 {
 					if ( !Format()->pfToRgba64F( Data( M, 0, A, F ), pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), Format() ) ) {
 						return SL2_E_INTERNALERROR;
 					}
+					if ( m_bApplyInputColorSpaceTransfer ) {
+						ApplyColorSpaceTransferFunction( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(),
+							m_tfInColorSpaceTransferFunc[SL2_PC_R].pfXtoLinear, m_tfInColorSpaceTransferFunc[SL2_PC_R].pvParm,
+							m_tfInColorSpaceTransferFunc[SL2_PC_G].pfXtoLinear, m_tfInColorSpaceTransferFunc[SL2_PC_G].pvParm,
+							m_tfInColorSpaceTransferFunc[SL2_PC_B].pfXtoLinear, m_tfInColorSpaceTransferFunc[SL2_PC_B].pvParm );
+					}
 					BakeGamma( pui8Dest, m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), CFormat::TransferFunc( m_cgcInputCurve ) );
 					if ( m_bIgnoreAlpha ) {
 						m_bIsPreMultiplied = m_bNeedsPreMultiply = false;
@@ -372,6 +386,12 @@ namespace sl2 {
 						if ( m_dTargetGamma ) {
 							BakeGamma( iTmp.Data( M, 0, A, F ), 1.0 / m_dTargetGamma, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth(), CFormat::TransferFunc( m_cgcOutputCurve ) );
 						}
+						if ( m_bApplyInputColorSpaceTransfer ) {
+							ApplyColorSpaceTransferFunction( iTmp.Data( M, 0, A, F ), iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth(),
+								m_tfOutColorSpaceTransferFunc[SL2_PC_R].pfLinearToX, m_tfOutColorSpaceTransferFunc[SL2_PC_R].pvParm,
+								m_tfOutColorSpaceTransferFunc[SL2_PC_G].pfLinearToX, m_tfOutColorSpaceTransferFunc[SL2_PC_G].pvParm,
+								m_tfOutColorSpaceTransferFunc[SL2_PC_B].pfLinearToX, m_tfOutColorSpaceTransferFunc[SL2_PC_B].pvParm );
+						}
 					}
 				}
 			}
@@ -385,7 +405,9 @@ namespace sl2 {
 			_iDst.m_dGamma = _iDst.m_dTargetGamma = m_dTargetGamma;
 			_iDst.m_cgcInputCurve = _iDst.m_cgcOutputCurve = m_cgcOutputCurve;
 			_iDst.m_vIccProfile = m_vIccProfile;
+			_iDst.m_bApplyInputColorSpaceTransfer = m_bApplyInputColorSpaceTransfer;
 			for ( size_t I = SL2_ELEMENTS( m_tfOutColorSpaceTransferFunc ); I--; ) {
+				_iDst.m_tfInColorSpaceTransferFunc[I] = m_tfOutColorSpaceTransferFunc[I];	// Not a bug.
 				_iDst.m_tfOutColorSpaceTransferFunc[I] = m_tfOutColorSpaceTransferFunc[I];
 			}
 			return SL2_E_SUCCESS;
@@ -409,7 +431,9 @@ namespace sl2 {
 		_iDst.m_dGamma = _iDst.m_dTargetGamma = m_dTargetGamma;
 		_iDst.m_cgcInputCurve = _iDst.m_cgcOutputCurve = m_cgcOutputCurve;
 		_iDst.m_vIccProfile = m_vIccProfile;
+		_iDst.m_bApplyInputColorSpaceTransfer = m_bApplyInputColorSpaceTransfer;
 		for ( size_t I = SL2_ELEMENTS( m_tfOutColorSpaceTransferFunc ); I--; ) {
+			_iDst.m_tfInColorSpaceTransferFunc[I] = m_tfOutColorSpaceTransferFunc[I];	// Not a bug.
 			_iDst.m_tfOutColorSpaceTransferFunc[I] = m_tfOutColorSpaceTransferFunc[I];
 		}
 		return SL2_E_SUCCESS;
@@ -719,6 +743,40 @@ namespace sl2 {
 	}
 
 	/**
+	 * Applies an ICC colorspace transfer function to a given RGBA64F buffer.
+	 * 
+	 * \param _pui8Buffer The texture texels.
+	 * \param _ui32Width The width of the image.
+	 * \param _ui32Height The height of the image.
+	 * \param _ui32Depth The depth of the image.
+	 * \param _pfGammaFuncR The gamma transfer function.
+	 * \param _pvGammaFuncParmR The gamma transfer function parameter.
+	 * \param _pfGammaFuncG The gamma transfer function.
+	 * \param _pvGammaFuncParmG The gamma transfer function parameter.
+	 * \param _pfGammaFuncB The gamma transfer function.
+	 * \param _pvGammaFuncParmB The gamma transfer function parameter.
+	 **/
+	void CImage::ApplyColorSpaceTransferFunction( uint8_t * _pui8Buffer, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth,
+		CIcc::PfTransferFunc _pfGammaFuncR, const void * _pvGammaFuncParmR,
+		CIcc::PfTransferFunc _pfGammaFuncG, const void * _pvGammaFuncParmG,
+		CIcc::PfTransferFunc _pfGammaFuncB, const void * _pvGammaFuncParmB ) {
+		if ( !_pui8Buffer ) { return; }
+		CFormat::SL2_RGBA64F * prDst = reinterpret_cast<CFormat::SL2_RGBA64F *>(_pui8Buffer);
+		for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+			uint32_t ui32Slice = _ui32Width * _ui32Height * D;
+			for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+				uint32_t ui32Row = _ui32Width * H;
+				for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+					CFormat::SL2_RGBA64F * prThis = &prDst[ui32Slice+ui32Row+W];
+					prThis->dRgba[SL2_PC_R] = _pfGammaFuncR( prThis->dRgba[SL2_PC_R], _pvGammaFuncParmR );
+					prThis->dRgba[SL2_PC_G] = _pfGammaFuncG( prThis->dRgba[SL2_PC_G], _pvGammaFuncParmG );
+					prThis->dRgba[SL2_PC_B] = _pfGammaFuncB( prThis->dRgba[SL2_PC_B], _pvGammaFuncParmB );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Sets alpha to 1.0.
 	 *
 	 * \param _pui8Buffer The texture texels.
@@ -870,20 +928,41 @@ namespace sl2 {
 			size_t sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigRedTRCTag, sSize );
 			if ( sOffset ) {
 				uint8_t * pui8Data = static_cast<uint8_t *>(pProfile->data) + sOffset;
-				CIcc::FillOutTransferFunc( m_tfInColorSpaceTransferFunc[SL2_PC_R], pui8Data, sSize );
-				//return SL2_E_BADFORMAT;
+				if ( CIcc::FillOutTransferFunc( m_tfInColorSpaceTransferFunc[SL2_PC_R], pui8Data, sSize ) ) {
+					m_dGamma = 0.0;
+				}
 			}
 			sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigGreenTRCTag, sSize );
 			if ( sOffset ) {
 				uint8_t * pui8Data = static_cast<uint8_t *>(pProfile->data) + sOffset;
-				CIcc::FillOutTransferFunc( m_tfInColorSpaceTransferFunc[SL2_PC_G], pui8Data, sSize );
-				//return SL2_E_BADFORMAT;
+				if ( CIcc::FillOutTransferFunc( m_tfInColorSpaceTransferFunc[SL2_PC_G], pui8Data, sSize ) ) {
+					m_dGamma = 0.0;
+				}
 			}
 			sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigBlueTRCTag, sSize );
 			if ( sOffset ) {
 				uint8_t * pui8Data = static_cast<uint8_t *>(pProfile->data) + sOffset;
-				CIcc::FillOutTransferFunc( m_tfInColorSpaceTransferFunc[SL2_PC_B], pui8Data, sSize );
-				//return SL2_E_BADFORMAT;
+				if ( CIcc::FillOutTransferFunc( m_tfInColorSpaceTransferFunc[SL2_PC_B], pui8Data, sSize ) ) {
+					m_dGamma = 0.0;
+				}
+			}
+
+
+			sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigRedColorantTag, sSize );
+			if ( sOffset ) {
+				CVector vTmp( 0.43603515625, 0.2224884033203125, 0.013916015625, 0.0 );
+				CVector vTmp1( vTmp[0] / vTmp[1], 1.0, vTmp[2] / vTmp[1], 0.0 );
+				CVector vTmp2 = vTmp1;
+				vTmp2.Normalize();
+				double dX = vTmp1[0] / (vTmp1[0] + vTmp1[1] + vTmp1[2]);
+				double dY = vTmp1[1] / (vTmp1[0] + vTmp1[1] + vTmp1[2]);
+				double dChromaX, dChromaZ;
+				CUtilities::XYZtoChromaticity( 0.43603515625, 0.2224884033203125, 0.013916015625, dChromaX, dChromaZ );
+				CVector vChroma( dX * (0.2224884033203125 / dY), 0.2224884033203125, (1.0 - dX - dY) * (0.2224884033203125 / dY), 0.0 );
+				vTmp = vChroma;
+				vTmp.Normalize();
+				uint8_t * pui8Data = static_cast<uint8_t *>(pProfile->data) + sOffset;
+				sOffset = 0;
 			}
 		}
 

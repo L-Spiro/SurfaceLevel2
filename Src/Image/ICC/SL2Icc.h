@@ -12,6 +12,7 @@
 #include "SL2IccDefs.h"
 #include "../../OS/SL2Os.h"
 
+#include <cmath>
 #include <cstdint>
 #include <vector>
 
@@ -42,16 +43,13 @@ namespace sl2 {
 			std::vector<double>									vInvTable;
 		};
 
-		/** Function prototype (X -> Linear). */
-		typedef double (*										PfX_to_Linear)( double _dIn, const void * _pvParm );
-
-		/** Function prototype (Linear -> X). */
-		typedef double (*										PfLinear_to_X)( double _dIn, const void * _pvParm );
+		/** Function prototype (X -> Linear/Linear -> X). */
+		typedef double (*										PfTransferFunc)( double _dIn, const void * _pvParm );
 
 		/** The structure for holding the transfer-function data. */
 		struct SL2_TRANSFER_FUNC {
-			PfX_to_Linear										pfXtoLinear = PassThrough;						/**< X-to-linear function. */
-			PfLinear_to_X										pfLinearToX = PassThrough;						/**< Linear-to-X function. */
+			PfTransferFunc										pfXtoLinear = PassThrough;						/**< X-to-linear function. */
+			PfTransferFunc										pfLinearToX = PassThrough;						/**< Linear-to-X function. */
 			SL2_PARA											pPara;											/**< Parametric parameters. */
 			SL2_CURV											cCurv;											/**< Curve parameters. */
 			void *												pvParm = nullptr;								/**< Points to either pPara or cCurv. */
@@ -123,7 +121,7 @@ namespace sl2 {
 		 **/
 		static double											Len1_Curve_To_Linear( double _dIn, const void * _pvParm ) {
 			const SL2_CURV * pcCurv = reinterpret_cast<const SL2_CURV *>(_pvParm);
-			return pcCurv->vTable[0] * _dIn;
+			return std::pow( _dIn, pcCurv->vTable[0] );
 		}
 
 		/**
@@ -135,7 +133,7 @@ namespace sl2 {
 		 **/
 		static double											Len1_Linear_To_Curve( double _dIn, const void * _pvParm ) {
 			const SL2_CURV * pcCurv = reinterpret_cast<const SL2_CURV *>(_pvParm);
-			return (1.0 / pcCurv->vTable[0]) * _dIn;
+			return std::pow( _dIn, pcCurv->vInvTable[0] );
 		}
 
 		/**

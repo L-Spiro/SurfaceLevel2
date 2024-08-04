@@ -11,10 +11,12 @@
 
 
 #include "../OS/SL2Os.h"
+#include "SL2SimdTypes.h"
 
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <immintrin.h>
 
 
 namespace sl2 {
@@ -69,12 +71,31 @@ namespace sl2 {
 		 *	unit length (1 unit in length) while maintaining its direction.
 		 * Accuracy/speed depends on the LSM_PERFORMANCE macro.
 		 */
-		void													Normalize() {
-			double fInvLen = 1.0 / std::sqrt( m_dElements[0] * m_dElements[0] + m_dElements[1] * m_dElements[1] + m_dElements[2] * m_dElements[2] + m_dElements[3] * m_dElements[3] );
-			m_dElements[0] *= fInvLen;
-			m_dElements[1] *= fInvLen;
-			m_dElements[2] *= fInvLen;
-			m_dElements[3] *= fInvLen;
+		template <unsigned _uSimd = SL2_ST_RAW>
+		inline void												Normalize() {
+			if constexpr ( SL2_ST_AVX == _uSimd ) {
+				__m256d mElements = _mm256_load_pd( m_dElements );													// Load mElements into an AVX register.
+				__m256d mSquared = _mm256_mul_pd( mElements, mElements );											// Square each element.
+
+				// Sum the squared elements.
+				__m256d mSum1 = _mm256_hadd_pd( mSquared, mSquared );												// Horizontal add.
+				__m128d mSum2 = _mm_add_pd( _mm256_castpd256_pd128( mSum1 ), _mm256_extractf128_pd( mSum1, 1 ) );	// Add the lower and higher halves
+
+				// Compute the length.
+				double dLen = _mm_cvtsd_f64( _mm_sqrt_sd( _mm_setzero_pd(), mSum2 ) );								// Compute the square root of the sum of squares.
+				double dInvLen = 1.0 / dLen;																		// Compute the inverse of the length.
+
+				__m256d mInvLen = _mm256_set1_pd( dInvLen );														// Set all elements of a register to dInvLen.
+				mElements = _mm256_mul_pd( mElements, mInvLen );													// Normalize the elements.
+				_mm256_store_pd( m_dElements, mElements );															// Store the result back to memory.
+			}
+			else {
+				double dInvLen = 1.0 / std::sqrt( m_dElements[0] * m_dElements[0] + m_dElements[1] * m_dElements[1] + m_dElements[2] * m_dElements[2] + m_dElements[3] * m_dElements[3] );
+				m_dElements[0] *= dInvLen;
+				m_dElements[1] *= dInvLen;
+				m_dElements[2] *= dInvLen;
+				m_dElements[3] *= dInvLen;
+			}
 		}
 
 		/**
@@ -84,8 +105,23 @@ namespace sl2 {
 		 * \param _v4bOther The vector against which the dot product is to be determined.
 		 * \return Returns the dot product between the two vectors.
 		 */
-		double 													Dot( const CVector &_v4bOther ) const {
-			return m_dElements[0] * _v4bOther.m_dElements[0] + m_dElements[1] * _v4bOther.m_dElements[1] + m_dElements[2] * _v4bOther.m_dElements[2] + m_dElements[3] * _v4bOther.m_dElements[3];
+		template <unsigned _uSimd = SL2_ST_RAW>
+		inline double 											Dot( const CVector &_v4bOther ) const {
+			if constexpr ( SL2_ST_AVX == _uSimd ) {
+				__m256d mVec1 = _mm256_load_pd( m_dElements );														// Load elements of the first vector into an AVX register.
+				__m256d mVec2 = _mm256_load_pd( _v4bOther.m_dElements );											// Load elements of the second vector into an AVX register.
+				__m256d mMul = _mm256_mul_pd( mVec1, mVec2 );														// Multiply corresponding elements.
+				__m256d mHAdd = _mm256_hadd_pd( mMul, mMul );														// Horizontally add the results.
+
+				__m128d mSunHi = _mm256_extractf128_pd( mHAdd, 1 );													// Extract high 128 bits.
+				__m128d mSumLo = _mm256_castpd256_pd128( mHAdd );													// Extract low 128 bits.
+				__m128d mFinalSum = _mm_add_pd( mSunHi, mSumLo );													// Add high and low parts.
+
+				return _mm_cvtsd_f64( mFinalSum );																	// Return the dot product.
+			}
+			else {
+				return m_dElements[0] * _v4bOther.m_dElements[0] + m_dElements[1] * _v4bOther.m_dElements[1] + m_dElements[2] * _v4bOther.m_dElements[2] + m_dElements[3] * _v4bOther.m_dElements[3];
+			}
 		}
 
 		/**
@@ -93,7 +129,7 @@ namespace sl2 {
 		 *
 		 * \return Returns the maximum component.
 		 */
-		double  												Max() const {
+		inline double 											Max() const {
 			return std::max( std::max( std::max( m_dElements[0], m_dElements[1] ), m_dElements[2] ), m_dElements[3] );
 		}
 
@@ -102,7 +138,7 @@ namespace sl2 {
 		 *
 		 * \return Returns the minimum component.
 		 */
-		double   												Min() const {
+		inline double 											Min() const {
 			return std::min( std::min( std::min( m_dElements[0], m_dElements[1] ), m_dElements[2] ), m_dElements[3] );
 		}
 

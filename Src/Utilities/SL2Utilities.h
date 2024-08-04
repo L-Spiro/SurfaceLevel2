@@ -478,6 +478,36 @@ namespace sl2 {
 		}
 
 		/**
+		 * Converts XYZ values to chromaticities.
+		 * 
+		 * \param _dX The input X.
+		 * \param _dY The input Y.
+		 * \param _dZ The input Z.
+		 * \param _dChromaX The output chromaticity X.
+		 * \param _dChromaY The output chromaticity Y.
+		 **/
+		static inline void									XYZtoChromaticity( double _dX, double _dY, double _dZ, double &_dChromaX, double &_dChromaY ) {
+			double dX = _dX / _dY;
+			constexpr double dY = 1.0;
+			double dZ = _dZ / _dY;
+
+			_dChromaX = dX / (dX + dY + dZ);
+			_dChromaY = dY / (dX + dY + dZ);
+		}
+
+		/**
+		 * Converts chromaticities to XYZ values.
+		 * 
+		 * \param PARM DESC
+		 * \param PARM DESC
+		 * \return DESC
+		 **/
+		static void											ChromaticityToXYZ( double _dX, double _dY, double _dY0, double &X, double &Z) {
+			/*X = x * (Y / y);
+			Z = (1 - x - y) * (Y / y);*/
+		}
+
+		/**
 		 * 6-point, 5th-order Hermite X-form sampling.
 		 *
 		 * \param _pfsSamples The array of 6 input samples, indices -2, -1, 0, 1, 2, and 3.

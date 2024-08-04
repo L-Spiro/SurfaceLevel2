@@ -488,7 +488,9 @@ namespace sl2 {
 		SL2_TEXTURE_TYPES									m_ttType;								/**< The type of texture. */
 		bool												m_bFullyOpaque;							/**< Is the alpha channel just 1.0's? */
 
-		std::vector<uint8_t>								m_vIccProfile;							/**, The ICC profile. */
+		std::vector<uint8_t>								m_vIccProfile;							/**< The ICC profile. */
+		bool												m_bApplyInputColorSpaceTransfer;		/**< If true, any ICC-profile transfer functions are applied during the X -> Linear conversion. */
+		bool												m_bApplyOutputColorSpaceTransfer;		/**< If true, any ICC-profile transfer functions are applied during the Linear -> X conversion. */
 
 
 		// == Functions.
@@ -529,6 +531,25 @@ namespace sl2 {
 		 * \param _ptfGamma The gamma transfer functions.
 		 **/
 		void												BakeGamma( uint8_t * _pui8Buffer, double _dGamma, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, CFormat::SL2_TRANSFER_FUNCS _ptfGamma );
+
+		/**
+		 * Applies an ICC colorspace transfer function to a given RGBA64F buffer.
+		 * 
+		 * \param _pui8Buffer The texture texels.
+		 * \param _ui32Width The width of the image.
+		 * \param _ui32Height The height of the image.
+		 * \param _ui32Depth The depth of the image.
+		 * \param _pfGammaFuncR The gamma transfer function.
+		 * \param _pvGammaFuncParmR The gamma transfer function parameter.
+		 * \param _pfGammaFuncG The gamma transfer function.
+		 * \param _pvGammaFuncParmG The gamma transfer function parameter.
+		 * \param _pfGammaFuncB The gamma transfer function.
+		 * \param _pvGammaFuncParmB The gamma transfer function parameter.
+		 **/
+		void												ApplyColorSpaceTransferFunction( uint8_t * _pui8Buffer, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth,
+			CIcc::PfTransferFunc _pfGammaFuncR, const void * _pvGammaFuncParmR,
+			CIcc::PfTransferFunc _pfGammaFuncG, const void * _pvGammaFuncParmG,
+			CIcc::PfTransferFunc _pfGammaFuncB, const void * _pvGammaFuncParmB );
 
 		/**
 		 * Sets alpha to _dValue.
