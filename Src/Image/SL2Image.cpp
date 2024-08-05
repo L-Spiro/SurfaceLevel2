@@ -948,7 +948,7 @@ namespace sl2 {
 			}
 
 
-			sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigRedColorantTag, sSize );
+			/*sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigRedColorantTag, sSize );
 			if ( sOffset ) {
 				CVector vTmp( 0.43603515625, 0.2224884033203125, 0.013916015625, 0.0 );
 				CVector vTmp1( vTmp[0] / vTmp[1], 1.0, vTmp[2] / vTmp[1], 0.0 );
@@ -963,7 +963,7 @@ namespace sl2 {
 				vTmp.Normalize();
 				uint8_t * pui8Data = static_cast<uint8_t *>(pProfile->data) + sOffset;
 				sOffset = 0;
-			}
+			}*/
 		}
 
 		switch ( fitType ) {

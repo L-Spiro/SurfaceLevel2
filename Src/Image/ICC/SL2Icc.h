@@ -11,6 +11,7 @@
 
 #include "SL2IccDefs.h"
 #include "../../OS/SL2Os.h"
+#include "../Little-CMS/include/lcms2.h"
 
 #include <cmath>
 #include <cstdint>
@@ -41,6 +42,89 @@ namespace sl2 {
 		struct SL2_CURV {
 			std::vector<double>									vTable;
 			std::vector<double>									vInvTable;
+		};
+
+		/** Little CMS cmsHPROFILE wrapper. */
+		struct SL2_CMS_PROFILE {
+			SL2_CMS_PROFILE() {}
+			SL2_CMS_PROFILE( const uint8_t * _pui8Data, size_t _sSize ) :
+				hProfile( ::cmsOpenProfileFromMem( _pui8Data, static_cast<cmsUInt32Number>(_sSize) ) ),
+				bFree( true ) {}
+			SL2_CMS_PROFILE( cmsHPROFILE _hProfile, bool _bFree = false ) :
+				hProfile( _hProfile ),
+				bFree( _bFree ) {
+			}
+			~SL2_CMS_PROFILE() {
+				Reset();
+			}
+
+
+			// == Functions.
+			/**
+			 * Resets the object.
+			 **/
+			void												Reset() {
+				if ( hProfile ) {
+					::cmsCloseProfile( hProfile );
+					if ( bFree ) {
+						::free( hProfile );
+					}
+					hProfile = nullptr;
+				}
+			}
+
+			/**
+			 * Sets the transform.
+			 * 
+			 * \param _hTransform The transform to set.
+			 **/
+			void												Set( cmsHPROFILE _hProfile, bool _bFree = false ) {
+				Reset();
+				hProfile = _hProfile;
+				bFree = _bFree;
+			}
+
+
+			// == Members.
+			cmsHPROFILE											hProfile = nullptr;
+			bool												bFree = true;
+		};
+
+		/** Little CMS cmsHTRANSFORM wrapper. */
+		struct SL2_CMS_TRANSFER {
+			SL2_CMS_TRANSFER() {}
+			SL2_CMS_TRANSFER( cmsHTRANSFORM _hProfile ) :
+				hTransform( _hProfile ) {
+			}
+			~SL2_CMS_TRANSFER() {
+				Reset();
+			}
+
+
+			// == Functions.
+			/**
+			 * Resets the object.
+			 **/
+			void												Reset() {
+				if ( hTransform ) {
+					::cmsDeleteTransform( hTransform );
+					hTransform = nullptr;
+				}
+			}
+
+			/**
+			 * Sets the transform.
+			 * 
+			 * \param _hTransform The transform to set.
+			 **/
+			void												Set( cmsHTRANSFORM _hTransform ) {
+				Reset();
+				hTransform = _hTransform;
+			}
+
+
+			// == Members.
+			cmsHTRANSFORM										hTransform = nullptr;
 		};
 
 		/** Function prototype (X -> Linear/Linear -> X). */

@@ -498,13 +498,15 @@ namespace sl2 {
 		/**
 		 * Converts chromaticities to XYZ values.
 		 * 
-		 * \param PARM DESC
-		 * \param PARM DESC
-		 * \return DESC
+		 * \param _dChromaX The input chromaticity X.
+		 * \param _dChromaY The input chromaticity Y.
+		 * \param _dY0 The input XYZ Y value.
+		 * \param _dX0 The output XYZ Z value.
+		 * \param _dZ0 The output XYZ Z value.
 		 **/
-		static void											ChromaticityToXYZ( double _dX, double _dY, double _dY0, double &X, double &Z) {
-			/*X = x * (Y / y);
-			Z = (1 - x - y) * (Y / y);*/
+		static void											ChromaticityToXYZ( double _dChromaX, double _dChromaY, double _dY0, double &_dX0, double &_dZ0 ) {
+			_dX0 = _dChromaX * (_dY0 / _dChromaY);
+			_dZ0 = (1.0 - _dChromaX - _dChromaY) * (_dY0 / _dChromaY);
 		}
 
 		/**

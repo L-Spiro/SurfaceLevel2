@@ -72,7 +72,8 @@ namespace sl2 {
 		 * Accuracy/speed depends on the LSM_PERFORMANCE macro.
 		 */
 		template <unsigned _uSimd = SL2_ST_RAW>
-		inline void												Normalize() {
+		inline CVector											Normalize() {
+			CVector vCopy;
 			if constexpr ( SL2_ST_AVX == _uSimd ) {
 				__m256d mElements = _mm256_load_pd( m_dElements );													// Load mElements into an AVX register.
 				__m256d mSquared = _mm256_mul_pd( mElements, mElements );											// Square each element.
@@ -87,15 +88,16 @@ namespace sl2 {
 
 				__m256d mInvLen = _mm256_set1_pd( dInvLen );														// Set all elements of a register to dInvLen.
 				mElements = _mm256_mul_pd( mElements, mInvLen );													// Normalize the elements.
-				_mm256_store_pd( m_dElements, mElements );															// Store the result back to memory.
+				_mm256_store_pd( vCopy.m_dElements, mElements );													// Store the result back to memory.
 			}
 			else {
 				double dInvLen = 1.0 / std::sqrt( m_dElements[0] * m_dElements[0] + m_dElements[1] * m_dElements[1] + m_dElements[2] * m_dElements[2] + m_dElements[3] * m_dElements[3] );
-				m_dElements[0] *= dInvLen;
-				m_dElements[1] *= dInvLen;
-				m_dElements[2] *= dInvLen;
-				m_dElements[3] *= dInvLen;
+				vCopy.m_dElements[0] = m_dElements[0] * dInvLen;
+				vCopy.m_dElements[1] = m_dElements[1] * dInvLen;
+				vCopy.m_dElements[2] = m_dElements[2] * dInvLen;
+				vCopy.m_dElements[3] = m_dElements[3] * dInvLen;
 			}
+			return vCopy;
 		}
 
 		/**

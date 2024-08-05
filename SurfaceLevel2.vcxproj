@@ -76,6 +76,9 @@
     <ClInclude Include="Src\Image\KTX-Software\lib\vkformat_enum.h" />
     <ClInclude Include="Src\Image\KTX-Software\lib\vk_format.h" />
     <ClInclude Include="Src\Image\KTX-Software\utils\unused.h" />
+    <ClInclude Include="Src\Image\Little-CMS\include\lcms2.h" />
+    <ClInclude Include="Src\Image\Little-CMS\include\lcms2_plugin.h" />
+    <ClInclude Include="Src\Image\Little-CMS\src\lcms2_internal.h" />
     <ClInclude Include="Src\Image\PVRTexTool\PVRTexLib.h" />
     <ClInclude Include="Src\Image\PVRTexTool\PVRTexLib.hpp" />
     <ClInclude Include="Src\Image\PVRTexTool\PVRTexLibDefines.h" />
@@ -204,6 +207,32 @@
     <ClCompile Include="Src\Image\KTX-Software\lib\vkformat_str.c" />
     <ClCompile Include="Src\Image\KTX-Software\lib\writer1.c" />
     <ClCompile Include="Src\Image\KTX-Software\lib\writer2.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmsalpha.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmscam02.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmscgats.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmscnvrt.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmserr.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmsgamma.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmsgmt.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmshalf.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmsintrp.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmsio0.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmsio1.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmslut.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmsmd5.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmsmtrx.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmsnamed.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmsopt.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmspack.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmspcs.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmsplugin.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmsps2.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmssamp.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmssm.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmstypes.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmsvirt.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmswtpnt.c" />
+    <ClCompile Include="Src\Image\Little-CMS\src\cmsxform.c" />
     <ClCompile Include="Src\Image\SL2Formats.cpp" />
     <ClCompile Include="Src\Image\SL2Image.cpp" />
     <ClCompile Include="Src\Image\SL2Kernel.cpp" />
@@ -333,7 +362,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>__AVX512BW__=1;__AVX512F__=1;__AVX2__=1;__AVX__=1;__SSE4_1__=1;BASISU_NO_ITERATOR_DEBUG_LEVEL;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CMS_NO_REGISTER_KEYWORD;__AVX512BW__=1;__AVX512F__=1;__AVX2__=1;__AVX__=1;__SSE4_1__=1;BASISU_NO_ITERATOR_DEBUG_LEVEL;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
@@ -361,7 +390,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>__AVX512BW__=1;__AVX512F__=1;__AVX2__=1;__AVX__=1;__SSE4_1__=1;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CMS_NO_REGISTER_KEYWORD;__AVX512BW__=1;__AVX512F__=1;__AVX2__=1;__AVX__=1;__SSE4_1__=1;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
@@ -388,7 +417,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>__AVX512BW__=1;__AVX512F__=1;__AVX2__=1;__AVX__=1;__SSE4_1__=1;BASISU_NO_ITERATOR_DEBUG_LEVEL;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CMS_NO_REGISTER_KEYWORD;__AVX512BW__=1;__AVX512F__=1;__AVX2__=1;__AVX__=1;__SSE4_1__=1;BASISU_NO_ITERATOR_DEBUG_LEVEL;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
@@ -416,7 +445,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>__AVX512BW__=1;__AVX512F__=1;__AVX2__=1;__AVX__=1;__SSE4_1__=1;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CMS_NO_REGISTER_KEYWORD;__AVX512BW__=1;__AVX512F__=1;__AVX2__=1;__AVX__=1;__SSE4_1__=1;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>

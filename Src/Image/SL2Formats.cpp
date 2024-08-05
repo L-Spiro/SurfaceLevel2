@@ -612,37 +612,75 @@ namespace sl2 {
 
 	/** Alpha cut-off. */
 	uint8_t CFormat::m_ui8AlphaThresh = 128;
+#define SL2_SRGB_CHROMAS								{ 0.640, 0.330, 0.212639005871510 },		{ 0.300, 0.600, 0.715168678767756 },		{ 0.150, 0.060, 0.072192315360734 },		{ 0.3127, 0.3290, 1.0000 },
+#define SL2_SMPTE_170M_CHROMAS							{ 0.630, 0.340, 0.2988390 },				{ 0.310, 0.595, 0.5868110 },				{ 0.155, 0.070, 0.1143500 },				{ 0.3127, 0.3290, 1.0000 },
+#define SL2_BT_709_CHROMAS								{ 0.640, 0.330, 0.212639005871510 },		{ 0.300, 0.600, 0.715168678767756 },		{ 0.150, 0.060, 0.072192315360734 },		{ 0.3127, 0.3290, 1.0000 },
+#define SL2_ADOBE_RGB_CHROMAS							{ 0.640, 0.330, 0.2988390 },				{ 0.210, 0.710, 0.5868110 },				{ 0.150, 0.060, 0.1143500 },				{ 0.3127, 0.3290, 1.0000 },
+#define SL2_BT_2020_CHROMAS								{ 0.708, 0.292, 0.2627 },					{ 0.170, 0.797, 0.6780 },					{ 0.131, 0.046, 0.0593 },					{ 0.3127, 0.3290, 1.0000 },
+#define SL2_DCI_P3_CHROMAS								{ 0.680, 0.320, 1.0 },						{ 0.265, 0.690, 1.0 },						{ 0.150, 0.060, 1.0 },						{ 0.3140, 0.3510, 1.0000 },
+#define SL2_SMPTE_240M_CHROMAS							{ 0.630, 0.340, 0.2122 },					{ 0.310, 0.595, 0.7013 },					{ 0.155, 0.070, 0.0865 },					{ 0.3127, 0.3290, 1.0000 },
+#define SL2_NTSC_1953_CHROMAS							{ 0.670, 0.330, 0.2988390 },				{ 0.210, 0.710, 0.5868110 },				{ 0.140, 0.080, 0.1143500 },				{ 0.3100, 0.3160, 1.0000 },
+#define SL2_EBU_TECH_3213_CHROMAS						{ 0.640, 0.330, 0.2988390 },				{ 0.290, 0.600, 0.5868110 },				{ 0.150, 0.060, 0.1143500 },				{ 0.3127, 0.3290, 1.0000 },
+#define SL2_DISPLAY_P3_CHROMAS							{ 0.680, 0.320, 1.0 },						{ 0.265, 0.690, 1.0 },						{ 0.150, 0.060, 1.0 },						{ 0.3140, 0.3510, 1.0000 },
 
 	/** Colorspace transfer functions. */
 	CFormat::SL2_TRANSFER_FUNCS CFormat::m_tfColorspaceTransfers[] = {
-		{ CUtilities::SRgbToLinear,						CUtilities::LinearToSRgb },								// SL2_CGC_sRGB_STANDARD
-		{ CUtilities::SRgbToLinear_Precise,				CUtilities::LinearToSRgb_Precise },						// SL2_CGC_sRGB_PRECISE
+		{ CUtilities::SRgbToLinear,						CUtilities::LinearToSRgb,								// SL2_CGC_sRGB_STANDARD
+			SL2_SRGB_CHROMAS },
+		{ CUtilities::SRgbToLinear_Precise,				CUtilities::LinearToSRgb_Precise,						// SL2_CGC_sRGB_PRECISE
+			SL2_SRGB_CHROMAS },
 
-		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M },						// SL2_CGC_SMPTE_170M_1999
-		{ CUtilities::SMPTE170MtoLinear_Precise,		CUtilities::LinearToSMPTE170M_Precise },				// SL2_CGC_SMPTE_170M_1999_PRECISE
+		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M,							// SL2_CGC_SMPTE_170M_1999
+			SL2_SMPTE_170M_CHROMAS },
+		{ CUtilities::SMPTE170MtoLinear_Precise,		CUtilities::LinearToSMPTE170M_Precise,					// SL2_CGC_SMPTE_170M_1999_PRECISE
+			SL2_SMPTE_170M_CHROMAS },
 
-		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M },						// SL2_CGC_ITU_BT_709
-		{ CUtilities::SMPTE170MtoLinear_Precise,		CUtilities::LinearToSMPTE170M_Precise },				// SL2_CGC_ITU_BT_709_PRECISE
+		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M,							// SL2_CGC_ITU_BT_709
+			SL2_BT_709_CHROMAS },
+		{ CUtilities::SMPTE170MtoLinear_Precise,		CUtilities::LinearToSMPTE170M_Precise,					// SL2_CGC_ITU_BT_709_PRECISE
+			SL2_BT_709_CHROMAS },
 
-		{ CUtilities::AdobeRGBtoLinear,					CUtilities::LinearToAdobeRGB },							// SL2_CGC_ADOBE_RGB
+		{ CUtilities::AdobeRGBtoLinear,					CUtilities::LinearToAdobeRGB,							// SL2_CGC_ADOBE_RGB
+			SL2_ADOBE_RGB_CHROMAS },
 
-		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M },						// SL2_CGC_ITU_BT_2020
-		{ CUtilities::SMPTE170MtoLinear_Precise,		CUtilities::LinearToSMPTE170M_Precise },				// SL2_CGC_ITU_BT_2020_PRECISE
+		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M,							// SL2_CGC_ITU_BT_2020
+			SL2_BT_2020_CHROMAS },
+		{ CUtilities::SMPTE170MtoLinear_Precise,		CUtilities::LinearToSMPTE170M_Precise,					// SL2_CGC_ITU_BT_2020_PRECISE
+			SL2_BT_2020_CHROMAS },
 
-		{ CUtilities::DCIP3toLinear,					CUtilities::LinearToDCIP3 },							// SL2_CGC_DCI_P3
+		{ CUtilities::DCIP3toLinear,					CUtilities::LinearToDCIP3,								// SL2_CGC_DCI_P3
+			SL2_DCI_P3_CHROMAS },
 
-		{ CUtilities::SMPTE240MtoLinear,				CUtilities::LinearToSMPTE240M },						// SL2_CGC_SMPTE_240M_1999
-		{ CUtilities::SMPTE240MtoLinear_Precise,		CUtilities::LinearToSMPTE240M_Precise },				// SL2_CGC_SMPTE_240M_1999_PRECISE
+		{ CUtilities::SMPTE240MtoLinear,				CUtilities::LinearToSMPTE240M,							// SL2_CGC_SMPTE_240M_1999
+			SL2_SMPTE_240M_CHROMAS },
+		{ CUtilities::SMPTE240MtoLinear_Precise,		CUtilities::LinearToSMPTE240M_Precise,					// SL2_CGC_SMPTE_240M_1999_PRECISE
+			SL2_SMPTE_240M_CHROMAS },
 
-		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M },						// SL2_CGC_NTSC_1953
-		{ CUtilities::SMPTE170MtoLinear_Precise,		CUtilities::LinearToSMPTE170M_Precise },				// SL2_CGC_NTSC_1953_PRECISE
+		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M,							// SL2_CGC_NTSC_1953
+			SL2_NTSC_1953_CHROMAS },
+		{ CUtilities::SMPTE170MtoLinear_Precise,		CUtilities::LinearToSMPTE170M_Precise,					// SL2_CGC_NTSC_1953_PRECISE
+			SL2_NTSC_1953_CHROMAS },
 
-		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M },						// SL2_CGC_EBU_TECH_3213
-		{ CUtilities::SMPTE170MtoLinear_Precise,		CUtilities::LinearToSMPTE170M_Precise },				// SL2_CGC_EBU_TECH_3213_PRECISE
+		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M,							// SL2_CGC_EBU_TECH_3213
+			SL2_EBU_TECH_3213_CHROMAS },
+		{ CUtilities::SMPTE170MtoLinear_Precise,		CUtilities::LinearToSMPTE170M_Precise,					// SL2_CGC_EBU_TECH_3213_PRECISE
+			SL2_EBU_TECH_3213_CHROMAS },
 
-		{ CUtilities::SRgbToLinear,						CUtilities::LinearToSRgb },								// SL2_CGC_EBU_DISPLAY_P3
-		{ CUtilities::SRgbToLinear_Precise,				CUtilities::LinearToSRgb_Precise },						// SL2_CGC_EBU_DISPLAY_P3_PRECISE
+		{ CUtilities::SRgbToLinear,						CUtilities::LinearToSRgb,								// SL2_CGC_EBU_DISPLAY_P3
+			SL2_DISPLAY_P3_CHROMAS },
+		{ CUtilities::SRgbToLinear_Precise,				CUtilities::LinearToSRgb_Precise,						// SL2_CGC_EBU_DISPLAY_P3_PRECISE
+			SL2_DISPLAY_P3_CHROMAS },
 	};
+#undef SL2_DISPLAY_P3_CHROMAS
+#undef SL2_EBU_TECH_3213_CHROMAS
+#undef SL2_NTSC_1953_CHROMAS
+#undef SL2_SMPTE_240M_CHROMAS
+#undef SL2_DCI_P3_CHROMAS
+#undef SL2_BT_2020_CHROMAS
+#undef SL2_ADOBE_RGB_CHROMAS
+#undef SL2_BT_709_CHROMAS
+#undef SL2_SMPTE_170M_CHROMAS
+#undef SL2_SRGB_CHROMAS
 
 	/** Which transfer function are we using? */
 	size_t CFormat::m_sTransferFunc = SL2_CGC_sRGB_PRECISE;

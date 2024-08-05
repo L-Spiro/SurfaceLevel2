@@ -1369,8 +1369,16 @@ namespace sl2 {
 		struct SL2_TRANSFER_FUNCS {
 			/** Inverse transfer function. */
 			PfTransferFunc															pfXtoLinear;
-			/** TRansfer function. */
+			/** Transfer function. */
 			PfTransferFunc															pfLinearToX;
+			/** Chromaticities for R. */
+			double																	dChromaR[3];
+			/** Chromaticities for G. */
+			double																	dChromaG[3];
+			/** Chromaticities for B. */
+			double																	dChromaB[3];
+			/** White point. */
+			double																	dWhite[3];
 		};
 
 		/** An RGBA color component. */
