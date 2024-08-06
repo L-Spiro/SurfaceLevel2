@@ -411,52 +411,113 @@ namespace sl2 {
 	}
 
 	/**
-	 * An X-length "curve" handler.
-	 * 
-	 * \param _dIn The value to convert.
-	 * \param _pvParm Associated structure data (SL2_CURV).
-	 * \param dIdx The index in the array where the conversion took place.
-	 * \return Returns the linear value of the _dIn.
+	 * Creates a colorspace profile using a predefined colorspace.
+	 *
+	 * \param _cContextID The context or nullptr.
+	 * \param _cgcCurve The type of profile to create.
+	 * \param _cpProfile The returned profile.
+	 * \param _bIncludeCurves If true, tone curves are included.
+	 * \return Returns true if all allocations succeed.
 	 **/
-	//double CIcc::LenX_Curve_To_Linear( double _dIn, const void * _pvParm, double &dIdx ) {
-	//	const SL2_CURV * pcCurv = reinterpret_cast<const SL2_CURV *>(_pvParm);
+	bool CIcc::CreateProfile( cmsContext _cContextID, SL2_COLORSPACE_GAMMA_CURVES _cgcCurve, SL2_CMS_PROFILE &_cpProfile, bool _bIncludeCurves ) {
+		const CFormat::SL2_TRANSFER_FUNCS & tfFunc = CFormat::TransferFunc( _cgcCurve );
+		cmsCIExyY		cieD65 = { tfFunc.dWhite[0], tfFunc.dWhite[1], 1.0 };
+		cmsCIExyYTRIPLE	ciePrimaries = {
+							{ tfFunc.dChromaR[0], tfFunc.dChromaR[1], 1.0 },
+							{ tfFunc.dChromaG[0], tfFunc.dChromaG[1], 1.0 },
+							{ tfFunc.dChromaB[0], tfFunc.dChromaB[1], 1.0 },
+		};
+		
 
-	//	dIdx = _dIn * (pcCurv->vTable.size() - 1.0);
-	//	if ( pcCurv->vTable.size() == 0 ) { dIdx = 0.0; return 0.0; }
-	//	if ( pcCurv->vTable.size() == 1 ) { dIdx = 0.0; return _dIn * pcCurv->vTable[0]; }
+		if ( _bIncludeCurves ) {
+			cmsToneCurve *	ptcGamma[3];
+			SL2_CMS_TONECURVE tcCurve;
+			ptcGamma[0] = ptcGamma[1] = ptcGamma[2] = tcCurve.Set( ::cmsBuildParametricToneCurve( _cContextID, tfFunc.i32CurveType, tfFunc.dParaCurve ) ).tcCurve;
+			if ( ptcGamma[0] == NULL ) { return false; }
 
-	//	if ( dIdx <= 0.0 ) { dIdx = 0.0; return pcCurv->vTable[0]; }
-	//	size_t sEnd = pcCurv->vTable.size() - 1;
-	//	
-	//	size_t sIdx = static_cast<size_t>(dIdx);
-	//	if ( sIdx >= sEnd ) { dIdx = double( sEnd ); return pcCurv->vTable[sEnd]; }
+			if ( !_cpProfile.Set( ::cmsCreateRGBProfileTHR( _cContextID, &cieD65, &ciePrimaries, ptcGamma ), true ).hProfile ) { return false; }
+		}
+		else {
+			cmsFloat64Number f64nParm[1] = { 1.0 };
+			cmsToneCurve *	ptcGamma[3];
+			SL2_CMS_TONECURVE tcCurve;
+			ptcGamma[0] = ptcGamma[1] = ptcGamma[2] = tcCurve.Set( ::cmsBuildParametricToneCurve( _cContextID, 1, f64nParm ) ).tcCurve;
+			if ( ptcGamma[0] == NULL ) { return false; }
 
-	//	
-	//	double dFrac = dIdx - static_cast<double>(sIdx);
-	//	if ( pcCurv->vTable.size() >= 6 ) {
-	//		size_t sClampedIdx = std::max( sIdx, size_t( 2 ) );
-	//		sClampedIdx = std::min( sClampedIdx, size_t( sEnd - 3 ) );
-	//		dFrac = dIdx - static_cast<double>(sClampedIdx);
-	//		return CUtilities::Sample_6Point_5thOrder_Hermite_X( &pcCurv->vTable[sClampedIdx-2], dFrac );
-	//	}
-	//	if ( pcCurv->vTable.size() >= 4 ) {
-	//		size_t sClampedIdx = std::max( sIdx, size_t( 1 ) );
-	//		sClampedIdx = std::min( sClampedIdx, size_t( sEnd - 2 ) );
-	//		dFrac = dIdx - static_cast<double>(sClampedIdx);
-	//		return CUtilities::Sample_4Point_3rdhOrder_Hermite_X( &pcCurv->vTable[sClampedIdx-1], dFrac );
-	//	}
-	//	return ((pcCurv->vTable[sIdx+1] - pcCurv->vTable[sIdx]) * dFrac) + pcCurv->vTable[sIdx];
+			if ( !_cpProfile.Set( ::cmsCreateRGBProfileTHR( _cContextID, &cieD65, &ciePrimaries, ptcGamma ), true ).hProfile ) { return false; }
+		}
+		if ( !SetTextTags( _cpProfile.hProfile, tfFunc.pwcDesc )) { return false; }
 
+		return true;
+	}
 
-	//	/*if ( sIdx >= 2 && (sEnd - sIdx) > 2 ) {
-	//		return CUtilities::Sample_6Point_5thOrder_Hermite_X( &pcCurv->vTable[sIdx-2], dFrac );
-	//	}
-	//	else if ( sIdx >= 1 && (sEnd - sIdx) > 1 ) {
-	//		return CUtilities::Sample_4Point_3rdhOrder_Hermite_X( &pcCurv->vTable[sIdx-1], dFrac );
-	//	}
-	//	else {
-	//		return ((pcCurv->vTable[sIdx+1] - pcCurv->vTable[sIdx]) * dFrac) + pcCurv->vTable[sIdx];
-	//	}*/
-	//}
+	/**
+	 * Creates an in-memory ICC file.
+	 * 
+	 * \param _pProfile The profile to save.
+	 * \param _vFile The in-memory file after saving.
+	 * \return Returns true if the file was saved to memory.
+	 **/
+	bool CIcc::SaveProfileToMemory( const SL2_CMS_PROFILE &_pProfile, std::vector<uint8_t> &_vFile ) {
+		cmsUInt32Number ui32Size = 0;
+		if ( !::cmsSaveProfileToMem( _pProfile.hProfile, nullptr, &ui32Size ) ) { return false; }
+		try {
+			_vFile.resize( ui32Size );
+		}
+		catch ( ... ) { return false; }
+		return ::cmsSaveProfileToMem( _pProfile.hProfile, _vFile.data(), &ui32Size );
+	}
+
+	/**
+	 * Creates a linear version of the given in-memory ICC profile.
+	 * 
+	 * \param _vFile The in-memory ICC file.
+	 * \param _pProfile The created profile.
+	 * \return Returns true if the ICC file was loaded and set to linear.
+	 **/
+	bool CIcc::CreateLinearProfile( std::vector<uint8_t> &_vFile, SL2_CMS_PROFILE &_pProfile ) {
+		if ( _vFile.size() != static_cast<size_t>(static_cast<cmsUInt32Number>(_vFile.size())) || static_cast<cmsUInt32Number>(_vFile.size()) <= 0 ) { return false; }
+		if ( _pProfile.Set( ::cmsOpenProfileFromMem( _vFile.data(), static_cast<cmsUInt32Number>(_vFile.size()) ), true ).hProfile == NULL ) { return false; }
+		CIcc::SL2_CMS_TONECURVE tcGamma( ::cmsBuildGamma( NULL, 1.0 ) );
+		if ( !tcGamma.tcCurve ) { return false; }
+		cmsToneCurve * ptcCurves[4] = { tcGamma.tcCurve, tcGamma.tcCurve, tcGamma.tcCurve, tcGamma.tcCurve };
+		if ( !::cmsWriteTag( _pProfile.hProfile, cmsSigRedTRCTag, ptcCurves[0] ) ||
+			!::cmsWriteTag( _pProfile.hProfile, cmsSigGreenTRCTag, ptcCurves[1] ) ||
+			!::cmsWriteTag( _pProfile.hProfile, cmsSigBlueTRCTag, ptcCurves[2] ) ||
+			!::cmsWriteTag( _pProfile.hProfile, cmsSigGrayTRCTag, ptcCurves[3] ) ) { return false; }
+		return true;
+	}
+
+	cmsBool CIcc::SetTextTags( cmsHPROFILE hProfile, const wchar_t * Description ) {
+		cmsMLU *DescriptionMLU, *CopyrightMLU, *ManufacturerMLU;
+		cmsBool  rc = FALSE;
+		cmsContext ContextID = cmsGetProfileContextID(hProfile);
+
+		DescriptionMLU  = cmsMLUalloc(ContextID, 1);
+		ManufacturerMLU = cmsMLUalloc(ContextID, 1);
+		CopyrightMLU    = cmsMLUalloc(ContextID, 1);
+
+		if (DescriptionMLU == NULL || CopyrightMLU == NULL) goto Error;
+
+		if (!cmsMLUsetWide(DescriptionMLU,  "en", "US", Description)) goto Error;
+		if (!cmsMLUsetWide(ManufacturerMLU, "en", "US", L"L. Spiro SurfaceLevel 2.0")) goto Error;
+		if (!cmsMLUsetWide(CopyrightMLU,    "en", "US", L"Public Domain")) goto Error;
+
+		if (!cmsWriteTag(hProfile, cmsSigProfileDescriptionTag,  DescriptionMLU)) goto Error;
+		if (!cmsWriteTag(hProfile, cmsSigDeviceMfgDescTag,       ManufacturerMLU)) goto Error;
+		if (!cmsWriteTag(hProfile, cmsSigCopyrightTag,           CopyrightMLU)) goto Error;
+
+		rc = TRUE;
+
+	Error:
+
+		if (DescriptionMLU)
+			cmsMLUfree(DescriptionMLU);
+		if (ManufacturerMLU)
+			cmsMLUfree(ManufacturerMLU);
+		if (CopyrightMLU)
+			cmsMLUfree(CopyrightMLU);
+		return rc;
+	}
 
 }	// namespace sl2

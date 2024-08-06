@@ -329,10 +329,33 @@ namespace sl2 {
 		 * \param _cgcInput The input gamma curve.
 		 * \param _cgcOutput The output gamma curve.
 		 **/
-		inline void											SetTransferFunctions( SL2_COLORSPACE_GAMMA_CURVES _cgcInput, SL2_COLORSPACE_GAMMA_CURVES _cgcOutput ) {
+		inline void											SetColorSpace( SL2_COLORSPACE_GAMMA_CURVES _cgcInput, SL2_COLORSPACE_GAMMA_CURVES _cgcOutput ) {
 			m_cgcInputCurve = _cgcInput;
 			m_cgcOutputCurve = _cgcOutput;
 		}
+
+		/**
+		 * Sets the output ICC file.
+		 * 
+		 * \param _vFile The output file.
+		 * \return Returns false if no profile is provided and allocation of a new default profile fails.
+		 **/
+		inline bool											SetOutputColorSpace( std::vector<uint8_t> &_vFile ) {
+			m_vOutIccProfile = std::move( _vFile );
+			if ( !m_vOutIccProfile.size() ) {
+				sl2::CIcc::SL2_CMS_PROFILE cpProfile;
+				if ( !sl2::CIcc::CreateProfile( NULL, SL2_CGC_sRGB_PRECISE, cpProfile, true ) ) { return false; }
+				if ( !sl2::CIcc::SaveProfileToMemory( cpProfile, m_vOutIccProfile ) ) { return false; }
+			}
+			return true;
+		}
+
+		/**
+		 * Gets the output ICC file.
+		 *
+		 * \return Returns a constant reference to the in-memory output ICC file.
+		 **/
+		inline const std::vector<uint8_t> &					OutputColorSpace() const { return m_vOutIccProfile; }
 
 		/**
 		 * Sets whether or not alpha needs to be pre-multiplied.
@@ -489,6 +512,7 @@ namespace sl2 {
 		bool												m_bFullyOpaque;							/**< Is the alpha channel just 1.0's? */
 
 		std::vector<uint8_t>								m_vIccProfile;							/**< The ICC profile. */
+		std::vector<uint8_t>								m_vOutIccProfile;						/**< The output ICC profile. */
 		bool												m_bApplyInputColorSpaceTransfer;		/**< If true, any ICC-profile transfer functions are applied during the X -> Linear conversion. */
 		bool												m_bApplyOutputColorSpaceTransfer;		/**< If true, any ICC-profile transfer functions are applied during the Linear -> X conversion. */
 
@@ -550,6 +574,17 @@ namespace sl2 {
 			CIcc::PfTransferFunc _pfGammaFuncR, const void * _pvGammaFuncParmR,
 			CIcc::PfTransferFunc _pfGammaFuncG, const void * _pvGammaFuncParmG,
 			CIcc::PfTransferFunc _pfGammaFuncB, const void * _pvGammaFuncParmB );
+
+		/**
+		 * Applies the source colorspace profile.  The source color profile is whatever came with the loaded image file.  The destination is a linear color space based on m_cgcOutputCurve
+		 * 
+		 * \param _pui8Buffer The texture texels.
+		 * \param _ui32Width The width of the image.
+		 * \param _ui32Height The height of the image.
+		 * \param _ui32Depth The depth of the image.
+		 * \return Returns true if the profile was applied.
+		 **/
+		bool												ApplySrcColorSpace( uint8_t * _pui8Buffer, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth );
 
 		/**
 		 * Sets alpha to _dValue.

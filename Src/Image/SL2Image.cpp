@@ -97,6 +97,7 @@ namespace sl2 {
 			m_ttType = _iOther.m_ttType;
 			m_bFullyOpaque = _iOther.m_bFullyOpaque;
 			m_vIccProfile = std::move( _iOther.m_vIccProfile );
+			m_vOutIccProfile = std::move( _iOther.m_vOutIccProfile );
 			m_bApplyInputColorSpaceTransfer = _iOther.m_bApplyInputColorSpaceTransfer;
 			m_bApplyOutputColorSpaceTransfer = _iOther.m_bApplyOutputColorSpaceTransfer;
 			
@@ -180,6 +181,8 @@ namespace sl2 {
 		m_bFullyOpaque = false;
 		m_vIccProfile.clear();
 		m_vIccProfile = std::vector<uint8_t>();
+		m_vOutIccProfile.clear();
+		m_vOutIccProfile = std::vector<uint8_t>();
 		m_bApplyInputColorSpaceTransfer = true;
 		m_bApplyOutputColorSpaceTransfer = false;
 	}
@@ -308,12 +311,17 @@ namespace sl2 {
 						return SL2_E_INTERNALERROR;
 					}
 					if ( m_bApplyInputColorSpaceTransfer ) {
-						ApplyColorSpaceTransferFunction( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(),
+						/*ApplyColorSpaceTransferFunction( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(),
 							m_tfInColorSpaceTransferFunc[SL2_PC_R].pfXtoLinear, m_tfInColorSpaceTransferFunc[SL2_PC_R].pvParm,
 							m_tfInColorSpaceTransferFunc[SL2_PC_G].pfXtoLinear, m_tfInColorSpaceTransferFunc[SL2_PC_G].pvParm,
-							m_tfInColorSpaceTransferFunc[SL2_PC_B].pfXtoLinear, m_tfInColorSpaceTransferFunc[SL2_PC_B].pvParm );
+							m_tfInColorSpaceTransferFunc[SL2_PC_B].pfXtoLinear, m_tfInColorSpaceTransferFunc[SL2_PC_B].pvParm );*/
+						ApplySrcColorSpace( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
 					}
-					BakeGamma( pui8Dest, m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), CFormat::TransferFunc( m_cgcInputCurve ) );
+					SL2_COLORSPACE_GAMMA_CURVES cgcCurve = m_cgcInputCurve;
+					if ( cgcCurve == SL2_CGC_NONE ) {
+						cgcCurve = SL2_CGC_sRGB_PRECISE;
+					}
+					BakeGamma( pui8Dest, m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), CFormat::TransferFunc( cgcCurve ) );
 					if ( m_bIgnoreAlpha ) {
 						m_bIsPreMultiplied = m_bNeedsPreMultiply = false;
 						SetAlpha( pui8Dest, 1.0, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
@@ -404,7 +412,8 @@ namespace sl2 {
 			_iDst.m_bFullyOpaque = bOpaque;
 			_iDst.m_dGamma = _iDst.m_dTargetGamma = m_dTargetGamma;
 			_iDst.m_cgcInputCurve = _iDst.m_cgcOutputCurve = m_cgcOutputCurve;
-			_iDst.m_vIccProfile = m_vIccProfile;
+			_iDst.m_vIccProfile = m_vOutIccProfile;
+			_iDst.m_vOutIccProfile = m_vOutIccProfile;
 			_iDst.m_bApplyInputColorSpaceTransfer = m_bApplyInputColorSpaceTransfer;
 			for ( size_t I = SL2_ELEMENTS( m_tfOutColorSpaceTransferFunc ); I--; ) {
 				_iDst.m_tfInColorSpaceTransferFunc[I] = m_tfOutColorSpaceTransferFunc[I];	// Not a bug.
@@ -430,7 +439,8 @@ namespace sl2 {
 		_iDst.m_bFullyOpaque = bOpaque;
 		_iDst.m_dGamma = _iDst.m_dTargetGamma = m_dTargetGamma;
 		_iDst.m_cgcInputCurve = _iDst.m_cgcOutputCurve = m_cgcOutputCurve;
-		_iDst.m_vIccProfile = m_vIccProfile;
+		_iDst.m_vIccProfile = m_vOutIccProfile;
+		_iDst.m_vOutIccProfile = m_vOutIccProfile;
 		_iDst.m_bApplyInputColorSpaceTransfer = m_bApplyInputColorSpaceTransfer;
 		for ( size_t I = SL2_ELEMENTS( m_tfOutColorSpaceTransferFunc ); I--; ) {
 			_iDst.m_tfInColorSpaceTransferFunc[I] = m_tfOutColorSpaceTransferFunc[I];	// Not a bug.
@@ -777,6 +787,44 @@ namespace sl2 {
 	}
 
 	/**
+	 * Applies the source colorspace profile.  The source color profile is whatever came with the loaded image file.  The destination is a linear color space based on m_cgcOutputCurve
+	 * 
+	 * \param _pui8Buffer The texture texels.
+	 * \param _ui32Width The width of the image.
+	 * \param _ui32Height The height of the image.
+	 * \param _ui32Depth The depth of the image.
+	 * \return Returns true if the profile was applied.
+	 **/
+	bool CImage::ApplySrcColorSpace( uint8_t * _pui8Buffer, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) {
+		if ( !_pui8Buffer ) { return false; }
+		if ( m_cgcInputCurve == SL2_CGC_NONE && m_vIccProfile.size() == 0 ) { return false; }		// No user selection and no embedded profile.
+
+		CIcc::SL2_CMS_PROFILE pSrc, pDst;
+		if ( m_cgcInputCurve != SL2_CGC_NONE ) {
+			// User selection overrides embedded profile.
+			if ( !CIcc::CreateProfile( NULL, m_cgcInputCurve, pSrc, true ) ) {
+				// That's weird.  This can't happen but anyway we can still fall back to the embedded profile.
+				if ( m_vIccProfile.size() ) {
+					if ( m_vIccProfile.size() != static_cast<size_t>(static_cast<cmsUInt32Number>(m_vIccProfile.size())) || static_cast<cmsUInt32Number>(m_vIccProfile.size()) <= 0 ) { return false; }
+					if ( pSrc.Set( ::cmsOpenProfileFromMem( m_vIccProfile.data(), static_cast<cmsUInt32Number>(m_vIccProfile.size()) ), true ).hProfile == NULL ) { return false; }
+				}
+			}
+		}
+		else {
+			if ( m_vIccProfile.size() != static_cast<size_t>(static_cast<cmsUInt32Number>(m_vIccProfile.size())) || static_cast<cmsUInt32Number>(m_vIccProfile.size()) <= 0 ) { return false; }
+			if ( pSrc.Set( ::cmsOpenProfileFromMem( m_vIccProfile.data(), static_cast<cmsUInt32Number>(m_vIccProfile.size()) ), true ).hProfile == NULL ) { return false; }
+		}
+		if ( !CIcc::CreateLinearProfile( m_vOutIccProfile, pDst ) ) { return false; }
+
+		CIcc::SL2_CMS_TRANSFORM tTransform( ::cmsCreateTransform( pSrc.hProfile, TYPE_RGBA_DBL, pDst.hProfile, TYPE_RGBA_DBL, INTENT_PERCEPTUAL, 0 ) );
+		if ( tTransform.hTransform == NULL ) { return false; }
+		
+		::cmsDoTransform( tTransform.hTransform, _pui8Buffer, _pui8Buffer, _ui32Width * _ui32Height * _ui32Depth );
+
+		return true;
+	}
+
+	/**
 	 * Sets alpha to 1.0.
 	 *
 	 * \param _pui8Buffer The texture texels.
@@ -924,6 +972,7 @@ namespace sl2 {
 				std::memcpy( m_vIccProfile.data(), pProfile->data, pProfile->size );
 			}
 			catch ( ... ) { return SL2_E_OUTOFMEMORY; }
+			m_dGamma = 0.0;
 			size_t sSize;
 			size_t sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigRedTRCTag, sSize );
 			if ( sOffset ) {
@@ -932,7 +981,7 @@ namespace sl2 {
 					m_dGamma = 0.0;
 				}
 			}
-			sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigGreenTRCTag, sSize );
+			/*sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigGreenTRCTag, sSize );
 			if ( sOffset ) {
 				uint8_t * pui8Data = static_cast<uint8_t *>(pProfile->data) + sOffset;
 				if ( CIcc::FillOutTransferFunc( m_tfInColorSpaceTransferFunc[SL2_PC_G], pui8Data, sSize ) ) {
@@ -945,7 +994,7 @@ namespace sl2 {
 				if ( CIcc::FillOutTransferFunc( m_tfInColorSpaceTransferFunc[SL2_PC_B], pui8Data, sSize ) ) {
 					m_dGamma = 0.0;
 				}
-			}
+			}*/
 
 
 			/*sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigRedColorantTag, sSize );

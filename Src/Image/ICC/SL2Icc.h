@@ -10,6 +10,7 @@
 #pragma once
 
 #include "SL2IccDefs.h"
+#include "../SL2Formats.h"
 #include "../../OS/SL2Os.h"
 #include "../Little-CMS/include/lcms2.h"
 
@@ -67,7 +68,7 @@ namespace sl2 {
 				if ( hProfile ) {
 					::cmsCloseProfile( hProfile );
 					if ( bFree ) {
-						::free( hProfile );
+						//::free( hProfile );
 					}
 					hProfile = nullptr;
 				}
@@ -77,11 +78,13 @@ namespace sl2 {
 			 * Sets the transform.
 			 * 
 			 * \param _hTransform The transform to set.
+			 * \return Returns a reference to this object.
 			 **/
-			void												Set( cmsHPROFILE _hProfile, bool _bFree = false ) {
+			SL2_CMS_PROFILE &									Set( cmsHPROFILE _hProfile, bool _bFree = false ) {
 				Reset();
 				hProfile = _hProfile;
 				bFree = _bFree;
+				return (*this);
 			}
 
 
@@ -91,12 +94,12 @@ namespace sl2 {
 		};
 
 		/** Little CMS cmsHTRANSFORM wrapper. */
-		struct SL2_CMS_TRANSFER {
-			SL2_CMS_TRANSFER() {}
-			SL2_CMS_TRANSFER( cmsHTRANSFORM _hProfile ) :
+		struct SL2_CMS_TRANSFORM {
+			SL2_CMS_TRANSFORM() {}
+			SL2_CMS_TRANSFORM( cmsHTRANSFORM _hProfile ) :
 				hTransform( _hProfile ) {
 			}
-			~SL2_CMS_TRANSFER() {
+			~SL2_CMS_TRANSFORM() {
 				Reset();
 			}
 
@@ -116,15 +119,56 @@ namespace sl2 {
 			 * Sets the transform.
 			 * 
 			 * \param _hTransform The transform to set.
+			 * \return Returns a reference to this object.
 			 **/
-			void												Set( cmsHTRANSFORM _hTransform ) {
+			SL2_CMS_TRANSFORM &									Set( cmsHTRANSFORM _hTransform ) {
 				Reset();
 				hTransform = _hTransform;
+				return (*this);
 			}
 
 
 			// == Members.
 			cmsHTRANSFORM										hTransform = nullptr;
+		};
+
+		/**  Little CMS cmsToneCurve wrapper. */
+		struct SL2_CMS_TONECURVE {
+			SL2_CMS_TONECURVE() {}
+			SL2_CMS_TONECURVE( cmsToneCurve * _htcToneCurve ) :
+				tcCurve( _htcToneCurve ) {
+			}
+			~SL2_CMS_TONECURVE() {
+				Reset();
+			}
+
+
+			// == Functions.
+			/**
+			 * Resets the object.
+			 **/
+			void												Reset() {
+				if ( tcCurve ) {
+					::cmsFreeToneCurve( tcCurve );
+					tcCurve = nullptr;
+				}
+			}
+
+			/**
+			 * Sets the transform.
+			 * 
+			 * \param _hTransform The transform to set.
+			 * \return Returns a reference to this object.
+			 **/
+			SL2_CMS_TONECURVE &										Set( cmsToneCurve * _hTransform ) {
+				Reset();
+				tcCurve = _hTransform;
+				return (*this);
+			}
+
+
+			// == Members.
+			cmsToneCurve *										tcCurve = nullptr;
 		};
 
 		/** Function prototype (X -> Linear/Linear -> X). */
@@ -284,14 +328,35 @@ namespace sl2 {
 		static double											InverseLut( const SL2_CURV * _pcCurv, double _dPoint );
 
 		/**
-		 * An X-length "curve" handler.
-		 * 
-		 * \param _dIn The value to convert.
-		 * \param _pvParm Associated structure data (SL2_CURV).
-		 * \param _dIdx The index in the array where the conversion took place.
-		 * \return Returns the linear value of the _dIn.
+		 * Creates a colorspace profile using a predefined colorspace.
+		 *
+		 * \param _cContextID The context or nullptr.
+		 * \param _cgcCurve The type of profile to create.
+		 * \param _cpProfile The returned profile.
+		 * \param _bIncludeCurves If true, tone curves are included.
+		 * \return Returns true if all allocations succeed.
 		 **/
-		//static double											LenX_Curve_To_Linear( double _dIn, const void * _pvParm, double &_dIdx );
+		static bool												CreateProfile( cmsContext _cContextID, SL2_COLORSPACE_GAMMA_CURVES _cgcCurve, SL2_CMS_PROFILE &_cpProfile, bool _bIncludeCurves = false );
+
+		/**
+		 * Creates an in-memory ICC file.
+		 * 
+		 * \param _pProfile The profile to save.
+		 * \param _vFile The in-memory file after saving.
+		 * \return Returns true if the file was saved to memory.
+		 **/
+		static bool												SaveProfileToMemory( const SL2_CMS_PROFILE &_pProfile, std::vector<uint8_t> &_vFile );
+
+		/**
+		 * Creates a linear version of the given in-memory ICC profile.
+		 * 
+		 * \param _vFile The in-memory ICC file.
+		 * \param _pProfile The created profile.
+		 * \return Returns true if the ICC file was loaded and set to linear.
+		 **/
+		static bool												CreateLinearProfile( std::vector<uint8_t> &_vFile, SL2_CMS_PROFILE &_pProfile );
+
+		static cmsBool											SetTextTags(cmsHPROFILE hProfile, const wchar_t* Description);
 
 	};
 

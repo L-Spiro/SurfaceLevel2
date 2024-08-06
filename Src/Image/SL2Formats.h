@@ -1228,6 +1228,8 @@ namespace sl2 {
 		SL2_CGC_EBU_TECH_3213_PRECISE = 15,											/**< EBU Tech. 3213 in high precision, without the discontinuities in the standard. */
 		SL2_CGC_EBU_DISPLAY_P3 = 16,												/**< Display P3 Color Encoding (v 1.0) standard. */
 		SL2_CGC_EBU_DISPLAY_P3_PRECISE = 17,										/**< Display P3 Color Encoding (v 1.0) in high precision, without the discontinuities in the standard. */
+
+		SL2_CGC_NONE = 0x1337,
 	};
 
 	/** Channel access. */
@@ -1379,6 +1381,12 @@ namespace sl2 {
 			double																	dChromaB[3];
 			/** White point. */
 			double																	dWhite[3];
+			/** Parametric curve parameters. */
+			double																	dParaCurve[5];
+			/** Parametric curve type. */
+			int32_t																	i32CurveType;
+			/** Name/Description of the profile. */
+			const wchar_t *															pwcDesc;
 		};
 
 		/** An RGBA color component. */
