@@ -148,10 +148,12 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
             }
             if ( SL2_CHECK( 2, targetgamma ) ) {
                 oOptions.dTargetGamma = ::_wtof( _wcpArgV[1] );
+                oOptions.bManuallySetTargetGamma = true;
                 SL2_ADV( 2 );
             }
             if ( SL2_CHECK( 1, target_srgb ) ) {
                 oOptions.dTargetGamma = -2.2;
+                oOptions.bManuallySetTargetGamma = true;
                 SL2_ADV( 1 );
             }
 
@@ -217,8 +219,24 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 else if ( ::_wcsicmp( _wcpArgV[1], L"displayp3" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"display-p3" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"display_p3" ) == 0 ) {
                     oOptions.cgcOutputGammaCurve = sl2::SL2_CGC_EBU_DISPLAY_P3_PRECISE;
                 }
+
+                else if ( ::_wcsicmp( _wcpArgV[1], L"rec601_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"rec.601_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt601_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.601_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt601_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.601_std" ) == 0 ||
+                        ::_wcsicmp( _wcpArgV[1], L"rec601_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"rec.601_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt601_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.601_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt601_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.601_standard" ) == 0 ) {
+                    oOptions.cgcOutputGammaCurve = sl2::SL2_CGC_ITU_BT_601_525;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"rec601" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"rec.601" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt601" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.601" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt601" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.601" ) == 0 ) {
+                    oOptions.cgcOutputGammaCurve = sl2::SL2_CGC_ITU_BT_601_525_PRECISE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"rec601_pal_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"rec.601_pal_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt601_pal_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.601_pal_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt601_pal_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.601_pal_std" ) == 0 ||
+                        ::_wcsicmp( _wcpArgV[1], L"rec601_pal_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"rec.601_pal_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt601_pal_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.601_pal_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt601_pal_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.601_pal_standard" ) == 0 ) {
+                    oOptions.cgcOutputGammaCurve = sl2::SL2_CGC_ITU_BT_601_625;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"rec601_pal" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"rec.601_pal" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt601_pal" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.601_pal" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt601_pal" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.601_pal" ) == 0 ) {
+                    oOptions.cgcOutputGammaCurve = sl2::SL2_CGC_ITU_BT_601_625_PRECISE;
+                }
+
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"target_colorspace\": \"{}\". Must be sRGB, sRGB_std, smpte_170, smpte_170_std, rec709, rec709_std, adobergb, bt2020, bt2020_std, dci_p3, smpte_240, smpte_240_std, ntsc_1953, ntsc_1953_std, tech_3213, tech_3213_std, displayp3, or displayp3_std.",
+                    SL2_ERRORT( std::format( L"Invalid \"target_colorspace\": \"{}\". Must be sRGB, sRGB_std, smpte_170, smpte_170_std, rec601, rec601_std, rec601_pal, rec601_pal_std, rec709, rec709_std, adobergb, bt2020, bt2020_std, dci_p3, smpte_240, smpte_240_std, ntsc_1953, ntsc_1953_std, tech_3213, tech_3213_std, displayp3, or displayp3_std.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 sl2::CIcc::SL2_CMS_PROFILE cpProfile;
@@ -229,6 +247,151 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 if ( !sl2::CIcc::SaveProfileToMemory( cpProfile, oOptions.vOutColorProfile ) ) {
                     SL2_ERRORT( std::format( L"\"target_colorspace\": \"{}\". Failed to save colorspace profile.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_OUTOFMEMORY );
+                }
+                if ( !oOptions.bManuallySetTargetGamma ) {
+                    oOptions.bManuallySetTargetGamma = true;
+                    oOptions.dTargetGamma = 0.0;
+                }
+                oOptions.bEmbedColorProfile = true;
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 2, input_colorspace ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"sRGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"sRGB_precise" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_sRGB_PRECISE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"sRGB_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"sRGB_standard" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_sRGB_STANDARD;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"smpte_170_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"smpte_170m_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"170m_std" ) == 0 ||
+                    ::_wcsicmp( _wcpArgV[1], L"smpte_170_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"smpte_170m_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"170m_standard" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_SMPTE_170M_1999;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"smpte_170" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"smpte_170m" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"170m" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_SMPTE_170M_1999_PRECISE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"rec709_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"rec.709_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt709_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.709_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt709_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.709_std" ) == 0 ||
+                        ::_wcsicmp( _wcpArgV[1], L"rec709_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"rec.709_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt709_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.709_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt709_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.709_standard" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_ITU_BT_709;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"rec709" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"rec.709" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt709" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.709" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt709" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.709" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_ITU_BT_709_PRECISE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"adobe" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"adobergb" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"adobe_rgb" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_ADOBE_RGB;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"bt2020_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.2020_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt2020_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.2020_std" ) == 0 ||
+                        ::_wcsicmp( _wcpArgV[1], L"bt2020_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.2020_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt2020_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.2020_standard" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_ITU_BT_2020;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"bt2020" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.2020" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt2020" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.2020" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_ITU_BT_2020_PRECISE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"dcip3" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"dci-p3" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"dci_p3" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_DCI_P3;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"smpte_240_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"smpte_240m_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"240m_std" ) == 0 ||
+                    ::_wcsicmp( _wcpArgV[1], L"smpte_240_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"smpte_240m_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"240m_standard" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_SMPTE_240M_1999;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"smpte_240" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"smpte_240m" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"240m" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_SMPTE_240M_1999_PRECISE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"ntsc_1953_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"ntsc1953_std" ) == 0 ||
+                    ::_wcsicmp( _wcpArgV[1], L"ntsc_1953_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"ntsc1953_standard" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_NTSC_1953;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"ntsc_1953" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"ntsc1953" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_NTSC_1953_PRECISE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"tech_3213_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"tech3213_std" ) == 0 ||
+                    ::_wcsicmp( _wcpArgV[1], L"tech_3213_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"tech3213_standard" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_EBU_TECH_3213;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"tech_3213" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"tech3213" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_EBU_TECH_3213_PRECISE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"displayp3_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"display-p3_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"display_p3_std" ) == 0 ||
+                    ::_wcsicmp( _wcpArgV[1], L"displayp3_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"display-p3_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"display_p3_standard" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_EBU_DISPLAY_P3;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"displayp3" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"display-p3" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"display_p3" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_EBU_DISPLAY_P3_PRECISE;
+                }
+
+                else if ( ::_wcsicmp( _wcpArgV[1], L"rec601_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"rec.601_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt601_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.601_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt601_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.601_std" ) == 0 ||
+                        ::_wcsicmp( _wcpArgV[1], L"rec601_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"rec.601_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt601_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.601_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt601_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.601_standard" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_ITU_BT_601_525;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"rec601" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"rec.601" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt601" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.601" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt601" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.601" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_ITU_BT_601_525_PRECISE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"rec601_pal_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"rec.601_pal_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt601_pal_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.601_pal_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt601_pal_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.601_pal_std" ) == 0 ||
+                        ::_wcsicmp( _wcpArgV[1], L"rec601_pal_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"rec.601_pal_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt601_pal_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.601_pal_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt601_pal_standard" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.601_pal_standard" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_ITU_BT_601_625;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"rec601_pal" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"rec.601_pal" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt601_pal" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bt.601_pal" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt601_pal" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"itu_bt.601_pal" ) == 0 ) {
+                    oOptions.cgcInputGammaCurve = sl2::SL2_CGC_ITU_BT_601_625_PRECISE;
+                }
+
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"input_colorspace\": \"{}\". Must be sRGB, sRGB_std, smpte_170, smpte_170_std, rec601, rec601_std, rec601_pal, rec601_pal_std, rec709, rec709_std, adobergb, bt2020, bt2020_std, dci_p3, smpte_240, smpte_240_std, ntsc_1953, ntsc_1953_std, tech_3213, tech_3213_std, displayp3, or displayp3_std.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                sl2::CIcc::SL2_CMS_PROFILE cpProfile;
+                if ( !sl2::CIcc::CreateProfile( NULL, oOptions.cgcInputGammaCurve, cpProfile, true ) ) {
+                    SL2_ERRORT( std::format( L"\"input_colorspace\": \"{}\". Failed to create colorspace profile.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_OUTOFMEMORY );
+                }
+                if ( !sl2::CIcc::SaveProfileToMemory( cpProfile, oOptions.vInColorProfile ) ) {
+                    SL2_ERRORT( std::format( L"\"input_colorspace\": \"{}\". Failed to save colorspace profile.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_OUTOFMEMORY );
+                }
+                if ( !oOptions.bManuallySetGamma ) {
+                    oOptions.bManuallySetGamma = true;
+                    oOptions.dGamma = 0.0;
+                }
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 1, dont_embed_icc ) ) {
+                oOptions.bEmbedColorProfile = false;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 2, target_colorspace_file ) ) {
+                try {
+                    sl2::CStdFile sfFile;
+                    if ( !sfFile.Open( reinterpret_cast<const char16_t *>((_wcpArgV[1])) ) ) {
+                        SL2_ERRORT( std::format( L"\"target_colorspace_file\": \"{}\". File not found.",
+                            _wcpArgV[1] ).c_str(), sl2::SL2_E_FILENOTFOUND );
+                    }
+                    if ( !sfFile.LoadToMemory( oOptions.vOutColorProfile ) ) {
+                        SL2_ERRORT( std::format( L"\"target_colorspace_file\": \"{}\". Not enough memory to load the given file to memory.",
+                            _wcpArgV[1] ).c_str(), sl2::SL2_E_OUTOFMEMORY );
+                    }
+                }
+                catch ( ... ) { SL2_ERROR( sl2::SL2_E_OUTOFMEMORY ); }
+                if ( !oOptions.bManuallySetTargetGamma ) {
+                    oOptions.bManuallySetTargetGamma = true;
+                    oOptions.dTargetGamma = 0.0;
+                }
+                oOptions.bEmbedColorProfile = true;
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 2, input_colorspace_file ) ) {
+                try {
+                    sl2::CStdFile sfFile;
+                    if ( !sfFile.Open( reinterpret_cast<const char16_t *>((_wcpArgV[1])) ) ) {
+                        SL2_ERRORT( std::format( L"\"input_colorspace_file\": \"{}\". File not found.",
+                            _wcpArgV[1] ).c_str(), sl2::SL2_E_FILENOTFOUND );
+                    }
+                    if ( !sfFile.LoadToMemory( oOptions.vInColorProfile ) ) {
+                        SL2_ERRORT( std::format( L"\"input_colorspace_file\": \"{}\". Not enough memory to load the given file to memory.",
+                            _wcpArgV[1] ).c_str(), sl2::SL2_E_OUTOFMEMORY );
+                    }
+                }
+                catch ( ... ) { SL2_ERROR( sl2::SL2_E_OUTOFMEMORY ); }
+                if ( !oOptions.bManuallySetGamma ) {
+                    oOptions.bManuallySetGamma = true;
+                    oOptions.dGamma = 0.0;
                 }
                 SL2_ADV( 2 );
             }
@@ -1331,6 +1494,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         }
         iImage.SetTargetGamma( oOptions.dTargetGamma );
         iImage.SetColorSpace( oOptions.cgcInputGammaCurve, oOptions.cgcOutputGammaCurve );
+        iImage.SetInputColorSpace( oOptions.vInColorProfile );
         iImage.SetOutputColorSpace( oOptions.vOutColorProfile );
         iImage.SetSwizzle( oOptions.sSwizzle );
         iImage.SetSwap( oOptions.bSwap );

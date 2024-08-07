@@ -27,10 +27,14 @@ namespace sl2 {
 		double															dGamma = 1.0 / -2.2;											/**< User-supplied gamma. */
 		double															dTargetGamma = 1.0 / -2.2;										/**< User-supplied target gamma. */
 		bool															bManuallySetGamma = false;										/**< Have we used -g or -gamma or -srgb or _rgbe? */
+		bool															bManuallySetTargetGamma = false;								/**< Have we manually set the target gamma? */
 		SL2_COLORSPACE_GAMMA_CURVES										cgcInputGammaCurve = SL2_CGC_NONE;								/**< The input gamma curve. */
 		SL2_COLORSPACE_GAMMA_CURVES										cgcOutputGammaCurve = SL2_CGC_sRGB_PRECISE;						/**< The output gamma curve. */
+		std::vector<uint8_t>											vInColorProfile;												/**< The input color profile. */
 		std::vector<uint8_t>											vOutColorProfile;												/**< The output color profile. */
-		bool															bEmbedColorProfile = true;										/**< Embed the color profile. */
+		int32_t															i32InRenderingIntent = INTENT_RELATIVE_COLORIMETRIC;			/**< Input -> linear rendering intent. */
+		int32_t															i32OutRenderingIntent = INTENT_RELATIVE_COLORIMETRIC;			/**< Input -> linear rendering intent. */
+		bool															bEmbedColorProfile = false;										/**< Embed the color profile. */
 
 		sl2::CResampler::SL2_RESAMPLE									rResample;														/**< Resampling parameters. */
 		sl2::CResampler::SL2_RESAMPLE									rMipResample;													/**< Mipmap resampling parameters. */

@@ -394,12 +394,13 @@ namespace sl2 {
 						if ( m_dTargetGamma ) {
 							BakeGamma( iTmp.Data( M, 0, A, F ), 1.0 / m_dTargetGamma, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth(), CFormat::TransferFunc( m_cgcOutputCurve ) );
 						}
-						if ( m_bApplyInputColorSpaceTransfer ) {
+						/*if ( m_bApplyInputColorSpaceTransfer ) {
 							ApplyColorSpaceTransferFunction( iTmp.Data( M, 0, A, F ), iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth(),
 								m_tfOutColorSpaceTransferFunc[SL2_PC_R].pfLinearToX, m_tfOutColorSpaceTransferFunc[SL2_PC_R].pvParm,
 								m_tfOutColorSpaceTransferFunc[SL2_PC_G].pfLinearToX, m_tfOutColorSpaceTransferFunc[SL2_PC_G].pvParm,
 								m_tfOutColorSpaceTransferFunc[SL2_PC_B].pfLinearToX, m_tfOutColorSpaceTransferFunc[SL2_PC_B].pvParm );
-						}
+						}*/
+						ApplyDstColorSpace( iTmp.Data( M, 0, A, F ), iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );
 					}
 				}
 			}
@@ -797,10 +798,20 @@ namespace sl2 {
 	 **/
 	bool CImage::ApplySrcColorSpace( uint8_t * _pui8Buffer, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) {
 		if ( !_pui8Buffer ) { return false; }
+		if ( m_cgcInputCurve == SL2_CGC_NONE && m_vIccProfile.size() == 0 && m_vOutIccProfile.size() ) {
+			// If there is an output color space, we need to provide a starting point for it.
+			CIcc::SL2_CMS_PROFILE cpTmp;
+			if ( !CIcc::CreateProfile( NULL, SL2_CGC_sRGB_PRECISE, cpTmp, false ) ) { return false; }
+			if ( !CIcc::SaveProfileToMemory( cpTmp, m_vIccProfile ) ) { return false; }
+		}
 		if ( m_cgcInputCurve == SL2_CGC_NONE && m_vIccProfile.size() == 0 ) { return false; }		// No user selection and no embedded profile.
 
 		CIcc::SL2_CMS_PROFILE pSrc, pDst;
-		if ( m_cgcInputCurve != SL2_CGC_NONE ) {
+		if ( m_vIccProfile.size() != 0 ) {
+			if ( m_vIccProfile.size() != static_cast<size_t>(static_cast<cmsUInt32Number>(m_vIccProfile.size())) || static_cast<cmsUInt32Number>(m_vIccProfile.size()) <= 0 ) { return false; }
+			if ( pSrc.Set( ::cmsOpenProfileFromMem( m_vIccProfile.data(), static_cast<cmsUInt32Number>(m_vIccProfile.size()) ), true ).hProfile == NULL ) { return false; }
+		}
+		else if ( m_cgcInputCurve != SL2_CGC_NONE ) {
 			// User selection overrides embedded profile.
 			if ( !CIcc::CreateProfile( NULL, m_cgcInputCurve, pSrc, true ) ) {
 				// That's weird.  This can't happen but anyway we can still fall back to the embedded profile.
@@ -811,12 +822,37 @@ namespace sl2 {
 			}
 		}
 		else {
-			if ( m_vIccProfile.size() != static_cast<size_t>(static_cast<cmsUInt32Number>(m_vIccProfile.size())) || static_cast<cmsUInt32Number>(m_vIccProfile.size()) <= 0 ) { return false; }
-			if ( pSrc.Set( ::cmsOpenProfileFromMem( m_vIccProfile.data(), static_cast<cmsUInt32Number>(m_vIccProfile.size()) ), true ).hProfile == NULL ) { return false; }
+			return false;
 		}
 		if ( !CIcc::CreateLinearProfile( m_vOutIccProfile, pDst ) ) { return false; }
 
-		CIcc::SL2_CMS_TRANSFORM tTransform( ::cmsCreateTransform( pSrc.hProfile, TYPE_RGBA_DBL, pDst.hProfile, TYPE_RGBA_DBL, INTENT_PERCEPTUAL, 0 ) );
+		CIcc::SL2_CMS_TRANSFORM tTransform( ::cmsCreateTransform( pSrc.hProfile, TYPE_RGBA_DBL, pDst.hProfile, TYPE_RGBA_DBL, INTENT_RELATIVE_COLORIMETRIC, 0 ) );
+		if ( tTransform.hTransform == NULL ) { return false; }
+		
+		::cmsDoTransform( tTransform.hTransform, _pui8Buffer, _pui8Buffer, _ui32Width * _ui32Height * _ui32Depth );
+
+		return true;
+	}
+
+	/**
+	 * Applies the destination colorspace profile.  It actually only applies the gamma curve from the output ICC profile.
+	 * 
+	 * \param _pui8Buffer The texture texels.
+	 * \param _ui32Width The width of the image.
+	 * \param _ui32Height The height of the image.
+	 * \param _ui32Depth The depth of the image.
+	 * \return Returns true if the profile was applied.
+	 **/
+	bool CImage::ApplyDstColorSpace( uint8_t * _pui8Buffer, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) {
+		if ( !_pui8Buffer ) { return false; }
+		CIcc::SL2_CMS_PROFILE pSrc, pDst;
+
+		if ( !CIcc::CreateLinearProfile( m_vOutIccProfile, pSrc ) ) { return false; }
+
+		if ( m_vOutIccProfile.size() != static_cast<size_t>(static_cast<cmsUInt32Number>(m_vOutIccProfile.size())) || static_cast<cmsUInt32Number>(m_vOutIccProfile.size()) <= 0 ) { return false; }
+		if ( pDst.Set( ::cmsOpenProfileFromMem( m_vOutIccProfile.data(), static_cast<cmsUInt32Number>(m_vOutIccProfile.size()) ), true ).hProfile == NULL ) { return false; }
+
+		CIcc::SL2_CMS_TRANSFORM tTransform( ::cmsCreateTransform( pSrc.hProfile, TYPE_RGBA_DBL, pDst.hProfile, TYPE_RGBA_DBL, INTENT_RELATIVE_COLORIMETRIC, 0 ) );
 		if ( tTransform.hTransform == NULL ) { return false; }
 		
 		::cmsDoTransform( tTransform.hTransform, _pui8Buffer, _pui8Buffer, _ui32Width * _ui32Height * _ui32Depth );
@@ -966,7 +1002,7 @@ namespace sl2 {
 		if ( pProfile && (pProfile->flags & FIICC_COLOR_IS_CMYK) == FIICC_COLOR_IS_CMYK ) {
 			return SL2_E_BADFORMAT;
 		}
-		if ( pProfile ) {
+		if ( pProfile && pProfile->size ) {
 			try {
 				m_vIccProfile.resize( pProfile->size );
 				std::memcpy( m_vIccProfile.data(), pProfile->data, pProfile->size );

@@ -335,6 +335,17 @@ namespace sl2 {
 		}
 
 		/**
+		 * Sets the input ICC file.
+		 * 
+		 * \param _vFile The input file.
+		 * \return Returns false if no profile is provided and allocation of a new default profile fails.
+		 **/
+		inline bool											SetInputColorSpace( std::vector<uint8_t> &_vFile ) {
+			m_vIccProfile = std::move( _vFile );
+			return true;
+		}
+
+		/**
 		 * Sets the output ICC file.
 		 * 
 		 * \param _vFile The output file.
@@ -342,11 +353,6 @@ namespace sl2 {
 		 **/
 		inline bool											SetOutputColorSpace( std::vector<uint8_t> &_vFile ) {
 			m_vOutIccProfile = std::move( _vFile );
-			if ( !m_vOutIccProfile.size() ) {
-				sl2::CIcc::SL2_CMS_PROFILE cpProfile;
-				if ( !sl2::CIcc::CreateProfile( NULL, SL2_CGC_sRGB_PRECISE, cpProfile, true ) ) { return false; }
-				if ( !sl2::CIcc::SaveProfileToMemory( cpProfile, m_vOutIccProfile ) ) { return false; }
-			}
 			return true;
 		}
 
@@ -485,6 +491,7 @@ namespace sl2 {
 		SL2_COLORSPACE_GAMMA_CURVES							m_cgcOutputCurve;						/**< The output gamma curve. */
 		CIcc::SL2_TRANSFER_FUNC								m_tfInColorSpaceTransferFunc[4];		/**< The transfer functions for inputs. */
 		CIcc::SL2_TRANSFER_FUNC								m_tfOutColorSpaceTransferFunc[4];		/**< The transfer functions for outputs. */
+
 		CKernel												m_kKernel;								/**< The kernel to apply. */
 		double												m_dKernelScale;							/**< Kernel scale. */
 		double												m_dKernelYAxis;							/**< Kernel Y axis. */
@@ -585,6 +592,17 @@ namespace sl2 {
 		 * \return Returns true if the profile was applied.
 		 **/
 		bool												ApplySrcColorSpace( uint8_t * _pui8Buffer, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth );
+
+		/**
+		 * Applies the destination colorspace profile.  It actually only applies the gamma curve from the output ICC profile.
+		 * 
+		 * \param _pui8Buffer The texture texels.
+		 * \param _ui32Width The width of the image.
+		 * \param _ui32Height The height of the image.
+		 * \param _ui32Depth The depth of the image.
+		 * \return Returns true if the profile was applied.
+		 **/
+		bool												ApplyDstColorSpace( uint8_t * _pui8Buffer, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth );
 
 		/**
 		 * Sets alpha to _dValue.

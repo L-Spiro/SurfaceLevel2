@@ -1229,6 +1229,12 @@ namespace sl2 {
 		SL2_CGC_EBU_DISPLAY_P3 = 16,												/**< Display P3 Color Encoding (v 1.0) standard. */
 		SL2_CGC_EBU_DISPLAY_P3_PRECISE = 17,										/**< Display P3 Color Encoding (v 1.0) in high precision, without the discontinuities in the standard. */
 
+		SL2_CGC_ITU_BT_601_525 = 18,												/**< ITU-R Recommendation BT.601 (525) standard. */
+		SL2_CGC_ITU_BT_601_525_PRECISE = 19,										/**< ITU-R Recommendation BT.601 (525) in high precision, without the discontinuities in the standard. */
+
+		SL2_CGC_ITU_BT_601_625 = 20,												/**< ITU-R Recommendation BT.601 (625) standard. */
+		SL2_CGC_ITU_BT_601_625_PRECISE = 21,										/**< ITU-R Recommendation BT.601 (625) in high precision, without the discontinuities in the standard. */
+
 		SL2_CGC_NONE = 0x1337,
 	};
 
