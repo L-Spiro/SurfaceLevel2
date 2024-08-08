@@ -29,6 +29,8 @@ namespace sl2 {
 		m_dTargetGamma( 1.0 / -2.2 ),
 		m_cgcInputCurve( SL2_CGC_sRGB_PRECISE ),
 		m_cgcOutputCurve( SL2_CGC_sRGB_PRECISE ),
+		m_i32InRenderingIntent( INTENT_RELATIVE_COLORIMETRIC ),
+		m_i32OutRenderingIntent( INTENT_RELATIVE_COLORIMETRIC ),
 		m_sArraySize( 0 ),
 		m_sFaces( 0 ),
 		m_pkifFormat( nullptr ),
@@ -73,6 +75,8 @@ namespace sl2 {
 			m_dTargetGamma = _iOther.m_dTargetGamma;
 			m_cgcInputCurve = _iOther.m_cgcInputCurve;
 			m_cgcOutputCurve = _iOther.m_cgcOutputCurve;
+			m_i32InRenderingIntent = _iOther.m_i32InRenderingIntent,
+			m_i32OutRenderingIntent = _iOther.m_i32OutRenderingIntent;
 			for ( size_t I = SL2_ELEMENTS( m_tfInColorSpaceTransferFunc ); I--; ) {
 				m_tfInColorSpaceTransferFunc[I] = _iOther.m_tfInColorSpaceTransferFunc[I];
 			}
@@ -109,6 +113,8 @@ namespace sl2 {
 			_iOther.m_dTargetGamma = 1.0 / -2.2;
 			_iOther.m_cgcInputCurve = SL2_CGC_sRGB_PRECISE;
 			_iOther.m_cgcOutputCurve = SL2_CGC_sRGB_PRECISE;
+			_iOther.m_i32InRenderingIntent = INTENT_RELATIVE_COLORIMETRIC,
+			_iOther.m_i32OutRenderingIntent = INTENT_RELATIVE_COLORIMETRIC;
 			for ( size_t I = SL2_ELEMENTS( m_tfInColorSpaceTransferFunc ); I--; ) {
 				_iOther.m_tfInColorSpaceTransferFunc[I] = CIcc::SL2_TRANSFER_FUNC();
 			}
@@ -147,6 +153,8 @@ namespace sl2 {
 		m_dTargetGamma = 1.0 / -2.2;
 		m_cgcInputCurve = SL2_CGC_sRGB_PRECISE;
 		m_cgcOutputCurve = SL2_CGC_sRGB_PRECISE;
+		m_i32InRenderingIntent = INTENT_RELATIVE_COLORIMETRIC,
+		m_i32OutRenderingIntent = INTENT_RELATIVE_COLORIMETRIC;
 		m_sArraySize = 0;
 		m_sFaces = 0;
 		for ( auto I = m_vMipMaps.size(); I--; ) {
@@ -512,6 +520,9 @@ namespace sl2 {
 		if ( !Format()->pfToRgba64F( Data( _sMip, 0, _sArray, _sFace ), vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), Format() ) ) {
 			return SL2_E_INTERNALERROR;
 		}
+		if ( m_bApplyInputColorSpaceTransfer ) {
+			ApplySrcColorSpace( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
+		}
 		BakeGamma( vTmp.data(), m_dGamma, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), CFormat::TransferFunc( m_cgcInputCurve ) );
 		if ( !m_bIsPreMultiplied && m_bNeedsPreMultiply ) {
 			CFormat::ApplyPreMultiply( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
@@ -536,6 +547,9 @@ namespace sl2 {
 
 		if ( m_dTargetGamma ) {
 			BakeGamma( vTmp.data(), 1.0 / m_dTargetGamma, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), CFormat::TransferFunc( m_cgcOutputCurve ) );
+		}
+		if ( m_bApplyInputColorSpaceTransfer ) {
+			ApplyDstColorSpace( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
 		}
 
 		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*_pkifFormat);
@@ -826,7 +840,7 @@ namespace sl2 {
 		}
 		if ( !CIcc::CreateLinearProfile( m_vOutIccProfile, pDst ) ) { return false; }
 
-		CIcc::SL2_CMS_TRANSFORM tTransform( ::cmsCreateTransform( pSrc.hProfile, TYPE_RGBA_DBL, pDst.hProfile, TYPE_RGBA_DBL, INTENT_RELATIVE_COLORIMETRIC, 0 ) );
+		CIcc::SL2_CMS_TRANSFORM tTransform( ::cmsCreateTransform( pSrc.hProfile, TYPE_RGBA_DBL, pDst.hProfile, TYPE_RGBA_DBL, m_i32InRenderingIntent, 0 ) );
 		if ( tTransform.hTransform == NULL ) { return false; }
 		
 		::cmsDoTransform( tTransform.hTransform, _pui8Buffer, _pui8Buffer, _ui32Width * _ui32Height * _ui32Depth );
@@ -844,7 +858,7 @@ namespace sl2 {
 	 * \return Returns true if the profile was applied.
 	 **/
 	bool CImage::ApplyDstColorSpace( uint8_t * _pui8Buffer, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) {
-		if ( !_pui8Buffer ) { return false; }
+		if ( !_pui8Buffer || m_vOutIccProfile.size() == 0 ) { return false; }
 		CIcc::SL2_CMS_PROFILE pSrc, pDst;
 
 		if ( !CIcc::CreateLinearProfile( m_vOutIccProfile, pSrc ) ) { return false; }
@@ -852,7 +866,7 @@ namespace sl2 {
 		if ( m_vOutIccProfile.size() != static_cast<size_t>(static_cast<cmsUInt32Number>(m_vOutIccProfile.size())) || static_cast<cmsUInt32Number>(m_vOutIccProfile.size()) <= 0 ) { return false; }
 		if ( pDst.Set( ::cmsOpenProfileFromMem( m_vOutIccProfile.data(), static_cast<cmsUInt32Number>(m_vOutIccProfile.size()) ), true ).hProfile == NULL ) { return false; }
 
-		CIcc::SL2_CMS_TRANSFORM tTransform( ::cmsCreateTransform( pSrc.hProfile, TYPE_RGBA_DBL, pDst.hProfile, TYPE_RGBA_DBL, INTENT_RELATIVE_COLORIMETRIC, 0 ) );
+		CIcc::SL2_CMS_TRANSFORM tTransform( ::cmsCreateTransform( pSrc.hProfile, TYPE_RGBA_DBL, pDst.hProfile, TYPE_RGBA_DBL, INTENT_PERCEPTUAL/*m_i32OutRenderingIntent*/, 0 ) );
 		if ( tTransform.hTransform == NULL ) { return false; }
 		
 		::cmsDoTransform( tTransform.hTransform, _pui8Buffer, _pui8Buffer, _ui32Width * _ui32Height * _ui32Depth );

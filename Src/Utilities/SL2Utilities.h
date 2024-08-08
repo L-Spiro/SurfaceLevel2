@@ -404,6 +404,60 @@ namespace sl2 {
 		}
 
 		/**
+		 * Converts from linear to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					PassThrough( double _dVal ) {
+			return _dVal;
+		}
+
+		/**
+		 * Converts from 2.2 to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					Pow2_2toLinear( double _dVal ) {
+			if ( _dVal < 0 ) { return -std::pow( -_dVal, 2.2 ); }
+			return std::pow( _dVal, 2.2 );
+		}
+
+		/**
+		 * Converts from linear to 2.2.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to DCI-P3 space.
+		 */
+		static inline double SL2_FASTCALL					LinearToPow2_2( double _dVal ) {
+			if ( _dVal < 0 ) { return -std::pow( -_dVal, 1.0 / 2.2 ); }
+			return std::pow( _dVal, 1.0 / 2.2 );
+		}
+
+		/**
+		 * Converts from 2.8 to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					Pow2_8toLinear( double _dVal ) {
+			if ( _dVal < 0 ) { return -std::pow( -_dVal, 2.8 ); }
+			return std::pow( _dVal, 2.8 );
+		}
+
+		/**
+		 * Converts from linear to 2.8.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to DCI-P3 space.
+		 */
+		static inline double SL2_FASTCALL					LinearToPow2_8( double _dVal ) {
+			if ( _dVal < 0 ) { return -std::pow( -_dVal, 1.0 / 2.8 ); }
+			return std::pow( _dVal, 1.0 / 2.8 );
+		}
+
+		/**
 		 * Converts from Adobe RGB to linear.
 		 * 
 		 * \param _dVal The value to convert.

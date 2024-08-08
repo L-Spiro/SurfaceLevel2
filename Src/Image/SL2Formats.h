@@ -1235,6 +1235,14 @@ namespace sl2 {
 		SL2_CGC_ITU_BT_601_625 = 20,												/**< ITU-R Recommendation BT.601 (625) standard. */
 		SL2_CGC_ITU_BT_601_625_PRECISE = 21,										/**< ITU-R Recommendation BT.601 (625) in high precision, without the discontinuities in the standard. */
 
+		SL2_CGC_GENERIC_FILM = 23,													/**< Generic film (color filters using Illuminant C). */
+
+		SL2_CGC_ITU_BT_470_M_NTSC = 24,												/**< Rec. ITU-R BT.470-6 (M/NTSC). */
+		SL2_CGC_ITU_BT_470_M_PAL = 25,												/**< Rec. ITU-R BT.470-6 (M/PAL). */
+		SL2_CGC_ITU_BT_470_B_N_PAL = 26,											/**< Rec. ITU-R BT.470-6 (B, B1, D, D1, G, H, K, N/PAL, K1, L/SECAM). */
+
+		SL2_CGC_ACESCG = 27,														/**< ACEScg. */
+
 		SL2_CGC_NONE = 0x1337,
 	};
 
@@ -2208,7 +2216,9 @@ namespace sl2 {
 		 * \param _cgcCurve The transfer function pair index.
 		 * \return Returns a constant reference to a transfer function.
 		 **/
-		static const SL2_TRANSFER_FUNCS &											TransferFunc( SL2_COLORSPACE_GAMMA_CURVES _cgcCurve ) { return m_tfColorspaceTransfers[_cgcCurve]; }
+		static const SL2_TRANSFER_FUNCS &											TransferFunc( SL2_COLORSPACE_GAMMA_CURVES _cgcCurve ) {
+			return m_tfColorspaceTransfers[_cgcCurve==SL2_CGC_NONE?SL2_CGC_sRGB_PRECISE:_cgcCurve];
+		}
 
 
 	protected :

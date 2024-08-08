@@ -357,6 +357,17 @@ namespace sl2 {
 		}
 
 		/**
+		 * Sets the input and output rendering intents.
+		 * 
+		 * \param _i32In The input rendering intent.
+		 * \param _i32Out The output rendering intent.
+		 **/
+		inline void											SetRenderingIntents( int32_t _i32In, int32_t _i32Out ) {
+			m_i32InRenderingIntent = _i32In;
+			m_i32OutRenderingIntent = _i32Out;
+		}
+
+		/**
 		 * Gets the output ICC file.
 		 *
 		 * \return Returns a constant reference to the in-memory output ICC file.
@@ -491,6 +502,8 @@ namespace sl2 {
 		SL2_COLORSPACE_GAMMA_CURVES							m_cgcOutputCurve;						/**< The output gamma curve. */
 		CIcc::SL2_TRANSFER_FUNC								m_tfInColorSpaceTransferFunc[4];		/**< The transfer functions for inputs. */
 		CIcc::SL2_TRANSFER_FUNC								m_tfOutColorSpaceTransferFunc[4];		/**< The transfer functions for outputs. */
+		int32_t												m_i32InRenderingIntent;					/**< Input -> linear rendering intent. */
+		int32_t												m_i32OutRenderingIntent;				
 
 		CKernel												m_kKernel;								/**< The kernel to apply. */
 		double												m_dKernelScale;							/**< Kernel scale. */

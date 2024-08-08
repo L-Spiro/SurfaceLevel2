@@ -580,7 +580,7 @@ namespace sl2 {
 		{ 0.2124,				0.7011,				0.0866 },										// SL2_LS_SMPTC
 		{ 0.2988390,			0.5868110,			0.1143500 },									// SL2_LS_REC_601
 		{ 0.3086,				0.6094,				0.0820 },										// SL2_LS_CIE_1931
-		{ 0.2988390,			0.5868110,			0.1143500 },									// SL2_LS_NTSC_1953
+		{ 0.3,					0.59,				0.11 },											// SL2_LS_NTSC_1953
 		{ 0.2988390,			0.5868110,			0.1143500 },									// SL2_LS_EBU_TECH_3213
 	};
 
@@ -621,9 +621,13 @@ namespace sl2 {
 #define SL2_BT_2020_CHROMAS								{ 0.708, 0.292, 0.2627 },					{ 0.170, 0.797, 0.6780 },					{ 0.131, 0.046, 0.0593 },					{ 0.3127, 0.3290, 1.0000 }
 #define SL2_DCI_P3_CHROMAS								{ 0.680, 0.320, 1.0 },						{ 0.265, 0.690, 1.0 },						{ 0.150, 0.060, 1.0 },						{ 0.3140, 0.3510, 1.0000 }
 #define SL2_SMPTE_240M_CHROMAS							{ 0.630, 0.340, 0.2122 },					{ 0.310, 0.595, 0.7013 },					{ 0.155, 0.070, 0.0865 },					{ 0.3127, 0.3290, 1.0000 }
-#define SL2_NTSC_1953_CHROMAS							{ 0.670, 0.330, 0.2988390 },				{ 0.210, 0.710, 0.5868110 },				{ 0.140, 0.080, 0.1143500 },				{ 0.3100, 0.3160, 1.0000 }
+#define SL2_NTSC_1953_CHROMAS							{ 0.670, 0.330, 0.3 },						{ 0.210, 0.710, 0.59 },						{ 0.140, 0.080, 0.11 },						{ 0.3100, 0.3160, 1.0000 }
 #define SL2_EBU_TECH_3213_CHROMAS						{ 0.640, 0.330, 0.2988390 },				{ 0.290, 0.600, 0.5868110 },				{ 0.150, 0.060, 0.1143500 },				{ 0.3127, 0.3290, 1.0000 }
 #define SL2_DISPLAY_P3_CHROMAS							{ 0.680, 0.320, 1.0 },						{ 0.265, 0.690, 1.0 },						{ 0.150, 0.060, 1.0 },						{ 0.3140, 0.3510, 1.0000 }
+#define SL2_GENERIC_FILM_CHROMAS						{ 0.681, 0.319, 1.0 },						{ 0.243, 0.692, 1.0 },						{ 0.145, 0.049, 1.0 },						{ 0.3100, 0.3160, 1.0000 }
+#define SL2_ACESCG_CHROMAS								{ 0.713, 0.293, 1.0 },						{ 0.165, 0.830, 1.0 },						{ 0.128, 0.044, 1.0 },						{ 0.32168,0.33767,1.0000 }
+#define SL2_BT_470_NTSC_CHROMA							{ 0.670, 0.330, 0.2988390 },				{ 0.210, 0.710, 0.5868110 },				{ 0.140, 0.080, 0.1143500 },				{ 0.3100, 0.3160, 1.0000 }
+#define SL2_BT_470_PAL_CHROMA							{ 0.640, 0.330, 0.2988390 },				{ 0.290, 0.600, 0.5868110 },				{ 0.150, 0.060, 0.1143500 },				{ 0.3127, 0.3290, 1.0000 }
 
 #define SL2_sRGB_STANDARD_CURVE							{ 2.4,					1.0 / 1.055, 0.055 / 1.055, 1.0 / 12.92,												0.04045 }, 4
 #define SL2_sRGB_PRECISE_CURVE							{ 2.4,					1.0 / 1.055, 0.055 / 1.055, 1.0 / 12.92321018078785499483274179510772228240966796875,	0.039285714285714291860163172032116563059389591217041015625 }, 4
@@ -633,6 +637,9 @@ namespace sl2 {
 #define SL2_DCI_P3_CURVE								{ 2.6 }, 1
 #define SL2_SMPTE_240M_1999_CURVE						{ 1.0 / 0.45,			1.0 / 1.1115, 0.1115 / 1.1115, 1.0 / 4.0,												0.0913 }, 4
 #define SL2_SMPTE_240M_1999_PRECISE						{ 1.0 / 0.45,			1.0 / 1.1115721959217312875267680283286608755588531494140625, 0.1115721959217312597711924126997473649680614471435546875 / 1.1115721959217312875267680283286608755588531494140625, 1.0 / 4.0,												0.0912863421177801115380390228892792947590351104736328125 }, 4
+#define SL2_GENERIC_FILM_CURVE							{ 1.0 }, 1
+#define SL2_BT_470_NTSC_CURVE							{ 2.2 }, 1
+#define SL2_BT_470_PAL_CURVE							{ 2.8 }, 1
 
 	/** Colorspace transfer functions. */
 	CFormat::SL2_TRANSFER_FUNCS CFormat::m_tfColorspaceTransfers[] = {
@@ -692,7 +699,24 @@ namespace sl2 {
 			SL2_BT_601_625_CHROMA, SL2_SMPTE_170M_1999_CURVE, L"Standard Rec. 601 (625)" },
 		{ CUtilities::SMPTE170MtoLinear_Precise,		CUtilities::LinearToSMPTE170M_Precise,					// SL2_CGC_ITU_BT_601_625_PRECISE
 			SL2_BT_601_625_CHROMA, SL2_SMPTE_170M_1999_PRECISE_CURVE, L"Precise Rec. 601 (625)" },
+
+		{ CUtilities::PassThrough,						CUtilities::PassThrough,								// SL2_CGC_GENERIC_FILM
+			SL2_GENERIC_FILM_CHROMAS, SL2_GENERIC_FILM_CURVE, L"Generic Film" },
+
+		{ CUtilities::Pow2_2toLinear,					CUtilities::LinearToPow2_2,								// SL2_CGC_ITU_BT_470_M_NTSC
+			SL2_BT_470_NTSC_CHROMA, SL2_BT_470_NTSC_CURVE, L"ITU BT.470 (M/NTSC)" },
+		{ CUtilities::Pow2_2toLinear,					CUtilities::LinearToPow2_2,								// SL2_CGC_ITU_BT_470_M_PAL
+			SL2_BT_470_NTSC_CHROMA, SL2_BT_470_PAL_CURVE, L"ITU BT.470 (M/PAL)" },
+		{ CUtilities::Pow2_8toLinear,					CUtilities::LinearToPow2_8,								// SL2_CGC_ITU_BT_470_B_N_PAL
+			SL2_BT_470_PAL_CHROMA, SL2_BT_470_PAL_CURVE, L"ITU BT.470 (B, B1, D, D1, G, H, K, N/PAL, K1, L/SECAM)" },
+
+		{ CUtilities::PassThrough,						CUtilities::PassThrough,								// SL2_CGC_GENERIC_FILM
+			SL2_ACESCG_CHROMAS, SL2_GENERIC_FILM_CURVE, L"ACEScg" },
 	};
+#undef SL2_BT_470_PAL_CURVE
+#undef SL2_BT_470_NTSC_CURVE
+#undef SL2_ACESCG_CHROMAS
+#undef SL2_GENERIC_FILM_CURVE
 #undef SL2_SMPTE_240M_1999_PRECISE
 #undef SL2_SMPTE_240M_1999_CURVE
 #undef SL2_DCI_P3_CURVE
@@ -702,6 +726,9 @@ namespace sl2 {
 #undef SL2_sRGB_PRECISE_CURVE
 #undef SL2_sRGB_STANDARD_CURVE
 
+#undef SL2_BT_470_PAL_CHROMA
+#undef SL2_BT_470_NTSC_CHROMA
+#undef SL2_GENERIC_FILM_CHROMAS
 #undef SL2_DISPLAY_P3_CHROMAS
 #undef SL2_EBU_TECH_3213_CHROMAS
 #undef SL2_NTSC_1953_CHROMAS
