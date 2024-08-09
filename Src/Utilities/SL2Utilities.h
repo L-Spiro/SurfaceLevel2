@@ -532,6 +532,51 @@ namespace sl2 {
 		}
 
 		/**
+		 * Converts from ACEScc to linear.  Performs a conversion according to the standard.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					ACESccToLinear( double _dVal ) {
+			constexpr double dB = 9.72;
+			constexpr double dC = 17.52;
+			constexpr double dThresh = (dB - 15.0) / dC;														// -0.30136986301369863013698630136986.
+			constexpr double dUpperLimit = (15.9992953870234106972247900557704269886016845703125 + dB) / dC;	// (log2(65504)+9.72)/17.52 -> 1.4679963120447152224443373319503.
+
+			if ( _dVal <= dThresh ) {
+				return (std::pow( 2.0, _dVal * dC - dB ) - 0.0000152587890625 /*std::pow( 2.0, -16.0 )*/) * 2.0;
+			}
+			else if ( _dVal < dUpperLimit ) {
+				return std::pow( 2.0, _dVal * dC - dB );
+			}
+			else {
+				return 65504.0;
+			}
+
+		}
+
+		/**
+		 * Converts from linear to ACEScc.  Performs a conversion according to the standard.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to ACEScc space.
+		 */
+		static inline double SL2_FASTCALL					LinearToACEScc( double _dVal ) {
+			constexpr double dB = 9.72;
+			constexpr double dC = 17.52;
+    
+			if ( _dVal <= 0.0 ) {
+				return (-16.0 /*std::log2( std::pow(2.0, -16.0 ) )*/ + dB) / dC;
+			}
+			else if ( _dVal < 0.000030517578125 /*std::pow( 2.0, -15.0 )*/ ) {
+				return (std::log2( 0.0000152587890625 /*std::pow( 2.0, -16.0 )*/ + _dVal * 0.5 ) + dB) / dC;
+			}
+			else {
+				return (std::log2( _dVal ) + dB) / dC;
+			}
+		}
+
+		/**
 		 * Converts XYZ values to chromaticities.
 		 * 
 		 * \param _dX The input X.

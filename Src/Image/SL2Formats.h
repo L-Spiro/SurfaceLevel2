@@ -1243,6 +1243,9 @@ namespace sl2 {
 
 		SL2_CGC_ACESCG = 27,														/**< ACEScg. */
 
+		SL2_CGC_NTSC_1987_STANDARD = 28,											/**< Standard SMPTE C. */
+		SL2_CGC_NTSC_1987 = 29,														/**< SMPTE C with a pow(2.2) curve. */
+
 		SL2_CGC_NONE = 0x1337,
 	};
 
