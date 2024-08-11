@@ -35,6 +35,7 @@ namespace sl2 {
 		int32_t															i32InRenderingIntent = INTENT_RELATIVE_COLORIMETRIC;			/**< Input -> linear rendering intent. */
 		int32_t															i32OutRenderingIntent = INTENT_RELATIVE_COLORIMETRIC;			/**< Input -> linear rendering intent. */
 		bool															bEmbedColorProfile = false;										/**< Embed the color profile. */
+		bool															bIgnoreSourceColorspaceGamma = false;							/**< Ignores the gamma curve inside any embedded or selected ICC profiles. */
 
 		sl2::CResampler::SL2_RESAMPLE									rResample;														/**< Resampling parameters. */
 		sl2::CResampler::SL2_RESAMPLE									rMipResample;													/**< Mipmap resampling parameters. */
@@ -92,6 +93,9 @@ namespace sl2 {
 		int																iJp2SaveOption = JP2_DEFAULT;									/**< JP2 compression amount. */
 
 		int																iJpgSaveOption = JPEG_DEFAULT;									/**< JPG compression amount. */
+
+		sl2::SL2_VKFORMAT												vkTgaFormat = SL2_VK_FORMAT_UNDEFINED;							/**< The TGA format. */
+		int																iTgaSaveOption = TARGA_DEFAULT;									/**< TGA option. */
 
 		bool															bNeedsPreMultiply = false;										/**< Does the target format, or user request, demand pre-multiplied alpha? */
 		bool															bSwap = false;													/**< Swap R and B? */
@@ -310,5 +314,29 @@ namespace sl2 {
 	 * \return Returns an error code.
 	 **/
 	SL2_ERRORS															ExportAsKtx1( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions );
+
+	/**
+	 * Exports as TGA.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS															ExportAsTga( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions );
+
+	/**
+	 * Exports as TGA.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \param _sMip The mipmap level to export.
+	 * \param _sArray The array index to export.
+	 * \param _sFace The face to export.
+	 * \param _sSlice The slice to export.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS															ExportAsTga( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice );
 
 }	// namespace sl2

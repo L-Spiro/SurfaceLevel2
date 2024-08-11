@@ -375,6 +375,13 @@ namespace sl2 {
 		inline const std::vector<uint8_t> &					OutputColorSpace() const { return m_vOutIccProfile; }
 
 		/**
+		 * Whether to ignore ICC colorspace gamma.
+		 *
+		 * \param _bIgnoreSourceColorspaceGamma To ignore or not to ignore.
+		 **/
+		inline void											SetIgnoreColorspaceGamma( bool _bIgnoreSourceColorspaceGamma ) { m_bIgnoreSourceColorspaceGamma = _bIgnoreSourceColorspaceGamma; }
+
+		/**
 		 * Sets whether or not alpha needs to be pre-multiplied.
 		 * 
 		 * \param _bPreMult If true, alpha will be premultiplied.
@@ -535,7 +542,7 @@ namespace sl2 {
 		std::vector<uint8_t>								m_vOutIccProfile;						/**< The output ICC profile. */
 		bool												m_bApplyInputColorSpaceTransfer;		/**< If true, any ICC-profile transfer functions are applied during the X -> Linear conversion. */
 		bool												m_bApplyOutputColorSpaceTransfer;		/**< If true, any ICC-profile transfer functions are applied during the Linear -> X conversion. */
-
+		bool												m_bIgnoreSourceColorspaceGamma;			/**< Ignores the gamma curve on embedded or selected colrospace profiles. */
 
 		// == Functions.
 		/**

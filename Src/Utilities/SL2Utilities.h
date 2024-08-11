@@ -428,7 +428,7 @@ namespace sl2 {
 		 * Converts from linear to 2.2.
 		 *
 		 * \param _dVal The value to convert.
-		 * \return Returns the value converted to DCI-P3 space.
+		 * \return Returns the value converted to 2.2 space.
 		 */
 		static inline double SL2_FASTCALL					LinearToPow2_2( double _dVal ) {
 			if ( _dVal < 0 ) { return -std::pow( -_dVal, 1.0 / 2.2 ); }
@@ -450,7 +450,7 @@ namespace sl2 {
 		 * Converts from linear to 2.8.
 		 *
 		 * \param _dVal The value to convert.
-		 * \return Returns the value converted to DCI-P3 space.
+		 * \return Returns the value converted to 2.8 space.
 		 */
 		static inline double SL2_FASTCALL					LinearToPow2_8( double _dVal ) {
 			if ( _dVal < 0 ) { return -std::pow( -_dVal, 1.0 / 2.8 ); }
@@ -574,6 +574,125 @@ namespace sl2 {
 			else {
 				return (std::log2( _dVal ) + dB) / dC;
 			}
+		}
+
+		/**
+		 * Converts from ROMM RGB to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					RommRgbToLinear( double _dVal ) {
+			if ( _dVal <= 0 ) { return 0.0; }
+			if ( _dVal <= 0.03125 ) {
+				return _dVal / 16.0;
+			}
+			if ( _dVal < 1.0 ) {
+				return std::pow( _dVal, 1.8 );
+			}
+			return 1.0;
+		}
+
+		/**
+		 * Converts from linear to ROMM RGB.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to ROMM RGB space.
+		 */
+		static inline double SL2_FASTCALL					LinearToRommRgb( double _dVal ) {
+			if ( _dVal <= 0 ) { return 0.0; }
+			if ( _dVal <= 0.001953125 ) {	// pow(16.0, 1.8/(1-1.8));
+				return _dVal * 16.0;
+			}
+			if ( _dVal < 1.0 ) {
+				return std::pow( _dVal, 1.0 / 1.8 );
+			}
+			return 1.0;
+		}
+
+		/**
+		 * Converts from RIMM RGB to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					RimmRgbToLinear( double _dVal ) {
+			//constexpr double dVclip = 1.4022782421730806134974045562557876110076904296875;	// 1.099 * pow( 2.0, 0.45 ) - 0.099
+			constexpr double dVclip = 1.4023868927346205826012237594113685190677642822265625;	// 1.09929682680944296180314267985522747039794921875 * pow( 2.0, 0.45 ) - 0.09929682680944297568093048766968422569334506988525390625
+			_dVal *= dVclip;
+			if ( _dVal < -0.08124285829863515939752716121802222914993762969970703125 ) { return -std::pow( (-_dVal + 0.09929682680944297568093048766968422569334506988525390625) / 1.09929682680944296180314267985522747039794921875, 1.0 / 0.45 ); }
+			return _dVal <= 0.08124285829863515939752716121802222914993762969970703125 ?
+				_dVal / 4.5 :
+				std::pow( (_dVal + 0.09929682680944297568093048766968422569334506988525390625) / 1.09929682680944296180314267985522747039794921875, 1.0 / 0.45 );
+		}
+
+		/**
+		 * Converts from linear to RIMM RGB.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to RIMM RGB space.
+		 */
+		static inline double SL2_FASTCALL					LinearToRimmRgb( double _dVal ) {
+			//constexpr double dVclip = 1.4022782421730806134974045562557876110076904296875;	// 1.099 * pow( 2.0, 0.45 ) - 0.099
+			constexpr double dVclip = 1.4023868927346205826012237594113685190677642822265625;	// 1.09929682680944296180314267985522747039794921875 * pow( 2.0, 0.45 ) - 0.09929682680944297568093048766968422569334506988525390625
+			if ( _dVal < -0.0180539685108078128139563744980478077195584774017333984375 ) { return (-1.09929682680944296180314267985522747039794921875 * std::pow( -_dVal, 0.45 ) + 0.09929682680944297568093048766968422569334506988525390625) *
+				dVclip; }
+			return (_dVal <= 0.0180539685108078128139563744980478077195584774017333984375 ?
+				_dVal * 4.5 :
+				1.09929682680944296180314267985522747039794921875 * std::pow( _dVal, 0.45 ) - 0.09929682680944297568093048766968422569334506988525390625) / dVclip;
+		}
+
+		/**
+		 * Converts from ERIMM RGB to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					ErimmRgbToLinear( double _dVal ) {
+			constexpr double dLogEclip = 2.5;
+			constexpr double dEclip = 316.22776601683796116049052216112613677978515625;				// pow( 10, 2.5 ).
+			constexpr double dLogEmin = -3.0;
+			constexpr double dEmin = 0.001;
+			constexpr double dLogEt = -2.56570551809674807230976512073539197444915771484375;
+			constexpr double dEt = 0.0027182818284590451983484538089896886958740651607513427734375;	// e * dEmin.
+
+			constexpr double dLogEclipMinusLogEmin = dLogEclip - dLogEmin;
+			constexpr double dLogEtMinusLogEmin = dLogEt - dLogEmin;
+
+			if ( _dVal <= 0.0 ) { return 0.0; }
+			if ( _dVal <= (dLogEtMinusLogEmin / dLogEclipMinusLogEmin) ) {
+				return (dLogEclipMinusLogEmin / dLogEtMinusLogEmin) * (_dVal * dEt);
+			}
+			if ( _dVal < 1.0 ) {
+				return std::pow( 10.0, _dVal * dLogEclipMinusLogEmin + dLogEmin );
+			}
+			return 1.0;
+		}
+
+		/**
+		 * Converts from linear to ERIMM RGB.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to ERIMM RGB space.
+		 */
+		static inline double SL2_FASTCALL					LinearToErimmRgb( double _dVal ) {
+			constexpr double dLogEclip = 2.5;
+			constexpr double dEclip = 316.22776601683796116049052216112613677978515625;				// pow( 10, 2.5 ).
+			constexpr double dLogEmin = -3.0;
+			constexpr double dEmin = 0.001;
+			constexpr double dLogEt = -2.56570551809674807230976512073539197444915771484375;
+			constexpr double dEt = 0.0027182818284590451983484538089896886958740651607513427734375;	// e * dEmin.
+
+			constexpr double dLogEclipMinusLogEmin = dLogEclip - dLogEmin;
+
+			if ( _dVal <= 0.0 ) { return 0.0; }
+			if ( _dVal <= dEt ) {
+				return ((dLogEt - dLogEmin) / dLogEclipMinusLogEmin) * (_dVal / dEt);
+			}
+			if ( _dVal <= dEclip && _dVal < 1.0 ) {
+				return (std::log10( _dVal ) - dLogEmin) / dLogEclipMinusLogEmin;
+			}
+			return 1.0;
 		}
 
 		/**

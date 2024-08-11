@@ -430,12 +430,32 @@ namespace sl2 {
 		
 
 		if ( _bIncludeCurves ) {
-			cmsToneCurve *	ptcGamma[3];
-			SL2_CMS_TONECURVE tcCurve;
-			ptcGamma[0] = ptcGamma[1] = ptcGamma[2] = tcCurve.Set( ::cmsBuildParametricToneCurve( _cContextID, tfFunc.i32CurveType, tfFunc.dParaCurve ) ).tcCurve;
-			if ( ptcGamma[0] == NULL ) { return false; }
+			if ( tfFunc.i32CurveType == 0 ) {
+				std::vector<cmsFloat32Number> vValues;
+				try {
+					vValues.resize( 4096 );
+				}
+				catch ( ... ) { return false; }
 
-			if ( !_cpProfile.Set( ::cmsCreateRGBProfileTHR( _cContextID, &cieD65, &ciePrimaries, ptcGamma ), true ).hProfile ) { return false; }
+				for ( size_t I = 0; I < vValues.size(); ++I ) {
+					vValues[I] = static_cast<cmsFloat32Number>(tfFunc.pfXtoLinear( static_cast<double>(I) / (vValues.size() - 1.0) ));
+				}
+				cmsToneCurve *	ptcGamma[3];
+				SL2_CMS_TONECURVE tcCurve;
+				ptcGamma[0] = ptcGamma[1] = ptcGamma[2] = tcCurve.Set( ::cmsBuildTabulatedToneCurveFloat( _cContextID, static_cast<cmsUInt32Number>(vValues.size()), vValues.data() ) ).tcCurve;
+				if ( ptcGamma[0] == NULL ) { return false; }
+
+				if ( !_cpProfile.Set( ::cmsCreateRGBProfileTHR( _cContextID, &cieD65, &ciePrimaries, ptcGamma ), true ).hProfile ) { return false; }
+
+			}
+			else {
+				cmsToneCurve *	ptcGamma[3];
+				SL2_CMS_TONECURVE tcCurve;
+				ptcGamma[0] = ptcGamma[1] = ptcGamma[2] = tcCurve.Set( ::cmsBuildParametricToneCurve( _cContextID, tfFunc.i32CurveType, tfFunc.dParaCurve ) ).tcCurve;
+				if ( ptcGamma[0] == NULL ) { return false; }
+
+				if ( !_cpProfile.Set( ::cmsCreateRGBProfileTHR( _cContextID, &cieD65, &ciePrimaries, ptcGamma ), true ).hProfile ) { return false; }
+			}
 		}
 		else {
 			cmsFloat64Number f64nParm[1] = { 1.0 };

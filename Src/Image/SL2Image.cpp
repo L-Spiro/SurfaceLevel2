@@ -49,7 +49,8 @@ namespace sl2 {
 		m_ttType( SL2_TT_2D ),
 		m_bFullyOpaque( false ),
 		m_bApplyInputColorSpaceTransfer( true ),
-		m_bApplyOutputColorSpaceTransfer( false ) {
+		m_bApplyOutputColorSpaceTransfer( false ),
+		m_bIgnoreSourceColorspaceGamma( false ) {
 		m_sSwizzle = CFormat::DefaultSwizzle();
 	}
 	CImage::~CImage() {
@@ -104,6 +105,7 @@ namespace sl2 {
 			m_vOutIccProfile = std::move( _iOther.m_vOutIccProfile );
 			m_bApplyInputColorSpaceTransfer = _iOther.m_bApplyInputColorSpaceTransfer;
 			m_bApplyOutputColorSpaceTransfer = _iOther.m_bApplyOutputColorSpaceTransfer;
+			m_bIgnoreSourceColorspaceGamma = _iOther.m_bIgnoreSourceColorspaceGamma;
 			
 			_iOther.m_sArraySize = 0;
 			_iOther.m_kKernel.SetSize( 0 );
@@ -139,6 +141,7 @@ namespace sl2 {
 			_iOther.m_bFullyOpaque = false;
 			_iOther.m_bApplyInputColorSpaceTransfer = true;
 			_iOther.m_bApplyOutputColorSpaceTransfer = false;
+			_iOther.m_bIgnoreSourceColorspaceGamma = false;
 		}
 
 		return (*this);
@@ -193,6 +196,7 @@ namespace sl2 {
 		m_vOutIccProfile = std::vector<uint8_t>();
 		m_bApplyInputColorSpaceTransfer = true;
 		m_bApplyOutputColorSpaceTransfer = false;
+		m_bIgnoreSourceColorspaceGamma = false;
 	}
 
 	/**
@@ -823,7 +827,12 @@ namespace sl2 {
 		CIcc::SL2_CMS_PROFILE pSrc, pDst;
 		if ( m_vIccProfile.size() != 0 ) {
 			if ( m_vIccProfile.size() != static_cast<size_t>(static_cast<cmsUInt32Number>(m_vIccProfile.size())) || static_cast<cmsUInt32Number>(m_vIccProfile.size()) <= 0 ) { return false; }
-			if ( pSrc.Set( ::cmsOpenProfileFromMem( m_vIccProfile.data(), static_cast<cmsUInt32Number>(m_vIccProfile.size()) ), true ).hProfile == NULL ) { return false; }
+			if ( m_bIgnoreSourceColorspaceGamma ) {
+				if ( !CIcc::CreateLinearProfile( m_vIccProfile, pSrc ) ) { return false; }
+			}
+			else {
+				if ( pSrc.Set( ::cmsOpenProfileFromMem( m_vIccProfile.data(), static_cast<cmsUInt32Number>(m_vIccProfile.size()) ), true ).hProfile == NULL ) { return false; }
+			}
 		}
 		else if ( m_cgcInputCurve != SL2_CGC_NONE ) {
 			// User selection overrides embedded profile.

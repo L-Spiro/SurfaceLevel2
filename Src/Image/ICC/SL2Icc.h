@@ -160,7 +160,7 @@ namespace sl2 {
 			 * \param _hTransform The transform to set.
 			 * \return Returns a reference to this object.
 			 **/
-			SL2_CMS_TONECURVE &										Set( cmsToneCurve * _hTransform ) {
+			SL2_CMS_TONECURVE &									Set( cmsToneCurve * _hTransform ) {
 				Reset();
 				tcCurve = _hTransform;
 				return (*this);

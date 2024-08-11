@@ -1246,6 +1246,12 @@ namespace sl2 {
 		SL2_CGC_NTSC_1987_STANDARD = 28,											/**< Standard SMPTE C. */
 		SL2_CGC_NTSC_1987 = 29,														/**< SMPTE C with a pow(2.2) curve. */
 
+		SL2_CGC_ROMM_RGB = 30,														/**< Reference Output Medium Metric RGB (ROMM RGB). */
+		SL2_CGC_RIMM_RGB = 31,														/**< Reference Input Medium Metric RGB (RIMM RGB). */
+		SL2_CGC_ERIMM_RGB = 32,														/**< Extended Reference Input Medium Metric RGB (ERIMM RGB). */
+
+		SL2_CGC_PLASA_ANSI_E154 = 33,												/**< PLASA ANSI E1.54. */
+
 		SL2_CGC_NONE = 0x1337,
 	};
 

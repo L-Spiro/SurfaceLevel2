@@ -256,9 +256,18 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         else if ( ::_wcsicmp( _wcpArgV[1], L"ntsc_1987_std" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"smpte_c_std" ) == 0 ) {                                                                                                                                                                                                                                                            \
             oOptions.VAR = sl2::SL2_CGC_NTSC_1987_STANDARD;                                                                                                                                                                                                                                                                                                                         \
         }                                                                                                                                                                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"romm_rgb" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"rommrgb" ) == 0 ) {                                                                                                                                                                                                                                                                     \
+            oOptions.VAR = sl2::SL2_CGC_ROMM_RGB;                                                                                                                                                                                                                                                                                                                                   \
+        }                                                                                                                                                                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"rimm_rgb" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"rimmrgb" ) == 0 ) {                                                                                                                                                                                                                                                                     \
+            oOptions.VAR = sl2::SL2_CGC_RIMM_RGB;                                                                                                                                                                                                                                                                                                                                   \
+        }                                                                                                                                                                                                                                                                                                                                                                           \
+        else if ( ::_wcsicmp( _wcpArgV[1], L"erimm_rgb" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"erimmrgb" ) == 0 ) {                                                                                                                                                                                                                                                                   \
+            oOptions.VAR = sl2::SL2_CGC_ERIMM_RGB;                                                                                                                                                                                                                                                                                                                                  \
+        }                                                                                                                                                                                                                                                                                                                                                                           \
         else {                                                                                                                                                                                                                                                                                                                                                                      \
             SL2_ERRORT( std::format( L"Invalid \"" #CMD "\": \"{}\". Must be sRGB, sRGB_std, smpte_170, smpte_170_std, rec601, rec601_std, rec601_pal, rec601_pal_std, rec709, rec709_std, adobergb, bt2020, bt2020_std, dci_p3, smpte_240, smpte_240_std,"                                                                                                                         \
-                "ntsc_1953, ntsc_1953_std, tech_3213, tech_3213_std, generic_film, bt470_ntsc, bt470_pal, bt470_secam, displayp3, or displayp3_std.",                                                                                                                                                                                                                               \
+                "ntsc_1953, ntsc_1953_std, tech_3213, tech_3213_std, generic_film, bt470_ntsc, bt470_pal, bt470_secam, ntsc_1987, ntsc_1987_std, smpte_c, smpte_c_std, romm_rgb, rimm_rgb, erimm_rgb, displayp3, or displayp3_std.",                                                                                                                                                \
                 _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );                                                                                                                                                                                                                                                                                                                    \
         }                                                                                                                                                                                                                                                                                                                                                                           \
         sl2::CIcc::SL2_CMS_PROFILE cpProfile;                                                                                                                                                                                                                                                                                                                                       \
@@ -279,6 +288,14 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 
             if ( SL2_CHECK( 1, dont_embed_icc ) ) {
                 oOptions.bEmbedColorProfile = false;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, embed_icc ) ) {
+                oOptions.bEmbedColorProfile = true;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, ignore_input_colorspace_gamma ) ) {
+                oOptions.bIgnoreSourceColorspaceGamma = true;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 2, target_colorspace_file ) ) {
@@ -1252,6 +1269,36 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 SL2_ADV( 1 );
             }
 
+            if ( SL2_CHECK( 1, tga_rle ) ) {
+                oOptions.iTgaSaveOption = TARGA_SAVE_RLE;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 2, tga_format ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"RGB24" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8" ) == 0 ) {
+                    oOptions.vkTgaFormat = sl2::SL2_VK_FORMAT_R8G8B8_UNORM;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"RGB24_SRGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGB_SRGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8_SRGB" ) == 0 ) {
+                    oOptions.vkTgaFormat = sl2::SL2_VK_FORMAT_R8G8B8_SRGB;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"RGBA32" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGBA" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8A8" ) == 0 ) {
+                    oOptions.vkTgaFormat = sl2::SL2_VK_FORMAT_R8G8B8A8_UNORM;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"RGBA32_SRGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"RGBA_SRGB" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R8G8B8A8_SRGB" ) == 0 ) {
+                    oOptions.vkTgaFormat = sl2::SL2_VK_FORMAT_R8G8B8A8_SRGB;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"A1RGB5" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"A1R5G5B5" ) == 0 ) {
+                    oOptions.vkTgaFormat = sl2::SL2_VK_FORMAT_A1R5G5B5_UNORM_PACK16;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"L8" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GREYSCALE8" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GRAYSCALE8" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"LUMINANCE8" ) == 0 ) {
+                    oOptions.vkTgaFormat = sl2::SL2_VK_FORMAT_R8_UNORM;
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"tga_format\": \"{}\". Must be R8G8B8, R8G8B8_SRGB, R8G8B8A8, R8G8B8A8_SRGB, A1R5G5B5, or L8.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
+
 
 
             // ============
@@ -1412,6 +1459,13 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     SL2_ADV( 1 );
                 }
             }
+
+            SL2_ERRORT( std::format( L"Invalid command: \"{}\".",
+                _wcpArgV[0] ).c_str(), sl2::SL2_E_INVALIDCALL );
+        }
+        else {
+            SL2_ERRORT( std::format( L"Invalid command: \"{}\".",
+                _wcpArgV[0] ).c_str(), sl2::SL2_E_INVALIDCALL );
         }
 
 
@@ -1435,6 +1489,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         iImage.Resampling() = oOptions.rResample;
         iImage.MipResampling() = oOptions.rMipResample;
         iImage.SetNeedsPreMultiply( oOptions.bNeedsPreMultiply );
+        iImage.SetIgnoreColorspaceGamma( oOptions.bIgnoreSourceColorspaceGamma );
         if ( oOptions.bManuallySetGamma == true ) {
             iImage.SetGamma( oOptions.dGamma );
         }
@@ -1518,6 +1573,13 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         }
         else if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"ktx" ) == 0 ) {
             eError = sl2::ExportAsKtx1( iConverted, oOptions.vOutputs[I], oOptions );
+            if ( sl2::SL2_E_SUCCESS != eError ) {
+                SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
+                    reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
+            }
+        }
+        else if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"tga" ) == 0 ) {
+            eError = sl2::ExportAsTga( iConverted, oOptions.vOutputs[I], oOptions );
             if ( sl2::SL2_E_SUCCESS != eError ) {
                 SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
                     reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
@@ -3286,6 +3348,180 @@ namespace sl2 {
         }
 
         return eRet;
+    }
+
+    /**
+	 * Exports as TGA.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS ExportAsTga( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions ) {
+        if ( _iImage.Mipmaps() == 1 && _iImage.ArraySize() == 1 && _iImage.Faces() == 1 && _iImage.Depth() == 1 ) {
+            return ExportAsTga( _iImage, _sPath, _oOptions, 0, 0, 0, 0 );
+        }
+        else {
+            wchar_t szBuffer[64];
+            std::u16string sRoot = CUtilities::GetFilePath( _sPath ) + CUtilities::NoExtension( _sPath );
+            for ( uint32_t M = 0; M < _iImage.Mipmaps(); ++M ) {
+                for ( uint32_t A = 0; A < _iImage.ArraySize(); ++A ) {
+                    for ( uint32_t F = 0; F < _iImage.Faces(); ++F ) {
+                        for ( uint32_t D = 0; D < _iImage.Depth(); ++D ) {
+                            wchar_t * pwcBuf = szBuffer;
+                            if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_M%.2u", M ); }
+                            if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_A%.2u", A ); }
+                            if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_F%.2u", F ); }
+                            if ( _iImage.Depth() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_D%.2u", D ); }
+                            pwcBuf += ::wsprintfW( pwcBuf, L".tga" );
+                            //::wsprintfW( szBuffer, L"_M%.2u_A%.2u_F%.2u_D%.2u.png", M, A, F, D );
+                           SL2_ERRORS eErr = ExportAsTga( _iImage, CUtilities::Append( sRoot, szBuffer ), _oOptions, M, A, F, D );
+                           if ( eErr != SL2_E_SUCCESS ) { return eErr; }
+                        }
+                    }
+                }
+            }
+        }
+        return SL2_E_SUCCESS;
+    }
+
+	/**
+	 * Exports as TGA.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \param _sMip The mipmap level to export.
+	 * \param _sArray The array index to export.
+	 * \param _sFace The face to export.
+	 * \param _sSlice The slice to export.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS ExportAsTga( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice ) {
+        const CFormat::SL2_BEST_INTERNAL_FORMAT bifFormats[] = {
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8_UNORM ),            FIT_BITMAP, },
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8_SRGB ),             FIT_BITMAP, },
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8A8_UNORM ),          FIT_BITMAP, },
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R8G8B8A8_SRGB ),           FIT_BITMAP, },
+
+            { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_A1R5G5B5_UNORM_PACK16 ),   FIT_BITMAP, },
+
+            { CFormat::FindFormatDataByOgl( SL2_KIF_GL_LUMINANCE8 ),                    FIT_BITMAP },
+        };
+        const CFormat::SL2_BEST_INTERNAL_FORMAT * pkifdUseMe = nullptr;
+        if ( _oOptions.vkTgaFormat != SL2_VK_FORMAT_UNDEFINED ) {
+            pkifdUseMe = CFormat::FindBestFormat( CFormat::FindFormatDataByVulkan( _oOptions.vkTgaFormat ), bifFormats, SL2_ELEMENTS( bifFormats ) );
+            if ( !pkifdUseMe ) {
+                return SL2_E_BADFORMAT;
+            }
+        }
+        else {
+            pkifdUseMe = CFormat::FindBestFormat( _iImage.Format(), bifFormats, SL2_ELEMENTS( bifFormats ) );
+            if ( !pkifdUseMe ) {
+                return SL2_E_BADFORMAT;
+            }
+        }
+
+        if ( !pkifdUseMe ) { return SL2_E_BADFORMAT; }
+        FREE_IMAGE_TYPE fitType = static_cast<FREE_IMAGE_TYPE>(pkifdUseMe->sParm0);
+        CImage::SL2_FREEIMAGE_ALLOCATET fiImage( fitType, _iImage.GetMipmaps()[_sMip]->Width(), _iImage.GetMipmaps()[_sMip]->Height(), pkifdUseMe->pkifdFormat->ui32BlockSizeInBits );
+		if ( !fiImage.pbBitmap ) { return SL2_E_OUTOFMEMORY; }
+
+        std::vector<uint8_t> vConverted;
+        SL2_ERRORS eError = _iImage.ConvertToFormat( pkifdUseMe->pkifdFormat, _sMip, _sArray, _sFace, vConverted, true );
+        if ( eError != SL2_E_SUCCESS ) { return eError; }
+
+
+        size_t sPitch = CFormat::GetRowSize( pkifdUseMe->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
+        uint32_t ui32Slice = uint32_t( sPitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
+        for ( uint32_t H = 0; H < _iImage.GetMipmaps()[_sMip]->Height(); ++H ) {
+            BYTE * pui8Bits = ::FreeImage_GetScanLine( fiImage.pbBitmap, int( H ) );
+            uint8_t * pui8Src = vConverted.data() + ui32Slice + sPitch * H;
+            switch ( fitType ) {
+                case FIT_BITMAP : {
+                    switch ( pkifdUseMe->pkifdFormat->ui32BlockSizeInBits ) {
+                        case 8 * 1 : {
+                            for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
+                                uint8_t * prgbDst = pui8Bits + X;
+                                const uint8_t * pui8This = pui8Src + X;
+                                (*prgbDst) = (*pui8This);
+                            }
+                            break;
+                        }
+                        case 8 * 2 : {
+                            for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
+                                uint16_t * prgbDst = reinterpret_cast<uint16_t *>(pui8Bits) + X;
+                                const uint16_t * prgbSrc = reinterpret_cast<uint16_t *>(pui8Src) + X;
+                                /*prgbDst->red = (*prgbSrc) & 0xFF;
+                                prgbDst->alpha = (*prgbSrc) >> 8;*/
+                                (*prgbDst) = (*prgbSrc);
+                            }
+                            break;
+                        }
+                        case 8 * 3 : {
+                            for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
+                                RGBTRIPLE * prgbDst = reinterpret_cast<RGBTRIPLE *>(pui8Bits) + X;
+                                const CFormat::SL2_RGB_UNORM * prgbSrc = reinterpret_cast<CFormat::SL2_RGB_UNORM *>(pui8Src) + X;
+                                prgbDst->rgbtRed = prgbSrc->ui8Rgb[SL2_PC_R];
+                                prgbDst->rgbtGreen = prgbSrc->ui8Rgb[SL2_PC_G];
+                                prgbDst->rgbtBlue = prgbSrc->ui8Rgb[SL2_PC_B];
+                            }
+                            break;
+                        }
+                        case 8 * 4 : {
+                            for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
+                                RGBQUAD * prgbDst = reinterpret_cast<RGBQUAD *>(pui8Bits) + X;
+                                const CFormat::SL2_RGBA_UNORM * prgbSrc = reinterpret_cast<CFormat::SL2_RGBA_UNORM *>(pui8Src) + X;
+                                prgbDst->rgbRed = prgbSrc->ui8Rgba[SL2_PC_R];
+                                prgbDst->rgbGreen = prgbSrc->ui8Rgba[SL2_PC_G];
+                                prgbDst->rgbBlue = prgbSrc->ui8Rgba[SL2_PC_B];
+                                prgbDst->rgbReserved = prgbSrc->ui8Rgba[SL2_PC_A];
+                            }
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+
+        CImage::SL2_FREE_IMAGE fiBuffer;
+        if ( !fiBuffer.pmMemory ) { return SL2_E_OUTOFMEMORY; }
+
+        if ( _oOptions.bEmbedColorProfile && _iImage.OutputColorSpace().size() && static_cast<size_t>(static_cast<long>(_iImage.OutputColorSpace().size())) == _iImage.OutputColorSpace().size() && static_cast<long>(_iImage.OutputColorSpace().size()) > 0 ) {
+            if ( !::FreeImage_CreateICCProfile( fiImage.pbBitmap, static_cast<void *>(const_cast<uint8_t *>(_iImage.OutputColorSpace().data())), static_cast<long>(_iImage.OutputColorSpace().size()) ) ) { return SL2_E_OUTOFMEMORY; }
+        }
+
+        if ( !::FreeImage_SaveToMemory( FIF_TARGA, fiImage.pbBitmap, fiBuffer.pmMemory, _oOptions.iTgaSaveOption ) ) {
+            return SL2_E_OUTOFMEMORY;
+        }
+        
+
+        BYTE * pbData = nullptr;
+        DWORD dwSize = 0;
+        if ( !::FreeImage_AcquireMemory( fiBuffer.pmMemory, &pbData, &dwSize ) ) {
+            return SL2_E_INTERNALERROR;
+        }
+        try {
+            vConverted.resize( dwSize );
+        }
+        catch ( ... ) {
+            return SL2_E_OUTOFMEMORY;
+        }
+        std::memcpy( vConverted.data(), pbData, dwSize );
+        {
+            CStdFile sfFile;
+            if ( !sfFile.Create( _sPath.c_str() ) ) {
+                return SL2_E_INVALIDWRITEPERMISSIONS;
+            }
+            if ( !sfFile.WriteToFile( vConverted ) ) {
+                return SL2_E_FILEWRITEERROR;
+            }
+        }
+
+        return SL2_E_SUCCESS;
     }
 
 }   // namespace sl2
