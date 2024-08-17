@@ -89,7 +89,19 @@ namespace sl2 {
 		 */
 		CMatrix4x4												Inverse() const {
 			CMatrix4x4 m44bOut;
-			double fDet = Determ();
+			double fA0 = (*this)[0][0] * (*this)[1][1] - (*this)[0][1] * (*this)[1][0];
+			double fA1 = (*this)[0][0] * (*this)[1][2] - (*this)[0][2] * (*this)[1][0];
+			double fA2 = (*this)[0][0] * (*this)[1][3] - (*this)[0][3] * (*this)[1][0];
+			double fA3 = (*this)[0][1] * (*this)[1][2] - (*this)[0][2] * (*this)[1][1];
+			double fA4 = (*this)[0][1] * (*this)[1][3] - (*this)[0][3] * (*this)[1][1];
+			double fA5 = (*this)[0][2] * (*this)[1][3] - (*this)[0][3] * (*this)[1][2];
+			double fB0 = (*this)[2][0] * (*this)[3][1] - (*this)[2][1] * (*this)[3][0];
+			double fB1 = (*this)[2][0] * (*this)[3][2] - (*this)[2][2] * (*this)[3][0];
+			double fB2 = (*this)[2][0] * (*this)[3][3] - (*this)[2][3] * (*this)[3][0];
+			double fB3 = (*this)[2][1] * (*this)[3][2] - (*this)[2][2] * (*this)[3][1];
+			double fB4 = (*this)[2][1] * (*this)[3][3] - (*this)[2][3] * (*this)[3][1];
+			double fB5 = (*this)[2][2] * (*this)[3][3] - (*this)[2][3] * (*this)[3][2];
+			double fDet = fA0 * fB5 - fA1 * fB4 + fA2 * fB3 + fA3 * fB2 - fA4 * fB1 + fA5 * fB0;
 			
 			const CMatrix4x4 * pmSrc = this;
 			

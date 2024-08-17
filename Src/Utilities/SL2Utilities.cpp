@@ -9,6 +9,8 @@
 #include "SL2Utilities.h"
 #include "../OS/SL2Os.h"
 
+#include <random>
+
 namespace sl2 {
 
 	// == Functions.
@@ -234,6 +236,39 @@ namespace sl2 {
 			return s16File;
 		}
 		return std::u16string();
+	}
+
+	/**
+	 * Creates an ASCII path from the given file name, even if it is already an ASCII path.
+	 *
+	 * \param _sPath The input path, including the file name.
+	 * \param _pAsciiPath The output folder.
+	 * \param _pAsciiFileName The output file name.
+	 * \return Returns true if allocation of all strings succeeded.  Failure indicates a memory failure.
+	 **/
+	bool CUtilities::CreateAsciiPath( const std::u16string &_sPath, std::filesystem::path &_pAsciiPath, std::filesystem::path &_pAsciiFileName ) {
+		try {
+			_pAsciiFileName = Append( L"Tmp.", GetFileExtension( _sPath ) );
+			_pAsciiPath = std::filesystem::temp_directory_path();
+			if ( HasUtf( _pAsciiPath.c_str(), _pAsciiPath.native().size() ) ) {
+				_pAsciiPath = std::filesystem::path( _sPath ).root_path();
+			}
+			_pAsciiPath /= "SurfaceLevel2Tmp";
+
+			const char cCharSet[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+			std::random_device rdDevice;
+			std::mt19937 mGenerator( rdDevice() );
+			std::uniform_int_distribution<> uidDist( 0, sizeof( cCharSet ) - 2 );
+
+			for ( size_t i = 0; i < 8; ++i ) {
+				_pAsciiPath += cCharSet[uidDist(mGenerator)];
+			}
+
+			return true;
+		}
+		catch ( ... ) {
+			return false;
+		}
 	}
 
 	/**

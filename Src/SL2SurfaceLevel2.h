@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "Image/PVRTexTool/PVRTexLib.hpp"
 #include "Image/SL2Formats.h"
 #include "Image/SL2Image.h"
 #include <string>
@@ -314,6 +315,16 @@ namespace sl2 {
 	 * \return Returns an error code.
 	 **/
 	SL2_ERRORS															ExportAsKtx1( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions );
+
+	/**
+	 * Exports as PVR.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS															ExportAsPvr( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions );
 
 	/**
 	 * Exports as TGA.

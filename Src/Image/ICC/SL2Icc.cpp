@@ -421,11 +421,11 @@ namespace sl2 {
 	 **/
 	bool CIcc::CreateProfile( cmsContext _cContextID, SL2_COLORSPACE_GAMMA_CURVES _cgcCurve, SL2_CMS_PROFILE &_cpProfile, bool _bIncludeCurves ) {
 		const CFormat::SL2_TRANSFER_FUNCS & tfFunc = CFormat::TransferFunc( _cgcCurve );
-		cmsCIExyY		cieD65 = { tfFunc.dWhite[0], tfFunc.dWhite[1], 1.0 };
+		cmsCIExyY cieD65 = { tfFunc.dWhite[0], tfFunc.dWhite[1], 1.0 };
 		cmsCIExyYTRIPLE	ciePrimaries = {
-							{ tfFunc.dChromaR[0], tfFunc.dChromaR[1], 1.0 },
-							{ tfFunc.dChromaG[0], tfFunc.dChromaG[1], 1.0 },
-							{ tfFunc.dChromaB[0], tfFunc.dChromaB[1], 1.0 },
+			{ tfFunc.dChromaR[0], tfFunc.dChromaR[1], 1.0 },
+			{ tfFunc.dChromaG[0], tfFunc.dChromaG[1], 1.0 },
+			{ tfFunc.dChromaB[0], tfFunc.dChromaB[1], 1.0 },
 		};
 		
 
@@ -449,7 +449,7 @@ namespace sl2 {
 
 			}
 			else {
-				cmsToneCurve *	ptcGamma[3];
+				cmsToneCurve * ptcGamma[3];
 				SL2_CMS_TONECURVE tcCurve;
 				ptcGamma[0] = ptcGamma[1] = ptcGamma[2] = tcCurve.Set( ::cmsBuildParametricToneCurve( _cContextID, tfFunc.i32CurveType, tfFunc.dParaCurve ) ).tcCurve;
 				if ( ptcGamma[0] == NULL ) { return false; }
@@ -459,7 +459,7 @@ namespace sl2 {
 		}
 		else {
 			cmsFloat64Number f64nParm[1] = { 1.0 };
-			cmsToneCurve *	ptcGamma[3];
+			cmsToneCurve * ptcGamma[3];
 			SL2_CMS_TONECURVE tcCurve;
 			ptcGamma[0] = ptcGamma[1] = ptcGamma[2] = tcCurve.Set( ::cmsBuildParametricToneCurve( _cContextID, 1, f64nParm ) ).tcCurve;
 			if ( ptcGamma[0] == NULL ) { return false; }

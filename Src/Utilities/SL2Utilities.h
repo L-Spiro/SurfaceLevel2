@@ -13,6 +13,8 @@
 #include "../OS/SL2Os.h"
 
 #include <cmath>
+#include <filesystem>
+#include <numbers>
 #include <string>
 #include <vector>
 
@@ -163,6 +165,25 @@ namespace sl2 {
 		static std::string									Utf16ToUtf8( const char16_t * _pcString, bool * _pbErrored = nullptr );
 
 		/**
+		 * Converts an * string to a std::u16string.  Call inside try{}catch(...){}.
+		 * 
+		 * \param _pwcStr The string to convert.
+		 * \param _sLen The length of the string or 0.
+		 * \return Returns the converted string.
+		 **/
+		template <typename _tCharType>
+		static inline std::u16string						XStringToU16String( const _tCharType * _pwcStr, size_t _sLen ) {
+			std::u16string u16Tmp;
+			if ( _sLen ) {
+				u16Tmp.reserve( _sLen );
+			}
+			for ( size_t I = 0; (I < _sLen) || (_sLen == 0 && !_pwcStr[I]); ++I ) {
+				u16Tmp.push_back( static_cast<char16_t>(_pwcStr[I]) );
+			}
+			return u16Tmp;
+		}
+
+		/**
 		 * Reads a line from a buffer.
 		 * 
 		 * \param _vBuffer The buffer from which to read a line.
@@ -244,13 +265,13 @@ namespace sl2 {
 		/**
 		 * Appends a _pwcString string to a char16_t string.
 		 * 
-		 * \param _sDst The string to which to append the string.
+		 * \param _sStr The string to which to append the string.
 		 * \param _pwcString The string to append to the string.
 		 * \return Returns the new string.
 		 **/
-		static std::u16string								Append( const std::u16string &_sDst, const wchar_t * _pwcString ) {
+		static std::u16string								Append( const std::u16string &_sStr, const wchar_t * _pwcString ) {
 			try {
-				std::u16string sTmp = _sDst;
+				std::u16string sTmp = _sStr;
 				while ( (*_pwcString) ) {
 					sTmp.push_back( (*_pwcString++) );
 				}
@@ -258,6 +279,51 @@ namespace sl2 {
 			}
 			catch ( ... ) { return std::u16string(); }
 		}
+
+		/**
+		 * Appends a std::u16string string to a std::filesystem::path.  Call inside a try/catch.
+		 * 
+		 * \param _pStr The path to which to append the given string.
+		 * \param _u16String The string to append to the given path.
+		 * \return Returns the string with _u16String appended.
+		 **/
+		static inline std::filesystem::path					Append( const std::filesystem::path &_pStr, const std::u16string &_u16String ) {
+			std::filesystem::path pTmp = _pStr;
+			for ( size_t I = 0; I < _u16String.size(); ++I ) {
+				pTmp += std::filesystem::path( std::u16string( 1, _u16String[I] ) );
+			}
+			return pTmp;
+		}
+
+		/**
+		 * Determines if the given character array has any UTF encodings.
+		 * 
+		 * \param _ptString Pointer to the array to scan for UTF characters.
+		 * \param _sLen Length of the array to which _ptString points.
+		 * \return Returns true if any of the characters in the given array have any bits set above the 7th.
+		 **/
+		template <typename _tType>
+		static bool											HasUtf( const _tType * _ptString, size_t _sLen = 0 ) {
+			if ( !_sLen ) {
+				for ( size_t I = 0; _ptString[I]; ++I ) {
+					if ( _ptString[I] & ~static_cast<_tType>(0x7F) ) { return true; }
+				}
+			}
+			for ( auto I = _sLen; I--; ) {
+				if ( _ptString[I] & ~static_cast<_tType>(0x7F) ) { return true; }
+			}
+			return false;
+		}
+
+		/**
+		 * Creates an ASCII path from the given file name, even if it is already an ASCII path.
+		 *
+		 * \param _sPath The input path, including the file name.
+		 * \param _pAsciiPath The output folder.
+		 * \param _pAsciiFileName The output file name.
+		 * \return Returns true if allocation of all strings succeeded.  Failure indicates a memory failure.
+		 **/
+		static bool											CreateAsciiPath( const std::u16string &_sPath, std::filesystem::path &_pAsciiPath, std::filesystem::path &_pAsciiFileName );
 
 		/**
 		 * Takes a bit mask and returns a shift and divisor.
@@ -283,7 +349,7 @@ namespace sl2 {
 		 * \param _dVal The value to convert.
 		 * \return Returns the converted value.
 		 */
-		static inline double SL2_FASTCALL					SRgbToLinear( double _dVal ) {
+		static inline double SL2_FASTCALL					sRGBtoLinear( double _dVal ) {
 			if ( _dVal < -0.04045 ) { return -std::pow( (-_dVal + 0.055) / 1.055, 2.4 ); }
 			return _dVal <= 0.04045 ?
 				_dVal / 12.92 :
@@ -296,7 +362,7 @@ namespace sl2 {
 		 * \param _dVal The value to convert.
 		 * \return Returns the converted value.
 		 */
-		static inline double SL2_FASTCALL					LinearToSRgb( double _dVal ) {
+		static inline double SL2_FASTCALL					LinearTosRGB( double _dVal ) {
 			if ( _dVal < -0.0031308 ) { return -1.055 * std::pow( -_dVal, 1.0 / 2.4 ) + 0.055; }
 			return _dVal <= 0.0031308 ?
 				_dVal * 12.92 :
@@ -309,11 +375,20 @@ namespace sl2 {
 		 * \param _dVal The value to convert.
 		 * \return Returns the converted value.
 		 */
-		static inline double SL2_FASTCALL					SRgbToLinear_Precise( double _dVal ) {
-			if ( _dVal < -0.039285714285714291860163172032116563059389591217041015625 ) { return -std::pow( (-_dVal + 0.055) / 1.055, 2.4 ); }
-			return _dVal <= 0.039285714285714291860163172032116563059389591217041015625 ?
-				_dVal / 12.92321018078785499483274179510772228240966796875 :
-				std::pow( (_dVal + 0.055) / 1.055, 2.4 );
+		static inline double SL2_FASTCALL					sRGBtoLinear_Precise( double _dVal ) {
+			/*constexpr double dAlpha = 0.05501071894758659264201838823282741941511631011962890625;
+			constexpr double dBeta = 1.055010718947586578764230580418370664119720458984375;
+			constexpr double dTheta = 12.9200000000000017053025658242404460906982421875;
+			constexpr double dCut = 0.03929337067684757212049362351535819470882415771484375;*/
+
+			constexpr double dAlpha = 0.055000000000000000277555756156289135105907917022705078125;
+			constexpr double dBeta = 1.0549999999999999378275106209912337362766265869140625;
+			constexpr double dTheta = 12.92321018078785499483274179510772228240966796875;
+			constexpr double dCut = 0.039285714285714291860163172032116563059389591217041015625;
+			if ( _dVal < -dCut ) { return -std::pow( (-_dVal + dAlpha) / dBeta, 2.4 ); }
+			return _dVal <= dCut ?
+				_dVal / dTheta :
+				std::pow( (_dVal + dAlpha) / dBeta, 2.4 );
 		}
 
 		/**
@@ -322,11 +397,20 @@ namespace sl2 {
 		 * \param _dVal The value to convert.
 		 * \return Returns the converted value.
 		 */
-		static inline double SL2_FASTCALL					LinearToSRgb_Precise( double _dVal ) {
-			if ( _dVal < -0.003039934639778431833823102437008856213651597499847412109375 ) { return -1.055 * std::pow( -_dVal, 1.0 / 2.4 ) + 0.055; }
-			return _dVal <= 0.003039934639778431833823102437008856213651597499847412109375 ?
-				_dVal * 12.92321018078785499483274179510772228240966796875 :
-				1.055 * std::pow( _dVal, 1.0 / 2.4 ) - 0.055;
+		static inline double SL2_FASTCALL					LinearTosRGB_Precise( double _dVal ) {
+			/*constexpr double dAlpha = 0.05501071894758659264201838823282741941511631011962890625;
+			constexpr double dBeta = 1.055010718947586578764230580418370664119720458984375;
+			constexpr double dTheta = 12.9200000000000017053025658242404460906982421875;
+			constexpr double dCut = 0.0030412825601275205074369711866211218875832855701446533203125;*/
+
+			constexpr double dAlpha = 0.055000000000000000277555756156289135105907917022705078125;
+			constexpr double dBeta = 1.0549999999999999378275106209912337362766265869140625;
+			constexpr double dTheta = 12.92321018078785499483274179510772228240966796875;
+			constexpr double dCut = 0.003039934639778431833823102437008856213651597499847412109375;
+			if ( _dVal < -dCut ) { return -dBeta * std::pow( -_dVal, 1.0 / 2.4 ) + dAlpha; }
+			return _dVal <= dCut ?
+				_dVal * dTheta :
+				dBeta * std::pow( _dVal, 1.0 / 2.4 ) - dAlpha;
 		}
 
 		/**
@@ -696,6 +780,314 @@ namespace sl2 {
 		}
 
 		/**
+		 * Converts from S-Log to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					SLogToLinear( double _dVal ) {
+			return std::pow( 10.0, ((_dVal - 0.616596 - 0.03) / 0.432699) ) - 0.037584;
+
+		}
+
+		/**
+		 * Converts from linear to S-Log.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to S-Log space.
+		 */
+		static inline double SL2_FASTCALL					LinearToSLog( double _dVal ) {
+			return (0.432699 * std::log10( _dVal + 0.037584 ) + 0.616596) + 0.03;
+		}
+
+		/**
+		 * Converts from S-Log2 to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					SLog2ToLinear( double _dVal ) {
+			return (std::pow( 10.0, (((_dVal * 1023.0 / 4.0 - 16.0) / 219.0) - 0.616596 - 0.03) / 0.432699 ) - 0.037584) * 0.9;
+		}
+
+		/**
+		 * Converts from linear to S-Log2.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to S-Log2 space.
+		 */
+		static inline double SL2_FASTCALL					LinearToSLog2( double _dVal ) {
+			return (4.0 * (16.0 + 219.0 * (0.616596 + 0.03 + 0.432699 *
+				std::log10( 0.037584 + _dVal / 0.9 )))) / 1023.0;
+
+		}
+
+		/**
+		 * Converts from S-Log3 to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					SLog3ToLinear( double _dVal ) {
+			if ( _dVal >= 171.2102946929 / 1023.0 ) {
+				return std::pow( 10.0, ((_dVal * 1023.0 - 420.0) / 261.5) ) * (0.18 + 0.01) - 0.01;
+			}
+			return (_dVal * 1023.0 - 95.0) * 0.01125000 / (171.2102946929 - 95.0);
+
+		}
+
+		/**
+		 * Converts from linear to S-Log3.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to S-Log3 space.
+		 */
+		static inline double SL2_FASTCALL					LinearToSLog3( double _dVal ) {
+			if ( _dVal >= 0.01125000 ) {
+				return (420.0 + std::log10( (_dVal + 0.01) / (0.18 + 0.01) ) * 261.5) / 1023.0;
+			}
+			return (_dVal * (171.2102946929 - 95.0) / 0.01125000 + 95.0) / 1023.0;
+		}
+
+		/**
+		 * Converts from Protune to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					ProtuneToLinear( double _dVal ) {
+			return (std::pow( 113.0, _dVal ) - 1.0) / 112.0;
+
+		}
+
+		/**
+		 * Converts from linear to Protune.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to Protune space.
+		 */
+		static inline double SL2_FASTCALL					LinearToProtune( double _dVal ) {
+			constexpr double dD = 4.727387818712340816773576079867780208587646484375;	// std::log( 113.0 )
+			return std::log( _dVal * 112.0 + 1.0 ) / dD;
+		}
+
+		/**
+		 * Converts from Canon Log to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					CanonLogToLinear( double _dVal ) {
+			return (_dVal < 0.0730597) ?
+				-(std::pow( 10.0, (0.0730597 - _dVal) / 0.529136 ) - 1.0) / 10.1596 :
+				(std::pow( 10.0, (_dVal - 0.0730597) / 0.529136 ) - 1.0) / 10.1596;
+		}
+
+		/**
+		 * Converts from linear to Canon Log.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to Canon Log space.
+		 */
+		static inline double SL2_FASTCALL					LinearToCanonLog( double _dVal ) {
+			constexpr double dThreshold = 0.0;	// CanonLogToLinear( 0.0730597 );	// 0.0
+
+			return (_dVal < dThreshold) ?
+				-(0.529136 * (std::log10( -_dVal * 10.1596 + 1.0 )) - 0.0730597) :
+				0.529136 * std::log10( 10.1596 * _dVal + 1.0 ) + 0.0730597;
+		}
+
+		/**
+		 * Converts from Canon Log 2 to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					CanonLog2ToLinear( double _dVal ) {
+			return (_dVal < 0.035388128) ?
+				-(std::pow( 10.0, (0.035388128 - _dVal) / 0.281863093 ) - 1) / 87.09937546 :
+				(std::pow( 10.0, (_dVal - 0.035388128) / 0.281863093 ) - 1) / 87.09937546;
+		}
+
+		/**
+		 * Converts from linear to Canon Log 2.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to Canon Log 2 space.
+		 */
+		static inline double SL2_FASTCALL					LinearToCanonLog2( double _dVal ) {
+			constexpr double dThreshold = 0.0;	// CanonLog2ToLinear( 0.035388128 );	// 0.0
+
+			return (_dVal < dThreshold) ?
+				-(0.281863093 * (std::log10( -_dVal * 87.09937546 + 1.0 )) - 0.035388128) :
+				0.281863093 * std::log10( _dVal * 87.09937546 + 1.0 ) + 0.035388128;
+		}
+
+		/**
+		 * Converts from Canon Log 3 to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					CanonLog3ToLinear( double _dVal ) {
+			if ( _dVal < 0.04076162 ) {
+				return -(std::pow( 10.0, (0.069886632 - _dVal) / 0.42889912 ) - 1.0) / 14.98325;
+			}
+			else if ( _dVal <= 0.105357102 ) {
+				return (_dVal - 0.073059361) / 2.3069815;
+			}
+			return (std::pow( 10.0, (_dVal - 0.069886632) / 0.42889912 ) - 1.0) / 14.98325;
+		}
+
+		/**
+		 * Converts from linear to Canon Log 3.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to Canon Log 3 space.
+		 */
+		static inline double SL2_FASTCALL					LinearToCanonLog3( double _dVal ) {
+			//const double dThresh1 = CanonLog3ToLinear( 0.04076162 );	// -0.0140000000000000020261570199409106862731277942657470703125
+			//const double dThresh2 = CanonLog3ToLinear( 0.105357102 );	// 0.01399999999999999682198659201048940303735435009002685546875
+			constexpr double dThresh1 = -0.014;	// -0.0140000000000000020261570199409106862731277942657470703125
+			constexpr double dThresh2 = 0.014;	// 0.01399999999999999682198659201048940303735435009002685546875
+
+			double clog3_ire = 0.0;
+			if ( _dVal < dThresh1 ) {
+				return -(0.42889912 * (std::log10( -_dVal * 14.98325 + 1.0 )) - 0.069886632);
+			} else if ( _dVal <= dThresh2 ) {
+				return 2.3069815 * _dVal + 0.073059361;
+			}
+			return 0.42889912 * std::log10( _dVal * 14.98325 + 1.0 ) + 0.069886632;
+		}
+
+		/**
+		 * Converts from Viper to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					ViperToLinear( double _dVal ) {
+			return std::pow( 10.0, (1023.0 * _dVal - 1023.0) / 500.0 );
+		}
+
+		/**
+		 * Converts from linear to Viper.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to Viper space.
+		 */
+		static inline double SL2_FASTCALL					LinearToViper( double _dVal ) {
+			return (1023.0 + 500.0 * std::log10( _dVal )) / 1023.0;
+		}
+
+		/**
+		 * Converts from ARIB STD-B67 to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					ARIBSTDB67ToLinear( double _dVal ) {
+			constexpr double dA = 0.17883277;
+			constexpr double dB = 0.28466892;
+			constexpr double dC = 0.55991073;
+
+			constexpr double dR = 0.5;		// Optional: Video level corresponding to reference white level.
+
+			return (_dVal <= (1.0 * dR)) ?
+				std::pow( _dVal / dR, 2.0 ) :
+				std::exp( (_dVal - dC) / dA ) + dB;
+		}
+
+		/**
+		 * Converts from linear to ARIB STD-B67.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to ARIB STD-B67 space.
+		 */
+		static inline double SL2_FASTCALL					LinearToARIBSTDB67( double _dVal ) {
+			constexpr double dA = 0.17883277;
+			constexpr double dB = 0.28466892;
+			constexpr double dC = 0.55991073;
+
+			constexpr double dR = 0.5;		// Optional: Video level corresponding to reference white level.
+
+			return (_dVal <= 1.0) ?
+				dR * std::sqrt( _dVal ) :
+				dA * std::log( _dVal - dB ) + dC;
+		}
+
+		/**
+		 * Converts from Panalog to linear.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					PanalogToLinear( double _dVal ) {
+			//double dBlackOffset = std::pow( 10.0, (64.0 - 681.0) / 444.0 );		// 0.04077184461038073487917182305836
+			constexpr double dBlackOffset = 0.04077184461038073359784306148867472074925899505615234375;
+			return (std::pow( 10.0, (1023.0 * _dVal - 681.0) / 444.0 ) - dBlackOffset) / (1.0 - dBlackOffset);
+		}
+
+		/**
+		 * Converts from linear to Panalog.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to Panalog space.
+		 */
+		static inline double SL2_FASTCALL					LinearToPanalog( double _dVal ) {
+			//double dBlackOffset = std::pow( 10.0, (64.0 - 681.0) / 444.0 );		// 0.04077184461038073487917182305836
+			constexpr double dBlackOffset = 0.04077184461038073359784306148867472074925899505615234375;
+			return (681.0 + 444.0 * std::log10( _dVal * (1.0 - dBlackOffset) + dBlackOffset )) / 1023.0;
+		}
+
+		/**
+		 * A proper CRT curve with WHITE and BRIGHTNESS controls.
+		 * 
+		 * \param param _dVal The value to convert.
+		 * \param _dLw Screen luminance for white, reference setting is LW = 100 cd/m2.
+		 * \param _dB Variable for black level lift (legacy “brightness” control).
+		 *	The value of _dB is set so that the calculated luminance can be the same as the
+		 *	measurement data at input signal level 0.0183 (= (80-64)/876).
+		 *	The value of _dB changes depending on “brightness” control.
+		 * \return Returns the corresponding value from a decent CRT curve back to linear.
+		 **/
+		static inline double SL2_FASTCALL					CrtProperToLinear( double _dVal, double _dLw = 1.0, double _dB = 0.0181 ) {
+			constexpr double dAlpha1 = 2.6;						// Alpha1 parameter.
+			constexpr double dAlpha2 = 3.0;						// Alpha2 parameter.
+			constexpr double dVc = 0.35;						// Threshold value for dVc.
+			double dK = _dLw / std::pow( 1.0 + _dB, dAlpha1 );	// Coefficient for normalization.
+
+			if ( _dVal < dVc ) {
+				return dK * std::pow( dVc + _dB, (dAlpha1 - dAlpha2) ) * std::pow( _dVal + _dB, dAlpha2 );
+			}
+			return dK * std::pow( _dVal + _dB, dAlpha1 );
+		}
+
+		/**
+		 * The inverse of CrtProperToLinear().
+		 * 
+		 * \param _dVal The value to convert.
+		 * \param _dLw Screen luminance for white, reference setting is LW = 100 cd/m2.
+		 * \param _dB Variable for black level lift (legacy “brightness” control).
+		 *	The value of _dB is set so that the calculated luminance can be the same as the
+		 *	measurement data at input signal level 0.0183 (= (80-64)/876).
+		 *	The value of _dB changes depending on “brightness” control.
+		 * \return Returns the corresponding value along a decent CRT curve.
+		 **/
+		static inline double SL2_FASTCALL					LinearToCrtProper( double _dVal, double _dLw = 1.0, double _dB = 0.0181 ) {
+			constexpr double dAlpha1 = 2.6;						// Alpha1 parameter.
+			constexpr double dAlpha2 = 3.0;						// Alpha2 parameter.
+			constexpr double dVc = 0.35;						// Threshold value for dVc.
+			double dK = _dLw / std::pow( 1.0 + _dB, dAlpha1 );	// Coefficient for normalization.
+
+			_dVal /= dK;
+			if ( _dVal < std::pow( dVc + _dB, dAlpha1 ) ) {
+				return std::pow( _dVal / std::pow( dVc + _dB, (dAlpha1 - dAlpha2) ), 1.0 / dAlpha2 ) - _dB;
+			}
+			return std::pow( _dVal, 1.0 / dAlpha1 ) - _dB;
+		}
+
+		/**
 		 * Converts XYZ values to chromaticities.
 		 * 
 		 * \param _dX The input X.
@@ -766,6 +1158,21 @@ namespace sl2 {
 			double dC2 = _pfsSamples[-1+1] - 5.0 / 2.0 * _pfsSamples[0+1] + 2.0 * _pfsSamples[1+1] - 1.0 / 2.0 * _pfsSamples[2+1];
 			double dC3 = 1.0 / 2.0 * (_pfsSamples[2+1] - _pfsSamples[-1+1]) + 3.0 / 2.0 * (_pfsSamples[0+1] - _pfsSamples[1+1]);
 			return ((dC3 * _dFrac + dC2) * _dFrac + dC1) * _dFrac + dC0;
+		}
+
+		/**
+		 * Standard sinc() function.
+		 * 
+		 * \param _dX The operand.
+		 * \return Returns sin(x) / x.
+		 **/
+		static inline double								Sinc( double _dX ) {
+			_dX *= std::numbers::pi;
+			if ( _dX < 0.01 && _dX > -0.01 ) {
+				return 1.0 + _dX * _dX * (-1.0 / 6.0 + _dX * _dX * 1.0 / 120.0);
+			}
+
+			return std::sin( _dX ) / _dX;
 		}
 
 		/**

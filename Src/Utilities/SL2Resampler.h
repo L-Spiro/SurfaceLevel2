@@ -141,11 +141,11 @@ namespace sl2 {
 
 
 		/**
-		 * A helper function.
-		 *
-		 * \param _dX A happy parameter.
-		 * \return Returns happiness.
-		 */
+		 * Standard sinc() function.
+		 * 
+		 * \param _dX The operand.
+		 * \return Returns sin(x) / x.
+		 **/
 		static inline double									Sinc( double _dX ) {
 			_dX *= std::numbers::pi;
 			if ( _dX < 0.01 && _dX > -0.01 ) {

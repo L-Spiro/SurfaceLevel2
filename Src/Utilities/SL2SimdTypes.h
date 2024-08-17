@@ -3,7 +3,7 @@
  *
  * Written by: Shawn (L. Spiro) Wilcoxen
  *
- * Description: A 4-element vector.
+ * Description: SIMD types.
  */
 
 

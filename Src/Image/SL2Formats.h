@@ -1235,22 +1235,28 @@ namespace sl2 {
 		SL2_CGC_ITU_BT_601_625 = 20,												/**< ITU-R Recommendation BT.601 (625) standard. */
 		SL2_CGC_ITU_BT_601_625_PRECISE = 21,										/**< ITU-R Recommendation BT.601 (625) in high precision, without the discontinuities in the standard. */
 
-		SL2_CGC_GENERIC_FILM = 23,													/**< Generic film (color filters using Illuminant C). */
+		SL2_CGC_GENERIC_FILM = 22,													/**< Generic film (color filters using Illuminant C). */
 
-		SL2_CGC_ITU_BT_470_M_NTSC = 24,												/**< Rec. ITU-R BT.470-6 (M/NTSC). */
-		SL2_CGC_ITU_BT_470_M_PAL = 25,												/**< Rec. ITU-R BT.470-6 (M/PAL). */
-		SL2_CGC_ITU_BT_470_B_N_PAL = 26,											/**< Rec. ITU-R BT.470-6 (B, B1, D, D1, G, H, K, N/PAL, K1, L/SECAM). */
+		SL2_CGC_ITU_BT_470_M_NTSC = 23,												/**< Rec. ITU-R BT.470-6 (M/NTSC). */
+		SL2_CGC_ITU_BT_470_M_PAL = 24,												/**< Rec. ITU-R BT.470-6 (M/PAL). */
+		SL2_CGC_ITU_BT_470_B_N_PAL = 25,											/**< Rec. ITU-R BT.470-6 (B, B1, D, D1, G, H, K, N/PAL, K1, L/SECAM). */
 
-		SL2_CGC_ACESCG = 27,														/**< ACEScg. */
+		SL2_CGC_ACESCG = 26,														/**< ACEScg. */
 
-		SL2_CGC_NTSC_1987_STANDARD = 28,											/**< Standard SMPTE C. */
-		SL2_CGC_NTSC_1987 = 29,														/**< SMPTE C with a pow(2.2) curve. */
+		SL2_CGC_NTSC_1987_STANDARD = 27,											/**< Standard SMPTE C. */
+		SL2_CGC_NTSC_1987 = 28,														/**< SMPTE C with a pow(2.2) curve. */
 
-		SL2_CGC_ROMM_RGB = 30,														/**< Reference Output Medium Metric RGB (ROMM RGB). */
-		SL2_CGC_RIMM_RGB = 31,														/**< Reference Input Medium Metric RGB (RIMM RGB). */
-		SL2_CGC_ERIMM_RGB = 32,														/**< Extended Reference Input Medium Metric RGB (ERIMM RGB). */
+		SL2_CGC_ROMM_RGB = 29,														/**< Reference Output Medium Metric RGB (ROMM RGB). */
+		SL2_CGC_RIMM_RGB = 30,														/**< Reference Input Medium Metric RGB (RIMM RGB). */
+		SL2_CGC_ERIMM_RGB = 31,														/**< Extended Reference Input Medium Metric RGB (ERIMM RGB). */
 
-		SL2_CGC_PLASA_ANSI_E154 = 33,												/**< PLASA ANSI E1.54. */
+		SL2_CGC_PLASA_ANSI_E154 = 32,												/**< PLASA ANSI E1.54. */
+
+		SL2_CGC_PROTUNE = 33,														/**< Protune Native. */
+
+		SL2_CGC_S_GAMUT = 34,														/**< S-Gamut. */
+		SL2_CGC_S_GAMUT3 = 35,														/**< S-Gamut3. */
+		SL2_CGC_S_GAMUT3_CINE = 36,													/**< S-Gamut3.Cine. */
 
 		SL2_CGC_NONE = 0x1337,
 	};
@@ -1376,6 +1382,13 @@ namespace sl2 {
 			PfFromRgba64F															pfFromRgba64F;
 			/** A custom parameter that can be passed to conversion functions. */
 			void *																	pvCustom;
+
+			/** PVR pixel format. */
+			PVRTuint64																ui64PvrPixelFmt;
+			/** PVR variable type. */
+			PVRTexLibVariableType													tlvtVariableType;
+			/** PVR channel names. */
+			PVRTexLibChannelName													tlcnChanNames[4];
 		} * LPSL2_KTX_INTERNAL_FORMAT_DATA, * const LPCSL2_KTX_INTERNAL_FORMAT_DATA;
 
 		/** For finding best matches. */
@@ -1388,6 +1401,12 @@ namespace sl2 {
 			int32_t																	i32Parm1;
 			/** Extra parameter. */
 			void *																	pvParm2;
+			/** Large parameter. */
+			uint64_t																ui64Parm3;
+			/** More parameters. */
+			uint32_t																ui32Parm4;
+			/** More parameters. */
+			uint32_t																ui32Parm5;
 		} * LPSL2_BEST_INTERNAL_FORMAT, * const LPCSL2_BEST_INTERNAL_FORMAT;
 
 		/** Table of transfer functions. */
@@ -1410,6 +1429,8 @@ namespace sl2 {
 			int32_t																	i32CurveType;
 			/** Name/Description of the profile. */
 			const wchar_t *															pwcDesc;
+			/** The closest PVR colorspace. */
+			PVRTexLibColourSpace													tlcsPvrColorSpace;
 		};
 
 		/** An RGBA color component. */
@@ -2229,6 +2250,15 @@ namespace sl2 {
 			return m_tfColorspaceTransfers[_cgcCurve==SL2_CGC_NONE?SL2_CGC_sRGB_PRECISE:_cgcCurve];
 		}
 
+		/**
+		 * Gets the PVR texture format (and channels) given an internal format.  If one is supplied by the format it is returned, otherwise one is generated.
+		 * 
+		 * \param _kifdFormat The format whose format and channel data is to be obtained.
+		 * \param _ptlcnChannels Holds the returned 4 channels.
+		 * \return Returns the PVR format of the given format or 0.
+		 **/
+		static PVRTuint64															FormatToPvrFormat( const SL2_KTX_INTERNAL_FORMAT_DATA &_kifdFormat, PVRTexLibChannelName * _ptlcnChannels = nullptr );
+
 
 	protected :
 		// == Types.
@@ -2349,12 +2379,12 @@ namespace sl2 {
 					// warning C4723: potential divide by 0
 					//	_uBits can't be 0 so this warning is invalid.
 					double dFinal = CUtilities::Clamp<double>( i64Texel / static_cast<double>((1ULL << (_uBits - 1ULL)) - 1ULL), -1.0, 1.0 );
-					return _bSrgb ? CUtilities::SRgbToLinear( dFinal ) : dFinal;
+					return _bSrgb ? CUtilities::sRGBtoLinear( dFinal ) : dFinal;
 				}
 				else {
 					constexpr uint64_t ui64Max = ~0ULL >> (64U - _uBits);
 					double dFinal = ((_ui64Value >> _uShift) & ui64Max) / static_cast<double>(ui64Max);
-					return _bSrgb ? CUtilities::SRgbToLinear( dFinal ) : dFinal;
+					return _bSrgb ? CUtilities::sRGBtoLinear( dFinal ) : dFinal;
 				}
 			}
 			else { return _dDefault; }
@@ -2373,7 +2403,7 @@ namespace sl2 {
 			// Only do something if there are actual bits to modify.
 			if constexpr ( _uBits != 0 ) {
 				if constexpr ( _bSrgb != 0 ) {
-					_dValue = CUtilities::LinearToSRgb( _dValue );
+					_dValue = CUtilities::LinearTosRGB( _dValue );
 				}
 				// Clear the target bits.
 				constexpr uint64_t ui64Mask = ~0ULL >> (64U - _uBits);
@@ -3856,9 +3886,9 @@ namespace sl2 {
 			_dPalette.dRgba[SL2_PC_B] = (_ui16Point & ui32Mask5) / static_cast<double>(ui32Mask5);
 		}
 		if constexpr ( _bSrgb != 0 ) {
-			_dPalette.dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( _dPalette.dRgba[SL2_PC_B] );
-			_dPalette.dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( _dPalette.dRgba[SL2_PC_G] );
-			_dPalette.dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( _dPalette.dRgba[SL2_PC_R] );
+			_dPalette.dRgba[SL2_PC_B] = CUtilities::sRGBtoLinear( _dPalette.dRgba[SL2_PC_B] );
+			_dPalette.dRgba[SL2_PC_G] = CUtilities::sRGBtoLinear( _dPalette.dRgba[SL2_PC_G] );
+			_dPalette.dRgba[SL2_PC_R] = CUtilities::sRGBtoLinear( _dPalette.dRgba[SL2_PC_R] );
 		}
 		_dPalette.dRgba[SL2_PC_A] = 1.0;
 	}
@@ -3939,9 +3969,9 @@ namespace sl2 {
 		}
 		if constexpr ( _bSrgb != 0 ) {
 			for ( uint32_t I = 0; I < 4; ++I ) {
-				_prPalette[I].dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( _prPalette[I].dRgba[SL2_PC_R] );
-				_prPalette[I].dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( _prPalette[I].dRgba[SL2_PC_G] );
-				_prPalette[I].dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( _prPalette[I].dRgba[SL2_PC_B] );
+				_prPalette[I].dRgba[SL2_PC_R] = CUtilities::sRGBtoLinear( _prPalette[I].dRgba[SL2_PC_R] );
+				_prPalette[I].dRgba[SL2_PC_G] = CUtilities::sRGBtoLinear( _prPalette[I].dRgba[SL2_PC_G] );
+				_prPalette[I].dRgba[SL2_PC_B] = CUtilities::sRGBtoLinear( _prPalette[I].dRgba[SL2_PC_B] );
 			}
 		}
 	}
@@ -3997,9 +4027,9 @@ namespace sl2 {
 
 		if constexpr ( _bSrgb != 0 ) {
 			for ( uint32_t I = 0; I < 4; ++I ) {
-				_prPalette[I].dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( _prPalette[I].dRgba[SL2_PC_R] );
-				_prPalette[I].dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( _prPalette[I].dRgba[SL2_PC_G] );
-				_prPalette[I].dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( _prPalette[I].dRgba[SL2_PC_B] );
+				_prPalette[I].dRgba[SL2_PC_R] = CUtilities::sRGBtoLinear( _prPalette[I].dRgba[SL2_PC_R] );
+				_prPalette[I].dRgba[SL2_PC_G] = CUtilities::sRGBtoLinear( _prPalette[I].dRgba[SL2_PC_G] );
+				_prPalette[I].dRgba[SL2_PC_B] = CUtilities::sRGBtoLinear( _prPalette[I].dRgba[SL2_PC_B] );
 			}
 		}
 	}
@@ -5998,9 +6028,9 @@ namespace sl2 {
 						uint32_t ui32ThisY = Y * 4 + I / 4;
 						if ( ui32ThisX < _ui32Width && ui32ThisY < _ui32Height ) {
 							SL2_RGBA64F * prgbaRow0 = &prgbaTexels[Z*ui32DstSliceSize+ui32ThisY*_ui32Width+ui32ThisX];
-							(*prgbaRow0).dRgba[0] = _bSrgb ? CUtilities::SRgbToLinear( fPaletteRgbUi8[I*4+SL2_PC_R] / 255.0 ) : fPaletteRgbUi8[I*4+SL2_PC_R] / 255.0;
-							(*prgbaRow0).dRgba[1] = _bSrgb ? CUtilities::SRgbToLinear( fPaletteRgbUi8[I*4+SL2_PC_G] / 255.0 ) : fPaletteRgbUi8[I*4+SL2_PC_G] / 255.0;
-							(*prgbaRow0).dRgba[2] = _bSrgb ? CUtilities::SRgbToLinear( fPaletteRgbUi8[I*4+SL2_PC_B] / 255.0 ) : fPaletteRgbUi8[I*4+SL2_PC_B] / 255.0;
+							(*prgbaRow0).dRgba[0] = _bSrgb ? CUtilities::sRGBtoLinear( fPaletteRgbUi8[I*4+SL2_PC_R] / 255.0 ) : fPaletteRgbUi8[I*4+SL2_PC_R] / 255.0;
+							(*prgbaRow0).dRgba[1] = _bSrgb ? CUtilities::sRGBtoLinear( fPaletteRgbUi8[I*4+SL2_PC_G] / 255.0 ) : fPaletteRgbUi8[I*4+SL2_PC_G] / 255.0;
+							(*prgbaRow0).dRgba[2] = _bSrgb ? CUtilities::sRGBtoLinear( fPaletteRgbUi8[I*4+SL2_PC_B] / 255.0 ) : fPaletteRgbUi8[I*4+SL2_PC_B] / 255.0;
 							(*prgbaRow0).dRgba[3] = fPaletteRgbUi8[I*4+SL2_PC_A] / 255.0;
 						}
 					}
@@ -6119,9 +6149,9 @@ namespace sl2 {
 							(*prgbaRow0).dRgba[SL2_PC_B] = fPaletteRgbUi8[I*4+SL2_PC_B] / 255.0;
 							(*prgbaRow0).dRgba[SL2_PC_A] = 1.0;
 							if constexpr ( _bSrgb ) {
-								(*prgbaRow0).dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_R] );
-								(*prgbaRow0).dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_G] );
-								(*prgbaRow0).dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_B] );
+								(*prgbaRow0).dRgba[SL2_PC_R] = CUtilities::sRGBtoLinear( (*prgbaRow0).dRgba[SL2_PC_R] );
+								(*prgbaRow0).dRgba[SL2_PC_G] = CUtilities::sRGBtoLinear( (*prgbaRow0).dRgba[SL2_PC_G] );
+								(*prgbaRow0).dRgba[SL2_PC_B] = CUtilities::sRGBtoLinear( (*prgbaRow0).dRgba[SL2_PC_B] );
 							}
 						}
 					}
@@ -6239,9 +6269,9 @@ namespace sl2 {
 							(*prgbaRow0).dRgba[SL2_PC_B] = fPaletteRgbUi8[I*4+SL2_PC_B] / 255.0;
 							(*prgbaRow0).dRgba[SL2_PC_A] = fPaletteRgbUi8[I*4+SL2_PC_A] / 255.0;
 							if constexpr ( _bSrgb ) {
-								(*prgbaRow0).dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_R] );
-								(*prgbaRow0).dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_G] );
-								(*prgbaRow0).dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_B] );
+								(*prgbaRow0).dRgba[SL2_PC_R] = CUtilities::sRGBtoLinear( (*prgbaRow0).dRgba[SL2_PC_R] );
+								(*prgbaRow0).dRgba[SL2_PC_G] = CUtilities::sRGBtoLinear( (*prgbaRow0).dRgba[SL2_PC_G] );
+								(*prgbaRow0).dRgba[SL2_PC_B] = CUtilities::sRGBtoLinear( (*prgbaRow0).dRgba[SL2_PC_B] );
 							}
 						}
 					}
@@ -6363,9 +6393,9 @@ namespace sl2 {
 							(*prgbaRow0).dRgba[SL2_PC_B] = fPaletteRgbUi8[I*4+SL2_PC_B] / 255.0;
 							(*prgbaRow0).dRgba[SL2_PC_A] = fPaletteRgbUi8[I*4+SL2_PC_A] / 255.0;
 							if constexpr ( _bSrgb ) {
-								(*prgbaRow0).dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_R] );
-								(*prgbaRow0).dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_G] );
-								(*prgbaRow0).dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( (*prgbaRow0).dRgba[SL2_PC_B] );
+								(*prgbaRow0).dRgba[SL2_PC_R] = CUtilities::sRGBtoLinear( (*prgbaRow0).dRgba[SL2_PC_R] );
+								(*prgbaRow0).dRgba[SL2_PC_G] = CUtilities::sRGBtoLinear( (*prgbaRow0).dRgba[SL2_PC_G] );
+								(*prgbaRow0).dRgba[SL2_PC_B] = CUtilities::sRGBtoLinear( (*prgbaRow0).dRgba[SL2_PC_B] );
 							}
 						}
 					}
@@ -6723,9 +6753,9 @@ namespace sl2 {
 					prgbaDst->dRgba[SL2_PC_A] = prgbaSrc->fRgba[3];
 
 					if constexpr ( _bSrgb ) {
-						(*prgbaDst).dRgba[SL2_PC_R] = CUtilities::SRgbToLinear( (*prgbaDst).dRgba[SL2_PC_R] );
-						(*prgbaDst).dRgba[SL2_PC_G] = CUtilities::SRgbToLinear( (*prgbaDst).dRgba[SL2_PC_G] );
-						(*prgbaDst).dRgba[SL2_PC_B] = CUtilities::SRgbToLinear( (*prgbaDst).dRgba[SL2_PC_B] );
+						(*prgbaDst).dRgba[SL2_PC_R] = CUtilities::sRGBtoLinear( (*prgbaDst).dRgba[SL2_PC_R] );
+						(*prgbaDst).dRgba[SL2_PC_G] = CUtilities::sRGBtoLinear( (*prgbaDst).dRgba[SL2_PC_G] );
+						(*prgbaDst).dRgba[SL2_PC_B] = CUtilities::sRGBtoLinear( (*prgbaDst).dRgba[SL2_PC_B] );
 					}
 				}
 			}

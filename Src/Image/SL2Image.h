@@ -16,6 +16,7 @@
 
 #include "../Utilities/SL2Resampler.h"
 #include "ICC/SL2Icc.h"
+#include "PVRTexTool/PVRTexLib.hpp"
 #include "SL2Formats.h"
 #include "SL2Kernel.h"
 #include "SL2Surface.h"
@@ -118,6 +119,40 @@ namespace sl2 {
 
 			// == Members.
 			FIBITMAP *										pbBitmap;
+		};
+
+		/** Wraps PVRTexLib_PVRTextureHeader. */
+		struct SL2_PVRTEXTUREHEADER {
+			SL2_PVRTEXTUREHEADER( PVRTexLib_PVRTextureHeader _thHeader ) :
+				thHeader( _thHeader ) {
+			}
+			~SL2_PVRTEXTUREHEADER() {
+				if ( thHeader ) {
+					::PVRTexLib_DestroyTextureHeader( thHeader );
+					thHeader = nullptr;
+				}
+			}
+
+
+			// == Members.
+			PVRTexLib_PVRTextureHeader						thHeader;
+		};
+
+		/** Wraps PVRTexLib_PVRTexture. */
+		struct SL2_PVRTEXTURE {
+			SL2_PVRTEXTURE( PVRTexLib_PVRTexture _tTexture ) :
+				tTexture( _tTexture ) {
+			}
+			~SL2_PVRTEXTURE() {
+				if ( tTexture ) {
+					::PVRTexLib_DestroyTexture( tTexture );
+					tTexture = nullptr;
+				}
+			}
+
+
+			// == Members.
+			PVRTexLib_PVRTexture							tTexture;
 		};
 
 #pragma pack( push, 1 )
@@ -310,6 +345,13 @@ namespace sl2 {
 		inline double										Gamma() const { return m_dGamma; }
 
 		/**
+		 * Gets the user-supplied target gamma value.
+		 * 
+		 * \return Returns the user-supplied target gamma value.
+		 **/
+		inline double										TargetGamma() const { return m_dTargetGamma; }
+
+		/**
 		 * Sets the user-supplied gamma value.
 		 * 
 		 * \param _dGamma The user-supplied gamma.
@@ -341,6 +383,7 @@ namespace sl2 {
 		 * \return Returns false if no profile is provided and allocation of a new default profile fails.
 		 **/
 		inline bool											SetInputColorSpace( std::vector<uint8_t> &_vFile ) {
+			if ( !_vFile.size() && m_vIccProfile.size() ) { return true; }
 			m_vIccProfile = std::move( _vFile );
 			return true;
 		}
@@ -373,6 +416,13 @@ namespace sl2 {
 		 * \return Returns a constant reference to the in-memory output ICC file.
 		 **/
 		inline const std::vector<uint8_t> &					OutputColorSpace() const { return m_vOutIccProfile; }
+
+		/**
+		 * Gets the output gamma curve.
+		 *
+		 * \return Returns the output gamma curve.
+		 **/
+		inline SL2_COLORSPACE_GAMMA_CURVES					OutputColorSpaceType() const { return m_cgcOutputCurve; }
 
 		/**
 		 * Whether to ignore ICC colorspace gamma.
