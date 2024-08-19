@@ -356,14 +356,14 @@ namespace sl2 {
 		 * 
 		 * \param _dGamma The user-supplied gamma.
 		 **/
-		inline void											SetGamma( double _dGamma ) { m_dGamma = _dGamma; }
+		inline void											SetGamma( double _dGamma ) { m_dGamma = _dGamma; m_bManuallySetGamma = true; }
 
 		/**
 		 * Sets the target gamma.
 		 * 
 		 * \param _dGamma The user-supplied gamma.
 		 **/
-		inline void											SetTargetGamma( double _dGamma ) { m_dTargetGamma = _dGamma; }
+		inline void											SetTargetGamma( double _dGamma ) { m_dTargetGamma = _dGamma; m_bManuallySetTargetGamma = true; }
 
 		/**
 		 * Stes the input and output gamma transfer functions.
@@ -561,6 +561,8 @@ namespace sl2 {
 		CIcc::SL2_TRANSFER_FUNC								m_tfOutColorSpaceTransferFunc[4];		/**< The transfer functions for outputs. */
 		int32_t												m_i32InRenderingIntent;					/**< Input -> linear rendering intent. */
 		int32_t												m_i32OutRenderingIntent;				
+		bool												m_bManuallySetGamma;					/**< Was the input gamma manually set? */
+		bool												m_bManuallySetTargetGamma;				/**< Was the output gamma manually set? */
 
 		CKernel												m_kKernel;								/**< The kernel to apply. */
 		double												m_dKernelScale;							/**< Kernel scale. */

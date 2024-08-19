@@ -64,10 +64,10 @@ namespace sl2 {
 		std::vector<double> dBufferG;
 		std::vector<double> dBufferB;
 		std::vector<double> dBufferA;
-		std::vector<double> dBufferR2;
+		/*std::vector<double> dBufferR2;
 		std::vector<double> dBufferG2;
 		std::vector<double> dBufferB2;
-		std::vector<double> dBufferA2;
+		std::vector<double> dBufferA2;*/
 
 		uint32_t ui32NewW = std::max( 1U, _pParms.ui32NewW );
 		uint32_t ui32NewH = std::max( 1U, _pParms.ui32NewH );
@@ -94,7 +94,7 @@ namespace sl2 {
 		catch ( ... ) { return true; }
 
 		// Resize width first for best caching.
-		if ( !CreateContribList( ui32W, ui32NewW, _pParms.taAlphaW, _pParms.pfFilterW, _pParms.dFilterSupportW, _pParms.fFilterScale ) ) { return false; }
+		if ( !CreateContribList( ui32W, ui32NewW, _pParms.taAlphaW, _pParms.fFilterW.pfFunc, _pParms.fFilterW.dfSupport, _pParms.fFilterScale ) ) { return false; }
 		double * pdDst[4] = { dBufferR.data(), dBufferG.data(), dBufferB.data(), dBufferA.data() };
 		// Resize W.
 		size_t sPagesSize = ui32W * ui32H * 4;
@@ -105,7 +105,7 @@ namespace sl2 {
 		for ( size_t I = 0; I < (_pParms.bAlpha ? 4 : 3); ++I ) {
 			if ( I == 3 ) {
 				// Alpha channel.
-				if ( !CreateContribList( ui32W, ui32NewW, _pParms.taAlphaW, _pParms.pfAlphaFilterW, _pParms.dAlphaFilterSupportW, _pParms.fFilterScale ) ) { return false; }
+				if ( !CreateContribList( ui32W, ui32NewW, _pParms.taAlphaW, _pParms.fAlphaFilterW.pfFunc, _pParms.fAlphaFilterW.dfSupport, _pParms.fFilterScale ) ) { return false; }
 			}
 			for ( size_t D = 0; D < ui32D; ++D ) {
 				for ( size_t H = 0; H < ui32H; ++H ) {
@@ -130,7 +130,7 @@ namespace sl2 {
 		}
 
 		// Resize H, now aligned horizontally in the buffers.
-		if ( !CreateContribList( ui32H, ui32NewH, _pParms.taAlphaH, _pParms.pfFilterH, _pParms.dFilterSupportH, _pParms.fFilterScale ) ) { return false; }
+		if ( !CreateContribList( ui32H, ui32NewH, _pParms.taAlphaH, _pParms.fFilterH.pfFunc, _pParms.fFilterH.dfSupport, _pParms.fFilterScale ) ) { return false; }
 		sPagesSize = sNewPagesSize;
 		sNewPagesSize = ui32NewW * ui32NewH;
 		uint32_t tW = ui32H;
@@ -139,7 +139,7 @@ namespace sl2 {
 		for ( size_t I = 0; I < (_pParms.bAlpha ? 4 : 3); ++I ) {
 			if ( I == 3 ) {
 				// Alpha channel.
-				if ( !CreateContribList( ui32H, ui32NewH, _pParms.taAlphaH, _pParms.pfAlphaFilterH, _pParms.dAlphaFilterSupportH, _pParms.fFilterScale ) ) { return false; }
+				if ( !CreateContribList( ui32H, ui32NewH, _pParms.taAlphaH, _pParms.fAlphaFilterH.pfFunc, _pParms.fAlphaFilterH.dfSupport, _pParms.fFilterScale ) ) { return false; }
 			}
 			for ( size_t D = 0; D < ui32D; ++D ) {
 				for ( size_t H = 0; H < tH; ++H ) {

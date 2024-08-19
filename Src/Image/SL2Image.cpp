@@ -31,6 +31,8 @@ namespace sl2 {
 		m_cgcOutputCurve( SL2_CGC_sRGB_PRECISE ),
 		m_i32InRenderingIntent( INTENT_RELATIVE_COLORIMETRIC ),
 		m_i32OutRenderingIntent( INTENT_RELATIVE_COLORIMETRIC ),
+		m_bManuallySetGamma( false ),
+		m_bManuallySetTargetGamma( false ),
 		m_sArraySize( 0 ),
 		m_sFaces( 0 ),
 		m_pkifFormat( nullptr ),
@@ -74,6 +76,8 @@ namespace sl2 {
 			m_pkifFormat = _iOther.m_pkifFormat;
 			m_dGamma = _iOther.m_dGamma;
 			m_dTargetGamma = _iOther.m_dTargetGamma;
+			m_bManuallySetGamma = _iOther.m_bManuallySetGamma;
+			m_bManuallySetTargetGamma = _iOther.m_bManuallySetTargetGamma;
 			m_cgcInputCurve = _iOther.m_cgcInputCurve;
 			m_cgcOutputCurve = _iOther.m_cgcOutputCurve;
 			m_i32InRenderingIntent = _iOther.m_i32InRenderingIntent,
@@ -113,6 +117,7 @@ namespace sl2 {
 			_iOther.m_pkifFormat = nullptr;
 			_iOther.m_dGamma = 1.0 / -2.2;
 			_iOther.m_dTargetGamma = 1.0 / -2.2;
+			_iOther.m_bManuallySetGamma = _iOther.m_bManuallySetTargetGamma = false;
 			_iOther.m_cgcInputCurve = SL2_CGC_sRGB_PRECISE;
 			_iOther.m_cgcOutputCurve = SL2_CGC_sRGB_PRECISE;
 			_iOther.m_i32InRenderingIntent = INTENT_RELATIVE_COLORIMETRIC,
@@ -158,6 +163,7 @@ namespace sl2 {
 		m_cgcOutputCurve = SL2_CGC_sRGB_PRECISE;
 		m_i32InRenderingIntent = INTENT_RELATIVE_COLORIMETRIC,
 		m_i32OutRenderingIntent = INTENT_RELATIVE_COLORIMETRIC;
+		m_bManuallySetGamma = m_bManuallySetTargetGamma = false;
 		m_sArraySize = 0;
 		m_sFaces = 0;
 		for ( auto I = m_vMipMaps.size(); I--; ) {
@@ -821,6 +827,9 @@ namespace sl2 {
 			CIcc::SL2_CMS_PROFILE cpTmp;
 			if ( !CIcc::CreateProfile( NULL, SL2_CGC_sRGB_PRECISE, cpTmp, false ) ) { return false; }
 			if ( !CIcc::SaveProfileToMemory( cpTmp, m_vIccProfile ) ) { return false; }
+			/*if ( !m_bManuallySetGamma ) {
+				m_dGamma = 0.0;
+			}*/
 		}
 		if ( m_cgcInputCurve == SL2_CGC_NONE && m_vIccProfile.size() == 0 ) { return false; }		// No user selection and no embedded profile.
 
@@ -846,6 +855,14 @@ namespace sl2 {
 		}
 		else {
 			return false;
+		}
+		if ( !m_vOutIccProfile.size() ) {
+			CIcc::SL2_CMS_PROFILE cpTmp;
+			if ( !CIcc::CreateProfile( NULL, SL2_CGC_sRGB_PRECISE, cpTmp, false ) ) { return false; }
+			if ( !CIcc::SaveProfileToMemory( cpTmp, m_vOutIccProfile ) ) { return false; }
+			/*if ( !m_bManuallySetTargetGamma ) {
+				m_dTargetGamma = 0.0;
+			}*/
 		}
 		if ( !CIcc::CreateLinearProfile( m_vOutIccProfile, pDst ) ) { return false; }
 

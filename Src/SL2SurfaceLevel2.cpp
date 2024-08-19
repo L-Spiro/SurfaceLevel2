@@ -1516,7 +1516,9 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         if ( oOptions.bManuallySetGamma == true ) {
             iImage.SetGamma( oOptions.dGamma );
         }
-        iImage.SetTargetGamma( oOptions.dTargetGamma );
+        if ( oOptions.bManuallySetTargetGamma == true ) {
+            iImage.SetTargetGamma( oOptions.dTargetGamma );
+        }
         iImage.SetRenderingIntents( oOptions.i32InRenderingIntent, oOptions.i32OutRenderingIntent );
         iImage.SetColorSpace( oOptions.cgcInputGammaCurve, oOptions.cgcOutputGammaCurve );
         iImage.SetInputColorSpace( oOptions.vInColorProfile );
@@ -1793,34 +1795,22 @@ namespace sl2 {
         _oOptions.rResample.ui32NewH = ui32NewHeight;
         _oOptions.rResample.ui32NewD = ui32NewDepth;
 
-        _oOptions.rResample.pfFilterW = CResampler::m_fFilter[_oOptions.fFilterFuncW].pfFunc;
-        _oOptions.rResample.dFilterSupportW = CResampler::m_fFilter[_oOptions.fFilterFuncW].dfSupport;
-        _oOptions.rResample.pfFilterH = CResampler::m_fFilter[_oOptions.fFilterFuncH].pfFunc;
-        _oOptions.rResample.dFilterSupportH = CResampler::m_fFilter[_oOptions.fFilterFuncH].dfSupport;
-        _oOptions.rResample.pfFilterD = CResampler::m_fFilter[_oOptions.fFilterFuncD].pfFunc;
-        _oOptions.rResample.dFilterSupportD = CResampler::m_fFilter[_oOptions.fFilterFuncD].dfSupport;
+        _oOptions.rResample.fFilterW = CResampler::m_fFilter[_oOptions.fFilterFuncW];
+        _oOptions.rResample.fFilterH = CResampler::m_fFilter[_oOptions.fFilterFuncH];
+        _oOptions.rResample.fFilterD = CResampler::m_fFilter[_oOptions.fFilterFuncD];
 
-        _oOptions.rResample.pfAlphaFilterW = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncW].pfFunc;
-        _oOptions.rResample.dAlphaFilterSupportW = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncW].dfSupport;
-        _oOptions.rResample.pfAlphaFilterH = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncH].pfFunc;
-        _oOptions.rResample.dAlphaFilterSupportH = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncH].dfSupport;
-        _oOptions.rResample.pfAlphaFilterD = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncD].pfFunc;
-        _oOptions.rResample.dAlphaFilterSupportD = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncD].dfSupport;
+        _oOptions.rResample.fAlphaFilterW = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncW];
+        _oOptions.rResample.fAlphaFilterH = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncH];
+        _oOptions.rResample.fAlphaFilterD = CResampler::m_fFilter[_oOptions.fAlphaFilterFuncD];
 
 
-        _oOptions.rMipResample.pfFilterW = CResampler::m_fFilter[_oOptions.fMipFilterFuncW].pfFunc;
-        _oOptions.rMipResample.dFilterSupportW = CResampler::m_fFilter[_oOptions.fMipFilterFuncW].dfSupport;
-        _oOptions.rMipResample.pfFilterH = CResampler::m_fFilter[_oOptions.fMipFilterFuncH].pfFunc;
-        _oOptions.rMipResample.dFilterSupportH = CResampler::m_fFilter[_oOptions.fMipFilterFuncH].dfSupport;
-        _oOptions.rMipResample.pfFilterD = CResampler::m_fFilter[_oOptions.fMipFilterFuncD].pfFunc;
-        _oOptions.rMipResample.dFilterSupportD = CResampler::m_fFilter[_oOptions.fMipFilterFuncD].dfSupport;
+        _oOptions.rMipResample.fFilterW = CResampler::m_fFilter[_oOptions.fMipFilterFuncW];
+        _oOptions.rMipResample.fFilterH = CResampler::m_fFilter[_oOptions.fMipFilterFuncH];
+        _oOptions.rMipResample.fFilterD = CResampler::m_fFilter[_oOptions.fMipFilterFuncD];
 
-        _oOptions.rMipResample.pfAlphaFilterW = CResampler::m_fFilter[_oOptions.fMipAlphaFilterFuncW].pfFunc;
-        _oOptions.rMipResample.dAlphaFilterSupportW = CResampler::m_fFilter[_oOptions.fMipAlphaFilterFuncW].dfSupport;
-        _oOptions.rMipResample.pfAlphaFilterH = CResampler::m_fFilter[_oOptions.fMipAlphaFilterFuncH].pfFunc;
-        _oOptions.rMipResample.dAlphaFilterSupportH = CResampler::m_fFilter[_oOptions.fMipAlphaFilterFuncH].dfSupport;
-        _oOptions.rMipResample.pfAlphaFilterD = CResampler::m_fFilter[_oOptions.fMipAlphaFilterFuncD].pfFunc;
-        _oOptions.rMipResample.dAlphaFilterSupportD = CResampler::m_fFilter[_oOptions.fMipAlphaFilterFuncD].dfSupport;
+        _oOptions.rMipResample.fAlphaFilterW = CResampler::m_fFilter[_oOptions.fMipAlphaFilterFuncW];
+        _oOptions.rMipResample.fAlphaFilterH = CResampler::m_fFilter[_oOptions.fMipAlphaFilterFuncH];
+        _oOptions.rMipResample.fAlphaFilterD = CResampler::m_fFilter[_oOptions.fMipAlphaFilterFuncD];
     }
 
     /**

@@ -72,14 +72,23 @@ namespace sl2 {
 
 		typedef double (*										PfFilterFunc)( double );
 
+		/** Filter information. */
+		typedef struct SL2_FILTER {
+			/** The filter function to use. */
+			PfFilterFunc										pfFunc = BilinearFilterFunc;
+
+			/** Filter helper value. */
+			double												dfSupport = 1.0;
+		} * LPSL2_FILTER, * const LPCSL2_FILTER;
+
 		/** Parameters for resampling. */
 		struct SL2_RESAMPLE {
-			double												dFilterSupportW = 1.0;
+			/*double												dFilterSupportW = 1.0;
 			double												dFilterSupportH = 1.0;
 			double												dFilterSupportD = 1.0;
 			double												dAlphaFilterSupportW = 1.0;
 			double												dAlphaFilterSupportH = 1.0;
-			double												dAlphaFilterSupportD = 1.0;
+			double												dAlphaFilterSupportD = 1.0;*/
 			double												dBorderColor[4] = { 0.0, 0.0, 0.0, 1.0 };
 			float												fFilterScale = 1.0;
 			uint32_t											ui32W = 0;
@@ -94,23 +103,20 @@ namespace sl2 {
 			SL2_TEXTURE_ADDRESSING								taAlphaW = SL2_TA_NULL_BORDER;
 			SL2_TEXTURE_ADDRESSING								taAlphaH = SL2_TA_NULL_BORDER;
 			SL2_TEXTURE_ADDRESSING								taAlphaD = SL2_TA_NULL_BORDER;
-			PfFilterFunc										pfFilterW = BilinearFilterFunc;
+			SL2_FILTER											fFilterW;
+			SL2_FILTER											fFilterH;
+			SL2_FILTER											fFilterD;
+			SL2_FILTER											fAlphaFilterW;
+			SL2_FILTER											fAlphaFilterH;
+			SL2_FILTER											fAlphaFilterD;
+			/*PfFilterFunc										pfFilterW = BilinearFilterFunc;
 			PfFilterFunc										pfFilterH = BilinearFilterFunc;
 			PfFilterFunc										pfFilterD = BilinearFilterFunc;
 			PfFilterFunc										pfAlphaFilterW = BilinearFilterFunc;
 			PfFilterFunc										pfAlphaFilterH = BilinearFilterFunc;
-			PfFilterFunc										pfAlphaFilterD = BilinearFilterFunc;
+			PfFilterFunc										pfAlphaFilterD = BilinearFilterFunc;*/
 			bool												bAlpha = true;
 		};
-
-		/** Filter information. */
-		typedef struct SL2_FILTER {
-			/** The filter function to use. */
-			PfFilterFunc										pfFunc;
-
-			/** Filter helper value. */
-			double												dfSupport;
-		} * LPSL2_FILTER, * const LPCSL2_FILTER;
 
 
 		// == Functions.
@@ -138,7 +144,6 @@ namespace sl2 {
 		bool													CreateContribList( uint32_t _ui32SrcSize, uint32_t _ui32DstSize,
 			SL2_TEXTURE_ADDRESSING _taAddressMode,
 			PfFilterFunc _pfFilter, double _dFilterSupport, float _fFilterScale );
-
 
 		/**
 		 * Standard sinc() function.
