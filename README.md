@@ -18,7 +18,7 @@
   <tr>
     <td>-outfile</td>
     <td>&lt;file_path&gt;</td>
-    <td>The path to which to save the file supplied with the last <em>-file</em> command. The destination file format is determined by the file extension.</td>
+    <td>The path to which to save the file supplied with the last <em>-file</em> command. The destination file format is determined by the file extension.<br>Currenntly supported formats:<br>PNG<br>BMP<br>TGA<br>JPG<br>J2K<br>JP2<br>EXR<br>DDS<br>KTX<br>PVR</td>
   </tr>
 </table>
 
