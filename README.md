@@ -1,5 +1,14 @@
 # SurfaceLevel 2.0
  An image converter primarily for video-game development and general image resampling/conversion.
+
+* The only tool that supports `VK_FORMAT_R64_SFLOAT`, `VK_FORMAT_R64G64_SFLOAT`, `VK_FORMAT_R64G64B64_SFLOAT`, and `VK_FORMAT_R64G64B64A64_SFLOAT`. An entirely 64-bit double pipeline is used!
+* The only resampler to allow different filters for width, height, and depth, and for color channels and the alpha channel.  Use my custom filer for a sharp color down-sample, but use bilinear filtering for the alpha channel!
+* Provides the fastest texture-compression routines.  Other tools may take 40 minutes to convert a 4K texture to BC7, while SurfaceLevel 2.0 takes only 20 seconds while producing a better result!
+* The supported colorspaces, resampling filters, and texture-addressing modes is exhaustive.  37 built-in colorspaces, 25 resampling filters, and 6 texture-addressing modes.
+* Almost all texture formats for Vulkan, Metal, OpenGL, and Direct3D 12 are supported.  Literally hundreds of formats, and more to come!
+* Normal-map generation, swizzling, channel swapping, image flipping, pre-multiplying alpha, and more!
+* Handles 1-D, 2-D, and 3-D textures, multiple faces, texture arrays, and mipmaps.
+* Currently exports to **PNG**, **BMP**, **TGA**, **JPG**, **J2K**, **JP2**, **EXR**, **DDS**, **KTX**, and **PVR**.
 <h2>Commands</h2>
 
 <h3>File</h3>
