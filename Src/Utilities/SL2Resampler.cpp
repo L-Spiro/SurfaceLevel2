@@ -52,7 +52,7 @@ namespace sl2 {
 
 	// == Functions.
 	/**
-	 * Resamples an image in-place.
+	 * Resamples an image.
 	 * 
 	 * \param _pdIn The input buffer.
 	 * \param _vOut The output buffer.
@@ -91,10 +91,10 @@ namespace sl2 {
 				dBufferA2.resize( sSize );
 			}*/
 		}
-		catch ( ... ) { return true; }
+		catch ( ... ) { return false; }
 
 		// Resize width first for best caching.
-		if ( !CreateContribList( ui32W, ui32NewW, _pParms.taAlphaW, _pParms.fFilterW.pfFunc, _pParms.fFilterW.dfSupport, _pParms.fFilterScale ) ) { return false; }
+		if ( !CreateContribList( ui32W, ui32NewW, _pParms.taColorW, _pParms.fFilterW.pfFunc, _pParms.fFilterW.dfSupport, _pParms.fFilterScale ) ) { return false; }
 		double * pdDst[4] = { dBufferR.data(), dBufferG.data(), dBufferB.data(), dBufferA.data() };
 		// Resize W.
 		size_t sPagesSize = ui32W * ui32H * 4;
@@ -123,14 +123,13 @@ namespace sl2 {
 						double dConvolved = ConvolveAligned( m_cContribs[W].dContributions.data(), m_dBuffer.data(), m_cContribs[W].dContributions.size() );
 						size_t sDstIdx = (sNewPagesSize * D) + (W * ui32H) + H;
 						pdDst[I][sDstIdx] = dConvolved;
-						//pdDst[I][sDstIdx] = H / double( ui32H );
 					}
 				}
 			}
 		}
 
 		// Resize H, now aligned horizontally in the buffers.
-		if ( !CreateContribList( ui32H, ui32NewH, _pParms.taAlphaH, _pParms.fFilterH.pfFunc, _pParms.fFilterH.dfSupport, _pParms.fFilterScale ) ) { return false; }
+		if ( !CreateContribList( ui32H, ui32NewH, _pParms.taColorH, _pParms.fFilterH.pfFunc, _pParms.fFilterH.dfSupport, _pParms.fFilterScale ) ) { return false; }
 		sPagesSize = sNewPagesSize;
 		sNewPagesSize = ui32NewW * ui32NewH;
 		uint32_t tW = ui32H;
@@ -186,6 +185,93 @@ namespace sl2 {
 						}
 					}
 				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * A resample specialized for a 2-D image with a single channel (typically U or V).
+	 * 
+	 * \param _pdIn The input buffer.
+	 * \param _vOut The output buffer.
+	 * \param _pParms Image/resampling parameters.
+	 * \param _sOutputStride The output stride in channels (IE RGB = 3, RGBA = 4).
+	 * \return Returns true if all allocations succeed.
+	 **/
+	bool CResampler::Resample_1Channel_2d( const double * _pdIn, double * _pdOut, const SL2_RESAMPLE &_pParms, size_t _sOutputStride ) {
+		std::vector<double> dBuffer;
+		uint32_t ui32NewW = std::max( 1U, _pParms.ui32NewW );
+		uint32_t ui32NewH = std::max( 1U, _pParms.ui32NewH );
+		uint32_t ui32W = std::max( 1U, _pParms.ui32W );
+		uint32_t ui32H = std::max( 1U, _pParms.ui32H );
+		try {
+			size_t sSize = ui32NewW * ui32H;
+			dBuffer.resize( sSize );
+		}
+		catch ( ... ) { return false; }
+
+		// Resize width first for best caching.
+		if ( !CreateContribList( ui32W, ui32NewW, _pParms.taColorW, _pParms.fFilterW.pfFunc, _pParms.fFilterW.dfSupport, _pParms.fFilterScale ) ) { return false; }
+		double * pdDst[1] = { dBuffer.data() };
+		// Resize W.
+		size_t sPagesSize = ui32W * ui32H;
+		size_t sNewPagesSize = ui32NewW * ui32H;
+
+		uint32_t ui32DstW = ui32H;
+		uint32_t ui32DstH = ui32NewW;
+		for ( size_t H = 0; H < ui32H; ++H ) {
+			const double * pdRowStart = _pdIn + (sPagesSize + (H * ui32W));
+			for ( size_t W = 0; W < ui32NewW; ++W ) {
+				double dConvolved;
+				if ( m_cContribs[W].bInsideBounds ) {
+					dConvolved = ConvolveUnaligned( m_cContribs[W].dContributions.data(), pdRowStart + m_cContribs[W].i32Indices[0], m_cContribs[W].dContributions.size() );
+				}
+				else {
+					for ( size_t J = 0; J < m_cContribs[W].i32Indices.size(); ++J ) {
+						int32_t i32Index = m_cContribs[W].i32Indices[J];
+						if ( i32Index == -1 ) {
+							m_dBuffer[J] = _pParms.dBorderColor[0];
+						}
+						else {
+							m_dBuffer[J] = pdRowStart[i32Index];
+						}
+					}
+					dConvolved = ConvolveAligned( m_cContribs[W].dContributions.data(), m_dBuffer.data(), m_cContribs[W].dContributions.size() );
+				}
+				size_t sDstIdx = (sNewPagesSize) + (W * ui32H) + H;
+				pdDst[0][sDstIdx] = dConvolved;
+			}
+		}
+
+		// Resize H, now aligned horizontally in the buffers.
+		if ( !CreateContribList( ui32H, ui32NewH, _pParms.taColorH, _pParms.fFilterH.pfFunc, _pParms.fFilterH.dfSupport, _pParms.fFilterScale ) ) { return false; }
+		sPagesSize = sNewPagesSize;
+		sNewPagesSize = ui32NewW * ui32NewH;
+		uint32_t tW = ui32H;
+		uint32_t tH = ui32NewW;
+
+		for ( size_t H = 0; H < tH; ++H ) {
+			const double * pdRowStart = pdDst[0] + sPagesSize + (H * tW);
+			for ( size_t W = 0; W < ui32NewH; ++W ) {
+				double dConvolved;
+				if ( m_cContribs[W].bInsideBounds ) {
+					dConvolved = ConvolveUnaligned( m_cContribs[W].dContributions.data(), pdRowStart + m_cContribs[W].i32Indices[0], m_cContribs[W].dContributions.size() );
+				}
+				else {
+					for ( size_t J = 0; J < m_cContribs[W].i32Indices.size(); ++J ) {
+						int32_t i32Index = m_cContribs[W].i32Indices[J];
+						if ( i32Index == -1 ) {
+							m_dBuffer[J] = _pParms.dBorderColor[0];
+						}
+						else {
+							m_dBuffer[J] = (*(pdRowStart + i32Index));
+						}
+					}
+					dConvolved = ConvolveAligned( m_cContribs[W].dContributions.data(), m_dBuffer.data(), m_cContribs[W].dContributions.size() );
+				}
+				size_t sDstIdx = (sNewPagesSize + (W * ui32NewW) + H) * _sOutputStride;
+				_pdOut[sDstIdx] = dConvolved;
 			}
 		}
 		return true;
@@ -253,7 +339,6 @@ namespace sl2 {
 			double dTotalWeight = 0.0;
 			for ( int32_t J = i32Left; J <= i32Right; ++J ) {
 				if ( CTextureAddressing::m_pfFuncs[_taAddressMode]( _ui32SrcSize, J ) != -2 ) {
-					//dTotalWeight += (*_pfFilter)( ((vBounds[I].dCenter - (J + dNudge))) * dScale * _fFilterScale );
 					dTotalWeight += (*_pfFilter)( (vBounds[I].dCenter - J) * dScale * _fFilterScale );
 				}
 			}
@@ -262,7 +347,6 @@ namespace sl2 {
 			dTotalWeight = 0.0;
 
 			for ( int32_t J = i32Left; J <= i32Right; ++J ) {
-				//double dThisWeight = (*_pfFilter)( ((vBounds[I].dCenter - (J + dNudge))) * dScale * _fFilterScale ) * dNorm;
 				double dThisWeight = (*_pfFilter)( (vBounds[I].dCenter - J) * dScale * _fFilterScale ) * dNorm;
 
 				m_cContribs[I].i32Indices[J-i32Left] = CTextureAddressing::m_pfFuncs[_taAddressMode]( _ui32SrcSize, J );

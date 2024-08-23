@@ -83,12 +83,6 @@ namespace sl2 {
 
 		/** Parameters for resampling. */
 		struct SL2_RESAMPLE {
-			/*double												dFilterSupportW = 1.0;
-			double												dFilterSupportH = 1.0;
-			double												dFilterSupportD = 1.0;
-			double												dAlphaFilterSupportW = 1.0;
-			double												dAlphaFilterSupportH = 1.0;
-			double												dAlphaFilterSupportD = 1.0;*/
 			double												dBorderColor[4] = { 0.0, 0.0, 0.0, 1.0 };
 			float												fFilterScale = 1.0;
 			uint32_t											ui32W = 0;
@@ -109,19 +103,13 @@ namespace sl2 {
 			SL2_FILTER											fAlphaFilterW;
 			SL2_FILTER											fAlphaFilterH;
 			SL2_FILTER											fAlphaFilterD;
-			/*PfFilterFunc										pfFilterW = BilinearFilterFunc;
-			PfFilterFunc										pfFilterH = BilinearFilterFunc;
-			PfFilterFunc										pfFilterD = BilinearFilterFunc;
-			PfFilterFunc										pfAlphaFilterW = BilinearFilterFunc;
-			PfFilterFunc										pfAlphaFilterH = BilinearFilterFunc;
-			PfFilterFunc										pfAlphaFilterD = BilinearFilterFunc;*/
 			bool												bAlpha = true;
 		};
 
 
 		// == Functions.
 		/**
-		 * Resamples an image in-place.
+		 * Resamples an image.
 		 * 
 		 * \param _pdIn The input buffer.
 		 * \param _vOut The output buffer.
@@ -129,6 +117,17 @@ namespace sl2 {
 		 * \return Returns true if all allocations succeed.
 		 **/
 		bool													Resample( const double * _pdIn, double * _pdOut, const SL2_RESAMPLE &_pParms );
+
+		/**
+		 * A resample specialized for a 2-D image with a single channel (typically U or V).
+		 * 
+		 * \param _pdIn The input buffer.
+		 * \param _vOut The output buffer.
+		 * \param _pParms Image/resampling parameters.
+		 * \param _sOutputStride The output stride in channels (IE RGB = 3, RGBA = 4).
+		 * \return Returns true if all allocations succeed.
+		 **/
+		bool													Resample_1Channel_2d( const double * _pdIn, double * _pdOut, const SL2_RESAMPLE &_pParms, size_t _sOutputStride );
 
 		/**
 		 * Creates a new contribution list.

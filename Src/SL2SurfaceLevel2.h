@@ -35,7 +35,7 @@ namespace sl2 {
 		std::vector<uint8_t>											vOutColorProfile;												/**< The output color profile. */
 		int32_t															i32InRenderingIntent = INTENT_RELATIVE_COLORIMETRIC;			/**< Input -> linear rendering intent. */
 		int32_t															i32OutRenderingIntent = INTENT_RELATIVE_COLORIMETRIC;			/**< Input -> linear rendering intent. */
-		bool															bEmbedColorProfile = false;										/**< Embed the color profile. */
+		bool															bEmbedColorProfile = true;										/**< Embed the color profile. */
 		bool															bIgnoreSourceColorspaceGamma = false;							/**< Ignores the gamma curve inside any embedded or selected ICC profiles. */
 
 		sl2::CResampler::SL2_RESAMPLE									rResample;														/**< Resampling parameters. */
@@ -56,9 +56,9 @@ namespace sl2 {
 		CResampler::SL2_FILTER_FUNCS									fMipFilterFuncW = CResampler::SL2_FF_CARDINALSPLINEUNIFORM;		/**< The width filter. */
 		CResampler::SL2_FILTER_FUNCS									fMipFilterFuncH = CResampler::SL2_FF_CARDINALSPLINEUNIFORM;		/**< The height filter. */
 		CResampler::SL2_FILTER_FUNCS									fMipFilterFuncD = CResampler::SL2_FF_CARDINALSPLINEUNIFORM;		/**< The depth filter. */
-		CResampler::SL2_FILTER_FUNCS									fMipAlphaFilterFuncW = CResampler::SL2_FF_QUADRATICSHARP;		/**< The width alpha-channel filter. */
-		CResampler::SL2_FILTER_FUNCS									fMipAlphaFilterFuncH = CResampler::SL2_FF_QUADRATICSHARP;		/**< The height alpha-channel filter. */
-		CResampler::SL2_FILTER_FUNCS									fMipAlphaFilterFuncD = CResampler::SL2_FF_QUADRATICSHARP;		/**< The depth alpha-channel filter. */
+		CResampler::SL2_FILTER_FUNCS									fMipAlphaFilterFuncW = CResampler::SL2_FF_LINEAR;				/**< The width alpha-channel filter. */
+		CResampler::SL2_FILTER_FUNCS									fMipAlphaFilterFuncH = CResampler::SL2_FF_LINEAR;				/**< The height alpha-channel filter. */
+		CResampler::SL2_FILTER_FUNCS									fMipAlphaFilterFuncD = CResampler::SL2_FF_LINEAR;				/**< The depth alpha-channel filter. */
 
 		uint32_t														ui32ClampW = 0;													/**< Width clamp. */
 		uint32_t														ui32ClampH = 0;													/**< Height clamp. */

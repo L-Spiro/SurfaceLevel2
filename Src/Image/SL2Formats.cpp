@@ -1863,35 +1863,43 @@ namespace sl2 {
 	 **/
 	void CFormat::PrintFormats_List() {
 		std::string sTmp;
+		sTmp += " | Vulkan Formats |\r\n | --- |\r\n";
 		for ( size_t I = 0; I < SL2_ELEMENTS( m_kifdInternalFormats ); ++I ) {
 			if ( m_kifdInternalFormats[I].vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED ) {
+				sTmp += " | ";
 				sTmp += m_kifdInternalFormats[I].pcVulkanName;
-				sTmp += "\r\n";
+				sTmp += " |\r\n";
 			}
 		}
 
+		sTmp += "\r\n | DXGI Formats |\r\n | --- |\r\n";
 		for ( size_t I = 0; I < SL2_ELEMENTS( m_kifdInternalFormats ); ++I ) {
 			if ( m_kifdInternalFormats[I].dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN ) {
+				sTmp += " | ";
 				sTmp += m_kifdInternalFormats[I].pcDxName;
-				sTmp += "\r\n";
+				sTmp += " |\r\n";
 			}
 		}
 
+		sTmp += "\r\n | Metal Formats |\r\n | --- |\r\n";
 		for ( size_t I = 0; I < SL2_ELEMENTS( m_kifdInternalFormats ); ++I ) {
 			if ( m_kifdInternalFormats[I].mfMetalFormat != SL2_MTLPixelFormatInvalid ) {
+				sTmp += " | ";
 				sTmp += m_kifdInternalFormats[I].pcMetalName;
-				sTmp += "\r\n";
+				sTmp += " |\r\n";
 			}
 		}
 
+		sTmp += "\r\n | OpenGL Formats |\r\n | --- |\r\n";
 		for ( size_t I = 0; I < SL2_ELEMENTS( m_kifdInternalFormats ); ++I ) {
 			if ( m_kifdInternalFormats[I].kifInternalFormat != SL2_KIF_GL_INVALID ) {
+				sTmp += " | ";
 				sTmp += m_kifdInternalFormats[I].pcOglInternalFormat;
-				sTmp += "\t| ";
+				sTmp += "\t ";
 				sTmp += m_kifdInternalFormats[I].pcOglType;
-				sTmp += "\t| ";
+				sTmp += "\t ";
 				sTmp += m_kifdInternalFormats[I].pcOglBaseInternalFormat;
-				sTmp += "\r\n";
+				sTmp += " |\r\n";
 			}
 		}
 

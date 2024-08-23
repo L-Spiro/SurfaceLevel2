@@ -471,6 +471,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.bSwap = true;
                 SL2_ADV( 1 );
             }
+
             if ( SL2_CHECK( 3, prescale ) ) {
                 oOptions.rResample.ui32NewW = ::_wtoi( _wcpArgV[1] );
                 oOptions.rResample.ui32NewH = ::_wtoi( _wcpArgV[2] );
@@ -484,7 +485,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.i32ScaleDims = 3;
                 SL2_ADV( 4 );
             }
-            if ( SL2_CHECK( 2, rescale ) || SL2_CHECK( 2, rescale_to ) ) {
+            if ( SL2_CHECK( 2, rescale ) || SL2_CHECK( 2, rescale_to ) || SL2_CHECK( 2, resample_to ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"nearest" ) == 0 ) {
                     oOptions.rtResampleTo = sl2::SL2_RT_NEAREST;
                 }
@@ -598,27 +599,27 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         SL2_ADV( 2 );                                                                                                                                                                                                               \
     }
 
-            SL2_RESAMPLE( resample, fFilterFuncW, oOptions.fFilterFuncH = oOptions.fFilterFuncD = oOptions.fAlphaFilterFuncW = oOptions.fAlphaFilterFuncH = oOptions.fAlphaFilterFuncD );
-            SL2_RESAMPLE( resamplew, fFilterFuncW, oOptions.fAlphaFilterFuncW );
-            SL2_RESAMPLE( resampleh, fFilterFuncH, oOptions.fAlphaFilterFuncH );
-            SL2_RESAMPLE( resampled, fFilterFuncD, oOptions.fAlphaFilterFuncD );
-            SL2_RESAMPLE( resamplew_color, fFilterFuncW, oOptions.fFilterFuncW );
-            SL2_RESAMPLE( resampleh_color, fFilterFuncH, oOptions.fFilterFuncH );
-            SL2_RESAMPLE( resampled_color, fFilterFuncD, oOptions.fFilterFuncD );
-            SL2_RESAMPLE( resamplew_alpha, fAlphaFilterFuncW, oOptions.fAlphaFilterFuncW );
-            SL2_RESAMPLE( resampleh_alpha, fAlphaFilterFuncH, oOptions.fAlphaFilterFuncH );
-            SL2_RESAMPLE( resampled_alpha, fAlphaFilterFuncD, oOptions.fAlphaFilterFuncD );
+            SL2_RESAMPLE( filter, fFilterFuncW, oOptions.fFilterFuncH = oOptions.fFilterFuncD = oOptions.fAlphaFilterFuncW = oOptions.fAlphaFilterFuncH = oOptions.fAlphaFilterFuncD );
+            SL2_RESAMPLE( filterw, fFilterFuncW, oOptions.fAlphaFilterFuncW );
+            SL2_RESAMPLE( filterh, fFilterFuncH, oOptions.fAlphaFilterFuncH );
+            SL2_RESAMPLE( filterd, fFilterFuncD, oOptions.fAlphaFilterFuncD );
+            SL2_RESAMPLE( filterw_color, fFilterFuncW, oOptions.fFilterFuncW );
+            SL2_RESAMPLE( filterh_color, fFilterFuncH, oOptions.fFilterFuncH );
+            SL2_RESAMPLE( filterd_color, fFilterFuncD, oOptions.fFilterFuncD );
+            SL2_RESAMPLE( filterw_alpha, fAlphaFilterFuncW, oOptions.fAlphaFilterFuncW );
+            SL2_RESAMPLE( filterh_alpha, fAlphaFilterFuncH, oOptions.fAlphaFilterFuncH );
+            SL2_RESAMPLE( filterd_alpha, fAlphaFilterFuncD, oOptions.fAlphaFilterFuncD );
 
-            SL2_RESAMPLE( mip_resample, fMipFilterFuncW, oOptions.fMipFilterFuncH = oOptions.fMipFilterFuncD = oOptions.fMipAlphaFilterFuncW = oOptions.fMipAlphaFilterFuncH = oOptions.fMipAlphaFilterFuncD );
-            SL2_RESAMPLE( mip_resamplew, fMipFilterFuncW, oOptions.fMipAlphaFilterFuncW );
-            SL2_RESAMPLE( mip_resampleh, fMipFilterFuncH, oOptions.fMipAlphaFilterFuncH );
-            SL2_RESAMPLE( mip_resampled, fMipFilterFuncD, oOptions.fMipAlphaFilterFuncD );
-            SL2_RESAMPLE( mip_resamplew_color, fMipFilterFuncW, oOptions.fMipFilterFuncW );
-            SL2_RESAMPLE( mip_resampleh_color, fMipFilterFuncH, oOptions.fMipFilterFuncH );
-            SL2_RESAMPLE( mip_resampled_color, fMipFilterFuncD, oOptions.fMipFilterFuncD );
-            SL2_RESAMPLE( mip_resamplew_alpha, fMipAlphaFilterFuncW, oOptions.fMipAlphaFilterFuncW );
-            SL2_RESAMPLE( mip_resampleh_alpha, fMipAlphaFilterFuncH, oOptions.fMipAlphaFilterFuncH );
-            SL2_RESAMPLE( mip_resampled_alpha, fMipAlphaFilterFuncD, oOptions.fMipAlphaFilterFuncD );
+            SL2_RESAMPLE( mip_filter, fMipFilterFuncW, oOptions.fMipFilterFuncH = oOptions.fMipFilterFuncD = oOptions.fMipAlphaFilterFuncW = oOptions.fMipAlphaFilterFuncH = oOptions.fMipAlphaFilterFuncD );
+            SL2_RESAMPLE( mip_filterw, fMipFilterFuncW, oOptions.fMipAlphaFilterFuncW );
+            SL2_RESAMPLE( mip_filterh, fMipFilterFuncH, oOptions.fMipAlphaFilterFuncH );
+            SL2_RESAMPLE( mip_filterd, fMipFilterFuncD, oOptions.fMipAlphaFilterFuncD );
+            SL2_RESAMPLE( mip_filterw_color, fMipFilterFuncW, oOptions.fMipFilterFuncW );
+            SL2_RESAMPLE( mip_filterh_color, fMipFilterFuncH, oOptions.fMipFilterFuncH );
+            SL2_RESAMPLE( mip_filterd_color, fMipFilterFuncD, oOptions.fMipFilterFuncD );
+            SL2_RESAMPLE( mip_filterw_alpha, fMipAlphaFilterFuncW, oOptions.fMipAlphaFilterFuncW );
+            SL2_RESAMPLE( mip_filterh_alpha, fMipAlphaFilterFuncH, oOptions.fMipAlphaFilterFuncH );
+            SL2_RESAMPLE( mip_filterd_alpha, fMipAlphaFilterFuncD, oOptions.fMipAlphaFilterFuncD );
                 
 #undef SL2_RESAMPLE
 
@@ -671,6 +672,9 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 oOptions.rResample.taColorH = oOptions.rResample.taColorD = oOptions.rResample.taAlphaW = oOptions.rResample.taAlphaH = oOptions.rResample.taAlphaD = oOptions.rResample.taColorW;
+                oOptions.rMipResample.taColorW = oOptions.rMipResample.taAlphaW = 
+                    oOptions.rMipResample.taColorH = oOptions.rMipResample.taAlphaH = 
+                    oOptions.rMipResample.taColorD = oOptions.rMipResample.taAlphaD = oOptions.rResample.taColorW;
                 SL2_ADV( 2 );
             }
 
@@ -698,6 +702,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 oOptions.rResample.taAlphaW = oOptions.rResample.taColorW;
+                oOptions.rMipResample.taColorW = oOptions.rMipResample.taAlphaW = oOptions.rResample.taColorW;
                 SL2_ADV( 2 );
             }
             if ( SL2_CHECK( 2, textureaddressingh ) || SL2_CHECK( 2, tah ) ) {
@@ -724,6 +729,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 oOptions.rResample.taAlphaH = oOptions.rResample.taColorH;
+                oOptions.rMipResample.taColorH = oOptions.rMipResample.taAlphaH = oOptions.rResample.taColorH;
                 SL2_ADV( 2 );
             }
             if ( SL2_CHECK( 2, textureaddressingd ) || SL2_CHECK( 2, tad ) ) {
@@ -750,10 +756,11 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 oOptions.rResample.taAlphaD = oOptions.rResample.taColorD;
+                oOptions.rMipResample.taColorD = oOptions.rMipResample.taAlphaD = oOptions.rResample.taColorD;
                 SL2_ADV( 2 );
             }
 
-            if ( SL2_CHECK( 2, textureaddressingw_opaque ) || SL2_CHECK( 2, taw_opaque ) || SL2_CHECK( 2, textureaddressingu_opaque ) || SL2_CHECK( 2, tau_opaque ) ) {
+            if ( SL2_CHECK( 2, textureaddressingw_opaque ) || SL2_CHECK( 2, taw_opaque ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_CLAMP;
                 }
@@ -776,9 +783,10 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     SL2_ERRORT( std::format( L"Invalid \"textureaddressingw_opaque\"|\"taw_opaque\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
+                oOptions.rMipResample.taColorW = oOptions.rResample.taColorW;
                 SL2_ADV( 2 );
             }
-            if ( SL2_CHECK( 2, textureaddressingh_opaque ) || SL2_CHECK( 2, tah_opaque ) || SL2_CHECK( 2, textureaddressingv_opaque ) || SL2_CHECK( 2, tav_opaque ) ) {
+            if ( SL2_CHECK( 2, textureaddressingh_opaque ) || SL2_CHECK( 2, tah_opaque ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
                     oOptions.rResample.taColorH = sl2::SL2_TA_CLAMP;
                 }
@@ -801,9 +809,10 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     SL2_ERRORT( std::format( L"Invalid \"textureaddressingh_opaque\"|\"tah_opaque\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
+                oOptions.rMipResample.taColorH = oOptions.rResample.taColorH;
                 SL2_ADV( 2 );
             }
-            if ( SL2_CHECK( 2, textureaddressingd_opaque ) || SL2_CHECK( 2, tad_opaque ) || SL2_CHECK( 2, textureaddressingw_opaque ) || SL2_CHECK( 2, taw_opaque ) ) {
+            if ( SL2_CHECK( 2, textureaddressingd_opaque ) || SL2_CHECK( 2, tad_opaque ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
                     oOptions.rResample.taColorD = sl2::SL2_TA_CLAMP;
                 }
@@ -826,10 +835,11 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     SL2_ERRORT( std::format( L"Invalid \"textureaddressingd_opaque\"|\"tad_opaque\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
+                oOptions.rMipResample.taColorD = oOptions.rResample.taColorD;
                 SL2_ADV( 2 );
             }
 
-            if ( SL2_CHECK( 2, textureaddressingw_alpha ) || SL2_CHECK( 2, taw_alpha ) || SL2_CHECK( 2, textureaddressingu_alpha ) || SL2_CHECK( 2, tau_alpha ) ) {
+            if ( SL2_CHECK( 2, textureaddressingw_alpha ) || SL2_CHECK( 2, taw_alpha ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
                     oOptions.rResample.taAlphaW = sl2::SL2_TA_CLAMP;
                 }
@@ -852,9 +862,10 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     SL2_ERRORT( std::format( L"Invalid \"textureaddressingw_alpha\"|\"taw_alpha\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
+                oOptions.rMipResample.taAlphaW = oOptions.rResample.taAlphaW;
                 SL2_ADV( 2 );
             }
-            if ( SL2_CHECK( 2, textureaddressingh_alpha ) || SL2_CHECK( 2, tah_alpha ) || SL2_CHECK( 2, textureaddressingv_alpha ) || SL2_CHECK( 2, tav_alpha ) ) {
+            if ( SL2_CHECK( 2, textureaddressingh_alpha ) || SL2_CHECK( 2, tah_alpha ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
                     oOptions.rResample.taAlphaH = sl2::SL2_TA_CLAMP;
                 }
@@ -877,9 +888,10 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     SL2_ERRORT( std::format( L"Invalid \"textureaddressingh_alpha\"|\"tah_alpha\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
+                oOptions.rMipResample.taAlphaH = oOptions.rResample.taAlphaH;
                 SL2_ADV( 2 );
             }
-            if ( SL2_CHECK( 2, textureaddressingd_alpha ) || SL2_CHECK( 2, tad_alpha ) || SL2_CHECK( 2, textureaddressingw_alpha ) || SL2_CHECK( 2, taw_alpha ) ) {
+            if ( SL2_CHECK( 2, textureaddressingd_alpha ) || SL2_CHECK( 2, tad_alpha ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
                     oOptions.rResample.taAlphaD = sl2::SL2_TA_CLAMP;
                 }
@@ -902,8 +914,19 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     SL2_ERRORT( std::format( L"Invalid \"textureaddressingd_alpha\"|\"tad_alpha\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
+                oOptions.rMipResample.taAlphaD = oOptions.rResample.taAlphaD;
                 SL2_ADV( 2 );
             }
+
+            if ( SL2_CHECK( 4, border_color ) ) {
+				oOptions.rResample.dBorderColor[0] = ::_wtoi( _wcpArgV[1] );
+				oOptions.rResample.dBorderColor[1] = ::_wtoi( _wcpArgV[2] );
+                oOptions.rResample.dBorderColor[2] = ::_wtoi( _wcpArgV[3] );
+                oOptions.rMipResample.dBorderColor[0] = oOptions.rResample.dBorderColor[0];
+                oOptions.rMipResample.dBorderColor[1] = oOptions.rResample.dBorderColor[1];
+                oOptions.rMipResample.dBorderColor[2] = oOptions.rResample.dBorderColor[2];
+				SL2_ADV( 4 );
+			}
 
             // TODO: bake_tex_mapping_u, bake_tex_mapping_v, bake_tex_mapping_w.
             //  bake_tex_mapping_u ADDRESSING_MODE REPEATS

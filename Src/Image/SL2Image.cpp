@@ -328,6 +328,7 @@ namespace sl2 {
 					if ( !Format()->pfToRgba64F( Data( M, 0, A, F ), pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), Format() ) ) {
 						return SL2_E_INTERNALERROR;
 					}
+					BakeGamma( pui8Dest, m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), CFormat::TransferFunc( m_cgcInputCurve ) );
 					if ( m_bApplyInputColorSpaceTransfer ) {
 						/*ApplyColorSpaceTransferFunction( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(),
 							m_tfInColorSpaceTransferFunc[SL2_PC_R].pfXtoLinear, m_tfInColorSpaceTransferFunc[SL2_PC_R].pvParm,
@@ -335,11 +336,6 @@ namespace sl2 {
 							m_tfInColorSpaceTransferFunc[SL2_PC_B].pfXtoLinear, m_tfInColorSpaceTransferFunc[SL2_PC_B].pvParm );*/
 						ApplySrcColorSpace( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
 					}
-					SL2_COLORSPACE_GAMMA_CURVES cgcCurve = m_cgcInputCurve;
-					if ( cgcCurve == SL2_CGC_NONE ) {
-						cgcCurve = SL2_CGC_sRGB_PRECISE;
-					}
-					BakeGamma( pui8Dest, m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), CFormat::TransferFunc( cgcCurve ) );
 					if ( m_bIgnoreAlpha ) {
 						m_bIsPreMultiplied = m_bNeedsPreMultiply = false;
 						SetAlpha( pui8Dest, 1.0, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
@@ -412,12 +408,6 @@ namespace sl2 {
 						if ( m_dTargetGamma ) {
 							BakeGamma( iTmp.Data( M, 0, A, F ), 1.0 / m_dTargetGamma, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth(), CFormat::TransferFunc( m_cgcOutputCurve ) );
 						}
-						/*if ( m_bApplyInputColorSpaceTransfer ) {
-							ApplyColorSpaceTransferFunction( iTmp.Data( M, 0, A, F ), iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth(),
-								m_tfOutColorSpaceTransferFunc[SL2_PC_R].pfLinearToX, m_tfOutColorSpaceTransferFunc[SL2_PC_R].pvParm,
-								m_tfOutColorSpaceTransferFunc[SL2_PC_G].pfLinearToX, m_tfOutColorSpaceTransferFunc[SL2_PC_G].pvParm,
-								m_tfOutColorSpaceTransferFunc[SL2_PC_B].pfLinearToX, m_tfOutColorSpaceTransferFunc[SL2_PC_B].pvParm );
-						}*/
 						ApplyDstColorSpace( iTmp.Data( M, 0, A, F ), iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );
 					}
 				}
@@ -530,10 +520,11 @@ namespace sl2 {
 		if ( !Format()->pfToRgba64F( Data( _sMip, 0, _sArray, _sFace ), vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), Format() ) ) {
 			return SL2_E_INTERNALERROR;
 		}
+		
+		BakeGamma( vTmp.data(), m_dGamma, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), CFormat::TransferFunc( m_cgcInputCurve ) );
 		if ( m_bApplyInputColorSpaceTransfer ) {
 			ApplySrcColorSpace( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
 		}
-		BakeGamma( vTmp.data(), m_dGamma, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), CFormat::TransferFunc( m_cgcInputCurve ) );
 		if ( !m_bIsPreMultiplied && m_bNeedsPreMultiply ) {
 			CFormat::ApplyPreMultiply( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
 		}
