@@ -1,8 +1,478 @@
 # SurfaceLevel 2.0
  An image converter primarily for video-game development.
+<h2>Commands</h2>
+
+<h3>File</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>-file</td>
+    <td>&lt;file_path&gt;</td>
+    <td>A path to an image file to load and convert. The <em>-file</em> and <em>-outfile</em> commands can be used multiple times to load and save multiple files.</td>
+  </tr>
+  <tr>
+    <td>-outfile</td>
+    <td>&lt;file_path&gt;</td>
+    <td>The path to which to save the file supplied with the last <em>-file</em> command. The destination file format is determined by the file extension.</td>
+  </tr>
+</table>
+
+<h3>Gamma/Colorspaces</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td rowspan="1">-gamma<br>-g</td>
+    <td>&lt;gamma&gt;</td>
+    <td>Sets the input gamma power. Defaults to -0.454545454545 (precise sRGB).</td>
+  </tr>
+  <tr>
+    <td>-targetgamma</td>
+    <td>&lt;gamma&gt;</td>
+    <td>Sets the output gamma power.<br>Defaults to -0.454545454545 (precise sRGB).</td>
+  </tr>
+  <tr>
+    <td>-rgbe<br>-linear</td>
+    <td></td>
+    <td>Sets the source and output gamma to 0.0.</td>
+  </tr>
+  <tr>
+    <td>-srgb</td>
+    <td></td>
+    <td>Sets the source gamma to -0.454545454545 (precise sRGB).</td>
+  </tr>
+  <tr>
+    <td>-target_srgb</td>
+    <td></td>
+    <td>Sets the output gamma to -0.454545454545 (precise sRGB).</td>
+  </tr>
+  <tr>
+    <td rowspan="36">-input_colorspace</td>
+    <td>sRGB<br>sRGB_precise</td>
+    <td>Sets the source colorspace profile to an accurate no-gap sRGB.</td>
+  </tr>
+  <tr>
+    <td>sRGB_std<br>sRGB_standard</td>
+    <td>Sets the source colorspace profile to the standard sRGB.</td>
+  </tr>
+  <tr>
+    <td>smpte_170<br>smpte_170m</td>
+    <td>Sets the source colorspace profile to an accurate no-gap SMPTE 170M-1999.</td>
+  </tr>
+  <tr>
+    <td>smpte_170_std<br>smpte_170m_std<br>170m_std<br>smpte_170_standard<br>smpte_170m_standard<br>170m_standard</td>
+    <td>Sets the source colorspace profile to the standard SMPTE 170M-1999.</td>
+  </tr>
+  <tr>
+    <td>rec709<br>rec.709<br>bt709<br>bt.709<br>itu_bt709<br>itu_bt.709</td>
+    <td>Sets the source colorspace profile to an accurate no-gap ITU-R Recommendation BT.709-5.</td>
+  </tr>
+  <tr>
+    <td>rec709_std<br>rec.709_std<br>bt709_std<br>bt.709_std<br>itu_bt709_std<br>itu_bt.709_std</td>
+    <td>Sets the source colorspace profile to the standard ITU-R Recommendation BT.709-5.</td>
+  </tr>
+  <tr>
+    <td>adobe<br>adobergb<br>adobe_rgb</td>
+    <td>Sets the source colorspace profile to Adobe RGB (1998) Color Image Encoding Version 2005-05.</td>
+  </tr>
+  <tr>
+    <td>bt2020<br>bt.2020<br>itu_bt2020<br>itu_bt.2020</td>
+    <td>Sets the source colorspace profile to an accurate no-gap ITU-R Recommendation BT.2020.</td>
+  </tr>
+  <tr>
+    <td>bt2020_std<br>bt.2020_std<br>itu_bt2020_std<br>itu_bt.2020_std</td>
+    <td>Sets the source colorspace profile to the standard ITU-R Recommendation BT.2020.</td>
+  </tr>
+  <tr>
+    <td>dcip3<br>dci-p3<br>dci_p3</td>
+    <td>Sets the source colorspace profile to SMPTE RP 431-2:2011.</td>
+  </tr>
+  <tr>
+    <td>smpte_240<br>smpte_240m<br>240m</td>
+    <td>Sets the source colorspace profile to an accurate no-gap SMPTE 240M-1999.</td>
+  </tr>
+  <tr>
+    <td>smpte_240_std<br>smpte_240m_std<br>240m_std<br>smpte_240_standard<br>smpte_240m_standard<br>240m_standard</td>
+    <td>Sets the source colorspace profile to the standard SMPTE 240M-1999.</td>
+  </tr>
+  <tr>
+    <td>ntsc_1953<br>ntsc1953</td>
+    <td>Sets the source colorspace profile to an accurate no-gap NTSC 1953.</td>
+  </tr>
+  <tr>
+    <td>ntsc_1953_std<br>ntsc1953_std<br>ntsc_1953_standard<br>ntsc1953_standard</td>
+    <td>Sets the source colorspace profile to the standard NTSC 1953.</td>
+  </tr>
+  <tr>
+    <td>tech_3213<br>tech3213</td>
+    <td>Sets the source colorspace profile to an accurate no-gap EBU Tech. 3213.</td>
+  </tr>
+  <tr>
+    <td>tech_3213_std<br>tech3213_std<br>tech_3213_standard<br>tech3213_standard</td>
+    <td>Sets the source colorspace profile to the standard EBU Tech. 3213.</td>
+  </tr>
+  <tr>
+    <td>displayp3<br>display-p3<br>display_p3</td>
+    <td>Sets the source colorspace profile to an accurate no-gap Display P3 Color Encoding (v 1.0).</td>
+  </tr>
+  <tr>
+    <td>displayp3_std<br>display-p3_std<br>display_p3_std<br>displayp3_standard<br>display-p3_standard<br>display_p3_standard</td>
+    <td>Sets the source colorspace profile to the standard Display P3 Color Encoding (v 1.0).</td>
+  </tr>
+  <tr>
+    <td>rec601<br>rec.601<br>bt601<br>bt.601<br>itu_bt601<br>itu_bt.601</td>
+    <td>Sets the source colorspace profile to an accurate no-gap ITU-R Recommendation BT.601 (525).</td>
+  </tr>
+  <tr>
+    <td>rec601_std<br>rec.601_std<br>bt601_std<br>bt.601_std<br>itu_bt601_std<br>itu_bt.601_std</td>
+    <td>Sets the source colorspace profile to the standard ITU-R Recommendation BT.601 (525).</td>
+  </tr>
+  <tr>
+    <td>rec601_pal<br>rec.601_pal<br>bt601_pal<br>bt.601_pal<br>itu_bt601_pal<br>itu_bt.601_pal</td>
+    <td>Sets the source colorspace profile to an accurate no-gap ITU-R Recommendation BT.601 (625).</td>
+  </tr>
+  <tr>
+    <td>rec601_pal_std<br>rec.601_pal_std<br>bt601_pal_std<br>bt.601_pal_std<br>itu_bt601_pal_std<br>itu_bt.601_pal_std</td>
+    <td>Sets the source colorspace profile to the standard ITU-R Recommendation BT.601 (625).</td>
+  </tr>
+  <tr>
+    <td>generic_film<br>film</td>
+    <td>Sets the source colorspace profile to generic film.</td>
+  </tr>
+  <tr>
+    <td>bt470_ntsc<br>bt470_m_ntsc</td>
+    <td>Sets the source colorspace profile to an accurate no-gap Rec. ITU-R BT.470-6 (M/NTSC).</td>
+  </tr>
+  <tr>
+    <td>bt470_pal<br>bt470_m_pal</td>
+    <td>Sets the source colorspace profile to an accurate no-gap Rec. ITU-R BT.470-6 (M/PAL).</td>
+  </tr>
+  <tr>
+    <td>bt470_b<br>bt470_b1<br>bt470_d<br>bt470_d1<br>bt470_g<br>bt470_h<br>bt470_k<br>bt470_k1<br>bt470_l<br>bt470_n_pal<br>bt470_secam<br>bt470_l_secam</td>
+    <td>Sets the source colorspace profile to an accurate no-gap Rec. ITU-R BT.470-6 (B, B1, D, D1, G, H, K, N/PAL, K1, L/SECAM).</td>
+  </tr>
+  <tr>
+    <td>ntsc_1987<br>smpte_c</td>
+    <td>Sets the source colorspace profile to SMPTE C with a pow(2.2) curve.</td>
+  </tr>
+  <tr>
+    <td>ntsc_1987_std<br>smpte_c_std</td>
+    <td>Sets the source colorspace profile to the standard SMPTE C.</td>
+  </tr>
+  <tr>
+    <td>romm_rgb<br>rommrgb</td>
+    <td>Sets the source colorspace profile to Reference Output Medium Metric RGB (ROMM RGB).</td>
+  </tr>
+  <tr>
+    <td>rimm_rgb<br>rimmrgb</td>
+    <td>Sets the source colorspace profile to Reference Input Medium Metric RGB (RIMM RGB).</td>
+  </tr>
+  <tr>
+    <td>erimm_rgb<br>erimmrgb</td>
+    <td>Sets the source colorspace profile to Extended Reference Input Medium Metric RGB (ERIMM RGB).</td>
+  </tr>
+  <tr>
+    <td>plasa<br>plasa_ansi</td>
+    <td>Sets the source colorspace profile to PLASA ANSI E1.54.</td>
+  </tr>
+  <tr>
+    <td>protune<br>gopro</td>
+    <td>Sets the source colorspace profile to Protune Native (GoPro).</td>
+  </tr>
+  <tr>
+    <td>s-gamut<br>sgamut<br>s_gamut</td>
+    <td>Sets the source colorspace profile to S-Gamut.</td>
+  </tr>
+  <tr>
+    <td>s-gamut3<br>sgamut3<br>s_gamut3</td>
+    <td>Sets the source colorspace profile to S-Gamut3.</td>
+  </tr>
+  <tr>
+    <td>s-gamut3cine<br>sgamut3cine<br>s_gamut3cine<br>s-gamut3_cine<br>sgamut3_cine<br>s_gamut3_cine</td>
+    <td>Sets the source colorspace profile to S-Gamut3.Cine.</td>
+  </tr>
+  <tr>
+    <td>-target_colorspace</td>
+    <td>Same as for<br><em>-input_colorspace</em></td>
+    <td>Sets the output colorspace profile.</td>
+  </tr>
+  <tr>
+    <td>-input_colorspace_file</td>
+    <td>&lt;file&gt;</td>
+    <td>Sets the input colorspace profile. Loads .ICC and .ICM files.</td>
+  </tr>
+  <tr>
+    <td>-target_colorspace_file</td>
+    <td>&lt;file&gt;</td>
+    <td>Sets the output colorspace profile. Loads .ICC and .ICM files.</td>
+  </tr>
+  <tr>
+    <td>-dont_embed_icc</td>
+    <td></td>
+    <td>No colorspace profile will be embedded into files with colorspace-profile support.</td>
+  </tr>
+  <tr>
+    <td>-embed_icc</td>
+    <td></td>
+    <td>Any specified output colorspace profiles will be embedded into files with colorspace-profile support. This is the default.</td>
+  </tr>
+  <tr>
+    <td>-ignore_input_colorspace_gamma</td>
+    <td></td>
+    <td>The gamma in any supplied or embedded input colorspace profile will be ignored.</td>
+  </tr>
+  <tr>
+    <td rowspan="4">-rendering_intent<br>-render_intent</td>
+    <td>perceptual</td>
+    <td>All colors are scaled to fit into the target colorspace. Useful for converting from wide colorspaces to more narrow ones.</td>
+  </tr>
+  <tr>
+    <td>relative_colorimetric</td>
+    <td>Colors that are not in-gamut for the target colorspace are clipped to the nearest color in-gamut.<br>This is the default.</td>
+  </tr>
+  <tr>
+    <td>saturation</td>
+    <td>Colors are preserved in relative luminance and hue, but not necessarily saturation, resulting in higher overall saturation for in-gamut colors.</td>
+  </tr>
+  <tr>
+    <td>absolute_colorimetric</td>
+    <td>Not intended for color conversion, but rather typically for digital inkjet proofing.</td>
+  </tr>
+</table>
+
+<h3>Resampling</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td rowspan="25">-filter</td>
+    <td>box<br>point</td>
+    <td>Applies the selected filter to all non-mipmap filters.</td>
+  </tr>
+  <tr>
+    <td>tent<br>linear</td>
+    <td>The default mipmap alpha filter.</td>
+  </tr>
+  <tr>
+    <td>quadraticsharp<br>quadratic_sharp</td>
+    <td>The default non-mipmap filter.</td>
+  </tr>
+  <tr>
+    <td>quadratic</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>quadraticapprox<br>quadraticapproximate<br>quadratic_approximate</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>quadraticmix<br>quadratic_mix</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>kaiser</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>lanczos2</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>lanczos3</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>lanczos4</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>lanczos6</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>lanczos8</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>lanczos12</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>lanczos64</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>mitchell</td>
+    <td>One of the best choices for upscaling.</td>
+  </tr>
+  <tr>
+    <td>catmul<br>catmulrom<br>catmul-rom</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>bspline<br>b-spline<br>b_spline</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>cardinal<br>card<br>cardinaluniform<br>cardinal_uniform</td>
+    <td>The default mipmap color filter.</td>
+  </tr>
+  <tr>
+    <td>hermite</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>hamming</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>hanning</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>blackman</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>gaussiansharp<br>gaussian_sharp</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>gaussian</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>bell</td>
+    <td></td>
+  </tr> 
+  <tr>
+    <td>-filterw</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the non-mipmap color and alpha <strong>width</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-filterh</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the non-mipmap color and alpha <strong>height</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-filterd</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the non-mipmap color and alpha <strong>depth</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-filterw_color</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the non-mipmap color <strong>width</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-filterh_color</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the non-mipmap color <strong>height</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-filterd_alpha</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the non-mipmap alpha <strong>depth</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filter</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Applies the selected filter to all mipmap filters.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterw</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color and alpha <strong>width</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterh</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color and alpha <strong>height</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterd</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color and alpha <strong>depth</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterw_color</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color <strong>width</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterh_color</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color <strong>height</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterd_alpha</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap alpha <strong>depth</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-prescale</td>
+    <td>&lt;new width&gt; &lt;new height&gt;</td>
+    <td>Resamples the image to the given width/height using the selected non-mipmap filters.</td>
+  </tr>
+  <tr>
+    <td>-prescale3</td>
+    <td>&lt;new width&gt; &lt;new height&gt; &lt;new depth&gt;</td>
+    <td>Resamples the image to the given width/height/depth using the selected non-mipmap filters.</td>
+  </tr>
+  <tr>
+    <td>-resample_to</td>
+    <td>nearest</td>
+    <td>Resamples to the nearest power of 2 in each dimension.</td>
+  </tr>
+  <tr>
+    <td>-resample_to</td>
+    <td>lo</td>
+    <td>Resamples to the next power-of-2 down.</td>
+  </tr>
+  <tr>
+    <td>-resample_to</td>
+    <td>hi</td>
+    <td>Resamples to the next power-of-2 up.</td>
+  </tr>
+  <tr>
+    <td>-rel_scale</td>
+    <td>&lt;width multiplier&gt; &lt;height multiplier&gt;</td>
+    <td>Resamples by the given width and height multipliers.</td>
+  </tr>
+  <tr>
+    <td>-rel_scale3</td>
+    <td>&lt;width multiplier&gt; &lt;height multiplier&gt; &lt;depth multiplier&gt;</td>
+    <td>Resamples by the given width, height, and depth multipliers.</td>
+  </tr>
+  <tr>
+    <td>-clamp2</td>
+    <td>&lt;width&gt; &lt;height&gt;</td>
+    <td>Clamps the image to the given width and height.</td>
+  </tr>
+  <tr>
+    <td>-clamp3</td>
+    <td>&lt;width&gt; &lt;height&gt; &lt;depth&gt;</td>
+    <td>Clamps the image to the given width, height, and depth.</td>
+  </tr>
+</table>
+
+
+
 These image formats supported:
-
-
  | Vulkan Formats |
  | --- |
  | VK_FORMAT_R8_UNORM |
