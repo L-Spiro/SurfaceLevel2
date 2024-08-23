@@ -434,17 +434,15 @@
     <td>Resamples the image to the given width/height/depth using the selected non-mipmap filters.</td>
   </tr>
   <tr>
-    <td>-resample_to</td>
+    <td rowspan="3">-resample_to</td>
     <td>nearest</td>
     <td>Resamples to the nearest power of 2 in each dimension.</td>
   </tr>
   <tr>
-    <td>-resample_to</td>
     <td>lo</td>
     <td>Resamples to the next power-of-2 down.</td>
   </tr>
   <tr>
-    <td>-resample_to</td>
     <td>hi</td>
     <td>Resamples to the next power-of-2 up.</td>
   </tr>
