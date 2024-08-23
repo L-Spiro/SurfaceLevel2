@@ -1,5 +1,5 @@
 # SurfaceLevel 2.0
- An image converter primarily for video-game development.
+ An image converter primarily for video-game development and general image resampling/conversion.
 <h2>Commands</h2>
 
 <h3>File</h3>
@@ -207,12 +207,12 @@
   </tr>
   <tr>
     <td>-input_colorspace_file</td>
-    <td>&lt;file&gt;</td>
+    <td>&lt;file_path&gt;</td>
     <td>Sets the input colorspace profile. Loads .ICC and .ICM files.</td>
   </tr>
   <tr>
     <td>-target_colorspace_file</td>
-    <td>&lt;file&gt;</td>
+    <td>&lt;file_path&gt;</td>
     <td>Sets the output colorspace profile. Loads .ICC and .ICM files.</td>
   </tr>
   <tr>
@@ -470,6 +470,90 @@
   </tr>
 </table>
 
+<h3>Texture Addressing</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td rowspan="6">-textureaddressing<br>-ta</td>
+    <td>clamp</td>
+    <td>U, V, and W coordinates are clamped to the edge of the texture.<br>Equal to <code>D3D12_TEXTURE_ADDRESS_MODE_CLAMP</code>.</td>
+  </tr>
+  <tr>
+    <td>repeat<br>wrap</td>
+    <td>U, V, and W coordinates repeat beyond the 0..1 range.<br>Equal to <code>D3D12_TEXTURE_ADDRESS_MODE_WRAP</code>.</td>
+  </tr>
+  <tr>
+    <td>mirror<br>reflect</td>
+    <td>U, V, and W are mirrored beyond the 0..1 range.<br>Equal to <code>D3D12_TEXTURE_ADDRESS_MODE_MIRROR</code>.</td>
+  </tr>
+  <tr>
+    <td>mirroronce<br>mirror_once</td>
+    <td>U, V, and W are mirrored 1 time beyond the 0..1 range, after which clamping is used.<br>Equal to <code>D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE</code>.</td>
+  </tr>
+  <tr>
+    <td>border<br>bordercolor<br>border_color</td>
+    <td>The border color is used when U, V, and W go outside of 0..1.<br>Equal to <code>D3D12_TEXTURE_ADDRESS_MODE_BORDER</code>.</td>
+  </tr>
+  <tr>
+    <td>no_border<br>null_border</td>
+    <td>Nothing is considered to exist beyond the U, V, and W texture edges. This is the default.</td>
+  </tr>
+  <tr>
+    <td>-textureaddressingw<br>-taw</td>
+    <td>Same as <em>-ta.</em></td>
+    <td>Applies only to the U coordinate.</td>
+  </tr>
+  <tr>
+    <td>-textureaddressingh<br>-tah</td>
+    <td>Same as <em>-ta.</em></td>
+    <td>Applies only to the V coordinate.</td>
+  </tr>
+  <tr>
+    <td>-textureaddressingd<br>-tad</td>
+    <td>Same as <em>-ta.</em></td>
+    <td>Applies only to the W coordinate.</td>
+  </tr>
+  <tr>
+    <td>-textureaddressingw_opaque<br>-taw_opaque</td>
+    <td>Same as <em>-ta.</em></td>
+    <td>Applies only to the U coordinate and to color channels.</td>
+  </tr>
+  <tr>
+    <td>-textureaddressingh_opaque<br>-tah_opaque</td>
+    <td>Same as <em>-ta.</em></td>
+    <td>Applies only to the V coordinate and to color channels.</td>
+  </tr>
+  <tr>
+    <td>-textureaddressingd_opaque<br>-tad_opaque</td>
+    <td>Same as <em>-ta.</em></td>
+    <td>Applies only to the W coordinate and to color channels.</td>
+  </tr>
+  <tr>
+    <td>-textureaddressingw_alpha<br>-taw_alpha</td>
+    <td>Same as <em>-ta.</em></td>
+    <td>Applies only to the U coordinate and to the alpha channel.</td>
+  </tr>
+  <tr>
+    <td>-textureaddressingh_alpha<br>-tah_alpha</td>
+    <td>Same as <em>-ta.</em></td>
+    <td>Applies only to the V coordinate and to the alpha channel.</td>
+  </tr>
+  <tr>
+    <td>-textureaddressingd_alpha<br>-tad_alpha</td>
+    <td>Same as <em>-ta.</em></td>
+    <td>Applies only to the W coordinate and to the alpha channel.</td>
+  </tr>
+  <tr>
+    <td>-border_color</td>
+    <td>&lt;r&gt; &lt;g&gt; &lt;b&gt;</em></td>
+    <td>Sets the border color for the U, V, and W coordinates.<br>Defaults to <strong>0.0 0.0 0.0</strong></td>
+  </tr>
+</table>
 
 
 These image formats supported:
