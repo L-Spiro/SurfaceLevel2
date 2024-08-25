@@ -538,12 +538,12 @@ inline void compute_covar_dc_ugly(float covar[6], float dc[3], float block[48])
 		dc[p] = acc/16;
 	}
 	
-	float covar0 = 0f;
-	float covar1 = 0f;
-	float covar2 = 0f;
-	float covar3 = 0f;
-	float covar4 = 0f;
-	float covar5 = 0f;
+	float covar0 = 0.0f;
+	float covar1 = 0.0f;
+	float covar2 = 0.0f;
+	float covar3 = 0.0f;
+	float covar4 = 0.0f;
+	float covar5 = 0.0f;
 
 	for (uniform int k=0; k<16; k++)
 	{
@@ -617,7 +617,7 @@ inline void bc1_refine(int pe[2], float block[48], unsigned int32 bits, float dc
 	    float Cxx = 16*sq(3)-2*3*sum_q+sum_qq;
 	    float Cyy = sum_qq;
 		float Cxy = 3*sum_q-sum_qq;
-		float scale = 3f * RCP(Cxx*Cyy - Cxy*Cxy);
+		float scale = 3.0f * RCP(Cxx*Cyy - Cxy*Cxy);
 
         for (uniform int p=0; p<3; p++)
         {
@@ -699,7 +699,7 @@ inline void CompressBlockBC3_alpha(float block[16], uint32 data[2])
     if (ep[0] == ep[1]) ep[1] = ep[0]+0.1f;
 	    
     uint32 qblock[2] = { 0, 0 };
-    float scale = 7f/(ep[1]-ep[0]);
+    float scale = 7.0f/(ep[1]-ep[0]);
 
     for (uniform int k=0; k<16; k++)
     {
@@ -1099,7 +1099,7 @@ void block_segment_core(float ep[], float block[64], int mask, uniform int chann
 	}
 
 	// create some distance if the endpoints collapse
-	if (ext[1]-ext[0] < 1f)
+	if (ext[1]-ext[0] < 1.0f)
 	{
 		ext[0] -= 0.5f;
 		ext[1] += 0.5f;
@@ -1145,7 +1145,7 @@ float get_pca_bound(float covar[10], uniform int channels)
     if (channels == 3) ssymv3(vec, covar, axis);
     if (channels == 4) ssymv4(vec, covar, axis);
 
-	float sq_sum = 0f;
+	float sq_sum = 0.0f;
 	for (uniform int p=0; p<channels; p++) sq_sum += sq(vec[p]);
 	float lambda = sqrt(sq_sum);
 
@@ -1182,7 +1182,7 @@ float block_pca_bound_split(float block[64], int mask, float full_stats[15], uni
 	float covar2[10];
 	covar_from_stats(covar2, stats, channels);
 
-	float bound = 0f;
+	float bound = 0.0f;
 	bound += get_pca_bound(covar1, channels);
 	bound += get_pca_bound(covar2, channels);
 
@@ -1215,7 +1215,7 @@ void ep_quant0367(int qep[], float ep[], uniform int mode, uniform int channels)
 		for (uniform int b=0; b<2; b++)
 		for (uniform int p=0; p<4; p++)
 		{
-			int v = (int)((ep[i*4+p]/255f*levels2-b)/2+0.5)*2+b;
+			int v = (int)((ep[i*4+p]/255.0f*levels2-b)/2+0.5)*2+b;
 			qep_b[b*4+p] = clamp(v, b, levels2-1+b);
 		}
 
@@ -1227,8 +1227,8 @@ void ep_quant0367(int qep[], float ep[], uniform int mode, uniform int channels)
 		for (uniform int j=0; j<8; j++)
 			ep_b[j] = unpack_to_byte(qep_b[j], 5);
     
-        float err0 = 0f;
-        float err1 = 0f;
+        float err0 = 0.0f;
+        float err1 = 0.0f;
         for (uniform int p=0; p<channels; p++)
         {
             err0 += sq(ep[i*4+p]-ep_b[0+p]);
@@ -1247,7 +1247,7 @@ void ep_quant1(int qep[], float ep[], uniform int mode)
     for (uniform int b=0; b<2; b++)
 	for (uniform int i=0; i<8; i++)
     {
-        int v = ((int)((ep[i]/255f*127f-b)/2+0.5))*2+b;
+        int v = ((int)((ep[i]/255.0f*127f-b)/2+0.5))*2+b;
 		qep_b[b*8+i] = clamp(v, b, 126+b);
     }
     
@@ -1256,8 +1256,8 @@ void ep_quant1(int qep[], float ep[], uniform int mode)
 	for (uniform int k=0; k<16; k++)
         ep_b[k] = unpack_to_byte(qep_b[k], 7);
 
-	float err0 = 0f;
-    float err1 = 0f;
+	float err0 = 0.0f;
+    float err1 = 0.0f;
     for (uniform int j = 0; j < 2; j++)
     for (uniform int p = 0; p < 3; p++)
     {
@@ -1278,7 +1278,7 @@ void ep_quant245(int qep[], float ep[], uniform int mode)
         
 	for (uniform int i=0; i<8; i++)
 	{
-		int v = ((int)(ep[i]/255f*(levels-1)+0.5));
+		int v = ((int)(ep[i]/255.0f*(levels-1)+0.5));
 		qep[i] = clamp(v, 0, levels-1);
 	}
 }
@@ -1486,7 +1486,7 @@ void opt_endpoints(float ep[], float block[64], uniform int bits, uint32 qblock[
 float compute_opaque_err(float block[64], uniform int channels)
 {
     if (channels == 3) return 0;
-    float err = 0f;
+    float err = 0.0f;
     for (uniform int k=0; k<16; k++)
     {
         err += sq(block[48+k]-255);
@@ -1659,7 +1659,7 @@ void channel_quant_dequant(int qep[2], float ep[2], uniform int epbits)
 
 	for (uniform int i=0; i<2; i++)
 	{
-		int v = ((int)(ep[i]/255f*(elevels-1)+0.5));
+		int v = ((int)(ep[i]/255.0f*(elevels-1)+0.5));
 		qep[i] = clamp(v, 0, elevels-1);
 		ep[i] = unpack_to_byte(qep[i], epbits);
 	}

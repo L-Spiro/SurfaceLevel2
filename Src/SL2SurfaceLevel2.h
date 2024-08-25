@@ -18,10 +18,18 @@
 
 namespace sl2 {
 
+	struct SL2_OPEN_FILE {
+		std::u16string													u16Path;														/**< Path to the file to open. */
+		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *					pkifduvFormat = nullptr;										/**< The YUV format. */
+		uint32_t														ui32YuvW = 0;													/**< The YUV file width. */
+		uint32_t														ui32YuvH = 0;													/**< The YUV file height. */
+
+	};
+
 	// == Types.
 	/** The conversion options. */
 	struct SL2_OPTIONS {
-		std::vector<std::u16string>										vInputs;														/**< The input files. */
+		std::vector<SL2_OPEN_FILE>										vInputs;														/**< The input files. */
 		std::vector<std::u16string>										vOutputs;														/**< The output files. */
 		const sl2::CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *				pkifdFinalFormat = nullptr;										/**< Actual final format.  If not manually specified, vfAutoFormat is used. */
 		sl2::CFormat::SL2_SWIZZLE										sSwizzle = CFormat::DefaultSwizzle();							/**< The swizzle to apply. */

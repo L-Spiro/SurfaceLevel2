@@ -294,6 +294,15 @@ namespace sl2 {
 		SL2_ERRORS											LoadFile( const std::vector<uint8_t> &_vData );
 
 		/**
+		 * Loads a basic YUV image file.  All image slices, faces, and array slices will be loaded.
+		 * 
+		 * \param _vData The image file to load.
+		 * \return Returns an error code.
+		 **/
+		template <unsigned _uFormat>
+		SL2_ERRORS											LoadYuv_Dgxi_Basic( const std::vector<uint8_t> &_vData );
+
+		/**
 		 * Converts to another format.  _iDst holds the converted image.
 		 * 
 		 * \param _pkifFormat The format to which to convert.
@@ -524,13 +533,26 @@ namespace sl2 {
 		bool												SetNormalMapParms( const CKernel &_kKernel, double _dScale, SL2_CHANNEL_ACCESS _caNormalChannel, double _dY );
 
 		/**
+		 * Sets the YUV file width and height.
+		 * 
+		 * \param _pkifdYuvFormat The YUV file format.
+		 * \param _ui32W Width of the YUV file.
+		 * \param _ui32H Height of the YUV file.
+		 **/
+		void												SetYuvSize( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifdYuvFormat, uint32_t _ui32W, uint32_t _ui32H ) {
+			m_pkifdYuvFormat = _pkifdYuvFormat;
+			m_ui32YuvW = _ui32W;
+			m_ui32YuvH = _ui32H;
+		}
+
+		/**
 		 * Gets the final size of a byte buffer to be used as a texture plane.  The plane will be over-allocated by 8 bytes and then rounded up to the nearest 8 bytes.
 		 *	So if a 1-by-1 32-bit tecture is being allocated, 4 will be passed to _sSize, and 16 will be returned ((4+8) -> 16).
 		 * 
 		 * \param _sSize The base size of the byte buffer previously calculated by the texture's width, height, depth, and texel size.
 		 * \return Returns the adjusted size of the texture plane to actually be allocated.
 		 **/
-		static inline size_t								GetActualPlaneSize( size_t _sSize );
+		static inline uint64_t								GetActualPlaneSize( uint64_t _sSize );
 
 		/**
 		 * Applies a kernel to the given double image.
@@ -595,6 +617,10 @@ namespace sl2 {
 		bool												m_bApplyInputColorSpaceTransfer;		/**< If true, any ICC-profile transfer functions are applied during the X -> Linear conversion. */
 		bool												m_bApplyOutputColorSpaceTransfer;		/**< If true, any ICC-profile transfer functions are applied during the Linear -> X conversion. */
 		bool												m_bIgnoreSourceColorspaceGamma;			/**< Ignores the gamma curve on embedded or selected colrospace profiles. */
+
+		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *		m_pkifdYuvFormat;						/**< The YUV file format. */
+		uint32_t											m_ui32YuvW;								/**< The width of a YUV image. */
+		uint32_t											m_ui32YuvH;								/**< The height of a YUV image. */
 
 		// == Functions.
 		/**
@@ -835,11 +861,11 @@ namespace sl2 {
 	 **/
 	inline uint8_t * CImage::Data( size_t _sMip, uint32_t _ui32Slice, size_t _sArray, size_t _sFace ) {
 		if ( _sMip >= m_vMipMaps.size() || nullptr == m_pkifFormat ) { return nullptr; }
-		size_t sOff = m_vMipMaps[_sMip]->BaseSize() * ((_sArray * m_sFaces) +
+		uint64_t ui64Off = m_vMipMaps[_sMip]->BaseSize() * ((_sArray * m_sFaces) +
 			_sFace) +
 			CFormat::GetFormatSize( m_pkifFormat, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), _ui32Slice );
-		if ( sOff >= m_vMipMaps[_sMip]->size() ) { return nullptr; }
-		return m_vMipMaps[_sMip]->data() + sOff;
+		if ( ui64Off >= m_vMipMaps[_sMip]->size() ) { return nullptr; }
+		return m_vMipMaps[_sMip]->data() + ui64Off;
 	}
 
 	/**
@@ -849,9 +875,56 @@ namespace sl2 {
 	 * \param _sSize The base size of the byte buffer previously calculated by the texture's width, height, depth, and texel size.
 	 * \return Returns the adjusted size of the texture plane to actually be allocated.
 	 **/
-	inline size_t CImage::GetActualPlaneSize( size_t _sSize ) {
+	inline uint64_t CImage::GetActualPlaneSize( uint64_t _sSize ) {
 		if ( !_sSize ) { return 0; }
-		return ((_sSize + sizeof( uint64_t )) + (sizeof( uint64_t ) - 1)) & ~(sizeof( uint64_t ) - 1);
+		return ((_sSize + sizeof( uint64_t )) + (sizeof( uint64_t ) - 1ULL)) & ~(sizeof( uint64_t ) - 1ULL);
+	}
+
+	/**
+	 * Loads a basic YUV image file.  All image slices, faces, and array slices will be loaded.
+	 * 
+	 * \param _vData The image file to load.
+	 * \return Returns an error code.
+	 **/
+	template <unsigned _uFormat>
+	SL2_ERRORS CImage::LoadYuv_Dgxi_Basic( const std::vector<uint8_t> &_vData ) {
+		if ( !m_ui32YuvW || !m_ui32YuvH ) { return SL2_E_UNSUPPORTEDSIZE; }
+		if ( !m_pkifdYuvFormat ) {
+			m_pkifdYuvFormat = CFormat::FindFormatDataByDx( static_cast<SL2_DXGI_FORMAT>(_uFormat) );
+			if ( !m_pkifdYuvFormat ) { return SL2_E_INVALIDFILETYPE; }
+		}
+		uint64_t ui64SrcBaseSize = CFormat::GetFormatSize( m_pkifdYuvFormat, m_ui32YuvW, m_ui32YuvH, 1 );
+		uint64_t ui64Depth = uint64_t( _vData.size() / ui64SrcBaseSize );
+		if ( uint64_t( uint32_t( ui64Depth ) ) != ui64Depth ) { return SL2_E_UNSUPPORTEDSIZE; }
+		if ( !AllocateTexture( m_pkifdYuvFormat, m_ui32YuvW, m_ui32YuvH, uint32_t( ui64Depth ) ) ) { return SL2_E_OUTOFMEMORY; }
+
+		ui64SrcBaseSize = CFormat::GetFormatSize( m_pkifdYuvFormat, m_ui32YuvW, m_ui32YuvH, uint32_t( ui64Depth ) );
+		if ( uint64_t( size_t( ui64SrcBaseSize ) ) != ui64SrcBaseSize ) { return SL2_E_UNSUPPORTEDSIZE; }
+
+		// Convert to NV12.
+		/*uint32_t ui32ChromaW = std::max( (m_ui32YuvW + 1U) / 2U, 1U );
+		uint32_t ui32ChromaH = std::max( (m_ui32YuvH + 1U) / 2U, 1U );
+		uint64_t ui64YSize = uint64_t( m_ui32YuvW ) * m_ui32YuvH;
+		uint64_t ui64Off2 = (ui32ChromaW * ui32ChromaH);
+		if ( uint64_t( size_t( ui64YSize ) ) != ui64YSize ) { return SL2_E_UNSUPPORTEDSIZE; }
+		const uint8_t * pui8Src = _vData.data();
+		uint8_t * pui8Dst = Data();
+		for ( uint32_t D = 0; D < uint32_t( ui64Depth ); ++D ) {
+			std::memcpy( pui8Dst, pui8Src, size_t( m_ui32YuvW * m_ui32YuvH ) );
+			pui8Dst += m_ui32YuvW * m_ui32YuvH;
+			pui8Src += m_ui32YuvW * m_ui32YuvH;
+			for ( uint32_t H = 0; H < ui32ChromaH; ++H ) {
+				for ( uint32_t W = 0; W < ui32ChromaW; ++W ) {
+					pui8Dst[(H*ui32ChromaW+W)*2+0] = pui8Src[(H*ui32ChromaW+W)];
+					pui8Dst[(H*ui32ChromaW+W)*2+1] = pui8Src[(H*ui32ChromaW+W)+ui64Off2];
+				}
+			}
+			pui8Dst += ui64Off2 * 2;
+			pui8Src += ui64Off2 * 2;
+		}*/
+
+		std::memcpy( Data(), _vData.data(), _vData.size() );
+		return SL2_E_SUCCESS;
 	}
 
 }	// namespace sl2

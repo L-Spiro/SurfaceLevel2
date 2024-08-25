@@ -52,7 +52,8 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         if ( (*_wcpArgV)[0] == L'-' ) {
             if ( SL2_CHECK( 2, file ) ) {
                 try {
-                    oOptions.vInputs.push_back( reinterpret_cast<const char16_t *>((_wcpArgV[1])) );
+                    sl2::SL2_OPEN_FILE ofFile = { .u16Path = reinterpret_cast<const char16_t *>((_wcpArgV[1])) };
+                    oOptions.vInputs.push_back( ofFile );
                 }
                 catch ( ... ) { SL2_ERROR( sl2::SL2_E_OUTOFMEMORY ); }
                 SL2_ADV( 2 );
@@ -73,11 +74,11 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     if ( !sPath.size() ) { sPath = sThisDir; }
                     for ( size_t J = oOptions.vOutputs.size(); oOptions.vOutputs.size() < oOptions.vInputs.size() - 1; ++J ) {
                         std::u16string sSrc = sPath;
-                        sSrc += sl2::CFileBase::NoExtension( sl2::CFileBase::GetFileName( oOptions.vInputs[J] ) );
+                        sSrc += sl2::CFileBase::NoExtension( sl2::CFileBase::GetFileName( oOptions.vInputs[J].u16Path ) );
                         sSrc += u".";
                         // If the string is empty, keep the extension of the inputs.
                         if ( !sExt.size() ) {
-                            sSrc += sl2::CFileBase::GetFileExtension( oOptions.vInputs[J] );
+                            sSrc += sl2::CFileBase::GetFileExtension( oOptions.vInputs[J].u16Path );
                         }
                         else {
                             sSrc += sExt;
@@ -88,7 +89,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     
                     std::u16string sSrc = sPath;
                     if ( !sName.size() ) {
-                        sSrc += sl2::CFileBase::NoExtension( sl2::CFileBase::GetFileName( oOptions.vInputs[oOptions.vOutputs.size()] ) );
+                        sSrc += sl2::CFileBase::NoExtension( sl2::CFileBase::GetFileName( oOptions.vInputs[oOptions.vOutputs.size()].u16Path ) );
                     }
                     else {
                         sSrc += sl2::CFileBase::NoExtension( sl2::CFileBase::GetFileName( sThis ) );
@@ -96,7 +97,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     sSrc += u".";
                     // If the string is empty, keep the extension of the inputs.
                     if ( !sExt.size() ) {
-                        sSrc += sl2::CFileBase::GetFileExtension( oOptions.vInputs[oOptions.vOutputs.size()] );
+                        sSrc += sl2::CFileBase::GetFileExtension( oOptions.vInputs[oOptions.vOutputs.size()].u16Path );
                     }
                     else {
                         sSrc += sExt;
@@ -105,6 +106,17 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 }
                 catch ( ... ) { SL2_ERROR( sl2::SL2_E_OUTOFMEMORY ); }
                 SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 4, yuv_file ) ) {
+                try {
+                    sl2::SL2_OPEN_FILE ofFile = { .u16Path = reinterpret_cast<const char16_t *>((_wcpArgV[1])),
+                        .ui32YuvW = uint32_t( ::_wtoi( _wcpArgV[2] ) ),
+                        .ui32YuvH = uint32_t( ::_wtoi( _wcpArgV[3] ) ),
+                    };
+                    oOptions.vInputs.push_back( ofFile );
+                }
+                catch ( ... ) { SL2_ERROR( sl2::SL2_E_OUTOFMEMORY ); }
+                SL2_ADV( 4 );
             }
             if ( SL2_CHECK( 4, weight ) || SL2_CHECK( 4, weights ) ) {
 				sl2::CFormat::SetLuma( ::_wtof( _wcpArgV[1] ), ::_wtof( _wcpArgV[2] ), ::_wtof( _wcpArgV[3] ) );
@@ -1526,10 +1538,11 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
     for ( size_t I = 0; I < oOptions.vInputs.size(); ++I ) {
         sl2::CImage iImage;
         
-        sl2::SL2_ERRORS eError = iImage.LoadFile( oOptions.vInputs[I].c_str() );
+        iImage.SetYuvSize( oOptions.vInputs[I].pkifduvFormat, oOptions.vInputs[I].ui32YuvW, oOptions.vInputs[I].ui32YuvH );
+        sl2::SL2_ERRORS eError = iImage.LoadFile( oOptions.vInputs[I].u16Path.c_str() );
         if ( eError != sl2::SL2_E_SUCCESS ) {
             SL2_ERRORT( std::format( L"Failed to load file: \"{}\".",
-               reinterpret_cast<const wchar_t *>(oOptions.vInputs[I].c_str()) ).c_str(), eError );
+               reinterpret_cast<const wchar_t *>(oOptions.vInputs[I].u16Path.c_str()) ).c_str(), eError );
         }
         FixResampling( oOptions, iImage );
         iImage.Resampling() = oOptions.rResample;

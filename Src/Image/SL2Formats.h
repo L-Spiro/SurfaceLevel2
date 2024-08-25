@@ -81,6 +81,12 @@
 /** Gets a premultiply flag. */
 #define SL2_GET_PREMULT_FLAG( VAL )													(((VAL) >> 16) & 0x1)
 
+/** Makes a YUV flag. */
+#define SL2_MAKE_YUV_FLAG															(1 << 17)
+
+/** Gets a YUV flag. */
+#define SL2_GET_YUV_FLAG( VAL )														(((VAL) >> 17) & 0x1)
+
 
 #pragma warning( push )
 
@@ -1023,6 +1029,9 @@ namespace sl2 {
 		SL2_DXGI_FORMAT_V408														= 132,
 		SL2_DXGI_FORMAT_SAMPLER_FEEDBACK_MIN_MIP_OPAQUE,
 		SL2_DXGI_FORMAT_SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE,
+		// Fake formats.
+		SL2_DXGI_FORMAT_YV12														= 0x1F200000 + 0,
+		SL2_DXGI_FORMAT_NV21														= 0x1F200000 + 1,
 		SL2_DXGI_FORMAT_FORCE_UINT = 0xFFFFFFFF
 	};
 
@@ -1297,7 +1306,7 @@ namespace sl2 {
 	public :
 		// == Types.
 		/** The compression-size calculator. */
-		typedef uint32_t															(* PfCompSizeFunc)( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Factor, const void * _pvParms );
+		typedef uint64_t															(* PfCompSizeFunc)( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Factor, const void * _pvParms );
 
 		/** Function type for converting from any SL2_KTX_INTERNAL_FORMAT to RGBA64F. */
 		typedef bool																(* PfToRgba64F)( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms );
@@ -1306,7 +1315,7 @@ namespace sl2 {
 		typedef bool																(* PfFromRgba64F)( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms );
 
 		/** A transfer function. */
-		typedef double																(* PfTransferFunc)( double _dVal );
+		typedef double (SL2_FASTCALL												* PfTransferFunc)( double _dVal );
 
 		/** Internal format data. */
 		typedef struct SL2_KTX_INTERNAL_FORMAT_DATA {
@@ -1653,7 +1662,7 @@ namespace sl2 {
 		 * \param _pkifFormat The texel format.
 		 * \return Returns the size of the given format in bytes.
 		 */
-		static inline size_t SL2_FASTCALL											GetFormatSize( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat );
+		static inline uint64_t SL2_FASTCALL											GetFormatSize( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat );
 
 		/**
 		 * Gets the size, in bytes, of a texel format.
@@ -1664,7 +1673,7 @@ namespace sl2 {
 		 * \param _ui32Depth The depth of the image.
 		 * \return Returns the size of the given format in bytes.
 		 */
-		static inline size_t SL2_FASTCALL											GetFormatSize( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth );
+		static inline uint64_t SL2_FASTCALL											GetFormatSize( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth );
 
 		/**
 		 * Gets the size, in bytes, of a texel format.
@@ -1675,7 +1684,7 @@ namespace sl2 {
 		 * \param _ui32Depth The depth of the image.
 		 * \return Returns the size of the given format in bytes.
 		 */
-		static inline size_t SL2_FASTCALL											GetFormatSize( SL2_VKFORMAT _vfFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) { return GetFormatSize( FindFormatDataByVulkan( _vfFormat ), _ui32Width, _ui32Height, _ui32Depth ); }
+		static inline uint64_t SL2_FASTCALL											GetFormatSize( SL2_VKFORMAT _vfFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) { return GetFormatSize( FindFormatDataByVulkan( _vfFormat ), _ui32Width, _ui32Height, _ui32Depth ); }
 
 		/**
 		 * Gets the size, in bytes, of a texel format.
@@ -1686,7 +1695,7 @@ namespace sl2 {
 		 * \param _ui32Depth The depth of the image.
 		 * \return Returns the size of the given format in bytes.
 		 */
-		static inline size_t SL2_FASTCALL											GetFormatSize( SL2_DXGI_FORMAT _dfFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) { return GetFormatSize( FindFormatDataByDx( _dfFormat ), _ui32Width, _ui32Height, _ui32Depth ); }
+		static inline uint64_t SL2_FASTCALL											GetFormatSize( SL2_DXGI_FORMAT _dfFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) { return GetFormatSize( FindFormatDataByDx( _dfFormat ), _ui32Width, _ui32Height, _ui32Depth ); }
 
 		/**
 		 * Gets the size, in bytes, of a texel format.
@@ -1697,7 +1706,7 @@ namespace sl2 {
 		 * \param _ui32Depth The depth of the image.
 		 * \return Returns the size of the given format in bytes.
 		 */
-		static inline size_t SL2_FASTCALL											GetFormatSize( SL2_KTX_INTERNAL_FORMAT _kifFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) { return GetFormatSize( FindFormatDataByOgl( _kifFormat ), _ui32Width, _ui32Height, _ui32Depth ); }
+		static inline uint64_t SL2_FASTCALL											GetFormatSize( SL2_KTX_INTERNAL_FORMAT _kifFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) { return GetFormatSize( FindFormatDataByOgl( _kifFormat ), _ui32Width, _ui32Height, _ui32Depth ); }
 
 		/**
 		 * Gets the size, in bytes, of a texel format.
@@ -1708,7 +1717,7 @@ namespace sl2 {
 		 * \param _ui32Depth The depth of the image.
 		 * \return Returns the size of the given format in bytes.
 		 */
-		static inline size_t SL2_FASTCALL											GetFormatSize( SL2_MTLPIXELFORMAT _mpfFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) { return GetFormatSize( FindFormatDataByMetal( _mpfFormat ), _ui32Width, _ui32Height, _ui32Depth ); }
+		static inline uint64_t SL2_FASTCALL											GetFormatSize( SL2_MTLPIXELFORMAT _mpfFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) { return GetFormatSize( FindFormatDataByMetal( _mpfFormat ), _ui32Width, _ui32Height, _ui32Depth ); }
 
 		/**
 		 * Gets the size, in bytes, of a texel format.
@@ -1716,7 +1725,7 @@ namespace sl2 {
 		 * \param _vfFormat The texel format.
 		 * \return Returns the size of the given format in bytes.
 		 */
-		static inline size_t SL2_FASTCALL											GetFormatSize( SL2_VKFORMAT _vfFormat ) { return GetFormatSize( FindFormatDataByVulkan( _vfFormat ) ); }
+		static inline uint64_t SL2_FASTCALL											GetFormatSize( SL2_VKFORMAT _vfFormat ) { return GetFormatSize( FindFormatDataByVulkan( _vfFormat ) ); }
 
 		/**
 		 * Gets the size, in bytes, of a texel format.
@@ -1724,7 +1733,7 @@ namespace sl2 {
 		 * \param _vfFormat The texel format.
 		 * \return Returns the size of the given format in bytes.
 		 */
-		static inline size_t SL2_FASTCALL											GetFormatSize( SL2_DXGI_FORMAT _dfFormat ) { return GetFormatSize( FindFormatDataByDx( _dfFormat ) ); }
+		static inline uint64_t SL2_FASTCALL											GetFormatSize( SL2_DXGI_FORMAT _dfFormat ) { return GetFormatSize( FindFormatDataByDx( _dfFormat ) ); }
 
 		/**
 		 * Gets the size, in bytes, of a texel format.
@@ -1732,7 +1741,7 @@ namespace sl2 {
 		 * \param _kifFormat The texel format.
 		 * \return Returns the size of the given format in bytes.
 		 */
-		static inline size_t SL2_FASTCALL											GetFormatSize( SL2_KTX_INTERNAL_FORMAT _kifFormat ) { return GetFormatSize( FindFormatDataByOgl( _kifFormat ) ); }
+		static inline uint64_t SL2_FASTCALL											GetFormatSize( SL2_KTX_INTERNAL_FORMAT _kifFormat ) { return GetFormatSize( FindFormatDataByOgl( _kifFormat ) ); }
 
 		/**
 		 * Gets the size, in bytes, of a texel format.
@@ -1740,7 +1749,7 @@ namespace sl2 {
 		 * \param _mpfFormat The texel format.
 		 * \return Returns the size of the given format in bytes.
 		 */
-		static inline size_t SL2_FASTCALL											GetFormatSize( SL2_MTLPIXELFORMAT _mpfFormat ) { return GetFormatSize( FindFormatDataByMetal( _mpfFormat ) ); }
+		static inline uint64_t SL2_FASTCALL											GetFormatSize( SL2_MTLPIXELFORMAT _mpfFormat ) { return GetFormatSize( FindFormatDataByMetal( _mpfFormat ) ); }
 
 		/**
 		 * Gets the pitch of a format without any extra padding.
@@ -1749,7 +1758,7 @@ namespace sl2 {
 		 * \param _ui32RowLen Number of texels in a row.
 		 * \return Returns the length of a row of the given format without padding.
 		 **/
-		static size_t SL2_FASTCALL													GetRowSize_NoPadding( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32RowLen );
+		static uint64_t SL2_FASTCALL												GetRowSize_NoPadding( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32RowLen );
 
 		/**
 		 * Gets the width of a row of texels in bytes.
@@ -1758,7 +1767,7 @@ namespace sl2 {
 		 * \param _ui32Total Number of texels in a row.
 		 * \return Returns the number of bytes in a row of tightly packed texel data.
 		 */
-		static inline size_t SL2_FASTCALL											GetRowSize( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32Total ) {
+		static inline uint64_t SL2_FASTCALL											GetRowSize( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32Total ) {
 			return GetFormatSize( _pkifFormat, _ui32Total, 1, 1 );
 		}
 
@@ -1769,7 +1778,7 @@ namespace sl2 {
 		 * \param _ui32Total Number of texels in a row.
 		 * \return Returns the number of bytes in a row of tightly packed texel data.
 		 */
-		static inline size_t SL2_FASTCALL											GetRowSize( SL2_VKFORMAT _vfFormat, uint32_t _ui32Total ) {
+		static inline uint64_t SL2_FASTCALL											GetRowSize( SL2_VKFORMAT _vfFormat, uint32_t _ui32Total ) {
 			return GetFormatSize( _vfFormat, _ui32Total, 1, 1 );
 		}
 
@@ -1780,7 +1789,7 @@ namespace sl2 {
 		 * \param _ui32Total Number of texels in a row.
 		 * \return Returns the number of bytes in a row of tightly packed texel data.
 		 */
-		static inline size_t SL2_FASTCALL											GetRowSize( SL2_DXGI_FORMAT _dfFormat, uint32_t _ui32Total ) {
+		static inline uint64_t SL2_FASTCALL											GetRowSize( SL2_DXGI_FORMAT _dfFormat, uint32_t _ui32Total ) {
 			return GetFormatSize( _dfFormat, _ui32Total, 1, 1 );
 		}
 
@@ -1791,7 +1800,7 @@ namespace sl2 {
 		 * \param _ui32Total Number of texels in a row.
 		 * \return Returns the number of bytes in a row of tightly packed texel data.
 		 */
-		static inline size_t SL2_FASTCALL											GetRowSize( SL2_KTX_INTERNAL_FORMAT _kifFormat, uint32_t _ui32Total ) {
+		static inline uint64_t SL2_FASTCALL											GetRowSize( SL2_KTX_INTERNAL_FORMAT _kifFormat, uint32_t _ui32Total ) {
 			return GetFormatSize( _kifFormat, _ui32Total, 1, 1 );
 		}
 
@@ -1802,7 +1811,7 @@ namespace sl2 {
 		 * \param _ui32Total Number of texels in a row.
 		 * \return Returns the number of bytes in a row of tightly packed texel data.
 		 */
-		static inline size_t SL2_FASTCALL											GetRowSize( SL2_MTLPIXELFORMAT _mpfFormat, uint32_t _ui32Total ) {
+		static inline uint64_t SL2_FASTCALL											GetRowSize( SL2_MTLPIXELFORMAT _mpfFormat, uint32_t _ui32Total ) {
 			return GetFormatSize( _mpfFormat, _ui32Total, 1, 1 );
 		}
 
@@ -2175,22 +2184,25 @@ namespace sl2 {
 		 **/
 		template <typename _tTargetType>
 		static void																	YuvToRgb( _tTargetType _tY, _tTargetType _tU, _tTargetType _tV, double &_dR, double &_dG, double &_dB ) {
-			double dC = _tY / double( (1 << (sizeof( _tTargetType ) * 8)) - 1 );
-			double dD = _tU / double( (1 << (sizeof( _tTargetType ) * 8)) - 1 );
-			double dE = _tV / double( (1 << (sizeof( _tTargetType ) * 8)) - 1 );
+			double dC = _tY / double( (1ULL << (sizeof( _tTargetType ) * 8)) - 1 );
+			double dD = _tU / double( (1ULL << (sizeof( _tTargetType ) * 8)) - 1 );
+			double dE = _tV / double( (1ULL << (sizeof( _tTargetType ) * 8)) - 1 );
+			dC *= 255.0;
+			dD *= 255.0;
+			dE *= 255.0;
 
-			dC -= 16.0 / 255.0;
-			dD -= 128.0 / 255.0;
-			dE -= 128.0 / 255.0;
+			dC -= 16.0;
+			dD -= 128.0;
+			dE -= 128.0;
 
 			dC *= 1.164383;
 			_dR = std::max( dC + 1.596027 * dE, 0.0 );
 			_dG = std::max( dC - (0.391762 * dD) - (0.812968 * dE), 0.0 );
 			_dB = std::max( dC + 2.017232 + dD, 0.0 );
 
-			_dR = std::min( _dR, 1.0 );
-			_dG = std::min( _dG, 1.0 );
-			_dB = std::min( _dB, 1.0 );
+			_dR = std::min( _dR, 255.0 ) / 255.0;
+			_dG = std::min( _dG, 255.0 ) / 255.0;
+			_dB = std::min( _dB, 255.0 ) / 255.0;
 		}
 
 		/**
@@ -3219,7 +3231,7 @@ namespace sl2 {
 		 * \param _pvParms Unused.
 		 * \return Returns the size of the compressed data.
 		 */
-		static uint32_t																GetCompressedSizeBc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Factor, const void * _pvParms );
+		static uint64_t																GetCompressedSizeBc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Factor, const void * _pvParms );
 
 		/**
 		 * DXT1 -> RGBA64F conversion.
@@ -3528,7 +3540,7 @@ namespace sl2 {
 		 * \param _pvParms Unused.
 		 * \return Returns the size of the compressed data.
 		 */
-		static uint32_t																GetCompressedSizeEtc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Factor, const void * _pvParms );
+		static uint64_t																GetCompressedSizeEtc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Factor, const void * _pvParms );
 
 		/**
 		 * ETC1 -> RGBA64F conversion.
@@ -3699,8 +3711,8 @@ namespace sl2 {
 		 * \return Returns the size of the compressed data.
 		 */
 		template <unsigned _uW, unsigned _uH>
-		static uint32_t																GetCompressedSizePvrtc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t /*_ui32Factor*/, const void * /*_pvParms*/ ) {
-			return (((_ui32Width + (_uW - 1)) / _uW) * ((_ui32Height + (_uH - 1)) / _uH) * 8) * _ui32Depth;
+		static uint64_t																GetCompressedSizePvrtc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t /*_ui32Factor*/, const void * /*_pvParms*/ ) {
+			return (((_ui32Width + (_uW - 1ULL)) / _uW) * ((_ui32Height + (_uH - 1ULL)) / _uH) * 8ULL) * _ui32Depth;
 		}
 
 		/**
@@ -3744,8 +3756,8 @@ namespace sl2 {
 		 * \return Returns the size of the compressed data.
 		 */
 		template <unsigned _uW, unsigned _uH, unsigned _uD = 1>
-		static uint32_t																GetCompressedSizeAstc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t /*_ui32Factor*/, const void * /*_pvParms*/ ) {
-			return ((_ui32Width + (_uW - 1)) / _uW) * ((_ui32Height + (_uH - 1)) / _uH) * ((_ui32Depth + (_uD - 1)) / _uD) * 16;
+		static uint64_t																GetCompressedSizeAstc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t /*_ui32Factor*/, const void * /*_pvParms*/ ) {
+			return ((_ui32Width + (_uW - 1ULL)) / _uW) * ((_ui32Height + (_uH - 1ULL)) / _uH) * ((_ui32Depth + (_uD - 1ULL)) / _uD) * 16ULL;
 		}
 
 		/**
@@ -3786,6 +3798,94 @@ namespace sl2 {
 		 */
 		template <unsigned _uiBlockW, unsigned _uiBlockH, unsigned _bSrgb, unsigned _uiBlockD = 1, bool _bHdr = false>
 		static bool 																AstcFromRgba64F_2( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+
+		// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		// YUV FORMATS
+		// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		/**
+		 * Returns the total size of a YUV NV12 image given its width and height.
+		 *
+		 * \param _ui32Width Width in pixels.
+		 * \param _ui32Height Height in pixels.
+		 * \param _ui32Depth Unused.
+		 * \param _ui32Factor Multiplier.
+		 * \param _pvParms Unused.
+		 * \return Returns the size of the compressed data.
+		 */
+		static uint64_t																GetSizeYuy2( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t /*_ui32Factor*/, const void * /*_pvParms*/ );
+
+		/**
+		 * Returns the total size of a YUV NV12 image given its width and height.
+		 *
+		 * \param _ui32Width Width in pixels.
+		 * \param _ui32Height Height in pixels.
+		 * \param _ui32Depth Unused.
+		 * \param _ui32Factor Multiplier.
+		 * \param _pvParms Unused.
+		 * \return Returns the size of the compressed data.
+		 */
+		static uint64_t																GetSizeNv12( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t /*_ui32Factor*/, const void * /*_pvParms*/ );
+
+		/**
+		 * YUY2 -> RGBA32F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		static bool 																Yuy2ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * UYVY -> RGBA32F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		static bool 																UyvyToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * NV12 -> RGBA32F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		static bool 																Nv12ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * NV21 -> RGBA32F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		static bool 																Nv21ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+
+		/**
+		 * YV12 -> RGBA32F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		static bool 																Yv12ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
 	};
 	
 
@@ -3834,7 +3934,7 @@ namespace sl2 {
 	 * \param _pkifFormat The texel format.
 	 * \return Returns the size of the given format in bytes.
 	 */
-	inline size_t SL2_FASTCALL CFormat::GetFormatSize( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat ) {
+	inline uint64_t SL2_FASTCALL CFormat::GetFormatSize( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat ) {
 		if ( _pkifFormat ) {
 			return GetFormatSize( _pkifFormat, _pkifFormat->ui32BlockWidth, _pkifFormat->ui32BlockHeight, _pkifFormat->ui32BlockDepth );
 		}
@@ -3850,7 +3950,7 @@ namespace sl2 {
 	 * \param _ui32Depth The depth of the image.
 	 * \return Returns the size of the given format in bytes.
 	 */
-	inline size_t SL2_FASTCALL CFormat::GetFormatSize( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) {
+	inline uint64_t SL2_FASTCALL CFormat::GetFormatSize( const SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) {
 		if ( _pkifFormat ) {
 			if ( _pkifFormat->pfCompSizeFunc ) {
 				return _pkifFormat->pfCompSizeFunc( _ui32Width, _ui32Height, _ui32Depth, _pkifFormat->ui32BlockSizeInBits, _pkifFormat );
@@ -4955,8 +5055,8 @@ namespace sl2 {
 	 * \param _pvParms Unused.
 	 * \return Returns the size of the compressed data.
 	 */
-	inline uint32_t CFormat::GetCompressedSizeBc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Factor, const void * /*_pvParms*/ ) {
-		return ((((_ui32Width + 3) >> 2) * ((_ui32Height + 3) >> 2) * _ui32Factor) >> 3) * _ui32Depth;
+	inline uint64_t CFormat::GetCompressedSizeBc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Factor, const void * /*_pvParms*/ ) {
+		return ((((_ui32Width + 3ULL) >> 2ULL) * ((_ui32Height + 3ULL) >> 2ULL) * _ui32Factor) >> 3ULL) * _ui32Depth;
 	}
 
 	/**
@@ -6104,8 +6204,8 @@ namespace sl2 {
 	 * \param _pvParms Unused.
 	 * \return Returns the size of the compressed data.
 	 */
-	inline uint32_t CFormat::GetCompressedSizeEtc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Factor, const void * /*_pvParms*/ ) {
-		return ((((_ui32Width + 3) >> 2) * ((_ui32Height + 3) >> 2) * _ui32Factor) >> 3) * _ui32Depth;
+	inline uint64_t CFormat::GetCompressedSizeEtc( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t _ui32Factor, const void * /*_pvParms*/ ) {
+		return ((((_ui32Width + 3ULL) >> 2ULL) * ((_ui32Height + 3ULL) >> 2ULL) * _ui32Factor) >> 3ULL) * _ui32Depth;
 	}
 
 	/**
@@ -6793,7 +6893,8 @@ namespace sl2 {
 		ToRGBA32F( vResized.data(), ui32X, ui32Y, _ui32Depth );
 
 
-		uint32_t ui32DstSliceSize = pkifdData->pfCompSizeFunc( _ui32Width, _ui32Height, 1, pkifdData->ui32BlockSizeInBits, _pvParms );
+		uint64_t ui64DstSliceSize = pkifdData->pfCompSizeFunc( _ui32Width, _ui32Height, 1, pkifdData->ui32BlockSizeInBits, _pvParms );
+		if ( uint64_t( size_t( ui64DstSliceSize ) ) != ui64DstSliceSize ) { return false; }
 
 		pvrtexlib::PVRTextureHeader thTexHeader( PVRTGENPIXELID4( 'r', 'g', 'b', 'a', 32, 32, 32, 32 ),
 			ui32X, ui32Y, ui32Z,
@@ -6808,9 +6909,9 @@ namespace sl2 {
 		for ( uint32_t Z = 0; Z < _ui32Depth; ++Z ) {
 			void * pvData = tTex.GetTextureDataPointer( 0U, 0U, 0U, Z );
 			if ( !pvData ) { return false; }
-			std::memcpy( _pui8Dst, pvData, ui32DstSliceSize );
+			std::memcpy( _pui8Dst, pvData, size_t( ui64DstSliceSize ) );
 
-			_pui8Dst += ui32DstSliceSize;
+			_pui8Dst += ui64DstSliceSize;
 		}
 		return true;
 	}
@@ -6845,11 +6946,12 @@ namespace sl2 {
 		uint32_t ui32Z = (_ui32Depth + (_uiBlockD - 1)) / _uiBlockD * _uiBlockD;
 
 		
-		uint32_t ui32DstSliceSize = pkifdData->pfCompSizeFunc( ui32X, ui32Y, ui32Z, pkifdData->ui32BlockSizeInBits, _pvParms );
+		uint64_t ui64DstSliceSize = pkifdData->pfCompSizeFunc( ui32X, ui32Y, ui32Z, pkifdData->ui32BlockSizeInBits, _pvParms );
+		if ( uint64_t( size_t( ui64DstSliceSize ) ) != ui64DstSliceSize ) { return false; }
 
 		SL2_ASTC_IMAGE aiImage( 32, ui32X, ui32Y, ui32Z );
 		eStatus = ::astcenc_decompress_image(
-			acContext.pcContext, _pui8Src, ui32DstSliceSize, aiImage.piImage, &sSwizzle,
+			acContext.pcContext, _pui8Src, size_t( ui64DstSliceSize ), aiImage.piImage, &sSwizzle,
 			0 );
 		::astcenc_decompress_reset( acContext.pcContext );
 		if ( ASTCENC_SUCCESS != eStatus ) { return false; }
@@ -6977,7 +7079,8 @@ namespace sl2 {
 		}
 
 		
-		uint32_t ui32DstSliceSize = pkifdData->pfCompSizeFunc( ui32X, ui32Y, ui32Z, pkifdData->ui32BlockSizeInBits, _pvParms );
+		uint64_t ui64DstSliceSize = pkifdData->pfCompSizeFunc( ui32X, ui32Y, ui32Z, pkifdData->ui32BlockSizeInBits, _pvParms );
+		if ( uint64_t( size_t( ui64DstSliceSize ) ) != ui64DstSliceSize ) { return false; }
 
 		SL2_ASTC_IMAGE aiImage( 32, ui32X, ui32Y, ui32Z );
 		const SL2_RGBA64F * prgbaTexels = reinterpret_cast<const SL2_RGBA64F *>(pui8Src);
@@ -6998,7 +7101,7 @@ namespace sl2 {
 
 		eStatus = ::astcenc_compress_image(
 			acContext.pcContext, aiImage.piImage, &sSwizzle,
-			_pui8Dst, ui32DstSliceSize, 0 );
+			_pui8Dst, size_t( ui64DstSliceSize ), 0 );
 		if ( ASTCENC_SUCCESS != eStatus ) { return false; }
 		return true;
 	}

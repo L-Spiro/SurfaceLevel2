@@ -52,7 +52,9 @@ namespace sl2 {
 		m_bFullyOpaque( false ),
 		m_bApplyInputColorSpaceTransfer( true ),
 		m_bApplyOutputColorSpaceTransfer( false ),
-		m_bIgnoreSourceColorspaceGamma( false ) {
+		m_bIgnoreSourceColorspaceGamma( false ),
+		m_ui32YuvW( 0 ),
+		m_ui32YuvH( 0 ) {
 		m_sSwizzle = CFormat::DefaultSwizzle();
 	}
 	CImage::~CImage() {
@@ -110,6 +112,8 @@ namespace sl2 {
 			m_bApplyInputColorSpaceTransfer = _iOther.m_bApplyInputColorSpaceTransfer;
 			m_bApplyOutputColorSpaceTransfer = _iOther.m_bApplyOutputColorSpaceTransfer;
 			m_bIgnoreSourceColorspaceGamma = _iOther.m_bIgnoreSourceColorspaceGamma;
+			m_ui32YuvW = _iOther.m_ui32YuvW;
+			m_ui32YuvH = _iOther.m_ui32YuvH;
 			
 			_iOther.m_sArraySize = 0;
 			_iOther.m_kKernel.SetSize( 0 );
@@ -147,6 +151,7 @@ namespace sl2 {
 			_iOther.m_bApplyInputColorSpaceTransfer = true;
 			_iOther.m_bApplyOutputColorSpaceTransfer = false;
 			_iOther.m_bIgnoreSourceColorspaceGamma = false;
+			_iOther.m_ui32YuvW = _iOther.m_ui32YuvH = 0;
 		}
 
 		return (*this);
@@ -203,6 +208,7 @@ namespace sl2 {
 		m_bApplyInputColorSpaceTransfer = true;
 		m_bApplyOutputColorSpaceTransfer = false;
 		m_bIgnoreSourceColorspaceGamma = false;
+		m_ui32YuvW = m_ui32YuvH = 0;
 	}
 
 	/**
@@ -217,6 +223,22 @@ namespace sl2 {
 			CStdFile sfFile;
 			if ( !sfFile.Open( _pcFile ) ) { return SL2_E_FILENOTFOUND; }
 			if ( !sfFile.LoadToMemory( vFile ) ) { return SL2_E_OUTOFMEMORY; }
+		}
+		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuy2" ) == 0 || ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuyv" ) == 0 ) {
+			return LoadYuv_Dgxi_Basic<SL2_DXGI_FORMAT_YUY2>( vFile );
+		}
+		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"uyvy" ) == 0 ) {
+			return LoadYuv_Dgxi_Basic<SL2_DXGI_FORMAT_R8G8_B8G8_UNORM>( vFile );
+		}
+
+		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"nv12" ) == 0 ) {
+			return LoadYuv_Dgxi_Basic<SL2_DXGI_FORMAT_NV12>( vFile );
+		}
+		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"nv21" ) == 0 ) {
+			return LoadYuv_Dgxi_Basic<SL2_DXGI_FORMAT_NV21>( vFile );
+		}
+		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yv12" ) == 0 ) {
+			return LoadYuv_Dgxi_Basic<SL2_DXGI_FORMAT_420_OPAQUE>( vFile );
 		}
 
 		return LoadFile( vFile );
@@ -474,10 +496,11 @@ namespace sl2 {
 		if ( !_pkifFormat || !Format() ) { return SL2_E_BADFORMAT; }
 		if ( _sMip >= m_vMipMaps.size() ) { return SL2_E_INVALIDCALL; }
 
-		size_t sBaseSize = CFormat::GetFormatSize( _pkifFormat, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
-		sBaseSize = GetActualPlaneSize( sBaseSize );
+		uint64_t ui64BaseSize = CFormat::GetFormatSize( _pkifFormat, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
+		ui64BaseSize = GetActualPlaneSize( ui64BaseSize );
+		if ( uint64_t( size_t( ui64BaseSize ) ) != ui64BaseSize ) { return SL2_E_UNSUPPORTEDSIZE; }
 		try {
-			_vDst.resize( sBaseSize );
+			_vDst.resize( size_t( ui64BaseSize ) );
 		}
 		catch ( ... ) { SL2_E_OUTOFMEMORY; }
 		return ConvertToFormat( _pkifFormat, _sMip, _sArray, _sFace, _vDst.data(), _bInvertY );
@@ -499,19 +522,20 @@ namespace sl2 {
 		if ( !_pkifFormat || !Format() ) { return SL2_E_BADFORMAT; }
 		if ( _sMip >= m_vMipMaps.size() ) { return SL2_E_INVALIDCALL; }
 
-		size_t sBaseSize = CFormat::GetFormatSize( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
+		uint64_t ui64BaseSize = CFormat::GetFormatSize( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
+		if ( uint64_t( size_t( ui64BaseSize ) ) != ui64BaseSize ) { return SL2_E_UNSUPPORTEDSIZE; }
 		if ( ParametersAreUnchanged( _pkifFormat, _bInvertY, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() ) ) {
 			// No format conversion needed.  Just copy the buffers.
-			sBaseSize = CFormat::GetFormatSize( _pkifFormat, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
-			std::memcpy( _pui8Dst, Data( _sMip, 0, _sArray, _sFace ), sBaseSize );
+			ui64BaseSize = CFormat::GetFormatSize( _pkifFormat, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
+			std::memcpy( _pui8Dst, Data( _sMip, 0, _sArray, _sFace ), size_t( ui64BaseSize ) );
 			return SL2_E_SUCCESS;
 		}
 
-		sBaseSize = GetActualPlaneSize( sBaseSize );
-		if ( !sBaseSize ) { return SL2_E_BADFORMAT; }
+		ui64BaseSize = GetActualPlaneSize( ui64BaseSize );
+		if ( !ui64BaseSize || (uint64_t( size_t( ui64BaseSize ) ) != ui64BaseSize) ) { return SL2_E_BADFORMAT; }
 		std::vector<uint8_t> vTmp;
 		try {
-			vTmp.resize( sBaseSize );
+			vTmp.resize( size_t( ui64BaseSize ) );
 		}
 		catch ( ... ) {
 			return SL2_E_OUTOFMEMORY;
@@ -645,20 +669,20 @@ namespace sl2 {
 		m_sFaces = _sFaces;
 		m_pkifFormat = _pkifFormat;
 		
-		size_t sSrcBaseSize = CFormat::GetFormatSize( _pkifFormat, _ui32Width, _ui32Height, _ui32Depth );
-		if ( !sSrcBaseSize ) { Reset(); return false; }
+		uint64_t ui64BaseSize = CFormat::GetFormatSize( _pkifFormat, _ui32Width, _ui32Height, _ui32Depth );
+		if ( !ui64BaseSize || (uint64_t( size_t( ui64BaseSize ) ) != ui64BaseSize) ) { Reset(); return false; }
 		try {
 			m_vMipMaps.resize( _sMips );
 			for ( size_t I = 0; I < _sMips; ++I ) {
-				size_t sBaseSize = GetActualPlaneSize( CFormat::GetFormatSize( _pkifFormat, _ui32Width, _ui32Height, _ui32Depth ) );
-				size_t sFullSize = sBaseSize * _sArray * _sFaces;
-				if ( !sFullSize ) { Reset(); return false; }
+				uint64_t ui64ThisBaseSize = GetActualPlaneSize( CFormat::GetFormatSize( _pkifFormat, _ui32Width, _ui32Height, _ui32Depth ) );
+				uint64_t ui64FullSize = ui64ThisBaseSize * _sArray * _sFaces;
+				if ( !ui64FullSize || (uint64_t( size_t( ui64FullSize ) ) != ui64FullSize) ) { Reset(); return false; }
 
 				if ( m_vMipMaps[I].get() ) {
-					if ( !m_vMipMaps[I]->Reallocate( sFullSize, sBaseSize, _ui32Width, _ui32Height, _ui32Depth ) ) { Reset(); return false; }
+					if ( !m_vMipMaps[I]->Reallocate( size_t( ui64FullSize ), size_t( ui64BaseSize ), _ui32Width, _ui32Height, _ui32Depth ) ) { Reset(); return false; }
 				}
 				else {
-					m_vMipMaps[I] = std::make_unique<CSurface>( sFullSize, sBaseSize, _ui32Width, _ui32Height, _ui32Depth );
+					m_vMipMaps[I] = std::make_unique<CSurface>( size_t( ui64FullSize ), size_t( ui64BaseSize ), _ui32Width, _ui32Height, _ui32Depth );
 				}
 
 				_ui32Width = CUtilities::Max<uint32_t>( _ui32Width >> 1, 1 );
@@ -1494,28 +1518,30 @@ namespace sl2 {
 
 					if ( dFile.Header().ui32Flags & SL2_DF_LINEARSIZE ) {
 						// Compressed texture.
-						size_t sPageSize = CFormat::GetFormatSize( aFmt, ui32Width,
+						uint64_t ui64PageSize = CFormat::GetFormatSize( aFmt, ui32Width,
 							ui32Height,
 							1 );
-						size_t sBaseSize = sPageSize * ui32Depth;
+						if ( uint64_t( size_t( ui64PageSize ) ) != ui64PageSize ) { return SL2_E_UNSUPPORTEDSIZE; }
 						for ( uint32_t D = 0; D < ui32Depth; ++D ) {
-							if ( dFile.Buffers()[sIdx].vTexture.size() - (sPageSize * D) < sPageSize ) { return SL2_E_INVALIDDATA; }
-							std::memcpy( Data( M, D, 0, F ), dFile.Buffers()[sIdx].vTexture.data() + sPageSize * D, sPageSize );
+							if ( dFile.Buffers()[sIdx].vTexture.size() - (ui64PageSize * D) < ui64PageSize ) { return SL2_E_INVALIDDATA; }
+							std::memcpy( Data( M, D, 0, F ), dFile.Buffers()[sIdx].vTexture.data() + ui64PageSize * D, size_t( ui64PageSize ) );
 						}
 					}
 					else {
-						size_t sSrcPitch = CFormat::GetRowSize_NoPadding( aFmt, std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
+						uint64_t ui64SrcPitch = CFormat::GetRowSize_NoPadding( aFmt, std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
+						if ( uint64_t( size_t( ui64SrcPitch ) ) != ui64SrcPitch ) { return SL2_E_UNSUPPORTEDSIZE; }
 						auto aPitch = CFormat::GetRowSize( aFmt, std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
 
 						for ( uint32_t D = 0; D < ui32Depth; ++D ) {
-							size_t sDstSliceOffset = D * ui32Height * aPitch;
-							size_t sSrcSliceOffset = D * ui32Height * sSrcPitch;
-							for ( uint32_t H = 0; H < ui32Height; ++H ) {
-								size_t sDst = aPitch * H + sDstSliceOffset;
-								size_t sSrc = sSrcPitch * H + sSrcSliceOffset;
+							uint64_t ui64DstSliceOffset = D * ui32Height * aPitch;
+							uint64_t ui64SrcSliceOffset = D * ui32Height * ui64SrcPitch;
 
-								if ( dFile.Buffers()[sIdx].vTexture.size() - sSrc < sSrcPitch ) { return SL2_E_INVALIDDATA; }
-								std::memcpy( Data( M, 0, 0, F ) + sDst, dFile.Buffers()[sIdx].vTexture.data() + sSrc, sSrcPitch );
+							for ( uint32_t H = 0; H < ui32Height; ++H ) {
+								uint64_t ui64Dst = aPitch * H + ui64DstSliceOffset;
+								uint64_t ui64Src = ui64SrcPitch * H + ui64SrcSliceOffset;
+
+								if ( (dFile.Buffers()[sIdx].vTexture.size() - ui64Src) < ui64SrcPitch ) { return SL2_E_INVALIDDATA; }
+								std::memcpy( Data( M, 0, 0, F ) + ui64Dst, dFile.Buffers()[sIdx].vTexture.data() + ui64Src, size_t( ui64SrcPitch ) );
 							}
 						}
 					}
@@ -1535,28 +1561,29 @@ namespace sl2 {
 
 					if ( dFile.Header().ui32Flags & SL2_DF_LINEARSIZE ) {
 						// Compressed texture.
-						size_t sPageSize = CFormat::GetFormatSize( aFmt, ui32Width,
+						uint64_t ui64PageSize = CFormat::GetFormatSize( aFmt, ui32Width,
 							ui32Height,
 							1 );
-						size_t sBaseSize = sPageSize * ui32Depth;
+						if ( uint64_t( size_t( ui64PageSize ) ) != ui64PageSize ) { return SL2_E_UNSUPPORTEDSIZE; }
 						for ( uint32_t D = 0; D < ui32Depth; ++D ) {
-							if ( dFile.Buffers()[sIdx].vTexture.size() - (sPageSize * D) < sPageSize ) { return SL2_E_INVALIDDATA; }
-							std::memcpy( Data( M, D, A, 0 ), dFile.Buffers()[sIdx].vTexture.data() + sPageSize * D, sPageSize );
+							if ( dFile.Buffers()[sIdx].vTexture.size() - (ui64PageSize * D) < ui64PageSize ) { return SL2_E_INVALIDDATA; }
+							std::memcpy( Data( M, D, A, 0 ), dFile.Buffers()[sIdx].vTexture.data() + ui64PageSize * D, size_t( ui64PageSize ) );
 						}
 					}
 					else {
-						size_t sSrcPitch = CFormat::GetRowSize_NoPadding( aFmt, std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
+						uint64_t ui64SrcPitch = CFormat::GetRowSize_NoPadding( aFmt, std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
+						if ( uint64_t( size_t( ui64SrcPitch ) ) != ui64SrcPitch ) { return SL2_E_UNSUPPORTEDSIZE; }
 						auto aPitch = CFormat::GetRowSize( aFmt, std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
 
 						for ( uint32_t D = 0; D < ui32Depth; ++D ) {
-							size_t sDstSliceOffset = D * ui32Height * aPitch;
-							size_t sSrcSliceOffset = D * ui32Height * sSrcPitch;
+							uint64_t ui64DstSliceOffset = D * ui32Height * aPitch;
+							uint64_t ui64SrcSliceOffset = D * ui32Height * ui64SrcPitch;
 							for ( uint32_t H = 0; H < ui32Height; ++H ) {
-								size_t sDst = aPitch * H + sDstSliceOffset;
-								size_t sSrc = sSrcPitch * H + sSrcSliceOffset;
+								uint64_t ui64Dst = aPitch * H + ui64DstSliceOffset;
+								uint64_t ui64Src = ui64SrcPitch * H + ui64SrcSliceOffset;
 
-								if ( dFile.Buffers()[sIdx].vTexture.size() - sSrc < sSrcPitch ) { return SL2_E_INVALIDDATA; }
-								std::memcpy( Data( M, 0, A, 0 ) + sDst, dFile.Buffers()[sIdx].vTexture.data() + sSrc, sSrcPitch );
+								if ( dFile.Buffers()[sIdx].vTexture.size() - ui64Src < ui64SrcPitch ) { return SL2_E_INVALIDDATA; }
+								std::memcpy( Data( M, 0, A, 0 ) + ui64Dst, dFile.Buffers()[sIdx].vTexture.data() + ui64Src, size_t( ui64SrcPitch ) );
 							}
 						}
 					}
@@ -1710,7 +1737,7 @@ namespace sl2 {
 		}
 
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * pkiffFormat = CFormat::FindFormatDataByVulkan( vFormat );
-		size_t sDestRowWidth = CFormat::GetRowSize( pkiffFormat, lpbfhInfo->ui32Width );
+		uint64_t ui64DestRowWidth = CFormat::GetRowSize( pkiffFormat, lpbfhInfo->ui32Width );
 
 		switch ( lpbfhInfo->ui16BitsPerPixel ) {
 			case 8 : {
@@ -1735,10 +1762,10 @@ namespace sl2 {
 						uint32_t ui32YOff = ((Y * ui32RowWidth * ui32BytesPerPixel) >> 3) + ui32ActualOffset;
 
 						// This line is what handles reverse-encoded bitmaps.
-						size_t sYOffDest = bReverse ? Y * sDestRowWidth :
-							(ui32Height - Y - 1) * sDestRowWidth;
+						uint64_t ui64YOffDest = bReverse ? Y * ui64DestRowWidth :
+							(ui32Height - Y - 1) * ui64DestRowWidth;
 
-						uint8_t * pui8Dest = &Data()[sYOffDest];
+						uint8_t * pui8Dest = &Data()[ui64YOffDest];
 
 						
 
@@ -1876,12 +1903,12 @@ namespace sl2 {
 				for ( uint32_t Y = 0; Y < ui32Height; ++Y ) {
 					uint32_t ui32YOffSrc = Y * ui32RowWidth + ui32ActualOffset;
 					// This line is what handles reverse-encoded bitmaps.
-					size_t sYOffDest = bReverse ? Y * sDestRowWidth :
-						(ui32Height - Y - 1) * sDestRowWidth;
+					uint64_t ui64YOffDest = bReverse ? Y * ui64DestRowWidth :
+						(ui32Height - Y - 1) * ui64DestRowWidth;
 
 					// We can copy whole rows at a time if they are in the same format already.
 					const uint8_t * pui8Src = &_vData.data()[ui32YOffSrc];
-					uint8_t * pui8Dest = &Data()[sYOffDest];
+					uint8_t * pui8Dest = &Data()[ui64YOffDest];
 
 					// Since bitmaps store the alpha on the reverse side, we cannot use this trick
 					//	when there is an alpha channel.  In the end, it turns out that this only
@@ -1974,15 +2001,15 @@ namespace sl2 {
 		void * _pvPixels, void * _pvUserdata ) {
 
 		CImage * piImage = reinterpret_cast<CImage *>(_pvUserdata);
-		size_t sSrcSize = CFormat::GetFormatSize( piImage->Format(), _iWidth, _iHeight, _iDepth );
+		uint64_t ui64SrcSize = CFormat::GetFormatSize( piImage->Format(), _iWidth, _iHeight, _iDepth );
 		_ui64FaceLodSize /= piImage->ArraySize();
-		if ( _ui64FaceLodSize < sSrcSize || 0 == sSrcSize ) {
+		if ( _ui64FaceLodSize < ui64SrcSize || 0 == ui64SrcSize || (uint64_t( size_t( ui64SrcSize ) ) != ui64SrcSize) ) {
 			return ::KTX_FILE_READ_ERROR;
 		}
 		const uint8_t * pui8Src = reinterpret_cast<uint8_t *>(_pvPixels);
 		for ( size_t I = 0; I < piImage->ArraySize(); ++I ) {
 			uint8_t * pui8Dst = piImage->Data( _iMipLevel, 0, I, _iFace );
-			std::memcpy( pui8Dst, pui8Src + _ui64FaceLodSize * I, sSrcSize );
+			std::memcpy( pui8Dst, pui8Src + _ui64FaceLodSize * I, size_t( ui64SrcSize ) );
 		}
 		return ::KTX_SUCCESS;
 	}

@@ -213,15 +213,13 @@ namespace sl2 {
 
 		// Resize width first for best caching.
 		if ( !CreateContribList( ui32W, ui32NewW, _pParms.taColorW, _pParms.fFilterW.pfFunc, _pParms.fFilterW.dfSupport, _pParms.fFilterScale ) ) { return false; }
-		double * pdDst[1] = { dBuffer.data() };
+		//double * pdDst[1] = { dBuffer.data() };
 		// Resize W.
-		size_t sPagesSize = ui32W * ui32H;
-		size_t sNewPagesSize = ui32NewW * ui32H;
 
 		uint32_t ui32DstW = ui32H;
 		uint32_t ui32DstH = ui32NewW;
 		for ( size_t H = 0; H < ui32H; ++H ) {
-			const double * pdRowStart = _pdIn + (sPagesSize + (H * ui32W));
+			const double * pdRowStart = _pdIn + (/*sPagesSize +*/ (H * ui32W));
 			for ( size_t W = 0; W < ui32NewW; ++W ) {
 				double dConvolved;
 				if ( m_cContribs[W].bInsideBounds ) {
@@ -239,20 +237,19 @@ namespace sl2 {
 					}
 					dConvolved = ConvolveAligned( m_cContribs[W].dContributions.data(), m_dBuffer.data(), m_cContribs[W].dContributions.size() );
 				}
-				size_t sDstIdx = (sNewPagesSize) + (W * ui32H) + H;
-				pdDst[0][sDstIdx] = dConvolved;
+				size_t sDstIdx = (W * ui32H) + H;
+				dBuffer[sDstIdx] = dConvolved;
 			}
 		}
 
 		// Resize H, now aligned horizontally in the buffers.
 		if ( !CreateContribList( ui32H, ui32NewH, _pParms.taColorH, _pParms.fFilterH.pfFunc, _pParms.fFilterH.dfSupport, _pParms.fFilterScale ) ) { return false; }
-		sPagesSize = sNewPagesSize;
-		sNewPagesSize = ui32NewW * ui32NewH;
+
 		uint32_t tW = ui32H;
 		uint32_t tH = ui32NewW;
 
 		for ( size_t H = 0; H < tH; ++H ) {
-			const double * pdRowStart = pdDst[0] + sPagesSize + (H * tW);
+			const double * pdRowStart = &dBuffer[0] + (H * tW);
 			for ( size_t W = 0; W < ui32NewH; ++W ) {
 				double dConvolved;
 				if ( m_cContribs[W].bInsideBounds ) {
@@ -270,7 +267,7 @@ namespace sl2 {
 					}
 					dConvolved = ConvolveAligned( m_cContribs[W].dContributions.data(), m_dBuffer.data(), m_cContribs[W].dContributions.size() );
 				}
-				size_t sDstIdx = (sNewPagesSize + (W * ui32NewW) + H) * _sOutputStride;
+				size_t sDstIdx = ((W * ui32NewW) + H) * _sOutputStride;
 				_pdOut[sDstIdx] = dConvolved;
 			}
 		}
