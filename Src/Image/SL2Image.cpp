@@ -224,12 +224,56 @@ namespace sl2 {
 			if ( !sfFile.Open( _pcFile ) ) { return SL2_E_FILENOTFOUND; }
 			if ( !sfFile.LoadToMemory( vFile ) ) { return SL2_E_OUTOFMEMORY; }
 		}
+
+		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv444p16" ) == 0 ) {
+			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G16_B16_R16_3PLANE_444_UNORM>( vFile );
+		}
+		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv444p12le" ) == 0 ) {
+			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_444_UNORM_3PACK16>( vFile );
+		}
+		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv444p10le" ) == 0 ) {
+			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_444_UNORM_3PACK16>( vFile );
+		}
+		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv444p" ) == 0 ) {
+			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G8_B8_R8_3PLANE_444_UNORM>( vFile );
+		}
+
+
+		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv422p16" ) == 0 ) {
+			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G16_B16_R16_3PLANE_422_UNORM>( vFile );
+		}
+		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"Yuv422p12le" ) == 0 ) {
+			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_422_UNORM_3PACK16>( vFile );
+		}
+		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"Yuv422p10le" ) == 0 ) {
+			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_422_UNORM_3PACK16>( vFile );
+		}
+		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv422p" ) == 0 ) {
+			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM>( vFile );
+		}
+
+
+		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv420p16" ) == 0 ) {
+			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G16_B16_R16_3PLANE_420_UNORM>( vFile );
+		}
+		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"Yuv420p12le" ) == 0 ) {
+			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_420_UNORM_3PACK16>( vFile );
+		}
+		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"Yuv420p10le" ) == 0 ) {
+			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16>( vFile );
+		}
+		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv420p" ) == 0 ) {
+			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM>( vFile );
+		}
+
+
 		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuy2" ) == 0 || ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuyv" ) == 0 ) {
 			return LoadYuv_Dgxi_Basic<SL2_DXGI_FORMAT_YUY2>( vFile );
 		}
 		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"uyvy" ) == 0 ) {
 			return LoadYuv_Dgxi_Basic<SL2_DXGI_FORMAT_R8G8_B8G8_UNORM>( vFile );
 		}
+
 
 		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"nv12" ) == 0 ) {
 			return LoadYuv_Dgxi_Basic<SL2_DXGI_FORMAT_NV12>( vFile );

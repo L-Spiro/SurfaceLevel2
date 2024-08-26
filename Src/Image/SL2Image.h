@@ -303,6 +303,15 @@ namespace sl2 {
 		SL2_ERRORS											LoadYuv_Dgxi_Basic( const std::vector<uint8_t> &_vData );
 
 		/**
+		 * Loads a basic YUV image file.  All image slices, faces, and array slices will be loaded.
+		 * 
+		 * \param _vData The image file to load.
+		 * \return Returns an error code.
+		 **/
+		template <unsigned _uFormat>
+		SL2_ERRORS											LoadYuv_Vulkan_Basic( const std::vector<uint8_t> &_vData );
+
+		/**
 		 * Converts to another format.  _iDst holds the converted image.
 		 * 
 		 * \param _pkifFormat The format to which to convert.
@@ -895,7 +904,7 @@ namespace sl2 {
 		}
 		uint64_t ui64SrcBaseSize = CFormat::GetFormatSize( m_pkifdYuvFormat, m_ui32YuvW, m_ui32YuvH, 1 );
 		uint64_t ui64Depth = uint64_t( _vData.size() / ui64SrcBaseSize );
-		if ( uint64_t( uint32_t( ui64Depth ) ) != ui64Depth ) { return SL2_E_UNSUPPORTEDSIZE; }
+		if ( uint64_t( uint32_t( ui64Depth ) ) != ui64Depth || ui64Depth == 0 ) { return SL2_E_UNSUPPORTEDSIZE; }
 		if ( !AllocateTexture( m_pkifdYuvFormat, m_ui32YuvW, m_ui32YuvH, uint32_t( ui64Depth ) ) ) { return SL2_E_OUTOFMEMORY; }
 
 		ui64SrcBaseSize = CFormat::GetFormatSize( m_pkifdYuvFormat, m_ui32YuvW, m_ui32YuvH, uint32_t( ui64Depth ) );
@@ -922,6 +931,31 @@ namespace sl2 {
 			pui8Dst += ui64Off2 * 2;
 			pui8Src += ui64Off2 * 2;
 		}*/
+
+		std::memcpy( Data(), _vData.data(), _vData.size() );
+		return SL2_E_SUCCESS;
+	}
+
+	/**
+	 * Loads a basic YUV image file.  All image slices, faces, and array slices will be loaded.
+	 * 
+	 * \param _vData The image file to load.
+	 * \return Returns an error code.
+	 **/
+	template <unsigned _uFormat>
+	SL2_ERRORS CImage::LoadYuv_Vulkan_Basic( const std::vector<uint8_t> &_vData ) {
+		if ( !m_ui32YuvW || !m_ui32YuvH ) { return SL2_E_UNSUPPORTEDSIZE; }
+		if ( !m_pkifdYuvFormat ) {
+			m_pkifdYuvFormat = CFormat::FindFormatDataByVulkan( static_cast<SL2_VKFORMAT>(_uFormat) );
+			if ( !m_pkifdYuvFormat ) { return SL2_E_INVALIDFILETYPE; }
+		}
+		uint64_t ui64SrcBaseSize = CFormat::GetFormatSize( m_pkifdYuvFormat, m_ui32YuvW, m_ui32YuvH, 1 );
+		uint64_t ui64Depth = uint64_t( _vData.size() / ui64SrcBaseSize );
+		if ( uint64_t( uint32_t( ui64Depth ) ) != ui64Depth || ui64Depth == 0 ) { return SL2_E_UNSUPPORTEDSIZE; }
+		if ( !AllocateTexture( m_pkifdYuvFormat, m_ui32YuvW, m_ui32YuvH, uint32_t( ui64Depth ) ) ) { return SL2_E_OUTOFMEMORY; }
+
+		ui64SrcBaseSize = CFormat::GetFormatSize( m_pkifdYuvFormat, m_ui32YuvW, m_ui32YuvH, uint32_t( ui64Depth ) );
+		if ( uint64_t( size_t( ui64SrcBaseSize ) ) != ui64SrcBaseSize ) { return SL2_E_UNSUPPORTEDSIZE; }
 
 		std::memcpy( Data(), _vData.data(), _vData.size() );
 		return SL2_E_SUCCESS;
