@@ -560,28 +560,40 @@ namespace sl2 {
 
 
 
-		{ SL2_ID( VK_FORMAT_G16_B16_R16_3PLANE_444_UNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),					SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv444P16, SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv444PToRgba64F<16, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV16_3P_444, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
-		{ SL2_ID( VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_444_UNORM_3PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv444P16, SL2_TBITS(12, 12, 12, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv444PToRgba64F<12, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV12MSB_3P_444, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
-		{ SL2_ID( VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_444_UNORM_3PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv444P16, SL2_TBITS(10, 10, 10, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv444PToRgba64F<10, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV10MSB_3P_444, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
-		{ SL2_ID( VK_FORMAT_G8_B8_R8_3PLANE_444_UNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),					SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv444P, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::Yuv444PToRgba64F<8, uint8_t>, CFormat::Depth32FS8FromRgba64F,					nullptr, PVRTLPF_YUV_3P_444, PVRTLVT_UnsignedByteNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G16_B16_R16_3PLANE_444_UNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),					SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv444<uint16_t>, SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv444PToRgba64F<16, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV16_3P_444, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_444_UNORM_3PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv444<uint16_t>, SL2_TBITS(12, 12, 12, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv444PToRgba64F<12, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV12MSB_3P_444, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_444_UNORM_3PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv444<uint16_t>, SL2_TBITS(10, 10, 10, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv444PToRgba64F<10, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV10MSB_3P_444, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G8_B8_R8_3PLANE_444_UNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),					SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv444, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::Yuv444PToRgba64F<8, uint8_t>, CFormat::Depth32FS8FromRgba64F,					nullptr, PVRTLPF_YUV_3P_444, PVRTLVT_UnsignedByteNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
 
-		{ SL2_ID( VK_FORMAT_G16_B16_R16_3PLANE_422_UNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),					SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv422P<uint16_t>, SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv422PToRgba64F<16, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV16_3P_422, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
-		{ SL2_ID( VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_422_UNORM_3PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv422P<uint16_t>, SL2_TBITS(12, 12, 12, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv422PToRgba64F<12, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV12MSB_3P_422, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
-		{ SL2_ID( VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_422_UNORM_3PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv422P<uint16_t>, SL2_TBITS(10, 10, 10, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv422PToRgba64F<10, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV10MSB_3P_422, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
-		{ SL2_ID( VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),					SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv422P, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::Yuv422PToRgba64F<8, uint8_t>, CFormat::Depth32FS8FromRgba64F,					nullptr, PVRTLPF_YUV_3P_422, PVRTLVT_UnsignedByteNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G16_B16_R16_3PLANE_422_UNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),					SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv422<uint16_t>, SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv422PToRgba64F<16, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV16_3P_422, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_422_UNORM_3PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv422<uint16_t>, SL2_TBITS(12, 12, 12, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv422PToRgba64F<12, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV12MSB_3P_422, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_422_UNORM_3PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv422<uint16_t>, SL2_TBITS(10, 10, 10, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv422PToRgba64F<10, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV10MSB_3P_422, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),					SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv422, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::Yuv422PToRgba64F<8, uint8_t>, CFormat::Depth32FS8FromRgba64F,					nullptr, PVRTLPF_YUV_3P_422, PVRTLVT_UnsignedByteNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
 
-		{ SL2_ID( VK_FORMAT_G16_B16_R16_3PLANE_420_UNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),					SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv420P<uint16_t>, SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv420PToRgba64F<16, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV16_3P_420, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
-		{ SL2_ID( VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_420_UNORM_3PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv420P<uint16_t>, SL2_TBITS(12, 12, 12, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv420PToRgba64F<12, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV12MSB_3P_420, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
-		{ SL2_ID( VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv420P<uint16_t>, SL2_TBITS(10, 10, 10, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv420PToRgba64F<10, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV10MSB_3P_420, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
-		{ SL2_ID( VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),					SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv420P, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::Yuv420PToRgba64F<8, uint8_t>, CFormat::Depth32FS8FromRgba64F,					nullptr, PVRTLPF_YUV_3P_420, PVRTLVT_UnsignedByteNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G16_B16R16_2PLANE_422_UNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),					SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv422<uint16_t>, SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv422YToRgba64F<16, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV16_2P_422, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G12X4_B12X4R12X4_2PLANE_422_UNORM_3PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv422<uint16_t>, SL2_TBITS(12, 12, 12, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv422YToRgba64F<12, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV12MSB_2P_422, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G10X6_B10X6R10X6_2PLANE_422_UNORM_3PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv422<uint16_t>, SL2_TBITS(10, 10, 10, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv422YToRgba64F<10, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV10MSB_2P_422, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G8_B8R8_2PLANE_422_UNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),						SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv422, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::Yuv422PToRgba64F<8, uint8_t>, CFormat::Depth32FS8FromRgba64F,					nullptr, PVRTLPF_YUV_2P_422, PVRTLVT_UnsignedByteNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
 
-		{ SL2_ID( VK_FORMAT_G8B8G8R8_422_UNORM, DXGI_FORMAT_YUY2, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),								SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuy2, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::Yuy2ToRgba64F, CFormat::Depth32FS8FromRgba64F,						nullptr, PVRTLPF_YUYV16_422, PVRTLVT_UnsignedByteNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
-		{ SL2_ID( VK_FORMAT_B8G8R8G8_422_UNORM, DXGI_FORMAT_R8G8_B8G8_UNORM, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),					SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuy2, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::UyvyToRgba64F, CFormat::Depth32FS8FromRgba64F,						nullptr, PVRTLPF_UYVY16_422, PVRTLVT_UnsignedByteNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G16_B16_R16_3PLANE_420_UNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),					SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv420<uint16_t>, SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv420PToRgba64F<16, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV16_3P_420, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_420_UNORM_3PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv420<uint16_t>, SL2_TBITS(12, 12, 12, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv420PToRgba64F<12, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV12MSB_3P_420, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv420<uint16_t>, SL2_TBITS(10, 10, 10, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv420PToRgba64F<10, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV10MSB_3P_420, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),					SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv420, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::Yuv420PToRgba64F<8, uint8_t>, CFormat::Depth32FS8FromRgba64F,					nullptr, PVRTLPF_YUV_3P_420, PVRTLVT_UnsignedByteNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
 
-		{ SL2_ID( VK_FORMAT_G8_B8R8_2PLANE_420_UNORM, DXGI_FORMAT_NV12, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),						SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeNv12, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::Nv12ToRgba64F, CFormat::Depth32FS8FromRgba64F,						nullptr, PVRTLPF_YUV_2P_420, PVRTLVT_UnsignedByteNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_NV21, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),										SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeNv12, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::Nv21ToRgba64F, CFormat::Depth32FS8FromRgba64F,						nullptr, PVRTLPF_YVU_2P_420, PVRTLVT_UnsignedByteNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_420_OPAQUE, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),									SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeNv12, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::Yv12ToRgba64F, CFormat::Depth32FS8FromRgba64F,						nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_YV12, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),										SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeNv12, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::Yv12ToRgba64F, CFormat::Depth32FS8FromRgba64F,						nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_G16_B16R16_2PLANE_420_UNORM, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),					SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv420<uint16_t>, SL2_TBITS(16, 16, 16, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv420YToRgba64F<16, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV16_2P_420, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G12X4_B12X4R12X4_2PLANE_420_UNORM_3PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv420<uint16_t>, SL2_TBITS(12, 12, 12, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv420YToRgba64F<12, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV12MSB_2P_420, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),	SL2_MAKE_YUV_FLAG, 0, 48, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv420<uint16_t>, SL2_TBITS(10, 10, 10, 0), SL2_TSHIFTS(0, 16, 24, 0),CFormat::Yuv420YToRgba64F<10, uint16_t>, CFormat::Depth32FS8FromRgba64F,	nullptr, PVRTLPF_YUV10MSB_2P_420, PVRTLVT_UnsignedShortNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_G8_B8R8_2PLANE_420_UNORM, DXGI_FORMAT_NV12, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),						SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv420, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::Yuv420YToRgba64F<8, uint8_t, false>, CFormat::Depth32FS8FromRgba64F,			nullptr, PVRTLPF_YUV_2P_420, PVRTLVT_UnsignedByteNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_NV21, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),										SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv420, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::Yuv420YToRgba64F<8, uint8_t, true>, CFormat::Depth32FS8FromRgba64F,			nullptr, PVRTLPF_YVU_2P_420, PVRTLVT_UnsignedByteNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_420_OPAQUE, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),									SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv420, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::Yv12ToRgba64F, CFormat::Depth32FS8FromRgba64F,									nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_YV12, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),										SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuv420, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::Yv12ToRgba64F, CFormat::Depth32FS8FromRgba64F,									nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+																																							
+		
+		{ SL2_ID( VK_FORMAT_G8B8G8R8_422_UNORM, DXGI_FORMAT_YUY2, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),								SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuy2, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::Yuy2ToRgba64F, CFormat::Depth32FS8FromRgba64F,									nullptr, PVRTLPF_YUYV16_422, PVRTLVT_UnsignedByteNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+		{ SL2_ID( VK_FORMAT_B8G8R8G8_422_UNORM, DXGI_FORMAT_R8G8_B8G8_UNORM, MTLPixelFormatInvalid, GL_INVALID, GL_INVALID, GL_INVALID ),					SL2_MAKE_YUV_FLAG, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, GetSizeYuy2, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0),CFormat::UyvyToRgba64F, CFormat::Depth32FS8FromRgba64F,									nullptr, PVRTLPF_UYVY16_422, PVRTLVT_UnsignedByteNorm, { PVRTLCN_Red, PVRTLCN_Green, PVRTLCN_Blue }, },
+
+		
 		
 #undef SL2_ID
 #undef SL2_GEN_INT
@@ -2842,34 +2854,6 @@ namespace sl2 {
 	}
 
 	/**
-	 * Returns the total size of a YUV YUV444P image given its width and height.
-	 *
-	 * \param _ui32Width Width in pixels.
-	 * \param _ui32Height Height in pixels.
-	 * \param _ui32Depth Unused.
-	 * \param _ui32Factor Multiplier.
-	 * \param _pvParms Unused.
-	 * \return Returns the size of the compressed data.
-	 */
-	uint64_t CFormat::GetSizeYuv444P( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t /*_ui32Factor*/, const void * /*_pvParms*/ ) {
-		return _ui32Width * _ui32Height * 3 * _ui32Depth;
-	}
-
-	/**
-	 * Returns the total size of a YUV YUV444P10LE image given its width and height.
-	 *
-	 * \param _ui32Width Width in pixels.
-	 * \param _ui32Height Height in pixels.
-	 * \param _ui32Depth Unused.
-	 * \param _ui32Factor Multiplier.
-	 * \param _pvParms Unused.
-	 * \return Returns the size of the compressed data.
-	 */
-	uint64_t CFormat::GetSizeYuv444P16( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t /*_ui32Factor*/, const void * /*_pvParms*/ ) {
-		return (_ui32Width * _ui32Height * 3 * _ui32Depth) * 2;
-	}
-
-	/**
 	 * Returns the total size of a YUV YUY2/UVUY image given its width and height.
 	 *
 	 * \param _ui32Width Width in pixels.
@@ -2883,39 +2867,6 @@ namespace sl2 {
 		uint32_t ui32ChromaW = std::max( (_ui32Width + 1U) / 2U, 1U );
 		uint32_t ui32ChromaH = _ui32Height;
 		return _ui32Depth * (ui32ChromaW * 4 * ui32ChromaH);
-	}
-
-	/**
-	 * Returns the total size of a YUV NV12 image given its width and height.
-	 *
-	 * \param _ui32Width Width in pixels.
-	 * \param _ui32Height Height in pixels.
-	 * \param _ui32Depth Unused.
-	 * \param _ui32Factor Multiplier.
-	 * \param _pvParms Unused.
-	 * \return Returns the size of the compressed data.
-	 */
-	uint64_t CFormat::GetSizeNv12( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t /*_ui32Factor*/, const void * /*_pvParms*/ ) {
-		uint32_t ui32ChromaW = std::max( (_ui32Width + 1U) / 2U, 1U );
-		uint32_t ui32ChromaH = std::max( (_ui32Height + 1U) / 2U, 1U );
-		return _ui32Depth * ((uint64_t( _ui32Width ) * _ui32Height) + (ui32ChromaW * 2ULL * ui32ChromaH));
-		//for ( uint32_t I = 0; I < _ui32Depth; ++I ) {
-		//	//ui64Size = SL2_ROUND_UP( ui64Size, 16 );
-		//	ui64Size += _ui32Width * _ui32Height;	// Y.
-
-		//	// U.
-		//	for ( uint32_t H = 0; H < ui32ChromaH; ++H ) {
-		//		//ui64Size = SL2_ROUND_UP( ui64Size, 16 );
-		//		ui64Size += ui32ChromaW;
-		//	}
-		//	// V.
-		//	for ( uint32_t H = 0; H < ui32ChromaH; ++H ) {
-		//		//ui64Size = SL2_ROUND_UP( ui64Size, 16 );
-		//		ui64Size += ui32ChromaW;
-		//	}
-		//}
-		// 81,400
-		//return ui64Size;
 	}
 
 	/**
@@ -3071,164 +3022,6 @@ namespace sl2 {
 	}
 
 	/**
-	 * NV12 -> RGBA32F conversion.
-	 *
-	 * \param _pui8Src Source texels.
-	 * \param _pui8Dst Destination texels known to be in RGBA32F format.
-	 * \param _ui32Width Width of the image.
-	 * \param _ui32Height Height of the image.
-	 * \param _ui32Depth Depth of the image.
-	 * \param _pvParms Optional parameters for the conversion.
-	 */
-	bool CFormat::Nv12ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		SL2_RGBA64F * prgba64Rgba = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
-		uint32_t ui32ChromaW = std::max( (_ui32Width + 1U) / 2U, 1U );
-		uint32_t ui32ChromaH = std::max( (_ui32Height + 1U) / 2U, 1U );
-		uint64_t ui64PageSize = GetSizeNv12( _ui32Width, _ui32Height, 1, 0, nullptr );
-		struct SL2_UV {
-			double			dU;
-			double			dV;
-		};
-
-		std::vector<double> vConvertedYSrc;
-		std::vector<double> vConvertedUSrc;
-		std::vector<double> vConvertedVSrc;
-		std::vector<SL2_UV> vScaledUp;
-		try {
-			vConvertedYSrc.resize( _ui32Width * _ui32Height );
-			vConvertedUSrc.resize( ui32ChromaW * ui32ChromaH );
-			vConvertedVSrc.resize( ui32ChromaW * ui32ChromaH );
-			vScaledUp.resize( _ui32Width * _ui32Height );
-		}
-		catch ( ... ) { return false; }
-
-		for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
-			// Normalize the Y values.
-			for ( uint32_t H = 0; H < _ui32Height; ++H ) {
-				for ( uint32_t W = 0; W < _ui32Width; ++W ) {
-					vConvertedYSrc[H*_ui32Width+W] = _pui8Src[H*_ui32Width+W] / 255.0;
-				}
-			}
-			uint64_t ui64Off = _ui32Height * _ui32Width;
-			//uint64_t ui64Off2 = ui64Off + (ui32ChromaW * ui32ChromaH);
-			// Normalize the U and V values.
-			for ( uint32_t H = 0; H < ui32ChromaH; ++H ) {
-				for ( uint32_t W = 0; W < ui32ChromaW; ++W ) {
-					vConvertedUSrc[H*ui32ChromaW+W] = _pui8Src[((H*ui32ChromaW+W)*2+0)+ui64Off] / 255.0;
-					vConvertedVSrc[H*ui32ChromaW+W] = _pui8Src[((H*ui32ChromaW+W)*2+1)+ui64Off] / 255.0;
-				}
-			}
-			CResampler::SL2_RESAMPLE rResample;
-			CResampler rResampler;
-			rResample.ui32W = ui32ChromaW;
-			rResample.ui32H = ui32ChromaH;
-			rResample.ui32D = 1;
-			rResample.ui32NewW = _ui32Width;
-			rResample.ui32NewH = _ui32Height;
-			rResample.ui32NewD = 1;
-			rResample.fFilterW = CResampler::m_fFilter[CResampler::SL2_FF_CATMULLROM];
-			rResample.fFilterH = rResample.fFilterW;
-			if ( !rResampler.Resample_1Channel_2d( vConvertedUSrc.data(), &vScaledUp[0].dU, rResample, 2 ) ) { return false; }
-			if ( !rResampler.Resample_1Channel_2d( vConvertedVSrc.data(), &vScaledUp[0].dV, rResample, 2 ) ) { return false; }
-
-			for ( uint32_t H = 0; H < _ui32Height; ++H ) {
-				for ( uint32_t W = 0; W < _ui32Width; ++W ) {
-					size_t sIdx = size_t( H * _ui32Width + W );
-					YuvToRgb<uint32_t>( uint32_t( std::round( vConvertedYSrc[sIdx] * 0xFFFFFFFFU ) ),
-						uint32_t( std::round( vScaledUp[sIdx].dU * 0xFFFFFFFFU ) ), uint32_t( std::round( vScaledUp[sIdx].dV * 0xFFFFFFFFU ) ),
-						prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B] );
-					prgba64Rgba[sIdx].dRgba[SL2_PC_A] = 1.0;
-
-					/*prgba64Rgba[sIdx].dRgba[SL2_PC_R] = vScaledUp[sIdx].dV;
-					prgba64Rgba[sIdx].dRgba[SL2_PC_G] = vScaledUp[sIdx].dV;
-					prgba64Rgba[sIdx].dRgba[SL2_PC_B] = vScaledUp[sIdx].dV;*/
-					
-				}
-			}
-
-			_pui8Src += ui64PageSize;
-			prgba64Rgba += _ui32Width * _ui32Height;
-		}
-		return true;
-	}
-
-	/**
-	 * NV21 -> RGBA32F conversion.
-	 *
-	 * \param _pui8Src Source texels.
-	 * \param _pui8Dst Destination texels known to be in RGBA32F format.
-	 * \param _ui32Width Width of the image.
-	 * \param _ui32Height Height of the image.
-	 * \param _ui32Depth Depth of the image.
-	 * \param _pvParms Optional parameters for the conversion.
-	 */
-	bool CFormat::Nv21ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
-		SL2_RGBA64F * prgba64Rgba = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
-		uint32_t ui32ChromaW = std::max( (_ui32Width + 1U) / 2U, 1U );
-		uint32_t ui32ChromaH = std::max( (_ui32Height + 1U) / 2U, 1U );
-		uint64_t ui64PageSize = GetSizeNv12( _ui32Width, _ui32Height, 1, 0, nullptr );
-		struct SL2_UV {
-			double			dU;
-			double			dV;
-		};
-
-		std::vector<double> vConvertedYSrc;
-		std::vector<double> vConvertedUSrc;
-		std::vector<double> vConvertedVSrc;
-		std::vector<SL2_UV> vScaledUp;
-		try {
-			vConvertedYSrc.resize( _ui32Width * _ui32Height );
-			vConvertedUSrc.resize( ui32ChromaW * ui32ChromaH );
-			vConvertedVSrc.resize( ui32ChromaW * ui32ChromaH );
-			vScaledUp.resize( _ui32Width * _ui32Height );
-		}
-		catch ( ... ) { return false; }
-
-		for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
-			// Normalize the Y values.
-			for ( uint32_t H = 0; H < _ui32Height; ++H ) {
-				for ( uint32_t W = 0; W < _ui32Width; ++W ) {
-					vConvertedYSrc[H*_ui32Width+W] = _pui8Src[H*_ui32Width+W] / 255.0;
-				}
-			}
-			uint64_t ui64Off = _ui32Height * _ui32Width;
-			// Normalize the U and V values.
-			for ( uint32_t H = 0; H < ui32ChromaH; ++H ) {
-				for ( uint32_t W = 0; W < ui32ChromaW; ++W ) {
-					vConvertedUSrc[H*ui32ChromaW+W] = _pui8Src[((H*ui32ChromaW+W)*2+1)+ui64Off] / 255.0;
-					vConvertedVSrc[H*ui32ChromaW+W] = _pui8Src[((H*ui32ChromaW+W)*2+0)+ui64Off] / 255.0;
-				}
-			}
-			CResampler::SL2_RESAMPLE rResample;
-			CResampler rResampler;
-			rResample.ui32W = ui32ChromaW;
-			rResample.ui32H = ui32ChromaH;
-			rResample.ui32D = 1;
-			rResample.ui32NewW = _ui32Width;
-			rResample.ui32NewH = _ui32Height;
-			rResample.ui32NewD = 1;
-			rResample.fFilterW = CResampler::m_fFilter[CResampler::SL2_FF_CATMULLROM];
-			rResample.fFilterH = rResample.fFilterW;
-			if ( !rResampler.Resample_1Channel_2d( vConvertedUSrc.data(), &vScaledUp[0].dU, rResample, 2 ) ) { return false; }
-			if ( !rResampler.Resample_1Channel_2d( vConvertedVSrc.data(), &vScaledUp[0].dV, rResample, 2 ) ) { return false; }
-
-			for ( uint32_t H = 0; H < _ui32Height; ++H ) {
-				for ( uint32_t W = 0; W < _ui32Width; ++W ) {
-					size_t sIdx = size_t( H * _ui32Width + W );
-					YuvToRgb<uint32_t>( uint32_t( std::round( vConvertedYSrc[sIdx] * 0xFFFFFFFFU ) ),
-						uint32_t( std::round( vScaledUp[sIdx].dU * 0xFFFFFFFFU ) ), uint32_t( std::round( vScaledUp[sIdx].dV * 0xFFFFFFFFU ) ),
-						prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B] );
-					prgba64Rgba[sIdx].dRgba[SL2_PC_A] = 1.0;
-				}
-			}
-
-			_pui8Src += ui64PageSize;
-			prgba64Rgba += _ui32Width * _ui32Height;
-		}
-		return true;
-	}
-
-	/**
 	 * YV12 -> RGBA32F conversion.
 	 *
 	 * \param _pui8Src Source texels.
@@ -3242,7 +3035,7 @@ namespace sl2 {
 		SL2_RGBA64F * prgba64Rgba = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
 		uint32_t ui32ChromaW = std::max( (_ui32Width + 1U) / 2U, 1U );
 		uint32_t ui32ChromaH = std::max( (_ui32Height + 1U) / 2U, 1U );
-		uint64_t ui64PageSize = GetSizeNv12( _ui32Width, _ui32Height, 1, 0, nullptr );
+		uint64_t ui64PageSize = GetSizeYuv420( _ui32Width, _ui32Height, 1, 0, nullptr );
 		struct SL2_UV {
 			double			dU;
 			double			dV;
