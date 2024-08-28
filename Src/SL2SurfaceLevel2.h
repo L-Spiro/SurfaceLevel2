@@ -106,6 +106,8 @@ namespace sl2 {
 		sl2::SL2_VKFORMAT												vkTgaFormat = SL2_VK_FORMAT_UNDEFINED;							/**< The TGA format. */
 		int																iTgaSaveOption = TARGA_DEFAULT;									/**< TGA option. */
 
+		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *					pkifdYuvFormat = nullptr;										/**< The YUV format. */
+
 		bool															bNeedsPreMultiply = false;										/**< Does the target format, or user request, demand pre-multiplied alpha? */
 		bool															bSwap = false;													/**< Swap R and B? */
 		bool															bPause = false;													/**< If true, the program pauses before closing the command window. */
@@ -357,5 +359,29 @@ namespace sl2 {
 	 * \return Returns an error code.
 	 **/
 	SL2_ERRORS															ExportAsTga( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice );
+
+	/**
+	 * Exports as YUV.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS															ExportAsYuv( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions );
+
+	/**
+	 * Exports as YUV.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \param _sMip The mipmap level to export.
+	 * \param _sArray The array index to export.
+	 * \param _sFace The face to export.
+	 * \param _sSlice The slice to export.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS															ExportAsYuv( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice );
 
 }	// namespace sl2

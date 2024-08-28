@@ -1032,6 +1032,8 @@ namespace sl2 {
 		SL2_DXGI_FORMAT_SAMPLER_FEEDBACK_MIN_MIP_OPAQUE,
 		SL2_DXGI_FORMAT_SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE,
 		// Fake formats.
+		SL2_DXGI_FORMAT_P210														= SL2_MAKEFOURCC( 'P', '2', '1', '0' ),
+		SL2_DXGI_FORMAT_P216														= SL2_MAKEFOURCC( 'P', '2', '1', '6' ),
 		SL2_DXGI_FORMAT_Y010														= SL2_MAKEFOURCC( 'Y', '0', '1', '0' ),
 		SL2_DXGI_FORMAT_Y016														= SL2_MAKEFOURCC( 'Y', '0', '1', '6' ),
 		SL2_DXGI_FORMAT_YV12														= 0x1F200000 + 0,
@@ -2171,9 +2173,21 @@ namespace sl2 {
 		 **/
 		template <typename _tTargetType>
 		static void																	RgbToYuv( double _dR, double _dG, double _dB, _tTargetType &_tY, _tTargetType &_tU, _tTargetType &_tV ) {
-			_tY = static_cast<_tTargetType>(std::round( ((0.256788 * _dR + 0.504129 * _dG + 0.097906 * _dB) + 16.0 / 255.0) * ((1 << (sizeof( _tTargetType ) * 8)) - 1) ));
-			_tU = static_cast<_tTargetType>(std::round( ((-0.148223 * _dR - 0.290993 * _dG + 0.439216 * _dB) + 128.0 / 255.0) * ((1 << (sizeof( _tTargetType ) * 8)) - 1) ));
-			_tV = static_cast<_tTargetType>(std::round( ((0.439216 * _dR - 0.367788 * _dG - 0.071427 * _dB) + 128.0 / 255.0) * ((1 << (sizeof( _tTargetType ) * 8)) - 1) ));
+			_dR *= 255.0;
+			_dG *= 255.0;
+			_dB *= 255.0;
+
+			double dY = std::round( ((0.256788235294118 * _dR + 0.504129411764706 * _dG + 0.097905882352941 * _dB) + 16.0) );
+			double dU = std::round( (-0.148222352941176 * _dR - 0.290992941176471 * _dG + 0.439215686274510 * _dB + 128.0) );
+			double dV = std::round( ((0.439215686274510 * _dR - 0.367788235294118 * _dG - 0.071427450980392 * _dB) + 128.0) );
+
+			dY = std::clamp( dY, 0.0, 255.0 );
+			dU = std::clamp( dU, 0.0, 255.0 );
+			dV = std::clamp( dV, 0.0, 255.0 );
+
+			_tY = static_cast<_tTargetType>((dY / 255.0) * (1ULL << (sizeof(_tTargetType) * 8)) - 1);
+			_tU = static_cast<_tTargetType>((dU / 255.0) * (1ULL << (sizeof(_tTargetType) * 8)) - 1);
+			_tV = static_cast<_tTargetType>((dV / 255.0) * (1ULL << (sizeof(_tTargetType) * 8)) - 1);
 		}
 
 		/**
@@ -3819,7 +3833,7 @@ namespace sl2 {
 		 */
 		template <typename _tBackingType = uint8_t>
 		static uint64_t																GetSizeYuv444( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t /*_ui32Factor*/, const void * /*_pvParms*/ ) {
-			return ((_ui32Width * _ui32Height * 3 * _ui32Depth) * 2) * sizeof( _tBackingType );
+			return (_ui32Width * _ui32Height * 3 * _ui32Depth) * sizeof( _tBackingType );
 		}
 
 		/**
@@ -3865,7 +3879,12 @@ namespace sl2 {
 		 * \param _pvParms Unused.
 		 * \return Returns the size of the compressed data.
 		 */
-		static uint64_t																GetSizeYuy2( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t /*_ui32Factor*/, const void * /*_pvParms*/ );
+		template <typename _tBackingType = uint8_t>
+		static uint64_t																GetSize422_4Pack( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t /*_ui32Factor*/, const void * /*_pvParms*/ ) {
+			uint32_t ui32ChromaW = std::max( (_ui32Width + 1U) / 2U, 1U );
+			uint32_t ui32ChromaH = _ui32Height;
+			return (_ui32Depth * (ui32ChromaW * 4 * ui32ChromaH)) * sizeof( _tBackingType );
+		}
 
 		/**
 		 * YUV444P -> RGBA32F conversion.
@@ -3877,12 +3896,15 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		template <unsigned _uBits, typename _tType = uint8_t>
+		template <unsigned _uBits, typename _tType = uint8_t, bool _bSwapUv = false>
 		static bool 																Yuv444PToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
 			SL2_RGBA64F * prgba64Rgba = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
 			const _tType * prgbapui16Yuv = reinterpret_cast<const _tType *>(_pui8Src);
 			uint64_t ui64OffU = _ui32Width * _ui32Height;
 			uint64_t ui64OffV = _ui32Width * _ui32Height + ui64OffU;
+			if constexpr ( _bSwapUv ) {
+				std::swap( ui64OffU, ui64OffV );
+			}
 			constexpr uint16_t ui16Mask = (1 << _uBits) - 1;
 			constexpr double dMuliplier = double( (1.0 / ui16Mask) * 0xFFFFFFFFU );
 			for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
@@ -3895,10 +3917,266 @@ namespace sl2 {
 							uint32_t( std::round( prgbapui16Yuv[sIdx+ui64OffU] * dMuliplier ) ), uint32_t( std::round( prgbapui16Yuv[sIdx+ui64OffV] * dMuliplier ) ),
 							prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B] );
 						prgba64Rgba[sIdx].dRgba[SL2_PC_A] = 1.0;
+
+						/*uint32_t ui32Y, ui32U, ui32V;
+						RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+							ui32Y, ui32U, ui32V );
+						uint16_t ui16Y = uint16_t( ui32Y * (1.0 / 0xFFFFFFFFU) * ui16Mask );
+						uint16_t ui16U = uint16_t( ui32U * (1.0 / 0xFFFFFFFFU) * ui16Mask );
+						uint16_t ui16V = uint16_t( ui32V * (1.0 / 0xFFFFFFFFU) * ui16Mask );*/
 					}
 				}
 				prgba64Rgba += _ui32Width * _ui32Height * 3;
 				prgbapui16Yuv += _ui32Width * _ui32Height * 3;
+			}
+			return true;
+		}
+
+		/**
+		 * RGBA32F -> YUV444P conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _uBits, typename _tType = uint8_t, bool _bSwapUv = false>
+		static bool 																Yuv444PFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+			const SL2_RGBA64F * prgba64Rgba = reinterpret_cast<const SL2_RGBA64F *>(_pui8Src);
+			_tType * prgbapui16Yuv = reinterpret_cast<_tType *>(_pui8Dst);
+			uint64_t ui64OffU = _ui32Width * _ui32Height;
+			uint64_t ui64OffV = _ui32Width * _ui32Height + ui64OffU;
+			if constexpr ( _bSwapUv ) {
+				std::swap( ui64OffU, ui64OffV );
+			}
+			constexpr uint16_t ui16Mask = (1 << _uBits) - 1;
+			constexpr double dMuliplier = double( (1.0 / 0xFFFFFFFFU) * ui16Mask );
+			for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+				// Normalize the Y values.
+				for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+						size_t sIdx = size_t( H * _ui32Width + W );
+						uint32_t ui32Y, ui32U, ui32V;
+						RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+							ui32Y, ui32U, ui32V );
+						prgbapui16Yuv[sIdx] = _tType( ui32Y * dMuliplier );
+						prgbapui16Yuv[sIdx+ui64OffU] = _tType( ui32U * dMuliplier );
+						prgbapui16Yuv[sIdx+ui64OffV] = _tType( ui32V * dMuliplier );
+						/*YuvToRgb<uint32_t>( uint32_t( std::round( prgbapui16Yuv[sIdx] * dMuliplier ) ),
+							uint32_t( std::round( prgbapui16Yuv[sIdx+ui64OffU] * dMuliplier ) ), uint32_t( std::round( prgbapui16Yuv[sIdx+ui64OffV] * dMuliplier ) ),
+							prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B] );
+						prgba64Rgba[sIdx].dRgba[SL2_PC_A] = 1.0;*/
+					}
+				}
+				prgba64Rgba += _ui32Width * _ui32Height * 3;
+				prgbapui16Yuv += _ui32Width * _ui32Height * 3;
+			}
+			return true;
+		}
+
+		/**
+		 * YUV444Y -> RGBA32F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _uBits, typename _tType = uint8_t, bool _bSwapUv = false>
+		static bool 																Yuv444YToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr ) {
+			SL2_RGBA64F * prgba64Rgba = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+			const _tType * prgbapui16Yuv = reinterpret_cast<const _tType *>(_pui8Src);
+			uint32_t ui32ChromaW = _ui32Width;
+			uint32_t ui32ChromaH = _ui32Height;
+			uint64_t ui64PageSize = GetSizeYuv444<_tType>( _ui32Width, _ui32Height, 1, 0, nullptr );
+
+			constexpr uint16_t ui16Mask = (1 << _uBits) - 1;
+			constexpr double dMuliplier = (1.0 / ui16Mask);
+			struct SL2_UV {
+				double			dU;
+				double			dV;
+			};
+
+			std::vector<double> vConvertedYSrc;
+			std::vector<double> vConvertedUSrc;
+			std::vector<double> vConvertedVSrc;
+			std::vector<SL2_UV> vScaledUp;
+			try {
+				vConvertedYSrc.resize( _ui32Width * _ui32Height );
+				vConvertedUSrc.resize( ui32ChromaW * ui32ChromaH );
+				vConvertedVSrc.resize( ui32ChromaW * ui32ChromaH );
+				vScaledUp.resize( _ui32Width * _ui32Height );
+			}
+			catch ( ... ) { return false; }
+
+			for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+				// Normalize the Y values.
+				for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+						vConvertedYSrc[H*_ui32Width+W] = prgbapui16Yuv[H*_ui32Width+W] * dMuliplier;
+					}
+				}
+				uint64_t ui64Off = _ui32Height * _ui32Width;
+				// Normalize the U and V values.
+				for ( uint32_t H = 0; H < ui32ChromaH; ++H ) {
+					for ( uint32_t W = 0; W < ui32ChromaW; ++W ) {
+						vConvertedUSrc[H*ui32ChromaW+W] = prgbapui16Yuv[((H*ui32ChromaW+W)*2+_bSwapUv)+ui64Off] * dMuliplier;
+						vConvertedVSrc[H*ui32ChromaW+W] = prgbapui16Yuv[((H*ui32ChromaW+W)*2+!_bSwapUv)+ui64Off] * dMuliplier;
+					}
+				}
+				CResampler::SL2_RESAMPLE rResample;
+				CResampler rResampler;
+				rResample.ui32W = ui32ChromaW;
+				rResample.ui32H = ui32ChromaH;
+				rResample.ui32D = 1;
+				rResample.ui32NewW = _ui32Width;
+				rResample.ui32NewH = _ui32Height;
+				rResample.ui32NewD = 1;
+				rResample.fFilterW = CResampler::m_fFilter[CResampler::SL2_FF_CATMULLROM];
+				rResample.fFilterH = rResample.fFilterW;
+				if ( !rResampler.Resample_1Channel_2d( vConvertedUSrc.data(), &vScaledUp[0].dU, rResample, 2 ) ) { return false; }
+				if ( !rResampler.Resample_1Channel_2d( vConvertedVSrc.data(), &vScaledUp[0].dV, rResample, 2 ) ) { return false; }
+
+				for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+						size_t sIdx = size_t( H * _ui32Width + W );
+						YuvToRgb<uint32_t>( uint32_t( std::round( vConvertedYSrc[sIdx] * 0xFFFFFFFFU ) ),
+							uint32_t( std::round( vScaledUp[sIdx].dU * 0xFFFFFFFFU ) ), uint32_t( std::round( vScaledUp[sIdx].dV * 0xFFFFFFFFU ) ),
+							prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B] );
+						prgba64Rgba[sIdx].dRgba[SL2_PC_A] = 1.0;
+					}
+				}
+
+				prgbapui16Yuv += ui64PageSize;
+				prgba64Rgba += _ui32Width * _ui32Height;
+			}
+			return true;
+		}
+
+		/**
+		 * RGBA32F -> YUV444Y conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _uBits, typename _tType = uint8_t, bool _bSwapUv = false>
+		static bool 																Yuv444YFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr ) {
+			const SL2_RGBA64F * prgba64Rgba = reinterpret_cast<const SL2_RGBA64F *>(_pui8Src);
+			_tType * prgbapui16Yuv = reinterpret_cast<_tType *>(_pui8Dst);
+			uint32_t ui32ChromaW = _ui32Width;
+			uint32_t ui32ChromaH = _ui32Height;
+			uint64_t ui64PageSize = GetSizeYuv444<_tType>( _ui32Width, _ui32Height, 1, 0, nullptr );
+
+			constexpr uint16_t ui16Mask = (1 << _uBits) - 1;
+			constexpr double dMuliplier = double( ui16Mask );
+			struct SL2_UV {
+				double			dU;
+				double			dV;
+			};
+
+			std::vector<double> vConvertedYSrc;
+			std::vector<double> vConvertedUSrc;
+			std::vector<double> vConvertedVSrc;
+			std::vector<SL2_UV> vScaledDown;
+			try {
+				vConvertedYSrc.resize( _ui32Width * _ui32Height );
+				vConvertedUSrc.resize( _ui32Width * _ui32Height );
+				vConvertedVSrc.resize( _ui32Width * _ui32Height );
+				vScaledDown.resize( ui32ChromaW * ui32ChromaH );
+			}
+			catch ( ... ) { return false; }
+
+			for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+				for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+						size_t sIdx = size_t( H * _ui32Width + W );
+						uint32_t ui32Y, ui32U, ui32V;
+						RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+							ui32Y, ui32U, ui32V );
+						vConvertedYSrc[sIdx] = ui32Y / double( 0xFFFFFFFFU );
+						vConvertedUSrc[sIdx] = ui32U / double( 0xFFFFFFFFU );
+						vConvertedVSrc[sIdx] = ui32V / double( 0xFFFFFFFFU );
+					}
+				}
+				CResampler::SL2_RESAMPLE rResample;
+				CResampler rResampler;
+				rResample.ui32W = _ui32Width;
+				rResample.ui32H = _ui32Height;
+				rResample.ui32D = 1;
+				rResample.ui32NewW = ui32ChromaW;
+				rResample.ui32NewH = ui32ChromaH;
+				rResample.ui32NewD = 1;
+				rResample.fFilterW = CResampler::m_fFilter[CResampler::SL2_FF_CATMULLROM];
+				rResample.fFilterH = rResample.fFilterW;
+				if ( !rResampler.Resample_1Channel_2d( vConvertedUSrc.data(), &vScaledDown[0].dU, rResample, 2 ) ) { return false; }
+				if ( !rResampler.Resample_1Channel_2d( vConvertedVSrc.data(), &vScaledDown[0].dV, rResample, 2 ) ) { return false; }
+
+				// Copy the Y values.
+				for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+						prgbapui16Yuv[H*_ui32Width+W] = _tType( std::round( vConvertedYSrc[H*_ui32Width+W] * dMuliplier ) );
+					}
+				}
+
+				// Copy the U and V values.
+				uint64_t ui64Off = _ui32Height * _ui32Width;
+				// Normalize the U and V values.
+				for ( uint32_t H = 0; H < ui32ChromaH; ++H ) {
+					for ( uint32_t W = 0; W < ui32ChromaW; ++W ) {
+						prgbapui16Yuv[((H*ui32ChromaW+W)*2+_bSwapUv)+ui64Off] = _tType( std::round( vConvertedUSrc[H*ui32ChromaW+W] * dMuliplier ) );
+						prgbapui16Yuv[((H*ui32ChromaW+W)*2+!_bSwapUv)+ui64Off] = _tType( std::round( vConvertedVSrc[H*ui32ChromaW+W] * dMuliplier ) );
+						//vConvertedUSrc[H*ui32ChromaW+W] = prgbapui16Yuv[((H*ui32ChromaW+W)*2+_bSwapUv)+ui64Off] * dMuliplier;
+						//vConvertedVSrc[H*ui32ChromaW+W] = prgbapui16Yuv[((H*ui32ChromaW+W)*2+!_bSwapUv)+ui64Off] * dMuliplier;
+					}
+				}
+
+				// Normalize the Y values.
+				//for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+				//	for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+				//		vConvertedYSrc[H*_ui32Width+W] = prgbapui16Yuv[H*_ui32Width+W] * dMuliplier;
+				//	}
+				//}
+				//uint64_t ui64Off = _ui32Height * _ui32Width;
+				//// Normalize the U and V values.
+				//for ( uint32_t H = 0; H < ui32ChromaH; ++H ) {
+				//	for ( uint32_t W = 0; W < ui32ChromaW; ++W ) {
+				//		vConvertedUSrc[H*ui32ChromaW+W] = prgbapui16Yuv[((H*ui32ChromaW+W)*2+_bSwapUv)+ui64Off] * dMuliplier;
+				//		vConvertedVSrc[H*ui32ChromaW+W] = prgbapui16Yuv[((H*ui32ChromaW+W)*2+!_bSwapUv)+ui64Off] * dMuliplier;
+				//	}
+				//}
+				//CResampler::SL2_RESAMPLE rResample;
+				//CResampler rResampler;
+				//rResample.ui32W = ui32ChromaW;
+				//rResample.ui32H = ui32ChromaH;
+				//rResample.ui32D = 1;
+				//rResample.ui32NewW = _ui32Width;
+				//rResample.ui32NewH = _ui32Height;
+				//rResample.ui32NewD = 1;
+				//rResample.fFilterW = CResampler::m_fFilter[CResampler::SL2_FF_CATMULLROM];
+				//rResample.fFilterH = rResample.fFilterW;
+				//if ( !rResampler.Resample_1Channel_2d( vConvertedUSrc.data(), &vScaledDown[0].dU, rResample, 2 ) ) { return false; }
+				//if ( !rResampler.Resample_1Channel_2d( vConvertedVSrc.data(), &vScaledDown[0].dV, rResample, 2 ) ) { return false; }
+
+				//for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+				//	for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+				//		size_t sIdx = size_t( H * _ui32Width + W );
+				//		YuvToRgb<uint32_t>( uint32_t( std::round( vConvertedYSrc[sIdx] * 0xFFFFFFFFU ) ),
+				//			uint32_t( std::round( vScaledDown[sIdx].dU * 0xFFFFFFFFU ) ), uint32_t( std::round( vScaledDown[sIdx].dV * 0xFFFFFFFFU ) ),
+				//			prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B] );
+				//		prgba64Rgba[sIdx].dRgba[SL2_PC_A] = 1.0;
+				//	}
+				//}
+
+				prgbapui16Yuv += ui64PageSize;
+				prgba64Rgba += _ui32Width * _ui32Height;
 			}
 			return true;
 		}
@@ -3913,7 +4191,7 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		template <unsigned _uBits, typename _tType = uint8_t>
+		template <unsigned _uBits, typename _tType = uint8_t, bool _bSwapUv = false>
 		static bool 																Yuv422PToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr ) {
 			SL2_RGBA64F * prgba64Rgba = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
 			const _tType * prgbapui16Yuv = reinterpret_cast<const _tType *>(_pui8Src);
@@ -3949,6 +4227,9 @@ namespace sl2 {
 				}
 				uint64_t ui64Off = _ui32Height * _ui32Width;
 				uint64_t ui64Off2 = ui64Off + (ui32ChromaW * ui32ChromaH);
+				if constexpr ( _bSwapUv ) {
+					std::swap( ui64Off, ui64Off2 );
+				}
 				// Normalize the U and V values.
 				for ( uint32_t H = 0; H < ui32ChromaH; ++H ) {
 					for ( uint32_t W = 0; W < ui32ChromaW; ++W ) {
@@ -4080,7 +4361,7 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		template <unsigned _uBits, typename _tType = uint8_t>
+		template <unsigned _uBits, typename _tType = uint8_t, bool _bSwapUv = false>
 		static bool 																Yuv420PToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr ) {
 			SL2_RGBA64F * prgba64Rgba = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
 			const _tType * prgbapui16Yuv = reinterpret_cast<const _tType *>(_pui8Src);
@@ -4116,6 +4397,9 @@ namespace sl2 {
 				}
 				uint64_t ui64Off = _ui32Height * _ui32Width;
 				uint64_t ui64Off2 = ui64Off + (ui32ChromaW * ui32ChromaH);
+				if constexpr ( _bSwapUv ) {
+					std::swap( ui64Off, ui64Off2 );
+				}
 				// Normalize the U and V values.
 				for ( uint32_t H = 0; H < ui32ChromaH; ++H ) {
 					for ( uint32_t W = 0; W < ui32ChromaW; ++W ) {
@@ -4252,31 +4536,77 @@ namespace sl2 {
 		 * \param _ui32Depth Depth of the image.
 		 * \param _pvParms Optional parameters for the conversion.
 		 */
-		static bool 																Yuy2ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+		template <unsigned _uBits, typename _tType = uint8_t, unsigned _uY = 0, unsigned _uU = 1, unsigned _uV = 3>
+		static bool 																Yuv422_4PackToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr ) {
+			SL2_RGBA64F * prgba64Rgba = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+			const _tType * prgbapui16Yuv = reinterpret_cast<const _tType *>(_pui8Src);
+			uint32_t ui32ChromaW = std::max( (_ui32Width + 1U) / 2U, 1U );
+			uint32_t ui32ChromaH = _ui32Height;
+			uint64_t ui64Stride = ui32ChromaW * 4;
+			uint64_t ui64PageSize = GetSize422_4Pack<_tType>( _ui32Width, _ui32Height, 1, 0, nullptr );
 
-		/**
-		 * UYVY -> RGBA32F conversion.
-		 *
-		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
-		 * \param _ui32Width Width of the image.
-		 * \param _ui32Height Height of the image.
-		 * \param _ui32Depth Depth of the image.
-		 * \param _pvParms Optional parameters for the conversion.
-		 */
-		static bool 																UyvyToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+			constexpr uint16_t ui16Mask = (1 << _uBits) - 1;
+			constexpr double dMuliplier = (1.0 / ui16Mask);
+			struct SL2_UV {
+				double			dU;
+				double			dV;
+			};
 
-		/**
-		 * YV12 -> RGBA32F conversion.
-		 *
-		 * \param _pui8Src Source texels.
-		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
-		 * \param _ui32Width Width of the image.
-		 * \param _ui32Height Height of the image.
-		 * \param _ui32Depth Depth of the image.
-		 * \param _pvParms Optional parameters for the conversion.
-		 */
-		static bool 																Yv12ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms = nullptr );
+			std::vector<double> vConvertedYSrc;
+			std::vector<double> vConvertedUSrc;
+			std::vector<double> vConvertedVSrc;
+			std::vector<SL2_UV> vScaledUp;
+			try {
+				vConvertedYSrc.resize( _ui32Width * _ui32Height );
+				vConvertedUSrc.resize( ui32ChromaW * ui32ChromaH );
+				vConvertedVSrc.resize( ui32ChromaW * ui32ChromaH );
+				vScaledUp.resize( _ui32Width * _ui32Height );
+			}
+			catch ( ... ) { return false; }
+
+			for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+				// Normalize the Y values.
+				for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+						vConvertedYSrc[H*_ui32Width+W] = prgbapui16Yuv[H*ui64Stride+W*2+_uY] * dMuliplier;
+					}
+				}
+				// Normalize the U and V values.
+				for ( uint32_t H = 0; H < ui32ChromaH; ++H ) {
+					for ( uint32_t W = 0; W < ui32ChromaW; ++W ) {
+						vConvertedUSrc[H*ui32ChromaW+W] = prgbapui16Yuv[H*ui64Stride+W*4+_uU] * dMuliplier;
+						vConvertedVSrc[H*ui32ChromaW+W] = prgbapui16Yuv[H*ui64Stride+W*4+_uV] * dMuliplier;
+					}
+				}
+				CResampler::SL2_RESAMPLE rResample;
+				CResampler rResampler;
+				rResample.ui32W = ui32ChromaW;
+				rResample.ui32H = ui32ChromaH;
+				rResample.ui32D = 1;
+				rResample.ui32NewW = _ui32Width;
+				rResample.ui32NewH = _ui32Height;
+				rResample.ui32NewD = 1;
+				rResample.fFilterW = CResampler::m_fFilter[CResampler::SL2_FF_CATMULLROM];
+				rResample.fFilterH = rResample.fFilterW;
+				if ( !rResampler.Resample_1Channel_2d( vConvertedUSrc.data(), &vScaledUp[0].dU, rResample, 2 ) ) { return false; }
+				if ( !rResampler.Resample_1Channel_2d( vConvertedVSrc.data(), &vScaledUp[0].dV, rResample, 2 ) ) { return false; }
+
+				for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+						size_t sIdx = size_t( H * _ui32Width + W );
+						YuvToRgb<uint32_t>( uint32_t( std::round( vConvertedYSrc[sIdx] * 0xFFFFFFFFU ) ),
+							uint32_t( std::round( vScaledUp[sIdx].dU * 0xFFFFFFFFU ) ), uint32_t( std::round( vScaledUp[sIdx].dV * 0xFFFFFFFFU ) ),
+							prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B] );
+						prgba64Rgba[sIdx].dRgba[SL2_PC_A] = 1.0;
+					}
+				}
+
+				prgbapui16Yuv += ui64PageSize;
+				prgba64Rgba += _ui32Width * _ui32Height;
+			}
+			return true;
+		}
+
 	};
 	
 

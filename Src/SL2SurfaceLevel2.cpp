@@ -118,6 +118,71 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 catch ( ... ) { SL2_ERROR( sl2::SL2_E_OUTOFMEMORY ); }
                 SL2_ADV( 4 );
             }
+
+            if ( SL2_CHECK( 2, yuv_input_format ) ) {
+                if ( oOptions.vInputs.size() == 0 ) {
+                    SL2_ERRORT( std::format( L"Invalid \"yuv_input_format\": \"{}\". No input file provided yet. -yuv_file must come before yuv_input.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                size_t sIdx = oOptions.vInputs.size() - 1;
+                std::string sString = sl2::CUtilities::Utf16ToUtf8( reinterpret_cast<const char16_t *>((_wcpArgV[1])) );
+                oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByVulkan( sString.c_str() );
+                if ( !oOptions.vInputs[sIdx].pkifduvFormat ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sString.c_str() );
+                }
+                if ( oOptions.vInputs[sIdx].pkifduvFormat && SL2_GET_YUV_FLAG( oOptions.vInputs[sIdx].pkifduvFormat->ui32Flags ) ) {
+                    SL2_ADV( 2 );
+                }
+
+                if ( ::_wcsicmp( _wcpArgV[1], L"nv12" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_NV12 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"nv21" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_NV21 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"yv12" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_YV12 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"yv21" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_YV12 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"yuy2" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_YUY2 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"yvyu" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_R8G8_B8G8_UNORM );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"p010" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_P010 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"p016" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_P016 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"y010" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y010 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"y016" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y016 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"p210" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_P210 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"p216" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_P216 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"y210" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y210 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"y216" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y216 );
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"yuv_input_format\": \"{}\". Must be one of the Vulkan/DXGI YUV formats or nv12, nv21, yv12, yv21, yuy2, yvyu, p010, p016, y010, y016, p210, p216, y210, or y216.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
+
             if ( SL2_CHECK( 4, weight ) || SL2_CHECK( 4, weights ) ) {
 				sl2::CFormat::SetLuma( ::_wtof( _wcpArgV[1] ), ::_wtof( _wcpArgV[2] ), ::_wtof( _wcpArgV[3] ) );
 				SL2_ADV( 4 );
@@ -1582,77 +1647,104 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 			::printf( "Conversion time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
 		}
         cClock.SetStartingTick();
-
-        if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"png" ) == 0 ) {
+#define SL2_CHECKEXT( EXT )     ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L ## #EXT ) == 0
+        if ( SL2_CHECKEXT( png ) ) {
             eError = sl2::ExportAsPng( iConverted, oOptions.vOutputs[I], oOptions );
             if ( sl2::SL2_E_SUCCESS != eError ) {
                 SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
                     reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
             }
         }
-        else if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"bmp" ) == 0 ) {
+        else if ( SL2_CHECKEXT( bmp ) ) {
             eError = sl2::ExportAsBmp( iConverted, oOptions.vOutputs[I], oOptions );
             if ( sl2::SL2_E_SUCCESS != eError ) {
                 SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
                     reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
             }
         }
-        else if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"exr" ) == 0 ) {
+        else if ( SL2_CHECKEXT( exr ) ) {
             eError = sl2::ExportAsExr( iConverted, oOptions.vOutputs[I], oOptions );
             if ( sl2::SL2_E_SUCCESS != eError ) {
                 SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
                     reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
             }
         }
-        else if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"j2k" ) == 0 ) {
+        else if ( SL2_CHECKEXT( j2k ) ) {
             eError = sl2::ExportAsJ2k( iConverted, oOptions.vOutputs[I], oOptions );
             if ( sl2::SL2_E_SUCCESS != eError ) {
                 SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
                     reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
             }
         }
-        else if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"jp2" ) == 0 ) {
+        else if ( SL2_CHECKEXT( jp2 ) ) {
             eError = sl2::ExportAsJp2( iConverted, oOptions.vOutputs[I], oOptions );
             if ( sl2::SL2_E_SUCCESS != eError ) {
                 SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
                     reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
             }
         }
-        else if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"jpg" ) == 0 || ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"jpeg" ) == 0 ) {
+        else if ( SL2_CHECKEXT( jpg ) || SL2_CHECKEXT( jpeg ) ) {
             eError = sl2::ExportAsJpg( iConverted, oOptions.vOutputs[I], oOptions );
             if ( sl2::SL2_E_SUCCESS != eError ) {
                 SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
                     reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
             }
         }
-        else if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"dds" ) == 0 ) {
+        else if ( SL2_CHECKEXT( dds ) ) {
             eError = sl2::ExportAsDds( iConverted, oOptions.vOutputs[I], oOptions );
             if ( sl2::SL2_E_SUCCESS != eError ) {
                 SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
                     reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
             }
         }
-        else if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"ktx" ) == 0 ) {
+        else if ( SL2_CHECKEXT( ktx ) ) {
             eError = sl2::ExportAsKtx1( iConverted, oOptions.vOutputs[I], oOptions );
             if ( sl2::SL2_E_SUCCESS != eError ) {
                 SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
                     reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
             }
         }
-        else if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"tga" ) == 0 ) {
+        else if ( SL2_CHECKEXT( tga ) ) {
             eError = sl2::ExportAsTga( iConverted, oOptions.vOutputs[I], oOptions );
             if ( sl2::SL2_E_SUCCESS != eError ) {
                 SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
                     reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
             }
         }
-        else if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L"pvr" ) == 0 ) {
+        else if ( SL2_CHECKEXT( pvr ) ) {
             eError = sl2::ExportAsPvr( iConverted, oOptions.vOutputs[I], oOptions );
             if ( sl2::SL2_E_SUCCESS != eError ) {
                 SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
                     reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
             }
         }
+#define SL2_YUV_FILE( FMT, EXT )                                                                                                                                \
+    else if ( ((oOptions.pkifdYuvFormat && oOptions.pkifdYuvFormat->vfVulkanFormat == sl2::SL2_ ## FMT && (SL2_CHECKEXT( EXT ) || SL2_CHECKEXT( yuv ))) ||      \
+        (!oOptions.pkifdYuvFormat && SL2_CHECKEXT( EXT ))) ) {                                                                                                  \
+        if ( !oOptions.pkifdYuvFormat ) { oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_ ## FMT ); }                                 \
+        eError = sl2::ExportAsYuv( iConverted, oOptions.vOutputs[I], oOptions );                                                                                \
+        if ( sl2::SL2_E_SUCCESS != eError ) {                                                                                                                   \
+            SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",                                                                                           \
+                reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );                                                            \
+        }                                                                                                                                                       \
+    }
+        SL2_YUV_FILE( VK_FORMAT_G16_B16_R16_3PLANE_444_UNORM, yuv444p16 )
+        SL2_YUV_FILE( VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_444_UNORM_3PACK16, yuv444p12le )
+        SL2_YUV_FILE( VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_444_UNORM_3PACK16, yuv444p10le )
+        SL2_YUV_FILE( VK_FORMAT_G8_B8_R8_3PLANE_444_UNORM, yuv444p )
+
+        SL2_YUV_FILE( VK_FORMAT_G16_B16R16_2PLANE_444_UNORM, yuv444y16 )
+        SL2_YUV_FILE( VK_FORMAT_G12X4_B12X4R12X4_2PLANE_444_UNORM_3PACK16, yuv444y12le )
+        SL2_YUV_FILE( VK_FORMAT_G10X6_B10X6R10X6_2PLANE_444_UNORM_3PACK16, yuv444y10le )
+        SL2_YUV_FILE( VK_FORMAT_G8_B8R8_2PLANE_444_UNORM, yuv444y )
+
+        SL2_YUV_FILE( VK_FORMAT_G16_B16_R16_3PLANE_422_UNORM, yuv422p16 )
+        SL2_YUV_FILE( VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_422_UNORM_3PACK16, yuv422p12le )
+        SL2_YUV_FILE( VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_422_UNORM_3PACK16, yuv422p10le )
+        SL2_YUV_FILE( VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM, yuv422p )
+        
+#undef SL2_YUV_FILE
+#undef SL2_CHECKEXT
         
         ui64Time = cClock.GetRealTick() - cClock.GetStartTick();
         ::sprintf_s( szPrintfMe, "Save time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
@@ -3687,6 +3779,99 @@ namespace sl2 {
             return SL2_E_OUTOFMEMORY;
         }
         std::memcpy( vConverted.data(), pbData, dwSize );
+        {
+            CStdFile sfFile;
+            if ( !sfFile.Create( _sPath.c_str() ) ) {
+                return SL2_E_INVALIDWRITEPERMISSIONS;
+            }
+            if ( !sfFile.WriteToFile( vConverted ) ) {
+                return SL2_E_FILEWRITEERROR;
+            }
+        }
+
+        return SL2_E_SUCCESS;
+    }
+
+    /**
+	 * Exports as YUV.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS ExportAsYuv( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions ) {
+        if ( _iImage.Mipmaps() == 1 && _iImage.ArraySize() == 1 && _iImage.Faces() == 1 ) {
+            return ExportAsYuv( _iImage, _sPath, _oOptions, 0, 0, 0, 0 );
+        }
+        else {
+            wchar_t szBuffer[64];
+            std::u16string sRoot = CUtilities::GetFilePath( _sPath ) + CUtilities::NoExtension( _sPath );
+            std::u16string u16Ext = CUtilities::GetFileExtension( _sPath );
+            for ( uint32_t M = 0; M < _iImage.Mipmaps(); ++M ) {
+                for ( uint32_t A = 0; A < _iImage.ArraySize(); ++A ) {
+                    for ( uint32_t F = 0; F < _iImage.Faces(); ++F ) {
+                        wchar_t * pwcBuf = szBuffer;
+                        if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_M%.2u", M ); }
+                        if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_A%.2u", A ); }
+                        if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_F%.2u", F ); }
+                        pwcBuf += ::wsprintfW( pwcBuf, L"." );
+                        std::u16string u16Final = CUtilities::Append( sRoot, szBuffer );
+                        try { u16Final.append( u16Ext ); }
+                        catch ( ... ) { return SL2_E_OUTOFMEMORY; }
+                        //::wsprintfW( szBuffer, L"_M%.2u_A%.2u_F%.2u_D%.2u.png", M, A, F, D );
+                        SL2_ERRORS eErr = ExportAsYuv( _iImage, u16Final, _oOptions, M, A, F, 0 );
+                        if ( eErr != SL2_E_SUCCESS ) { return eErr; }
+                    }
+                }
+            }
+        }
+        return SL2_E_SUCCESS;
+    }
+
+	/**
+	 * Exports as YUV.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \param _sMip The mipmap level to export.
+	 * \param _sArray The array index to export.
+	 * \param _sFace The face to export.
+	 * \param _sSlice The slice to export.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS ExportAsYuv( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice ) {
+        const CFormat::SL2_BEST_INTERNAL_FORMAT bifFormats[] = {
+            { _iImage.Format() },
+            { _oOptions.pkifdYuvFormat },
+        };
+        const CFormat::SL2_BEST_INTERNAL_FORMAT * pkifdUseMe = nullptr;
+        if ( _oOptions.pkifdYuvFormat != nullptr ) {
+            pkifdUseMe = CFormat::FindBestFormat( _oOptions.pkifdYuvFormat, bifFormats, SL2_ELEMENTS( bifFormats ) );
+            if ( !pkifdUseMe ) {
+                return SL2_E_BADFORMAT;
+            }
+        }
+        else {
+            pkifdUseMe = CFormat::FindBestFormat( _iImage.Format(), bifFormats, SL2_ELEMENTS( bifFormats ) );
+            if ( !pkifdUseMe ) {
+                return SL2_E_BADFORMAT;
+            }
+        }
+        if ( !SL2_GET_YUV_FLAG( pkifdUseMe->pkifdFormat->ui32Flags ) ) { return SL2_E_BADFORMAT; }
+
+        std::vector<uint8_t> vConverted;
+        SL2_ERRORS eError = _iImage.ConvertToFormat( pkifdUseMe->pkifdFormat, _sMip, _sArray, _sFace, vConverted );
+        if ( eError != SL2_E_SUCCESS ) { return eError; }
+
+        uint64_t ui64Size = CFormat::GetFormatSize( pkifdUseMe->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width(), _iImage.GetMipmaps()[_sMip]->Height(), _iImage.GetMipmaps()[_sMip]->Depth() );
+        if ( uint64_t( size_t( ui64Size ) ) != ui64Size ) { return SL2_E_UNSUPPORTEDSIZE; }
+        try {
+            vConverted.resize( size_t( ui64Size ) );
+        }
+        catch ( ... ) { return SL2_E_OUTOFMEMORY; }
+
         {
             CStdFile sfFile;
             if ( !sfFile.Create( _sPath.c_str() ) ) {

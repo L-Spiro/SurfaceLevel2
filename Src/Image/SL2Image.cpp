@@ -225,96 +225,87 @@ namespace sl2 {
 			if ( !sfFile.LoadToMemory( vFile ) ) { return SL2_E_OUTOFMEMORY; }
 		}
 
+#define SL2_YUV_CHECK( FMT, EXT )	(m_pkifdYuvFormat && m_pkifdYuvFormat->vfVulkanFormat == SL2_ ## FMT) || ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L ## #EXT ) == 0
+#define SL2_VUL_YUV( FMT, EXT )									\
+	if ( SL2_YUV_CHECK( FMT, EXT ) ) {							\
+		return LoadYuv_Vulkan_Basic<SL2_ ## FMT>( vFile );		\
+	}
+#define SL2_DX_CHECK( FMT, EXT )	(m_pkifdYuvFormat && m_pkifdYuvFormat->dfDxFormat == SL2_ ## FMT) || ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L ## #EXT ) == 0
+#define SL2_DX_YUV( FMT, EXT )									\
+	if ( SL2_DX_CHECK( FMT, EXT ) ) {							\
+		return LoadYuv_Dgxi_Basic<SL2_ ## FMT>( vFile );		\
+	}
+
+		
 		// 4:4:4.
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv444p16" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G16_B16_R16_3PLANE_444_UNORM>( vFile );
-		}
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv444p12le" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_444_UNORM_3PACK16>( vFile );
-		}
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv444p10le" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_444_UNORM_3PACK16>( vFile );
-		}
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv444p" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G8_B8_R8_3PLANE_444_UNORM>( vFile );
-		}
+		SL2_VUL_YUV( VK_FORMAT_G16_B16_R16_3PLANE_444_UNORM, yuv444p16 )
+		SL2_VUL_YUV( VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_444_UNORM_3PACK16, yuv444p12le )
+		SL2_VUL_YUV( VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_444_UNORM_3PACK16, yuv444p10le )
+		SL2_VUL_YUV( VK_FORMAT_G8_B8_R8_3PLANE_444_UNORM, yuv444p )
+
+		SL2_VUL_YUV( VK_FORMAT_G16_B16R16_2PLANE_444_UNORM, yuv444y16 )
+		SL2_VUL_YUV( VK_FORMAT_G12X4_B12X4R12X4_2PLANE_444_UNORM_3PACK16, yuv444y12le )
+		SL2_VUL_YUV( VK_FORMAT_G10X6_B10X6R10X6_2PLANE_444_UNORM_3PACK16, yuv444y10le )
+		SL2_VUL_YUV( VK_FORMAT_G8_B8R8_2PLANE_444_UNORM, yuv444y )
 
 
 		// 4:2:2.
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv422p16" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G16_B16_R16_3PLANE_422_UNORM>( vFile );
-		}
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv422p12le" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_422_UNORM_3PACK16>( vFile );
-		}
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv422p10le" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_422_UNORM_3PACK16>( vFile );
-		}
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv422p" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM>( vFile );
-		}
+		SL2_VUL_YUV( VK_FORMAT_G16_B16_R16_3PLANE_422_UNORM, yuv422p16 )
+		SL2_VUL_YUV( VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_422_UNORM_3PACK16, yuv422p12le )
+		SL2_VUL_YUV( VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_422_UNORM_3PACK16, yuv422p10le )
+		SL2_VUL_YUV( VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM, yuv422p )
 
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv422y16" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G16_B16R16_2PLANE_422_UNORM>( vFile );
+		SL2_VUL_YUV( VK_FORMAT_G16_B16R16_2PLANE_422_UNORM, yuv422y16 )
+		SL2_DX_YUV( DXGI_FORMAT_P216, p216 );
+		SL2_VUL_YUV( VK_FORMAT_G12X4_B12X4R12X4_2PLANE_422_UNORM_3PACK16, yuv422y12le )
+		SL2_VUL_YUV( VK_FORMAT_G10X6_B10X6R10X6_2PLANE_422_UNORM_3PACK16, yuv422y10le )
+		SL2_DX_YUV( DXGI_FORMAT_P210, p210 );
+		SL2_VUL_YUV( VK_FORMAT_G8_B8R8_2PLANE_422_UNORM, yuv422y )
+
+		if ( SL2_DX_CHECK( DXGI_FORMAT_Y216, y216 ) || SL2_YUV_CHECK( VK_FORMAT_G16B16G16R16_422_UNORM, y216 ) ) {
+			return LoadYuv_Dgxi_Basic<SL2_DXGI_FORMAT_Y216>( vFile );
 		}
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv422y12le" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G12X4_B12X4R12X4_2PLANE_422_UNORM_3PACK16>( vFile );
-		}
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv422y10le" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G10X6_B10X6R10X6_2PLANE_422_UNORM_3PACK16>( vFile );
-		}
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv422y" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G8_B8R8_2PLANE_422_UNORM>( vFile );
+		if ( SL2_DX_CHECK( DXGI_FORMAT_Y210, y210 ) || SL2_YUV_CHECK( VK_FORMAT_G10X6B10X6G10X6R10X6_422_UNORM_4PACK16, y210 ) ) {
+			return LoadYuv_Dgxi_Basic<SL2_DXGI_FORMAT_Y210>( vFile );
 		}
 
 
 		// 4:2:0.
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv420p16" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G16_B16_R16_3PLANE_420_UNORM>( vFile );
+		SL2_VUL_YUV( VK_FORMAT_G16_B16_R16_3PLANE_420_UNORM, yuv420p16 )
+		SL2_VUL_YUV( VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_420_UNORM_3PACK16, yuv420p12le )
+		SL2_VUL_YUV( VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16, yuv420p10le )
+		SL2_VUL_YUV( VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM, yuv420p )
+		SL2_DX_YUV( DXGI_FORMAT_420_OPAQUE, yv12 )
+		SL2_DX_YUV( DXGI_FORMAT_YV12, yv12 )
+
+		SL2_VUL_YUV( VK_FORMAT_G16_B16R16_2PLANE_420_UNORM, yuv420y16 )
+		SL2_DX_YUV( DXGI_FORMAT_P016, p016 );
+
+		if ( SL2_YUV_CHECK( VK_FORMAT_G12X4_B12X4R12X4_2PLANE_420_UNORM_3PACK16, yuv420y12le ) || ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"y012" ) == 0 ) {
+			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G12X4_B12X4R12X4_2PLANE_420_UNORM_3PACK16>( vFile );
 		}
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv420p12le" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_420_UNORM_3PACK16>( vFile );
+		if ( SL2_YUV_CHECK( VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16, yuv420y10le ) || ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"y010" ) == 0 ) {
+			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16>( vFile );
 		}
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv420p10le" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16>( vFile );
-		}
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv420p" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM>( vFile );
+		if ( SL2_YUV_CHECK( VK_FORMAT_G8_B8R8_2PLANE_420_UNORM, yuv420y ) || SL2_YUV_CHECK( DXGI_FORMAT_NV12, nv12 ) || ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv420y" ) == 0 ) {
+			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G8_B8R8_2PLANE_420_UNORM>( vFile );
 		}
 
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv420y16" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G16_B16_R16_3PLANE_420_UNORM>( vFile );
-		}
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv420y12le" ) == 0 || ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"y012" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_420_UNORM_3PACK16>( vFile );
-		}
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv420y10le" ) == 0 || ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"y010" ) == 0 ) {
-			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16>( vFile );
-		}
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"nv12" ) == 0 || ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv420y" ) == 0 ) {
-			return LoadYuv_Dgxi_Basic<SL2_DXGI_FORMAT_NV12>( vFile );
-		}
-
-
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"nv21" ) == 0 ) {
-			return LoadYuv_Dgxi_Basic<SL2_DXGI_FORMAT_NV21>( vFile );
-		}
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yv12" ) == 0 ) {
-			return LoadYuv_Dgxi_Basic<SL2_DXGI_FORMAT_420_OPAQUE>( vFile );
-		}
-
-
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuy2" ) == 0 || ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuyv" ) == 0 ) {
+		SL2_DX_YUV( DXGI_FORMAT_NV21, nv21 )
+		if ( SL2_DX_CHECK( DXGI_FORMAT_YUY2, yuy2 ) || SL2_YUV_CHECK( VK_FORMAT_G8B8G8R8_422_UNORM, yuyv ) ) {
 			return LoadYuv_Dgxi_Basic<SL2_DXGI_FORMAT_YUY2>( vFile );
 		}
-		if ( ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"uyvy" ) == 0 ) {
-			return LoadYuv_Dgxi_Basic<SL2_DXGI_FORMAT_R8G8_B8G8_UNORM>( vFile );
+		if ( SL2_DX_CHECK( VK_FORMAT_B8G8R8G8_422_UNORM, uyv2 ) || SL2_YUV_CHECK( DXGI_FORMAT_R8G8_B8G8_UNORM, uyvy ) ) {
+			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_B8G8R8G8_422_UNORM>( vFile );
 		}
-
 
 		
 
 		return LoadFile( vFile );
+#undef SL2_DX_YUV
+#undef SL2_DX_CHECK
+#undef SL2_YUV_CHECK
+#undef SL2_VUL_YUV
 	}
 
 	/**
@@ -412,6 +403,8 @@ namespace sl2 {
 		}
 		bool bTargetIsPremulAlpha = m_bIsPreMultiplied;
 		bool bOpaque = true;
+		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*Format());
+		ifdData.pvCustom = this;
 		for ( size_t M = 0; M < sSrcMips; ++M ) {
 			for ( size_t A = 0; A < ArraySize(); ++A ) {
 				for ( size_t F = 0; F < Faces(); ++F ) {
@@ -420,15 +413,11 @@ namespace sl2 {
 						pui8Dest = reinterpret_cast<uint8_t *>(vTmp.data());
 					}
 
-					if ( !Format()->pfToRgba64F( Data( M, 0, A, F ), pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), Format() ) ) {
+					if ( !Format()->pfToRgba64F( Data( M, 0, A, F ), pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), &ifdData ) ) {
 						return SL2_E_INTERNALERROR;
 					}
 					BakeGamma( pui8Dest, m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), CFormat::TransferFunc( m_cgcInputCurve ) );
 					if ( m_bApplyInputColorSpaceTransfer ) {
-						/*ApplyColorSpaceTransferFunction( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(),
-							m_tfInColorSpaceTransferFunc[SL2_PC_R].pfXtoLinear, m_tfInColorSpaceTransferFunc[SL2_PC_R].pvParm,
-							m_tfInColorSpaceTransferFunc[SL2_PC_G].pfXtoLinear, m_tfInColorSpaceTransferFunc[SL2_PC_G].pvParm,
-							m_tfInColorSpaceTransferFunc[SL2_PC_B].pfXtoLinear, m_tfInColorSpaceTransferFunc[SL2_PC_B].pvParm );*/
 						ApplySrcColorSpace( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
 					}
 					if ( m_bIgnoreAlpha ) {
@@ -519,6 +508,9 @@ namespace sl2 {
 			_iDst.m_vIccProfile = m_vOutIccProfile;
 			_iDst.m_vOutIccProfile = m_vOutIccProfile;
 			_iDst.m_bApplyInputColorSpaceTransfer = m_bApplyInputColorSpaceTransfer;
+			if ( !_iDst.m_vOutIccProfile.size() ) {
+				_iDst.m_bApplyInputColorSpaceTransfer = false;
+			}
 			for ( size_t I = SL2_ELEMENTS( m_tfOutColorSpaceTransferFunc ); I--; ) {
 				_iDst.m_tfInColorSpaceTransferFunc[I] = m_tfOutColorSpaceTransferFunc[I];	// Not a bug.
 				_iDst.m_tfOutColorSpaceTransferFunc[I] = m_tfOutColorSpaceTransferFunc[I];
@@ -528,7 +520,8 @@ namespace sl2 {
 		if ( !_pkifFormat->pfFromRgba64F ) { return SL2_E_BADFORMAT; }
 		_iDst.Reset();
 		if ( !_iDst.AllocateTexture( _pkifFormat, ui32NewW, ui32NewH, ui32NewD, iTmp.Mipmaps(), iTmp.ArraySize(), iTmp.Faces() ) ) { return SL2_E_OUTOFMEMORY; }
-		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*_pkifFormat);
+		ifdData = (*_pkifFormat);
+		ifdData.pvCustom = this;
 		for ( size_t M = 0; M < iTmp.Mipmaps(); ++M ) {
 			for ( size_t A = 0; A < iTmp.ArraySize(); ++A ) {
 				for ( size_t F = 0; F < iTmp.Faces(); ++F ) {
@@ -546,6 +539,9 @@ namespace sl2 {
 		_iDst.m_vIccProfile = m_vOutIccProfile;
 		_iDst.m_vOutIccProfile = m_vOutIccProfile;
 		_iDst.m_bApplyInputColorSpaceTransfer = m_bApplyInputColorSpaceTransfer;
+		if ( !_iDst.m_vOutIccProfile.size() ) {
+			_iDst.m_bApplyInputColorSpaceTransfer = false;
+		}
 		for ( size_t I = SL2_ELEMENTS( m_tfOutColorSpaceTransferFunc ); I--; ) {
 			_iDst.m_tfInColorSpaceTransferFunc[I] = m_tfOutColorSpaceTransferFunc[I];	// Not a bug.
 			_iDst.m_tfOutColorSpaceTransferFunc[I] = m_tfOutColorSpaceTransferFunc[I];
@@ -597,12 +593,12 @@ namespace sl2 {
 
 		uint64_t ui64BaseSize = CFormat::GetFormatSize( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
 		if ( uint64_t( size_t( ui64BaseSize ) ) != ui64BaseSize ) { return SL2_E_UNSUPPORTEDSIZE; }
-		if ( ParametersAreUnchanged( _pkifFormat, _bInvertY, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() ) ) {
-			// No format conversion needed.  Just copy the buffers.
-			ui64BaseSize = CFormat::GetFormatSize( _pkifFormat, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
-			std::memcpy( _pui8Dst, Data( _sMip, 0, _sArray, _sFace ), size_t( ui64BaseSize ) );
-			return SL2_E_SUCCESS;
-		}
+		//if ( ParametersAreUnchanged( _pkifFormat, _bInvertY, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() ) ) {
+		//	// No format conversion needed.  Just copy the buffers.
+		//	ui64BaseSize = CFormat::GetFormatSize( _pkifFormat, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
+		//	std::memcpy( _pui8Dst, Data( _sMip, 0, _sArray, _sFace ), size_t( ui64BaseSize ) );
+		//	return SL2_E_SUCCESS;
+		//}
 
 		ui64BaseSize = GetActualPlaneSize( ui64BaseSize );
 		if ( !ui64BaseSize || (uint64_t( size_t( ui64BaseSize ) ) != ui64BaseSize) ) { return SL2_E_BADFORMAT; }
@@ -614,11 +610,13 @@ namespace sl2 {
 			return SL2_E_OUTOFMEMORY;
 		}
 
-		if ( !Format()->pfToRgba64F( Data( _sMip, 0, _sArray, _sFace ), vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), Format() ) ) {
+		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*Format());
+		ifdData.pvCustom = this;
+		if ( !Format()->pfToRgba64F( Data( _sMip, 0, _sArray, _sFace ), vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), &ifdData ) ) {
 			return SL2_E_INTERNALERROR;
 		}
 		
-		BakeGamma( vTmp.data(), m_dGamma, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), CFormat::TransferFunc( m_cgcInputCurve ) );
+		/*BakeGamma( vTmp.data(), m_dGamma, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), CFormat::TransferFunc( m_cgcInputCurve ) );
 		if ( m_bApplyInputColorSpaceTransfer ) {
 			ApplySrcColorSpace( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
 		}
@@ -648,9 +646,14 @@ namespace sl2 {
 		}
 		if ( m_bApplyInputColorSpaceTransfer ) {
 			ApplyDstColorSpace( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
+		}*/
+
+		if ( _bInvertY ) {
+			CFormat::FlipY( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
 		}
 
-		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*_pkifFormat);
+		ifdData = (*_pkifFormat);
+		ifdData.pvCustom = this;
 		if ( !_pkifFormat->pfFromRgba64F( vTmp.data(), _pui8Dst, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), &ifdData ) ) {
 			return SL2_E_INTERNALERROR;
 		}
