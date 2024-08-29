@@ -127,8 +127,20 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 size_t sIdx = oOptions.vInputs.size() - 1;
                 std::string sString = sl2::CUtilities::Utf16ToUtf8( reinterpret_cast<const char16_t *>((_wcpArgV[1])) );
                 oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByVulkan( sString.c_str() );
+                if ( oOptions.vInputs[sIdx].pkifduvFormat && !SL2_GET_YUV_FLAG( oOptions.vInputs[sIdx].pkifduvFormat->ui32Flags ) ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = nullptr;
+                }
                 if ( !oOptions.vInputs[sIdx].pkifduvFormat ) {
                     oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sString.c_str() );
+                    if ( oOptions.vInputs[sIdx].pkifduvFormat && !SL2_GET_YUV_FLAG( oOptions.vInputs[sIdx].pkifduvFormat->ui32Flags ) ) {
+                        oOptions.vInputs[sIdx].pkifduvFormat = nullptr;
+                    }
+                }
+                if ( !oOptions.vInputs[sIdx].pkifduvFormat ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByMetal( sString.c_str() );
+                    if ( oOptions.vInputs[sIdx].pkifduvFormat && !SL2_GET_YUV_FLAG( oOptions.vInputs[sIdx].pkifduvFormat->ui32Flags ) ) {
+                        oOptions.vInputs[sIdx].pkifduvFormat = nullptr;
+                    }
                 }
                 if ( oOptions.vInputs[sIdx].pkifduvFormat && SL2_GET_YUV_FLAG( oOptions.vInputs[sIdx].pkifduvFormat->ui32Flags ) ) {
                     SL2_ADV( 2 );
@@ -176,8 +188,17 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 else if ( ::_wcsicmp( _wcpArgV[1], L"y216" ) == 0 ) {
                     oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y216 );
                 }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"y416" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y416 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"y410" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y410 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"ayuv" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_AYUV );
+                }
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"yuv_input_format\": \"{}\". Must be one of the Vulkan/DXGI YUV formats or nv12, nv21, yv12, yv21, yuy2, yvyu, p010, p016, y010, y016, p210, p216, y210, or y216.",
+                    SL2_ERRORT( std::format( L"Invalid \"yuv_input_format\": \"{}\". Must be one of the Vulkan/DXGI YUV formats or nv12, nv21, yv12, yv21, yuy2, yvyu, p010, p016, y010, y016, p210, p216, y210, y216, y416, y410, or ayuv.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 SL2_ADV( 2 );
@@ -1742,7 +1763,72 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         SL2_YUV_FILE( VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_422_UNORM_3PACK16, yuv422p12le )
         SL2_YUV_FILE( VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_422_UNORM_3PACK16, yuv422p10le )
         SL2_YUV_FILE( VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM, yuv422p )
+
+        SL2_YUV_FILE( VK_FORMAT_G16_B16R16_2PLANE_422_UNORM, yuv422y16 )
+        SL2_YUV_FILE( VK_FORMAT_G12X4_B12X4R12X4_2PLANE_422_UNORM_3PACK16, yuv422y12le )
+        SL2_YUV_FILE( VK_FORMAT_G10X6_B10X6R10X6_2PLANE_422_UNORM_3PACK16, yuv422y10le )
+        SL2_YUV_FILE( VK_FORMAT_G8_B8R8_2PLANE_422_UNORM, yuv422y )
+
+        SL2_YUV_FILE( VK_FORMAT_G16_B16_R16_3PLANE_420_UNORM, yuv420p16 )
+        SL2_YUV_FILE( VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_420_UNORM_3PACK16, yuv420p12le )
+        SL2_YUV_FILE( VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16, yuv420p10le )
+        SL2_YUV_FILE( VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM, yuv420p )
+
+        SL2_YUV_FILE( VK_FORMAT_G16_B16R16_2PLANE_420_UNORM, yuv420y16 )
+        SL2_YUV_FILE( VK_FORMAT_G12X4_B12X4R12X4_2PLANE_420_UNORM_3PACK16, yuv420y12le )
+        SL2_YUV_FILE( VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16, yuv420y10le )
+        SL2_YUV_FILE( VK_FORMAT_G8_B8R8_2PLANE_420_UNORM, yuv420y )
+
+        SL2_YUV_FILE( VK_FORMAT_G16B16G16R16_422_UNORM, yuyv16 )
+        SL2_YUV_FILE( VK_FORMAT_G12X4B12X4G12X4R12X4_422_UNORM_4PACK16, yuyv12le )
+        SL2_YUV_FILE( VK_FORMAT_G10X6B10X6G10X6R10X6_422_UNORM_4PACK16, yuyv10le )
+        SL2_YUV_FILE( VK_FORMAT_G8B8G8R8_422_UNORM, yuy2 )
+
+        SL2_YUV_FILE( VK_FORMAT_B16G16R16G16_422_UNORM, uyvy16 )
+        SL2_YUV_FILE( VK_FORMAT_B12X4G12X4R12X4G12X4_422_UNORM_4PACK16, uyvy1612le )
+        SL2_YUV_FILE( VK_FORMAT_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16, uyvy1610le )
+        SL2_YUV_FILE( VK_FORMAT_B8G8R8G8_422_UNORM, uyvy )
+
+        SL2_YUV_FILE( VK_FORMAT_R12X4G12X4B12X4A12X4_UNORM_4PACK16, yuva12le )
+        SL2_YUV_FILE( VK_FORMAT_R10X6G10X6B10X6A10X6_UNORM_4PACK16, yuva10le )
         
+#undef SL2_YUV_FILE
+
+#define SL2_YUV_FILE( FMT, EXT )                                                                                                                                \
+    else if ( ((oOptions.pkifdYuvFormat && oOptions.pkifdYuvFormat->dfDxFormat == sl2::SL2_ ## FMT && (SL2_CHECKEXT( EXT ) || SL2_CHECKEXT( yuv ))) ||          \
+        (!oOptions.pkifdYuvFormat && SL2_CHECKEXT( EXT ))) ) {                                                                                                  \
+        if ( !oOptions.pkifdYuvFormat ) { oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_ ## FMT ); }                                     \
+        eError = sl2::ExportAsYuv( iConverted, oOptions.vOutputs[I], oOptions );                                                                                \
+        if ( sl2::SL2_E_SUCCESS != eError ) {                                                                                                                   \
+            SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",                                                                                           \
+                reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );                                                            \
+        }                                                                                                                                                       \
+    }
+
+        SL2_YUV_FILE( DXGI_FORMAT_P216, p216 )
+        SL2_YUV_FILE( DXGI_FORMAT_P210, p210 )
+        SL2_YUV_FILE( DXGI_FORMAT_P208, p208 )
+
+        SL2_YUV_FILE( DXGI_FORMAT_420_OPAQUE, yv12 )
+        SL2_YUV_FILE( DXGI_FORMAT_YV12, yv12 )
+
+        SL2_YUV_FILE( DXGI_FORMAT_P016, p016 )
+        SL2_YUV_FILE( DXGI_FORMAT_P010, p010 )
+        SL2_YUV_FILE( DXGI_FORMAT_NV12, nv12 )
+
+        SL2_YUV_FILE( DXGI_FORMAT_NV21, nv21 )
+
+        SL2_YUV_FILE( DXGI_FORMAT_Y216, y216 )
+        SL2_YUV_FILE( DXGI_FORMAT_Y210, y210 )
+        SL2_YUV_FILE( DXGI_FORMAT_G8R8_G8B8_UNORM, yuy2 )
+        SL2_YUV_FILE( DXGI_FORMAT_YUY2, yuy2 )
+
+        SL2_YUV_FILE( DXGI_FORMAT_R8G8_B8G8_UNORM, uyv2 )
+
+        SL2_YUV_FILE( DXGI_FORMAT_Y416, y416 )
+        SL2_YUV_FILE( DXGI_FORMAT_Y410, y410 )
+        SL2_YUV_FILE( DXGI_FORMAT_AYUV, ayuv )
+
 #undef SL2_YUV_FILE
 #undef SL2_CHECKEXT
         
