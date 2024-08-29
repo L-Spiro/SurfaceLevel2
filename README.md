@@ -1038,6 +1038,8 @@ These image formats supported:
  | MTLPixelFormatStencil8 |
  | MTLPixelFormatDepth24Unorm_Stencil8 |
  | MTLPixelFormatDepth32Float_Stencil8 |
+ | MTLPixelFormatGBGR422 |
+ | MTLPixelFormatBGRG422 |
 
  | OpenGL Formats |
  | --- |
