@@ -947,6 +947,43 @@
   </tr>
 </table>
 
+<h3>Transforms</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>-ignore_alpha</td>
+    <td></td>
+    <td>Any alpha channel is set to all 1’s.</td>
+  </tr>
+  <tr>
+    <td>-alpha_threshold</td>
+    <td>&lt;cutoff&gt;</td>
+    <td>Sets the alpha cutoff (0..255) for conversions to formats with binary alpha. Defaults to <strong>128</strong>.</td>
+  </tr>
+  <tr>
+    <td>-premultiply_alpha<br>-premult_alpha</td>
+    <td></td>
+    <td>Specifies that alpha should be pre-multiplied. If an image is already pre-multiplied it is not pre-multiplied again.</td>
+  </tr>
+  <tr>
+    <td>-swizzle</td>
+    <td>&lt;swizzle&gt;</td>
+    <td>
+      Specifies a swizzle to apply. Valid swizzle characters: rgbaxyzw01. Must be 4 characters long and is not case-sensitive.
+    </td>
+  </tr>
+  <tr>
+    <td>-swap</td>
+    <td></td>
+    <td>Swaps the R and B channels.</td>
+  </tr>
+</table>
+
 
 These image formats supported:
  | Vulkan Formats |
