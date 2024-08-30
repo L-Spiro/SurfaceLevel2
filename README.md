@@ -57,7 +57,8 @@
       yuva12le<br>
       yuva10le<br>
       uyvy16<br>
-      uyvy1612le<br>
+      uyvy12le<br>
+      uyvy10le<br>
       uyvy<br>
       y210<br>
       yuy2<br>
