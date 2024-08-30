@@ -1121,7 +1121,7 @@
   <tr>
     <td>-png_bestspeed</td>
     <td></td>
-    <td>Fast PNG compression (1) will be used.<br>This is the default.</td>
+    <td>Fast PNG compression (1) will be used.</td>
   </tr>
   <tr>
     <td>-png_bestcompression</td>
@@ -1131,7 +1131,7 @@
   <tr>
     <td>-png_level</td>
     <td></td>
-    <td>Specifies the PNG compression level. [1..9].</td>
+    <td>Specifies the PNG compression level. [0..9].</td>
   </tr>
   <tr>
     <td>-png_nocompression</td>
