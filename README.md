@@ -672,7 +672,7 @@
     <td>DXGI_FORMAT_YUY2</td>
   </tr>
   <tr>
-    <td>vyuy</td>
+    <td>uyvy</td>
     <td>DXGI_FORMAT_R8G8_B8G8_UNORM/ VK_FORMAT_B8G8R8G8_422_UNORM/ MTLPixelFormatBGRG422</td>
   </tr>
   <tr>
