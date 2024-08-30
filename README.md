@@ -93,12 +93,12 @@
   <tr>
     <td rowspan="1">-gamma<br>-g</td>
     <td>&lt;gamma&gt;</td>
-    <td>Sets the input gamma power. Defaults to <strong>-0.454545454545</strong> (precise sRGB).</td>
+    <td>Sets the input gamma power. Defaults to <strong>-2.2</strong> (precise sRGB).</td>
   </tr>
   <tr>
     <td>-targetgamma</td>
     <td>&lt;gamma&gt;</td>
-    <td>Sets the output gamma power.<br>Defaults to <strong>-0.454545454545</strong> (precise sRGB).</td>
+    <td>Sets the output gamma power.<br>Defaults to <strong>-2.2</strong> (precise sRGB).</td>
   </tr>
   <tr>
     <td>-rgbe<br>-linear</td>
@@ -108,12 +108,12 @@
   <tr>
     <td>-srgb</td>
     <td></td>
-    <td>Sets the source gamma to -0.454545454545 (precise sRGB).</td>
+    <td>Sets the source gamma to -2.2 (precise sRGB).</td>
   </tr>
   <tr>
     <td>-target_srgb</td>
     <td></td>
-    <td>Sets the output gamma to -0.454545454545 (precise sRGB).</td>
+    <td>Sets the output gamma to -2.2 (precise sRGB).</td>
   </tr>
   <tr>
     <td rowspan="36">-input_colorspace</td>
