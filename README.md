@@ -817,7 +817,7 @@
     <td>-yuv_pc</td>
     <td></td>
     <td>
-      Sets the black level to 0.0, scale to 1.0, Kr and Kb to the ITU-R Recommendation BT.709-5 standard, and enables the full non-approximate conversion routine for save to a YUV file.
+      Sets the black level to 0.0, scale to 1.0, Kr and Kb to the ITU-R Recommendation BT.709-5 standard, and enables the full non-approximate conversion routine for saving to a YUV file.
     </td>
   </tr>
   <tr>
@@ -831,7 +831,7 @@
     <td>-yuv_studio</td>
     <td></td>
     <td>
-      Sets the black level to (16.0 / 255.0), scale to (219.0 / 255.0), Kr and Kb to the ITU-R Recommendation BT.709-5 standard, and enables the full non-approximate conversion routine for save to a YUV file.
+      Sets the black level to (16.0 / 255.0), scale to (219.0 / 255.0), Kr and Kb to the ITU-R Recommendation BT.709-5 standard, and enables the full non-approximate conversion routine for saving to a YUV file.
     </td>
   </tr>
 </table>
