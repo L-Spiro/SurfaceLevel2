@@ -68,7 +68,6 @@
       y012<br>
       y010<br>
       nv12<br>
-      yuv420y<br>
       nv21<br>
       y416<br>
       y410<br>
