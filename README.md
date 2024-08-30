@@ -22,7 +22,7 @@
   <tr>
     <td>-file</td>
     <td>&lt;file path&gt;</td>
-    <td>A path to an image file to load and convert. The <em>-file</em> and <em>-outfile</em> commands can be used multiple times to load and save multiple files.</td>
+    <td>A path to an image file to load and convert. The <em>-file</em>, <em>-yuv_file</em>, and <em>-outfile</em> commands can be used multiple times to load and save multiple files.</td>
   </tr>
   <tr>
     <td>-yuv_file</td>
