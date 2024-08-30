@@ -94,12 +94,12 @@
   <tr>
     <td rowspan="1">-gamma<br>-g</td>
     <td>&lt;gamma&gt;</td>
-    <td>Sets the input gamma power. Defaults to -0.454545454545 (precise sRGB).</td>
+    <td>Sets the input gamma power. Defaults to <strong>-0.454545454545</strong> (precise sRGB).</td>
   </tr>
   <tr>
     <td>-targetgamma</td>
     <td>&lt;gamma&gt;</td>
-    <td>Sets the output gamma power.<br>Defaults to -0.454545454545 (precise sRGB).</td>
+    <td>Sets the output gamma power.<br>Defaults to <strong>-0.454545454545</strong> (precise sRGB).</td>
   </tr>
   <tr>
     <td>-rgbe<br>-linear</td>
@@ -703,7 +703,7 @@
     <td>REC_709<br>REC709</td>
     <td>
       Sets the Kr and Kb factors according to the ITU-R Recommendation BT.709-5 standard.<br>
-      0.212639005871510 and 0.072192315360734.<br>
+      <strong>0.212639005871510</strong> and <strong>0.072192315360734</strong>.<br>
       This is the default.
     </td>
   </tr>
@@ -761,22 +761,22 @@
   <tr>
     <td>-yuv_input_set_z<br>-yuv_input_set_black</td>
     <td>&lt;black level&gt;</td>
-    <td>Sets the black level (0..1) for loading a YUV file. Defaults to 0.0.</td>
+    <td>Sets the black level (0..1) for loading a YUV file. Defaults to <strong>0.0</strong>.</td>
   </tr>
   <tr>
     <td>-yuv_set_z<br>-yuv_set_black</td>
     <td>&lt;black level&gt;</td>
-    <td>Sets the black level (0..1) for saving to a YUV file. Defaults to 0.0.</td>
+    <td>Sets the black level (0..1) for saving to a YUV file. Defaults to <strong>0.0</strong>.</td>
   </tr>
   <tr>
     <td>-yuv_input_set_s<br>-yuv_input_set_scale</td>
     <td>&lt;scale&gt;</td>
-    <td>Sets the scaler (0..1) for loading a YUV file. Defaults to 1.0.</td>
+    <td>Sets the scaler (0..1) for loading a YUV file. Defaults to <strong>1.0</strong>.</td>
   </tr>
   <tr>
     <td>-yuv_set_s<br>-yuv_set_scale</td>
     <td>&lt;scale&gt;</td>
-    <td>Sets the scaler (0..1) for saving to a YUV file. Defaults to 1.0.</td>
+    <td>Sets the scaler (0..1) for saving to a YUV file. Defaults to <strong>1.0</strong>.</td>
   </tr>
   <tr>
     <td>-yuv_input_pc</td>
