@@ -21,12 +21,12 @@
   </tr>
   <tr>
     <td>-file</td>
-    <td>&lt;file_path&gt;</td>
+    <td>&lt;file path&gt;</td>
     <td>A path to an image file to load and convert. The <em>-file</em> and <em>-outfile</em> commands can be used multiple times to load and save multiple files.</td>
   </tr>
   <tr>
     <td>-yuv_file</td>
-    <td>&lt;file_path&gt;<br>&lt;width&gt; &lt;height&gt;</td>
+    <td>&lt;file path&gt;<br>&lt;width&gt; &lt;height&gt;</td>
     <td>
       Path to a YUV file to load. If the extension does not indicate the YUV encoding, then <em>yuv_input_format</em> must be called to specify the YUV encoding.<br>
       Recognized file extensions:<br>
@@ -76,7 +76,7 @@
   </tr>
   <tr>
     <td>-outfile</td>
-    <td>&lt;file_path&gt;</td>
+    <td>&lt;file path&gt;</td>
     <td>The path to which to save the file supplied with the last <em>-file</em> command. The destination file format is determined by the file extension.<br>Currently supported formats:<br>PNG<br>BMP<br>TGA<br>JPG<br>J2K<br>JP2<br>EXR<br>DDS<br>KTX<br>PVR<br>YUV (and variants)</td>
   </tr>
 </table>
@@ -266,12 +266,12 @@
   </tr>
   <tr>
     <td>-input_colorspace_file</td>
-    <td>&lt;file_path&gt;</td>
+    <td>&lt;file path&gt;</td>
     <td>Sets the input colorspace profile. Loads .ICC and .ICM files.</td>
   </tr>
   <tr>
     <td>-target_colorspace_file</td>
-    <td>&lt;file_path&gt;</td>
+    <td>&lt;file path&gt;</td>
     <td>Sets the output colorspace profile. Loads .ICC and .ICM files.</td>
   </tr>
   <tr>
