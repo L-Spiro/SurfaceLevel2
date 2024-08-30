@@ -1105,6 +1105,71 @@
   </tr>
 </table>
 
+<h3>PNG</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>-png_default</td>
+    <td></td>
+    <td>Default PNG compression (0) will be used.<br>The default compression level is 6.</td>
+  </tr>
+  <tr>
+    <td>-png_bestspeed</td>
+    <td></td>
+    <td>Fast PNG compression (1) will be used.<br>This is the default.</td>
+  </tr>
+  <tr>
+    <td>-png_bestcompression</td>
+    <td></td>
+    <td>Best PNG compression (9) will be used.</td>
+  </tr>
+  <tr>
+    <td>-png_level</td>
+    <td></td>
+    <td>Specifies the PNG compression level. [1..9].</td>
+  </tr>
+  <tr>
+    <td>-png_nocompression</td>
+    <td></td>
+    <td>No PNG compression will be used.</td>
+  </tr>
+  <tr>
+    <td>-png_interlaced</td>
+    <td></td>
+    <td>Interlacing will be used. The default is <em>no</em> interlacing.</td>
+  </tr>
+  <tr>
+    <td rowspan="8">-png_format</td>
+    <td>R8G8B8<br>RGB24<br>RGB</td>
+    <td rowspan="8">Specifies the PNG format to which to save.</td>
+  </tr>
+  <tr>
+    <td>R8G8B8_SRGB<br>RGB24_SRGB<br>RGB_SRGB</td>
+  </tr>
+  <tr>
+    <td>R8G8B8A8<br>RGBA32<br>RGBA</td>
+  </tr>
+  <tr>
+    <td>R8G8B8A8_SRGB<br>RGBA32_SRGB<br>RGBA_SRGB</td>
+  </tr>
+  <tr>
+    <td>R16G16B16<br>RGB16</td>
+  </tr>
+  <tr>
+    <td>R16G16B16A16<br>RGBA16</td>
+  </tr>
+  <tr>
+    <td>L8<br>LUMINANCE8<br>GREYSCALE8<br>GRAYSCALE8</td>
+  </tr>
+  <tr>
+    <td>L16<br>LUMINANCE16<br>GREYSCALE16<br>GRAYSCALE16</td>
+  </tr>
+</table>
 
 These image formats supported:
  | Vulkan Formats |
