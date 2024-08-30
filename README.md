@@ -1171,6 +1171,95 @@
   </tr>
 </table>
 
+<h3>BMP Options</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>-bmp_rle</td>
+    <td></td>
+    <td>
+      RLE encoding will be used to save the BMP file.<br>
+      <em>This is not set by default.</em>
+    </td>
+  </tr>
+  <tr>
+    <td>-bmp_noalpha</td>
+    <td></td>
+    <td>
+      Alpha will not be saved or will be set to 1 in the BMP file.<br>
+      The default is to store alpha when available.
+    </td>
+  </tr>
+  <tr>
+    <td>-bmp_nobitmask<br>-bmp_nomask</td>
+    <td></td>
+    <td>
+      By default, the BMP file will contain masks for the R, G, B, and A channels.<br>
+      This setting causes the BMP file to be saved without the masks.<br>
+    </td>
+  </tr>
+  <tr>
+    <td rowspan="18">-bmp_format</td>
+    <td>R8G8B8<br>RGB24<br>RGB</td>
+    <td rowspan="18">
+      Specifies the BMP format to which to save.<br>
+    </td>
+  </tr>
+  <tr>
+    <td>R8G8B8_SRGB<br>RGB24_SRGB<br>RGB_SRGB</td>
+  </tr>
+  <tr>
+    <td>R8G8B8A8<br>RGBA32<br>RGBA</td>
+  </tr>
+  <tr>
+    <td>R8G8B8A8_SRGB<br>RGBA32_SRGB<br>RGBA_SRGB</td>
+  </tr>
+  <tr>
+    <td>B8G8R8A8</td>
+  </tr>
+  <tr>
+    <td>B8G8R8A8_SRGB</td>
+  </tr>
+  <tr>
+    <td>A8B8G8R8</td>
+  </tr>
+  <tr>
+    <td>A8B8G8R8_SRGB</td>
+  </tr>
+  <tr>
+    <td>R4G4B4A4</td>
+  </tr>
+  <tr>
+    <td>B4G4R4A4</td>
+  </tr>
+  <tr>
+    <td>A4R4G4B4</td>
+  </tr>
+  <tr>
+    <td>A4B4G4R4</td>
+  </tr>
+  <tr>
+    <td>R5G6B5</td>
+  </tr>
+  <tr>
+    <td>B5G6R5</td>
+  </tr>
+  <tr>
+    <td>R5G5B5A1</td>
+  </tr>
+  <tr>
+    <td>A1B5G5R5</td>
+  </tr>
+  <tr>
+    <td>A4B4G4R4</td>
+  </tr>
+</table>
+
 These image formats supported:
  | Vulkan Formats |
  | --- |
