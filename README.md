@@ -464,56 +464,6 @@
     <td>Sets the non-mipmap alpha <strong>depth</strong> filter.</td>
   </tr>
   <tr>
-    <td>-mip_filter</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Applies the selected filter to all mipmap filters.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterw</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap color and alpha <strong>width</strong> filter.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterh</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap color and alpha <strong>height</strong> filter.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterd</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap color and alpha <strong>depth</strong> filter.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterw_color</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap color <strong>width</strong> filter.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterh_color</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap color <strong>height</strong> filter.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterd_color</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap color <strong>depth</strong> filter.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterw_alpha</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap alpha <strong>width</strong> filter.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterh_alpha</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap alpha <strong>height</strong> filter.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterd_alpha</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap alpha <strong>depth</strong> filter.</td>
-  </tr>
-  <tr>
     <td>-prescale</td>
     <td>&lt;new width&gt; &lt;new height&gt;</td>
     <td>Resamples the image to the given width/height using the selected non-mipmap filters.</td>
@@ -834,6 +784,324 @@
     <td>
       Sets the black level to (16.0 / 255.0), scale to (219.0 / 255.0), Kr and Kb to the ITU-R Recommendation BT.709-5 standard, and enables the full non-approximate conversion routine for saving to a YUV file.
     </td>
+  </tr>
+</table>
+
+<h3>Mipmaps</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>-nomips<br>-nomipmaps<br>-no_mips<br>-no_mipmaps</td>
+    <td></td>
+    <td>No mipmaps are generated and existing mipmaps are discarded.</td>
+  </tr>
+  <tr>
+    <td>-nmips</td>
+    <td>&lt;total mipmaps&gt;</td>
+    <td>
+      Sets the total number of mipmaps desired. Set to 0 to generate (or keep) a full mipmap chain.<br>
+      Defaults to <strong>0</strong>.
+    </td>
+  </tr>
+  <tr>
+    <td>-keepmips<br>-keepmipmaps<br>-keep_mips<br>-keep_mipmaps</td>
+    <td></td>
+    <td>
+      By default, new mipmaps will be generated as specified by <em>-nmips</em> (which defaults to 0, so a full chain is generated).<br>
+      This command allows existing mipmaps to be retained instead of overwritten. Existing mipmaps beyond the <em>-nmips</em> specification will be truncated, and if <em>-nmips</em> extends beyond the number of existing mipmaps, then new mipmaps will be generated to fill the gap.
+    </td>
+  </tr>
+    <tr>
+    <td>-mip_filter</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Applies the selected filter to all mipmap filters.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterw</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color and alpha <strong>width</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterh</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color and alpha <strong>height</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterd</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color and alpha <strong>depth</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterw_color</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color <strong>width</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterh_color</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color <strong>height</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterd_color</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color <strong>depth</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterw_alpha</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap alpha <strong>width</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterh_alpha</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap alpha <strong>height</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterd_alpha</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap alpha <strong>depth</strong> filter.</td>
+  </tr>
+</table>
+
+<h3>Normal Maps</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td rowspan="7">-nm_channel</td>
+    <td>r<br>red</td>
+    <td>The normal map will be generated using the R channel.</td>
+  </tr>
+  <tr>
+    <td>g<br>green</td>
+    <td>The normal map will be generated using the G channel.</td>
+  </tr>
+  <tr>
+    <td>b<br>blue</td>
+    <td>The normal map will be generated using the B channel.</td>
+  </tr>
+  <tr>
+    <td>a<br>alpha</td>
+    <td>The normal map will be generated using the A channel.</td>
+  </tr>
+  <tr>
+    <td>max</td>
+    <td>The normal map will be generated using the max value between the RGBA channels. This is the default.</td>
+  </tr>
+  <tr>
+    <td>rgb</td>
+    <td>The normal map will be generated using the average value between the RGB channels.</td>
+  </tr>
+  <tr>
+    <td>colorspace</td>
+    <td>The normal map will be generated using the weighted average value between the RGB channels. Use <em>-luma</em> to select from predefined weights or <strong>-weight</strong> to manually specify weights.</td>
+  </tr>
+  <tr>
+    <td>-norm<br>-normalize</td>
+    <td></td>
+    <td>Indicates that the normal maps should be normalized.</td>
+  </tr>
+  <tr>
+    <td>-opengl<br>-unity<br>-blender<br>-maya</td>
+    <td></td>
+    <td>Specifies that the normal map should be compatible with OpenGL.</td>
+  </tr>
+  <tr>
+    <td>-directx<br>-ue4<br>-unreal<br>-unrealengine<br>-ue<br>-dsmax</td>
+    <td></td>
+    <td>Specifies that the normal map should be compatible with DirectX.</td>
+  </tr>
+  <tr>
+    <td>-n3x3</td>
+    <td></td>
+    <td>Normal maps will be generated with a 3×3 kernel.</td>
+  </tr>
+  <tr>
+    <td>-n5x5</td>
+    <td></td>
+    <td>Normal maps will be generated with a 5×5 kernel.</td>
+  </tr>
+  <tr>
+    <td>-n7x7</td>
+    <td></td>
+    <td>Normal maps will be generated with a 7×7 kernel.</td>
+  </tr>
+  <tr>
+    <td>-n9x9</td>
+    <td></td>
+    <td>Normal maps will be generated with a 9×9 kernel.</td>
+  </tr>
+  <tr>
+    <td>-scale<br>-nm_z</td>
+    <td></td>
+    <td>Specifies the normal map’s Z influence.</td>
+  </tr>
+</table>
+
+<h3>Transforms</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>-format</td>
+    <td>&lt;any Vulkan, DXGI, or Metal format&gt;</td>
+    <td>Converts the loaded image to the given texture format.</td>
+  </tr>
+  <tr>
+    <td>-ogl_format</td>
+    <td>&lt;internal format&gt; &lt;type&gt; &lt;base internal format&gt;</td>
+    <td>Converts the loaded image to the given OpenGL texture format.</td>
+  </tr>
+  <tr>
+    <td>-ignore_alpha</td>
+    <td></td>
+    <td>Any alpha channel is set to all 1’s.</td>
+  </tr>
+  <tr>
+    <td>-alpha_threshold</td>
+    <td>&lt;cutoff&gt;</td>
+    <td>Sets the alpha cutoff (0..255) for conversions to formats with binary alpha. Defaults to <strong>128</strong>.</td>
+  </tr>
+  <tr>
+    <td>-premultiply_alpha<br>-premult_alpha</td>
+    <td></td>
+    <td>Specifies that alpha should be pre-multiplied. If an image is already pre-multiplied it is not pre-multiplied again.</td>
+  </tr>
+  <tr>
+    <td>-swizzle</td>
+    <td>&lt;swizzle&gt;</td>
+    <td>
+      Specifies a swizzle to apply. Valid swizzle characters: rgbaxyzw01. Must be 4 characters long and is not case-sensitive.
+    </td>
+  </tr>
+  <tr>
+    <td>-swap</td>
+    <td></td>
+    <td>Swaps the R and B channels.</td>
+  </tr>
+</table>
+
+<h3>Quality Settings</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>-quality_highest<br>-very_slow</td>
+    <td></td>
+    <td>The highest quality setting for compressing textures in BC*, EAC, ETC*, PVR, and ASTC formats.</td>
+  </tr>
+  <tr>
+    <td>-quality_production<br>-slow</td>
+    <td></td>
+    <td>The 2<sup>nd</sup>-highest quality setting for compressing textures in BC*, EAC, ETC*, PVR, and ASTC formats.</td>
+  </tr>
+  <tr>
+    <td>-quality_normal<br>-basic</td>
+    <td></td>
+    <td>The normal quality setting for compressing textures in BC*, EAC, ETC*, PVR, and ASTC formats.</td>
+  </tr>
+  <tr>
+    <td>-fast</td>
+    <td></td>
+    <td>A fast but somewhat low-quality setting for compressing textures in BC*, EAC, ETC*, PVR, and ASTC formats.</td>
+  </tr>
+  <tr>
+    <td>-quick<br>-veryfast</td>
+    <td></td>
+    <td>A faster but lower-quality setting for compressing textures in BC*, EAC, ETC*, PVR, and ASTC formats.</td>
+  </tr>
+  <tr>
+    <td>-ultrafast</td>
+    <td></td>
+    <td>The fastest but lowest-quality setting for compressing textures in BC*, EAC, ETC*, PVR, and ASTC formats.</td>
+  </tr>
+</table>
+
+<h3>Misc.</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>-weight<br>-weights</td>
+    <td>&lt;red weight&gt; &lt;green weight&gt; &lt;blue weight&gt;</td>
+    <td>Sets the luminance weight factors manually.</td>
+  </tr>
+  <tr>
+    <td rowspan="7">-luma</td>
+    <td>REC_709<br>REC709</td>
+    <td>
+      Sets the luminance weight factors according to the ITU-R Recommendation BT.709-5 standard.<br>
+      0.212639005871510, 0.715168678767756, and 0.072192315360734.<br>
+      This is the default.
+    </td>
+  </tr>
+  <tr>
+    <td>REC_2020<br>REC2020</td>
+    <td>
+      Sets the luminance weight factors according to the ITU-R Recommendation BT.2020 standard.<br>
+      0.2627, 0.678, and 0.0593.
+    </td>
+  </tr>
+  <tr>
+    <td>SMPTC</td>
+    <td>
+      Sets the luminance weight factors according to the SMPTE C standard.<br>
+      0.2124, 0.7011, and 0.0866.
+    </td>
+  </tr>
+  <tr>
+    <td>REC_601<br>REC601</td>
+    <td>
+      Sets the luminance weight factors according to the ITU-R Recommendation BT.601 standard.<br>
+      0.2988390, 0.5868110, and 0.1143500.
+    </td>
+  </tr>
+  <tr>
+    <td>CIE_1931<br>CIE1931</td>
+    <td>
+      Sets the luminance weight factors according to the CIE 1931 standard.<br>
+      0.3086, 0.6094, and 0.0820.
+    </td>
+  </tr>
+  <tr>
+    <td>NTSC_1953<br>NTSC1953</td>
+    <td>
+      Sets the luminance weight factors according to the NTSC 1953 standard.<br>
+      0.3, 0.59, and 0.11.
+    </td>
+  </tr>
+  <tr>
+    <td>EBU_TECH_3213<br>EBUTECH3213</td>
+    <td>
+      Sets the luminance weight factors according to the EBU Tech. 3213 standard.<br>
+      0.2988390, 0.5868110, and 0.1143500.
+    </td>
+  </tr>
+  <tr>
+    <td>-printformats<br>-print_formats</td>
+    <td></td>
+    <td>Prints all supported formats that can be supplied to <em>-format</em>.</td>
   </tr>
 </table>
 
