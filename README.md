@@ -1116,7 +1116,7 @@
   <tr>
     <td>-png_default</td>
     <td></td>
-    <td>Default PNG compression (0) will be used.<br>The default compression level is 6.</td>
+    <td>Default PNG compression (6) will be used.</td>
   </tr>
   <tr>
     <td>-png_bestspeed</td>
