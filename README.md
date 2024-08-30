@@ -868,6 +868,85 @@
   </tr>
 </table>
 
+<h3>Normal Maps</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td rowspan="7">-nm_channel</td>
+    <td>r<br>red</td>
+    <td>The normal map will be generated using the R channel.</td>
+  </tr>
+  <tr>
+    <td>g<br>green</td>
+    <td>The normal map will be generated using the G channel.</td>
+  </tr>
+  <tr>
+    <td>b<br>blue</td>
+    <td>The normal map will be generated using the B channel.</td>
+  </tr>
+  <tr>
+    <td>a<br>alpha</td>
+    <td>The normal map will be generated using the A channel.</td>
+  </tr>
+  <tr>
+    <td>max</td>
+    <td>The normal map will be generated using the max value between the RGBA channels. This is the default.</td>
+  </tr>
+  <tr>
+    <td>rgb</td>
+    <td>The normal map will be generated using the average value between the RGB channels.</td>
+  </tr>
+  <tr>
+    <td>colorspace</td>
+    <td>The normal map will be generated using the weighted average value between the RGB channels. Use <em>-luma</em> to select from predefined weights or <strong>-weight</strong> to manually specify weights.</td>
+  </tr>
+  <tr>
+    <td>-norm<br>-normalize</td>
+    <td></td>
+    <td>Indicates that the normal maps should be normalized.</td>
+  </tr>
+  <tr>
+    <td>-opengl<br>-unity<br>-blender<br>-maya</td>
+    <td></td>
+    <td>Specifies that the normal map should be compatible with OpenGL.</td>
+  </tr>
+  <tr>
+    <td>-directx<br>-ue4<br>-unreal<br>-unrealengine<br>-ue<br>-dsmax</td>
+    <td></td>
+    <td>Specifies that the normal map should be compatible with DirectX.</td>
+  </tr>
+  <tr>
+    <td>-n3x3</td>
+    <td></td>
+    <td>Normal maps will be generated with a 3×3 kernel.</td>
+  </tr>
+  <tr>
+    <td>-n5x5</td>
+    <td></td>
+    <td>Normal maps will be generated with a 5×5 kernel.</td>
+  </tr>
+  <tr>
+    <td>-n7x7</td>
+    <td></td>
+    <td>Normal maps will be generated with a 7×7 kernel.</td>
+  </tr>
+  <tr>
+    <td>-n9x9</td>
+    <td></td>
+    <td>Normal maps will be generated with a 9×9 kernel.</td>
+  </tr>
+  <tr>
+    <td>-scale<br>-nm_z</td>
+    <td></td>
+    <td>Specifies the normal map’s Z influence.</td>
+  </tr>
+</table>
+
 
 These image formats supported:
  | Vulkan Formats |
