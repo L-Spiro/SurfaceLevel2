@@ -588,8 +588,8 @@
   </tr>
   <tr>
     <td>-border_color</td>
-    <td>&lt;r&gt; &lt;g&gt; &lt;b&gt;</em></td>
-    <td>Sets the border color for the U, V, and W coordinates.<br>Defaults to <strong>0.0 0.0 0.0</strong></td>
+    <td>&lt;r&gt; &lt;g&gt; &lt;b&gt; &lt;a&gt;</em></td>
+    <td>Sets the border color for the U, V, and W coordinates.<br>Defaults to <strong>0.0 0.0 0.0 1.0</strong></td>
   </tr>
 </table>
 
