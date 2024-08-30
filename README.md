@@ -64,9 +64,8 @@
       yuy12<br>
       yv12<br>
       p016<br>
+      p012<br>
       p010<br>
-      y012<br>
-      y010<br>
       nv12<br>
       nv21<br>
       y416<br>
