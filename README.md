@@ -1146,7 +1146,7 @@
   <tr>
     <td rowspan="8">-png_format</td>
     <td>R8G8B8<br>RGB24<br>RGB</td>
-    <td rowspan="8">Specifies the PNG format to which to save.</td>
+    <td rowspan="8">Specifies the PNG format to which to save.<br>If the format is not specified, the closest format to what was specified by <em>-format</em> (or the original file’s format if <em>-format</em> is not specified) will be used.</td>
   </tr>
   <tr>
     <td>R8G8B8_SRGB<br>RGB24_SRGB<br>RGB_SRGB</td>
@@ -1207,7 +1207,7 @@
     <td rowspan="18">-bmp_format</td>
     <td>R8G8B8<br>RGB24<br>RGB</td>
     <td rowspan="18">
-      Specifies the BMP format to which to save.<br>
+      Specifies the BMP format to which to save.<br>If the format is not specified, the closest format to what was specified by <em>-format</em> (or the original file’s format if <em>-format</em> is not specified) will be used.</td>
     </td>
   </tr>
   <tr>
@@ -1257,6 +1257,41 @@
   </tr>
   <tr>
     <td>A4B4G4R4</td>
+  </tr>
+</table>
+
+<h3>TGA Options</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>-tga_rle</td>
+    <td></td>
+    <td>The TGA file will be saved with RLE encoding.</td>
+  </tr>
+  <tr>
+    <td rowspan="6">-tga_format</td>
+    <td>R8G8B8<br>RGB24<br>RGB</td>
+    <td rowspan="6">Specifies the TGA format to which to save.<br>If the format is not specified, the closest format to what was specified by <em>-format</em> (or the original file’s format if <em>-format</em> is not specified) will be used.</td>
+  </tr>
+  <tr>
+    <td>R8G8B8_SRGB<br>RGB24_SRGB<br>RGB_SRGB</td>
+  </tr>
+  <tr>
+    <td>R8G8B8A8<br>RGBA32<br>RGBA</td>
+  </tr>
+  <tr>
+    <td>R8G8B8A8_SRGB<br>RGBA32_SRGB<br>RGBA_SRGB</td>
+  </tr>
+  <tr>
+    <td>A1R5G5B5<br>A1RGB5</td>
+  </tr>
+  <tr>
+    <td>L8<br>LUMINANCE8<br>GREYSCALE8<br>GRAYSCALE8</td>
   </tr>
 </table>
 
