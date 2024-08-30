@@ -1034,8 +1034,8 @@ namespace sl2 {
 		// Fake formats.
 		SL2_DXGI_FORMAT_P210														= SL2_MAKEFOURCC( 'P', '2', '1', '0' ),
 		SL2_DXGI_FORMAT_P216														= SL2_MAKEFOURCC( 'P', '2', '1', '6' ),
-		SL2_DXGI_FORMAT_Y010														= SL2_MAKEFOURCC( 'Y', '0', '1', '0' ),
-		SL2_DXGI_FORMAT_Y016														= SL2_MAKEFOURCC( 'Y', '0', '1', '6' ),
+		/*SL2_DXGI_FORMAT_Y010														= SL2_MAKEFOURCC( 'Y', '0', '1', '0' ),
+		SL2_DXGI_FORMAT_Y016														= SL2_MAKEFOURCC( 'Y', '0', '1', '6' ),*/
 		SL2_DXGI_FORMAT_YV12														= 0x1F200000 + 0,
 		SL2_DXGI_FORMAT_NV21														= 0x1F200000 + 1,
 		SL2_DXGI_FORMAT_FORCE_UINT = 0xFFFFFFFF
@@ -1602,9 +1602,9 @@ namespace sl2 {
 		struct SL2_YUV_CONVERSION_OPTIONS {
 			double																	dKr = 0.212639005871510;			/**< Kr. */
 			double																	dKb = 0.072192315360734;			/**< Kb. */
-			double																	dBlack = 0.0;//16.0 / 255.0;				/**< Black level. */
-			double																	dS = 1.0;//219.0 / 255.0;					/**< S. */
-			bool																	bStudio = true;						/**< Use the studio version? */
+			double																	dBlack = 0.0;//16.0 / 255.0;		/**< Black level. */
+			double																	dS = 1.0;//219.0 / 255.0;			/**< S. */
+			bool																	bFullAlgorithm = true;				/**< Use the studio version? */
 		};
 
 
@@ -1893,6 +1893,19 @@ namespace sl2 {
 		 * \return Returns the current luma coefficient.
 		 **/
 		static const CFormat::SL2_LUMA &											Luma() { return m_lCurCoeffs; }
+
+		/**
+		 * Gets a pre-defined luma value by index.
+		 * 
+		 * \param _lsLuma The luma standard to apply.
+		 * \return Returns a constant reference to the requested luma.
+		 **/
+		static const CFormat::SL2_LUMA &											Luma( SL2_LUMA_STANDARDS _lsLuma ) {
+			if ( _lsLuma < SL2_LS_TOTAL ) {
+				return m_lLumaCoeffs[_lsLuma];
+			}
+			return m_lLumaCoeffs[SL2_LS_REC_709];
+		}
 
 		/**
 		 * Sets the performance level, 0-5, with 0 being the slowest and 5 being the fastest.
@@ -3973,7 +3986,7 @@ namespace sl2 {
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						size_t sIdx = size_t( H * _ui32Width + W );
 
-						if ( !m_ycoYuvToRgb.bStudio ) {
+						if ( !m_ycoYuvToRgb.bFullAlgorithm ) {
 							YuvToRgb<uint32_t>( uint32_t( std::round( prgbapui16Yuv[sIdx] * dMuliplier ) ),
 								uint32_t( std::round( prgbapui16Yuv[sIdx+ui64OffU] * dMuliplier ) ), uint32_t( std::round( prgbapui16Yuv[sIdx+ui64OffV] * dMuliplier ) ),
 								prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B] );
@@ -4022,8 +4035,16 @@ namespace sl2 {
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						size_t sIdx = size_t( H * _ui32Width + W );
 						uint32_t ui32Y, ui32U, ui32V;
-						RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
-							ui32Y, ui32U, ui32V );
+						if ( !m_ycoRgbToYuv.bFullAlgorithm ) {
+							RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+								ui32Y, ui32U, ui32V );
+						}
+						else {
+							RgbToYuv( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+								ui32Y, ui32U, ui32V,
+								m_ycoRgbToYuv.dKr, m_ycoRgbToYuv.dKb,
+								32, uint32_t( std::round( m_ycoRgbToYuv.dBlack * 0xFFFFFFFFU ) ), uint32_t( std::round( m_ycoRgbToYuv.dS * 0xFFFFFFFFU ) ) );
+						}
 						prgbapui16Yuv[sIdx] = _tType( ui32Y * dMuliplier );
 						prgbapui16Yuv[sIdx+ui64OffU] = _tType( ui32U * dMuliplier );
 						prgbapui16Yuv[sIdx+ui64OffV] = _tType( ui32V * dMuliplier );
@@ -4066,7 +4087,7 @@ namespace sl2 {
 				for ( uint32_t H = 0; H < _ui32Height; ++H ) {
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						size_t sIdx = size_t( H * _ui32Width + W );
-						if ( !m_ycoYuvToRgb.bStudio ) {
+						if ( !m_ycoYuvToRgb.bFullAlgorithm ) {
 							YuvToRgb<uint32_t>( uint32_t( std::round( prgbapui16Yuv[H*_ui32Width+W] * dMuliplier * 0xFFFFFFFFU ) ),
 								uint32_t( std::round( prgbapui16Yuv[((H*ui32ChromaW+W)*2+_bSwapUv)+ui64Off] * dMuliplier * 0xFFFFFFFFU ) ),
 								uint32_t( std::round( prgbapui16Yuv[((H*ui32ChromaW+W)*2+!_bSwapUv)+ui64Off] * dMuliplier * 0xFFFFFFFFU ) ),
@@ -4132,8 +4153,16 @@ namespace sl2 {
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						size_t sIdx = size_t( H * _ui32Width + W );
 						uint32_t ui32Y, ui32U, ui32V;
-						RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
-							ui32Y, ui32U, ui32V );
+						if ( !m_ycoRgbToYuv.bFullAlgorithm ) {
+							RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+								ui32Y, ui32U, ui32V );
+						}
+						else {
+							RgbToYuv( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+								ui32Y, ui32U, ui32V,
+								m_ycoRgbToYuv.dKr, m_ycoRgbToYuv.dKb,
+								32, uint32_t( std::round( m_ycoRgbToYuv.dBlack * 0xFFFFFFFFU ) ), uint32_t( std::round( m_ycoRgbToYuv.dS * 0xFFFFFFFFU ) ) );
+						}
 						vConvertedYSrc[sIdx] = ui32Y / double( 0xFFFFFFFFU );
 						vConvertedUSrc[sIdx] = ui32U / double( 0xFFFFFFFFU );
 						vConvertedVSrc[sIdx] = ui32V / double( 0xFFFFFFFFU );
@@ -4235,7 +4264,7 @@ namespace sl2 {
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						size_t sIdx = size_t( H * _ui32Width + W );
 						
-						if ( !m_ycoYuvToRgb.bStudio ) {
+						if ( !m_ycoYuvToRgb.bFullAlgorithm ) {
 							YuvToRgb<uint32_t>( uint32_t( std::round( vConvertedYSrc[sIdx] * 0xFFFFFFFFU ) ),
 								uint32_t( std::round( vScaledUp[sIdx].dU * 0xFFFFFFFFU ) ), uint32_t( std::round( vScaledUp[sIdx].dV * 0xFFFFFFFFU ) ),
 								prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B] );
@@ -4300,8 +4329,16 @@ namespace sl2 {
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						size_t sIdx = size_t( H * _ui32Width + W );
 						uint32_t ui32Y, ui32U, ui32V;
-						RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
-							ui32Y, ui32U, ui32V );
+						if ( !m_ycoRgbToYuv.bFullAlgorithm ) {
+							RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+								ui32Y, ui32U, ui32V );
+						}
+						else {
+							RgbToYuv( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+								ui32Y, ui32U, ui32V,
+								m_ycoRgbToYuv.dKr, m_ycoRgbToYuv.dKb,
+								32, uint32_t( std::round( m_ycoRgbToYuv.dBlack * 0xFFFFFFFFU ) ), uint32_t( std::round( m_ycoRgbToYuv.dS * 0xFFFFFFFFU ) ) );
+						}
 						vConvertedYSrc[sIdx] = ui32Y / double( 0xFFFFFFFFU );
 						vConvertedUSrc[sIdx] = ui32U / double( 0xFFFFFFFFU );
 						vConvertedVSrc[sIdx] = ui32V / double( 0xFFFFFFFFU );
@@ -4416,7 +4453,7 @@ namespace sl2 {
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						size_t sIdx = size_t( H * _ui32Width + W );
 						
-						if ( !m_ycoYuvToRgb.bStudio ) {
+						if ( !m_ycoYuvToRgb.bFullAlgorithm ) {
 							YuvToRgb<uint32_t>( uint32_t( std::round( vConvertedYSrc[sIdx] * 0xFFFFFFFFU ) ),
 								uint32_t( std::round( vScaledUp[sIdx].dU * 0xFFFFFFFFU ) ), uint32_t( std::round( vScaledUp[sIdx].dV * 0xFFFFFFFFU ) ),
 								prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B] );
@@ -4481,10 +4518,16 @@ namespace sl2 {
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						size_t sIdx = size_t( H * _ui32Width + W );
 						uint32_t ui32Y, ui32U, ui32V;
-						RgbToYuv( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
-							ui32Y, ui32U, ui32V,
-							0.2126, 0.0722,
-							32, 0, 0xFFFFFFFFU );
+						if ( !m_ycoRgbToYuv.bFullAlgorithm ) {
+							RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+								ui32Y, ui32U, ui32V );
+						}
+						else {
+							RgbToYuv( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+								ui32Y, ui32U, ui32V,
+								m_ycoRgbToYuv.dKr, m_ycoRgbToYuv.dKb,
+								32, uint32_t( std::round( m_ycoRgbToYuv.dBlack * 0xFFFFFFFFU ) ), uint32_t( std::round( m_ycoRgbToYuv.dS * 0xFFFFFFFFU ) ) );
+						}
 
 						vConvertedYSrc[sIdx] = ui32Y / double( 0xFFFFFFFFU );
 						vConvertedUSrc[sIdx] = ui32U / double( 0xFFFFFFFFU );
@@ -4605,7 +4648,7 @@ namespace sl2 {
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						size_t sIdx = size_t( H * _ui32Width + W );
 						
-						if ( !m_ycoYuvToRgb.bStudio ) {
+						if ( !m_ycoYuvToRgb.bFullAlgorithm ) {
 							YuvToRgb<uint32_t>( uint32_t( std::round( vConvertedYSrc[sIdx] * 0xFFFFFFFFU ) ),
 								uint32_t( std::round( vScaledUp[sIdx].dU * 0xFFFFFFFFU ) ), uint32_t( std::round( vScaledUp[sIdx].dV * 0xFFFFFFFFU ) ),
 								prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B] );
@@ -4670,8 +4713,16 @@ namespace sl2 {
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						size_t sIdx = size_t( H * _ui32Width + W );
 						uint32_t ui32Y, ui32U, ui32V;
-						RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
-							ui32Y, ui32U, ui32V );
+						if ( !m_ycoRgbToYuv.bFullAlgorithm ) {
+							RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+								ui32Y, ui32U, ui32V );
+						}
+						else {
+							RgbToYuv( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+								ui32Y, ui32U, ui32V,
+								m_ycoRgbToYuv.dKr, m_ycoRgbToYuv.dKb,
+								32, uint32_t( std::round( m_ycoRgbToYuv.dBlack * 0xFFFFFFFFU ) ), uint32_t( std::round( m_ycoRgbToYuv.dS * 0xFFFFFFFFU ) ) );
+						}
 						vConvertedYSrc[sIdx] = ui32Y / double( 0xFFFFFFFFU );
 						vConvertedUSrc[sIdx] = ui32U / double( 0xFFFFFFFFU );
 						vConvertedVSrc[sIdx] = ui32V / double( 0xFFFFFFFFU );
@@ -4786,7 +4837,7 @@ namespace sl2 {
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						size_t sIdx = size_t( H * _ui32Width + W );
 						
-						if ( !m_ycoYuvToRgb.bStudio ) {
+						if ( !m_ycoYuvToRgb.bFullAlgorithm ) {
 							YuvToRgb<uint32_t>( uint32_t( std::round( vConvertedYSrc[sIdx] * 0xFFFFFFFFU ) ),
 								uint32_t( std::round( vScaledUp[sIdx].dU * 0xFFFFFFFFU ) ), uint32_t( std::round( vScaledUp[sIdx].dV * 0xFFFFFFFFU ) ),
 								prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B] );
@@ -4851,8 +4902,16 @@ namespace sl2 {
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						size_t sIdx = size_t( H * _ui32Width + W );
 						uint32_t ui32Y, ui32U, ui32V;
-						RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
-							ui32Y, ui32U, ui32V );
+						if ( !m_ycoRgbToYuv.bFullAlgorithm ) {
+							RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+								ui32Y, ui32U, ui32V );
+						}
+						else {
+							RgbToYuv( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+								ui32Y, ui32U, ui32V,
+								m_ycoRgbToYuv.dKr, m_ycoRgbToYuv.dKb,
+								32, uint32_t( std::round( m_ycoRgbToYuv.dBlack * 0xFFFFFFFFU ) ), uint32_t( std::round( m_ycoRgbToYuv.dS * 0xFFFFFFFFU ) ) );
+						}
 						vConvertedYSrc[sIdx] = ui32Y / double( 0xFFFFFFFFU );
 						vConvertedUSrc[sIdx] = ui32U / double( 0xFFFFFFFFU );
 						vConvertedVSrc[sIdx] = ui32V / double( 0xFFFFFFFFU );
@@ -4963,7 +5022,7 @@ namespace sl2 {
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						size_t sIdx = size_t( H * _ui32Width + W );
 						
-						if ( !m_ycoYuvToRgb.bStudio ) {
+						if ( !m_ycoYuvToRgb.bFullAlgorithm ) {
 							YuvToRgb<uint32_t>( uint32_t( std::round( vConvertedYSrc[sIdx] * 0xFFFFFFFFU ) ),
 								uint32_t( std::round( vScaledUp[sIdx].dU * 0xFFFFFFFFU ) ), uint32_t( std::round( vScaledUp[sIdx].dV * 0xFFFFFFFFU ) ),
 								prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B] );
@@ -5029,8 +5088,17 @@ namespace sl2 {
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						size_t sIdx = size_t( H * _ui32Width + W );
 						uint32_t ui32Y, ui32U, ui32V;
-						RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
-							ui32Y, ui32U, ui32V );
+						
+						if ( !m_ycoRgbToYuv.bFullAlgorithm ) {
+							RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+								ui32Y, ui32U, ui32V );
+						}
+						else {
+							RgbToYuv( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+								ui32Y, ui32U, ui32V,
+								m_ycoRgbToYuv.dKr, m_ycoRgbToYuv.dKb,
+								32, uint32_t( std::round( m_ycoRgbToYuv.dBlack * 0xFFFFFFFFU ) ), uint32_t( std::round( m_ycoRgbToYuv.dS * 0xFFFFFFFFU ) ) );
+						}
 						vConvertedYSrc[sIdx] = ui32Y / double( 0xFFFFFFFFU );
 						vConvertedUSrc[sIdx] = ui32U / double( 0xFFFFFFFFU );
 						vConvertedVSrc[sIdx] = ui32V / double( 0xFFFFFFFFU );
@@ -5102,7 +5170,7 @@ namespace sl2 {
 				for ( uint32_t H = 0; H < _ui32Height; ++H ) {
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						size_t sIdx = size_t( H * _ui32Width + W );
-						if ( !m_ycoYuvToRgb.bStudio ) {
+						if ( !m_ycoYuvToRgb.bFullAlgorithm ) {
 							YuvToRgb<uint32_t>( uint32_t( std::round( (prgbapui16Yuv[sIdx].uiR & ui16MaskY) * dMuliplierY ) ),
 								uint32_t( std::round( (prgbapui16Yuv[sIdx].uiG & ui16MaskU) * dMuliplierU ) ),
 								uint32_t( std::round( (prgbapui16Yuv[sIdx].uiB & ui16MaskV) * dMuliplierV ) ),
@@ -5158,17 +5226,21 @@ namespace sl2 {
 					for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 						size_t sIdx = size_t( H * _ui32Width + W );
 						uint32_t ui32Y, ui32U, ui32V;
-						RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
-							ui32Y, ui32U, ui32V );
+						
+						if ( !m_ycoRgbToYuv.bFullAlgorithm ) {
+							RgbToYuv<uint32_t>( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+								ui32Y, ui32U, ui32V );
+						}
+						else {
+							RgbToYuv( prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B],
+								ui32Y, ui32U, ui32V,
+								m_ycoRgbToYuv.dKr, m_ycoRgbToYuv.dKb,
+								32, uint32_t( std::round( m_ycoRgbToYuv.dBlack * 0xFFFFFFFFU ) ), uint32_t( std::round( m_ycoRgbToYuv.dS * 0xFFFFFFFFU ) ) );
+						}
 						prgbapui16Yuv[sIdx].uiR = uint16_t( ui32Y * dMuliplierY ) & ui16MaskY;
 						prgbapui16Yuv[sIdx].uiG = uint16_t( ui32U * dMuliplierU ) & ui16MaskU;
 						prgbapui16Yuv[sIdx].uiB = uint16_t( ui32V * dMuliplierV ) & ui16MaskV;
 						prgbapui16Yuv[sIdx].uiA = uint16_t( (prgba64Rgba[sIdx].dRgba[SL2_PC_A]) * dMuliplierA ) & ui16MaskA;
-						/*YuvToRgb<uint32_t>( uint32_t( std::round( (prgbapui16Yuv[sIdx].uiR & ui16MaskY) * dMuliplierY ) ),
-							uint32_t( std::round( (prgbapui16Yuv[sIdx].uiG & ui16MaskU) * dMuliplierU ) ),
-							uint32_t( std::round( (prgbapui16Yuv[sIdx].uiB & ui16MaskV) * dMuliplierV ) ),
-							prgba64Rgba[sIdx].dRgba[SL2_PC_R], prgba64Rgba[sIdx].dRgba[SL2_PC_G], prgba64Rgba[sIdx].dRgba[SL2_PC_B] );
-						prgba64Rgba[sIdx].dRgba[SL2_PC_A] = (prgbapui16Yuv[sIdx].uiA & ui16MaskA) * dMuliplierA;*/
 					}
 				}
 

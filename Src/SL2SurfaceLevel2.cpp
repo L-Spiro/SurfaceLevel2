@@ -119,90 +119,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 SL2_ADV( 4 );
             }
 
-            if ( SL2_CHECK( 2, yuv_input_format ) ) {
-                if ( oOptions.vInputs.size() == 0 ) {
-                    SL2_ERRORT( std::format( L"Invalid \"yuv_input_format\": \"{}\". No input file provided yet. -yuv_file must come before yuv_input.",
-                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
-                }
-                size_t sIdx = oOptions.vInputs.size() - 1;
-                std::string sString = sl2::CUtilities::Utf16ToUtf8( reinterpret_cast<const char16_t *>((_wcpArgV[1])) );
-                oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByVulkan( sString.c_str() );
-                if ( oOptions.vInputs[sIdx].pkifduvFormat && !SL2_GET_YUV_FLAG( oOptions.vInputs[sIdx].pkifduvFormat->ui32Flags ) ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = nullptr;
-                }
-                if ( !oOptions.vInputs[sIdx].pkifduvFormat ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sString.c_str() );
-                    if ( oOptions.vInputs[sIdx].pkifduvFormat && !SL2_GET_YUV_FLAG( oOptions.vInputs[sIdx].pkifduvFormat->ui32Flags ) ) {
-                        oOptions.vInputs[sIdx].pkifduvFormat = nullptr;
-                    }
-                }
-                if ( !oOptions.vInputs[sIdx].pkifduvFormat ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByMetal( sString.c_str() );
-                    if ( oOptions.vInputs[sIdx].pkifduvFormat && !SL2_GET_YUV_FLAG( oOptions.vInputs[sIdx].pkifduvFormat->ui32Flags ) ) {
-                        oOptions.vInputs[sIdx].pkifduvFormat = nullptr;
-                    }
-                }
-                if ( oOptions.vInputs[sIdx].pkifduvFormat && SL2_GET_YUV_FLAG( oOptions.vInputs[sIdx].pkifduvFormat->ui32Flags ) ) {
-                    SL2_ADV( 2 );
-                }
-
-                if ( ::_wcsicmp( _wcpArgV[1], L"nv12" ) == 0 ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_NV12 );
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"nv21" ) == 0 ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_NV21 );
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"yv12" ) == 0 ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_YV12 );
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"yv21" ) == 0 ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_YV12 );
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"yuy2" ) == 0 ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_YUY2 );
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"yvyu" ) == 0 ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_R8G8_B8G8_UNORM );
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"p010" ) == 0 ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_P010 );
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"p016" ) == 0 ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_P016 );
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"y010" ) == 0 ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y010 );
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"y016" ) == 0 ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y016 );
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"p210" ) == 0 ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_P210 );
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"p216" ) == 0 ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_P216 );
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"y210" ) == 0 ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y210 );
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"y216" ) == 0 ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y216 );
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"y416" ) == 0 ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y416 );
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"y410" ) == 0 ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y410 );
-                }
-                else if ( ::_wcsicmp( _wcpArgV[1], L"ayuv" ) == 0 ) {
-                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_AYUV );
-                }
-                else {
-                    SL2_ERRORT( std::format( L"Invalid \"yuv_input_format\": \"{}\". Must be one of the Vulkan/DXGI YUV formats or nv12, nv21, yv12, yv21, yuy2, yvyu, p010, p016, y010, y016, p210, p216, y210, y216, y416, y410, or ayuv.",
-                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
-                }
-                SL2_ADV( 2 );
-            }
+            
 
             if ( SL2_CHECK( 4, weight ) || SL2_CHECK( 4, weights ) ) {
 				sl2::CFormat::SetLuma( ::_wtof( _wcpArgV[1] ), ::_wtof( _wcpArgV[2] ), ::_wtof( _wcpArgV[3] ) );
@@ -248,7 +165,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, srgb ) ) {
-                oOptions.dGamma = 1.0 / -2.2;
+                oOptions.dGamma = -2.2;
                 oOptions.bManuallySetGamma = true;
                 SL2_ADV( 1 );
             }
@@ -721,7 +638,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 
 #undef SL2_RESAMPLE
 
-            if ( SL2_CHECK( 1, nomips ) || SL2_CHECK( 1, nomipmapss ) || SL2_CHECK( 1, no_mips ) || SL2_CHECK( 1, no_mipmapss ) ) {
+            if ( SL2_CHECK( 1, nomips ) || SL2_CHECK( 1, nomipmaps ) || SL2_CHECK( 1, no_mips ) || SL2_CHECK( 1, no_mipmaps ) ) {
                 oOptions.mhMipHandling = sl2::SL2_MH_REMOVE_EXISTING;
                 SL2_ADV( 1 );
             }
@@ -729,7 +646,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.sTotalMips = ::_wtoi( _wcpArgV[1] );
                 SL2_ADV( 2 );
             }
-            if ( SL2_CHECK( 1, keepmips ) || SL2_CHECK( 1, keepmipmapss ) || SL2_CHECK( 1, keep_mips ) || SL2_CHECK( 1, keep_mipmapss ) ) {
+            if ( SL2_CHECK( 1, keepmips ) || SL2_CHECK( 1, keepmipmaps ) || SL2_CHECK( 1, keep_mips ) || SL2_CHECK( 1, keep_mipmaps ) ) {
                 oOptions.mhMipHandling = sl2::SL2_MH_KEEP_EXISTING;
                 SL2_ADV( 1 );
             }
@@ -1443,7 +1360,333 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 SL2_ADV( 2 );
             }
 
+            if ( SL2_CHECK( 1, yuv_input_pc ) ) {
+                sl2::CFormat::m_ycoYuvToRgb.bFullAlgorithm = true;
+                sl2::CFormat::m_ycoYuvToRgb.dBlack = 0.0;
+                sl2::CFormat::m_ycoYuvToRgb.dS = 1.0;
+                sl2::CFormat::m_ycoYuvToRgb.dKr = sl2::CFormat::Luma( sl2::SL2_LS_REC_709 ).dRgb[0];
+                sl2::CFormat::m_ycoYuvToRgb.dKb = sl2::CFormat::Luma( sl2::SL2_LS_REC_709 ).dRgb[2];
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, yuv_pc ) ) {
+                sl2::CFormat::m_ycoRgbToYuv.bFullAlgorithm = true;
+                sl2::CFormat::m_ycoRgbToYuv.dBlack = 0.0;
+                sl2::CFormat::m_ycoRgbToYuv.dS = 1.0;
+                sl2::CFormat::m_ycoRgbToYuv.dKr = sl2::CFormat::Luma( sl2::SL2_LS_REC_709 ).dRgb[0];
+                sl2::CFormat::m_ycoRgbToYuv.dKb = sl2::CFormat::Luma( sl2::SL2_LS_REC_709 ).dRgb[2];
+                SL2_ADV( 1 );
+            }
 
+            if ( SL2_CHECK( 1, yuv_input_studio ) ) {
+                sl2::CFormat::m_ycoYuvToRgb.bFullAlgorithm = true;
+                sl2::CFormat::m_ycoYuvToRgb.dBlack = 16.0 / 255.0;
+                sl2::CFormat::m_ycoYuvToRgb.dS = 219.0 / 255.0;
+                sl2::CFormat::m_ycoYuvToRgb.dKr = sl2::CFormat::Luma( sl2::SL2_LS_REC_709 ).dRgb[0];
+                sl2::CFormat::m_ycoYuvToRgb.dKb = sl2::CFormat::Luma( sl2::SL2_LS_REC_709 ).dRgb[2];
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, yuv_studio ) ) {
+                sl2::CFormat::m_ycoRgbToYuv.bFullAlgorithm = true;
+                sl2::CFormat::m_ycoRgbToYuv.dBlack = 16.0 / 255.0;
+                sl2::CFormat::m_ycoRgbToYuv.dS = 219.0 / 255.0;
+                sl2::CFormat::m_ycoRgbToYuv.dKr = sl2::CFormat::Luma( sl2::SL2_LS_REC_709 ).dRgb[0];
+                sl2::CFormat::m_ycoRgbToYuv.dKb = sl2::CFormat::Luma( sl2::SL2_LS_REC_709 ).dRgb[2];
+                SL2_ADV( 1 );
+            }
+
+            if ( SL2_CHECK( 2, yuv_input_set_s ) || SL2_CHECK( 2, yuv_input_set_scale ) ) {
+				sl2::CFormat::m_ycoYuvToRgb.dS = ::_wtof( _wcpArgV[1] );
+                if ( sl2::CFormat::m_ycoYuvToRgb.dS < 0.0 || sl2::CFormat::m_ycoYuvToRgb.dS > 1.0 ) {
+                    SL2_ERRORT( std::format( L"Invalid \"{}\": \"{}\". Parameters must be between 0 and 1.",
+                        _wcpArgV[0], _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+				SL2_ADV( 2 );
+			}
+            if ( SL2_CHECK( 2, yuv_set_s ) || SL2_CHECK( 2, yuv_set_scale ) ) {
+				sl2::CFormat::m_ycoRgbToYuv.dS = ::_wtof( _wcpArgV[1] );
+                if ( sl2::CFormat::m_ycoRgbToYuv.dS < 0.0 || sl2::CFormat::m_ycoRgbToYuv.dS > 1.0 ) {
+                    SL2_ERRORT( std::format( L"Invalid \"{}\": \"{}\". Parameters must be between 0 and 1.",
+                        _wcpArgV[0], _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+				SL2_ADV( 2 );
+			}
+            if ( SL2_CHECK( 2, yuv_input_set_z ) || SL2_CHECK( 2, yuv_input_set_black ) ) {
+				sl2::CFormat::m_ycoYuvToRgb.dBlack = ::_wtof( _wcpArgV[1] );
+                if ( sl2::CFormat::m_ycoYuvToRgb.dBlack < 0.0 || sl2::CFormat::m_ycoYuvToRgb.dBlack > 1.0 ) {
+                    SL2_ERRORT( std::format( L"Invalid \"{}\": \"{}\". Parameters must be between 0 and 1.",
+                        _wcpArgV[0], _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+				SL2_ADV( 2 );
+			}
+            if ( SL2_CHECK( 2, yuv_set_z ) || SL2_CHECK( 2, yuv_set_black ) ) {
+				sl2::CFormat::m_ycoRgbToYuv.dBlack = ::_wtof( _wcpArgV[1] );
+                if ( sl2::CFormat::m_ycoRgbToYuv.dBlack < 0.0 || sl2::CFormat::m_ycoRgbToYuv.dBlack > 1.0 ) {
+                    SL2_ERRORT( std::format( L"Invalid \"{}\": \"{}\". Parameters must be between 0 and 1.",
+                        _wcpArgV[0], _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+				SL2_ADV( 2 );
+			}
+            if ( SL2_CHECK( 2, yuv_input_kr_kb ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"REC_709" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"REC709" ) == 0 ) {
+                    sl2::CFormat::m_ycoYuvToRgb.dKr = sl2::CFormat::Luma( sl2::SL2_LS_REC_709 ).dRgb[0];
+                    sl2::CFormat::m_ycoYuvToRgb.dKb = sl2::CFormat::Luma( sl2::SL2_LS_REC_709 ).dRgb[2];
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"REC_2020" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"REC2020" ) == 0 ) {
+                    sl2::CFormat::m_ycoYuvToRgb.dKr = sl2::CFormat::Luma( sl2::SL2_LS_REC_2020 ).dRgb[0];
+                    sl2::CFormat::m_ycoYuvToRgb.dKb = sl2::CFormat::Luma( sl2::SL2_LS_REC_2020 ).dRgb[2];
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"SMPTC" ) == 0 ) {
+                    sl2::CFormat::m_ycoYuvToRgb.dKr = sl2::CFormat::Luma( sl2::SL2_LS_SMPTC ).dRgb[0];
+                    sl2::CFormat::m_ycoYuvToRgb.dKb = sl2::CFormat::Luma( sl2::SL2_LS_SMPTC ).dRgb[2];
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"REC_601" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"REC601" ) == 0 ) {
+                    sl2::CFormat::m_ycoYuvToRgb.dKr = sl2::CFormat::Luma( sl2::SL2_LS_REC_601 ).dRgb[0];
+                    sl2::CFormat::m_ycoYuvToRgb.dKb = sl2::CFormat::Luma( sl2::SL2_LS_REC_601 ).dRgb[2];
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"CIE_1931" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"CIE1931" ) == 0 ) {
+                    sl2::CFormat::m_ycoYuvToRgb.dKr = sl2::CFormat::Luma( sl2::SL2_LS_CIE_1931 ).dRgb[0];
+                    sl2::CFormat::m_ycoYuvToRgb.dKb = sl2::CFormat::Luma( sl2::SL2_LS_CIE_1931 ).dRgb[2];
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"NTSC_1953" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"NTSC1953" ) == 0 ) {
+                    sl2::CFormat::m_ycoYuvToRgb.dKr = sl2::CFormat::Luma( sl2::SL2_LS_NTSC_1953 ).dRgb[0];
+                    sl2::CFormat::m_ycoYuvToRgb.dKb = sl2::CFormat::Luma( sl2::SL2_LS_NTSC_1953 ).dRgb[2];
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"EBU_TECH_3213" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"EBUTECH3213" ) == 0 ) {
+                    sl2::CFormat::m_ycoYuvToRgb.dKr = sl2::CFormat::Luma( sl2::SL2_LS_EBU_TECH_3213 ).dRgb[0];
+                    sl2::CFormat::m_ycoYuvToRgb.dKb = sl2::CFormat::Luma( sl2::SL2_LS_EBU_TECH_3213 ).dRgb[2];
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"yuv_input_kr_kb\": \"{}\". Must be REC_709, REC_2020, SMPTC, REC_601, CIE_1931, NTSC_1953, or EBU_TECH_3213.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 2, yuv_kr_kb ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"REC_709" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"REC709" ) == 0 ) {
+                    sl2::CFormat::m_ycoRgbToYuv.dKr = sl2::CFormat::Luma( sl2::SL2_LS_REC_709 ).dRgb[0];
+                    sl2::CFormat::m_ycoRgbToYuv.dKb = sl2::CFormat::Luma( sl2::SL2_LS_REC_709 ).dRgb[2];
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"REC_2020" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"REC2020" ) == 0 ) {
+                    sl2::CFormat::m_ycoRgbToYuv.dKr = sl2::CFormat::Luma( sl2::SL2_LS_REC_2020 ).dRgb[0];
+                    sl2::CFormat::m_ycoRgbToYuv.dKb = sl2::CFormat::Luma( sl2::SL2_LS_REC_2020 ).dRgb[2];
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"SMPTC" ) == 0 ) {
+                    sl2::CFormat::m_ycoRgbToYuv.dKr = sl2::CFormat::Luma( sl2::SL2_LS_SMPTC ).dRgb[0];
+                    sl2::CFormat::m_ycoRgbToYuv.dKb = sl2::CFormat::Luma( sl2::SL2_LS_SMPTC ).dRgb[2];
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"REC_601" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"REC601" ) == 0 ) {
+                    sl2::CFormat::m_ycoRgbToYuv.dKr = sl2::CFormat::Luma( sl2::SL2_LS_REC_601 ).dRgb[0];
+                    sl2::CFormat::m_ycoRgbToYuv.dKb = sl2::CFormat::Luma( sl2::SL2_LS_REC_601 ).dRgb[2];
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"CIE_1931" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"CIE1931" ) == 0 ) {
+                    sl2::CFormat::m_ycoRgbToYuv.dKr = sl2::CFormat::Luma( sl2::SL2_LS_CIE_1931 ).dRgb[0];
+                    sl2::CFormat::m_ycoRgbToYuv.dKb = sl2::CFormat::Luma( sl2::SL2_LS_CIE_1931 ).dRgb[2];
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"NTSC_1953" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"NTSC1953" ) == 0 ) {
+                    sl2::CFormat::m_ycoRgbToYuv.dKr = sl2::CFormat::Luma( sl2::SL2_LS_NTSC_1953 ).dRgb[0];
+                    sl2::CFormat::m_ycoRgbToYuv.dKb = sl2::CFormat::Luma( sl2::SL2_LS_NTSC_1953 ).dRgb[2];
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"EBU_TECH_3213" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"EBUTECH3213" ) == 0 ) {
+                    sl2::CFormat::m_ycoRgbToYuv.dKr = sl2::CFormat::Luma( sl2::SL2_LS_EBU_TECH_3213 ).dRgb[0];
+                    sl2::CFormat::m_ycoRgbToYuv.dKb = sl2::CFormat::Luma( sl2::SL2_LS_EBU_TECH_3213 ).dRgb[2];
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"yuv_kr_kb\": \"{}\". Must be REC_709, REC_2020, SMPTC, REC_601, CIE_1931, NTSC_1953, or EBU_TECH_3213.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 3, yuv_input_set_kr_kb ) ) {
+				sl2::CFormat::m_ycoYuvToRgb.dKr = ::_wtof( _wcpArgV[1] );
+                sl2::CFormat::m_ycoYuvToRgb.dKr = ::_wtof( _wcpArgV[2] );
+                if ( sl2::CFormat::m_ycoYuvToRgb.dKr < 0.0 || sl2::CFormat::m_ycoYuvToRgb.dKr > 1.0 ||
+                    sl2::CFormat::m_ycoYuvToRgb.dKr < 0.0 || sl2::CFormat::m_ycoYuvToRgb.dKr > 1.0 ) {
+                    SL2_ERRORT( std::format( L"Invalid \"yuv_input_set_kr_kb\": \"{}\" \"{}\". Parameters must be between 0 and 1.",
+                        _wcpArgV[1], _wcpArgV[2] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+				SL2_ADV( 3 );
+			}
+            if ( SL2_CHECK( 3, yuv_set_kr_kb ) ) {
+				sl2::CFormat::m_ycoRgbToYuv.dKr = ::_wtof( _wcpArgV[1] );
+                sl2::CFormat::m_ycoRgbToYuv.dKr = ::_wtof( _wcpArgV[2] );
+                if ( sl2::CFormat::m_ycoRgbToYuv.dKr < 0.0 || sl2::CFormat::m_ycoRgbToYuv.dKr > 1.0 ||
+                    sl2::CFormat::m_ycoRgbToYuv.dKr < 0.0 || sl2::CFormat::m_ycoRgbToYuv.dKr > 1.0 ) {
+                    SL2_ERRORT( std::format( L"Invalid \"yuv_set_kr_kb\": \"{}\" \"{}\". Parameters must be between 0 and 1.",
+                        _wcpArgV[1], _wcpArgV[2] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+				SL2_ADV( 3 );
+			}
+            if ( SL2_CHECK( 1, yuv_input_use_approx ) ) {
+                sl2::CFormat::m_ycoYuvToRgb.bFullAlgorithm = false;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, yuv_use_approx ) ) {
+                sl2::CFormat::m_ycoRgbToYuv.bFullAlgorithm = false;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 2, yuv_input_format ) ) {
+                if ( oOptions.vInputs.size() == 0 ) {
+                    SL2_ERRORT( std::format( L"Invalid \"yuv_input_format\": \"{}\". No input file provided yet. -yuv_file must come before yuv_input.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                size_t sIdx = oOptions.vInputs.size() - 1;
+                std::string sString = sl2::CUtilities::Utf16ToUtf8( reinterpret_cast<const char16_t *>((_wcpArgV[1])) );
+                oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByVulkan( sString.c_str() );
+                if ( oOptions.vInputs[sIdx].pkifduvFormat && !SL2_GET_YUV_FLAG( oOptions.vInputs[sIdx].pkifduvFormat->ui32Flags ) ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = nullptr;
+                }
+                if ( !oOptions.vInputs[sIdx].pkifduvFormat ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sString.c_str() );
+                    if ( oOptions.vInputs[sIdx].pkifduvFormat && !SL2_GET_YUV_FLAG( oOptions.vInputs[sIdx].pkifduvFormat->ui32Flags ) ) {
+                        oOptions.vInputs[sIdx].pkifduvFormat = nullptr;
+                    }
+                }
+                if ( !oOptions.vInputs[sIdx].pkifduvFormat ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByMetal( sString.c_str() );
+                    if ( oOptions.vInputs[sIdx].pkifduvFormat && !SL2_GET_YUV_FLAG( oOptions.vInputs[sIdx].pkifduvFormat->ui32Flags ) ) {
+                        oOptions.vInputs[sIdx].pkifduvFormat = nullptr;
+                    }
+                }
+                if ( oOptions.vInputs[sIdx].pkifduvFormat && SL2_GET_YUV_FLAG( oOptions.vInputs[sIdx].pkifduvFormat->ui32Flags ) ) {
+                    SL2_ADV( 2 );
+                }
+
+                if ( ::_wcsicmp( _wcpArgV[1], L"nv12" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_NV12 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"nv21" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_NV21 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"yv12" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_YV12 );
+                }
+                /*else if ( ::_wcsicmp( _wcpArgV[1], L"yv21" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_YV21 );
+                }*/
+                else if ( ::_wcsicmp( _wcpArgV[1], L"yuy2" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_YUY2 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"uyvy" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_R8G8_B8G8_UNORM );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"p010" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_P010 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"p016" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_P016 );
+                }
+                /*else if ( ::_wcsicmp( _wcpArgV[1], L"y010" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"y016" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y016 );
+                }*/
+                else if ( ::_wcsicmp( _wcpArgV[1], L"p210" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_P210 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"p216" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_P216 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"y210" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y210 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"y216" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y216 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"y416" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y416 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"y410" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y410 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"ayuv" ) == 0 ) {
+                    oOptions.vInputs[sIdx].pkifduvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_AYUV );
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"yuv_input_format\": \"{}\". Must be one of the Vulkan/DXGI YUV formats or nv12, nv21, yv12, yuy2, uyvy, p010, p016, p210, p216, y210, y216, y416, y410, or ayuv.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
+            if ( SL2_CHECK( 2, yuv_format ) ) {
+                std::string sString = sl2::CUtilities::Utf16ToUtf8( reinterpret_cast<const char16_t *>((_wcpArgV[1])) );
+                oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByVulkan( sString.c_str() );
+                if ( oOptions.pkifdYuvFormat && !SL2_GET_YUV_FLAG( oOptions.pkifdYuvFormat->ui32Flags ) ) {
+                    oOptions.pkifdYuvFormat = nullptr;
+                }
+                if ( !oOptions.pkifdYuvFormat ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sString.c_str() );
+                    if ( oOptions.pkifdYuvFormat && !SL2_GET_YUV_FLAG( oOptions.pkifdYuvFormat->ui32Flags ) ) {
+                        oOptions.pkifdYuvFormat = nullptr;
+                    }
+                }
+                if ( !oOptions.pkifdYuvFormat ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByMetal( sString.c_str() );
+                    if ( oOptions.pkifdYuvFormat && !SL2_GET_YUV_FLAG( oOptions.pkifdYuvFormat->ui32Flags ) ) {
+                        oOptions.pkifdYuvFormat = nullptr;
+                    }
+                }
+                if ( oOptions.pkifdYuvFormat && SL2_GET_YUV_FLAG( oOptions.pkifdYuvFormat->ui32Flags ) ) {
+                    SL2_ADV( 2 );
+                }
+
+                if ( ::_wcsicmp( _wcpArgV[1], L"nv12" ) == 0 ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_NV12 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"nv21" ) == 0 ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_NV21 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"yv12" ) == 0 ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_YV12 );
+                }
+                /*else if ( ::_wcsicmp( _wcpArgV[1], L"yv21" ) == 0 ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_YV21 );
+                }*/
+                else if ( ::_wcsicmp( _wcpArgV[1], L"yuy2" ) == 0 ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_YUY2 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"uyvy" ) == 0 ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_R8G8_B8G8_UNORM );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"p010" ) == 0 ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_P010 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"p016" ) == 0 ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_P016 );
+                }
+                /*else if ( ::_wcsicmp( _wcpArgV[1], L"y010" ) == 0 ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"y016" ) == 0 ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y016 );
+                }*/
+                else if ( ::_wcsicmp( _wcpArgV[1], L"p210" ) == 0 ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_P210 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"p216" ) == 0 ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_P216 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"y210" ) == 0 ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y210 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"y216" ) == 0 ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y216 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"y416" ) == 0 ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y416 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"y410" ) == 0 ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_Y410 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"ayuv" ) == 0 ) {
+                    oOptions.pkifdYuvFormat = sl2::CFormat::FindFormatDataByDx( sl2::SL2_DXGI_FORMAT_AYUV );
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"yuv_format\": \"{}\". Must be one of the Vulkan/DXGI YUV formats or nv12, nv21, yv12, yuy2, uyvy, p010, p016, p210, p216, y210, y216, y416, y410, or ayuv.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
 
             // ============
             // == LEGACY ==
@@ -1785,8 +2028,8 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
         SL2_YUV_FILE( VK_FORMAT_G8B8G8R8_422_UNORM, yuy2 )
 
         SL2_YUV_FILE( VK_FORMAT_B16G16R16G16_422_UNORM, uyvy16 )
-        SL2_YUV_FILE( VK_FORMAT_B12X4G12X4R12X4G12X4_422_UNORM_4PACK16, uyvy1612le )
-        SL2_YUV_FILE( VK_FORMAT_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16, uyvy1610le )
+        SL2_YUV_FILE( VK_FORMAT_B12X4G12X4R12X4G12X4_422_UNORM_4PACK16, uyvy12le )
+        SL2_YUV_FILE( VK_FORMAT_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16, uyvy10le )
         SL2_YUV_FILE( VK_FORMAT_B8G8R8G8_422_UNORM, uyvy )
 
         SL2_YUV_FILE( VK_FORMAT_R12X4G12X4B12X4A12X4_UNORM_4PACK16, yuva12le )

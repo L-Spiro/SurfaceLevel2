@@ -1990,8 +1990,8 @@ namespace sl2 {
 		size_t _sM, uint32_t _ui32BlackLevel, uint32_t _ui32S ) {
 		double dL = _dKr * _dR + _dKb * _dB + (1.0 - _dKr - _dKb) * _dG;
 
-		double dMult = double( 1 << (_sM - 8) );
-		double dMax = double( (1 << _sM) - 1 );
+		double dMult = double( 1ULL << (_sM - 8) );
+		double dMax = double( (1ULL << _sM) - 1 );
 
 		dL *= 255.0;
 		_dR *= 255.0;
@@ -2055,7 +2055,7 @@ namespace sl2 {
 		double dU = double( _ui32U ) / dMult;
 		double dV = double( _ui32V ) / dMult;
 
-		double dL_ = _dKr * _dR + _dKb * _dB + (1.0 - _dKr - _dKb) * _dG;
+		//double dL = _dKr * _dR + _dKb * _dB + (1.0 - _dKr - _dKb) * _dG;
 		double dL = dZ + (dS / 219.0) * (dY - 16.0);
 
 		_dB = dL + (dU - 128.0) * (1.0 - _dKb) * dS / 112.0;

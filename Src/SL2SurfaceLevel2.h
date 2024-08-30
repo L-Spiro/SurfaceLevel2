@@ -33,8 +33,8 @@ namespace sl2 {
 		std::vector<std::u16string>										vOutputs;														/**< The output files. */
 		const sl2::CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *				pkifdFinalFormat = nullptr;										/**< Actual final format.  If not manually specified, vfAutoFormat is used. */
 		sl2::CFormat::SL2_SWIZZLE										sSwizzle = CFormat::DefaultSwizzle();							/**< The swizzle to apply. */
-		double															dGamma = 1.0 / -2.2;											/**< User-supplied gamma. */
-		double															dTargetGamma = 1.0 / -2.2;										/**< User-supplied target gamma. */
+		double															dGamma = -2.2;													/**< User-supplied gamma. */
+		double															dTargetGamma = -2.2;											/**< User-supplied target gamma. */
 		bool															bManuallySetGamma = false;										/**< Have we used -g or -gamma or -srgb or _rgbe? */
 		bool															bManuallySetTargetGamma = false;								/**< Have we manually set the target gamma? */
 		SL2_COLORSPACE_GAMMA_CURVES										cgcInputGammaCurve = SL2_CGC_NONE;								/**< The input gamma curve. */

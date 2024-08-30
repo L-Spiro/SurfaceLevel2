@@ -25,8 +25,8 @@
 namespace sl2 {
 
 	CImage::CImage() :
-		m_dGamma( 1.0 / -2.2 ),
-		m_dTargetGamma( 1.0 / -2.2 ),
+		m_dGamma( -2.2 ),
+		m_dTargetGamma( -2.2 ),
 		m_cgcInputCurve( SL2_CGC_sRGB_PRECISE ),
 		m_cgcOutputCurve( SL2_CGC_sRGB_PRECISE ),
 		m_i32InRenderingIntent( INTENT_RELATIVE_COLORIMETRIC ),
@@ -119,8 +119,8 @@ namespace sl2 {
 			_iOther.m_kKernel.SetSize( 0 );
 			_iOther.m_sFaces = 0;
 			_iOther.m_pkifFormat = nullptr;
-			_iOther.m_dGamma = 1.0 / -2.2;
-			_iOther.m_dTargetGamma = 1.0 / -2.2;
+			_iOther.m_dGamma = -2.2;
+			_iOther.m_dTargetGamma = -2.2;
 			_iOther.m_bManuallySetGamma = _iOther.m_bManuallySetTargetGamma = false;
 			_iOther.m_cgcInputCurve = SL2_CGC_sRGB_PRECISE;
 			_iOther.m_cgcOutputCurve = SL2_CGC_sRGB_PRECISE;
@@ -162,8 +162,8 @@ namespace sl2 {
 	 * Resets the object to scratch.  It can be reused after this.
 	 **/
 	void CImage::Reset() {
-		m_dGamma = 1.0 / -2.2,
-		m_dTargetGamma = 1.0 / -2.2;
+		m_dGamma = -2.2,
+		m_dTargetGamma = -2.2;
 		m_cgcInputCurve = SL2_CGC_sRGB_PRECISE;
 		m_cgcOutputCurve = SL2_CGC_sRGB_PRECISE;
 		m_i32InRenderingIntent = INTENT_RELATIVE_COLORIMETRIC,
@@ -275,8 +275,8 @@ namespace sl2 {
 		}
 
 		SL2_VUL_YUV( VK_FORMAT_B16G16R16G16_422_UNORM, uyvy16 );
-		SL2_VUL_YUV( VK_FORMAT_B12X4G12X4R12X4G12X4_422_UNORM_4PACK16, uyvy1612le );
-		SL2_VUL_YUV( VK_FORMAT_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16, uyvy1610le );
+		SL2_VUL_YUV( VK_FORMAT_B12X4G12X4R12X4G12X4_422_UNORM_4PACK16, uyvy12le );
+		SL2_VUL_YUV( VK_FORMAT_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16, uyvy10le );
 		if ( SL2_DX_CHECK( VK_FORMAT_B8G8R8G8_422_UNORM, uyv2 ) || SL2_YUV_CHECK( DXGI_FORMAT_R8G8_B8G8_UNORM, uyvy ) ) {
 			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_B8G8R8G8_422_UNORM>( vFile );
 		}
@@ -296,10 +296,10 @@ namespace sl2 {
 		SL2_DX_YUV( DXGI_FORMAT_P016, p016 );
 		SL2_DX_YUV( DXGI_FORMAT_P010, p010 );
 
-		if ( SL2_YUV_CHECK( VK_FORMAT_G12X4_B12X4R12X4_2PLANE_420_UNORM_3PACK16, yuv420y12le ) || ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"y012" ) == 0 ) {
+		if ( SL2_YUV_CHECK( VK_FORMAT_G12X4_B12X4R12X4_2PLANE_420_UNORM_3PACK16, yuv420y12le ) || ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"p012" ) == 0 ) {
 			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G12X4_B12X4R12X4_2PLANE_420_UNORM_3PACK16>( vFile );
 		}
-		if ( SL2_YUV_CHECK( VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16, yuv420y10le ) || ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"y010" ) == 0 ) {
+		if ( SL2_YUV_CHECK( VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16, yuv420y10le ) || ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"p010" ) == 0 ) {
 			return LoadYuv_Vulkan_Basic<SL2_VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16>( vFile );
 		}
 		if ( SL2_YUV_CHECK( VK_FORMAT_G8_B8R8_2PLANE_420_UNORM, yuv420y ) || SL2_YUV_CHECK( DXGI_FORMAT_NV12, nv12 ) || ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _pcFile ).c_str()), L"yuv420y" ) == 0 ) {
@@ -348,14 +348,14 @@ namespace sl2 {
 		CImage iTmp;
 		if ( !_pkifFormat || !Format() ) { return SL2_E_BADFORMAT; }
 
-		if ( ParametersAreUnchanged( _pkifFormat, false, 0, 0, 0 ) ) {
-			// No format conversion needed.  Just copy the buffers.
-			if ( !_iDst.AllocateTexture( _pkifFormat, Width(), Height(), Depth(), Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
-			for ( size_t M = 0; M < Mipmaps(); ++M ) {
-				std::memcpy( _iDst.Data( M, 0, 0, 0 ), Data( M, 0, 0, 0 ), m_vMipMaps[M]->size() );
-			}
-			return SL2_E_SUCCESS;
-		}
+		//if ( ParametersAreUnchanged( _pkifFormat, false, 0, 0, 0 ) ) {
+		//	// No format conversion needed.  Just copy the buffers.
+		//	if ( !_iDst.AllocateTexture( _pkifFormat, Width(), Height(), Depth(), Mipmaps(), ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
+		//	for ( size_t M = 0; M < Mipmaps(); ++M ) {
+		//		std::memcpy( _iDst.Data( M, 0, 0, 0 ), Data( M, 0, 0, 0 ), m_vMipMaps[M]->size() );
+		//	}
+		//	return SL2_E_SUCCESS;
+		//}
 
 		if ( !Format()->pfToRgba64F ) { return SL2_E_BADFORMAT; }
 		
@@ -389,13 +389,17 @@ namespace sl2 {
 			case SL2_MH_KEEP_EXISTING : {
 				sSrcMips = std::max( std::min( Mipmaps(), m_sTotalMips + 1 ), size_t( 1 ) );
 				sDstMips = std::max( m_sTotalMips + 1, Mipmaps() );
+				if ( !m_sTotalMips ) {
+					sDstMips = CUtilities::Max( size_t( std::round( std::log2( ui32NewW ) ) ), size_t( std::round( std::log2( ui32NewH ) ) ) );
+					sDstMips = CUtilities::Max( size_t( std::round( std::log2( ui32NewD ) ) ), sDstMips ) + 1;
+				}
 				break;
 			}
 			case SL2_MH_GENERATE_NEW : {
 				sSrcMips = 1;
 				if ( !m_sTotalMips ) {
 					sDstMips = CUtilities::Max( size_t( std::round( std::log2( ui32NewW ) ) ), size_t( std::round( std::log2( ui32NewH ) ) ) );
-					sDstMips = CUtilities::Max( size_t( std::round( std::log2( ui32NewH ) ) ), sDstMips ) + 1;
+					sDstMips = CUtilities::Max( size_t( std::round( std::log2( ui32NewD ) ) ), sDstMips ) + 1;
 				}
 				else {
 					sDstMips = m_sTotalMips + 1;
@@ -431,17 +435,15 @@ namespace sl2 {
 					if ( !Format()->pfToRgba64F( Data( M, 0, A, F ), pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), &ifdData ) ) {
 						return SL2_E_INTERNALERROR;
 					}
-					BakeGamma( pui8Dest, m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), CFormat::TransferFunc( m_cgcInputCurve ) );
+					if ( m_dGamma ) {
+						BakeGamma( pui8Dest, 1.0 / m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), CFormat::TransferFunc( m_cgcInputCurve ) );
+					}
 					if ( m_bApplyInputColorSpaceTransfer ) {
 						ApplySrcColorSpace( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
 					}
 					if ( m_bIgnoreAlpha ) {
 						m_bIsPreMultiplied = m_bNeedsPreMultiply = false;
 						SetAlpha( pui8Dest, 1.0, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
-					}
-					if ( !m_bIsPreMultiplied && m_bNeedsPreMultiply ) {
-						CFormat::ApplyPreMultiply( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
-						bTargetIsPremulAlpha = true;
 					}
 					if ( m_bFlipX && m_vMipMaps[M]->Width() > 1 ) {
 						CFormat::FlipX( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
@@ -492,6 +494,10 @@ namespace sl2 {
 							if ( !rResampleMe.Resample( reinterpret_cast<double *>(pui8Dest), reinterpret_cast<double *>(iTmp.Data( N, 0, A, F )), rResampleCopy ) ) { return SL2_E_OUTOFMEMORY; }
 						}
 					}
+					if ( !m_bIsPreMultiplied && m_bNeedsPreMultiply ) {
+						CFormat::ApplyPreMultiply( iTmp.Data( M, 0, A, F ), m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+						bTargetIsPremulAlpha = true;
+					}
 					
 				}
 			}
@@ -505,7 +511,7 @@ namespace sl2 {
 					}
 					else {
 						if ( m_dTargetGamma ) {
-							BakeGamma( iTmp.Data( M, 0, A, F ), 1.0 / m_dTargetGamma, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth(), CFormat::TransferFunc( m_cgcOutputCurve ) );
+							BakeGamma( iTmp.Data( M, 0, A, F ), m_dTargetGamma, iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth(), CFormat::TransferFunc( m_cgcOutputCurve ) );
 						}
 						ApplyDstColorSpace( iTmp.Data( M, 0, A, F ), iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );
 					}
