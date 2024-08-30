@@ -443,6 +443,21 @@
     <td>Sets the non-mipmap color <strong>height</strong> filter.</td>
   </tr>
   <tr>
+    <td>-filterd_color</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the non-mipmap color <strong>depth</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-filterw_alpha</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the non-mipmap alpha <strong>width</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-filterh_alpha</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the non-mipmap alpha <strong>height</strong> filter.</td>
+  </tr>
+  <tr>
     <td>-filterd_alpha</td>
     <td>Same as for <em>-filter</em>.</td>
     <td>Sets the non-mipmap alpha <strong>depth</strong> filter.</td>
@@ -476,6 +491,21 @@
     <td>-mip_filterh_color</td>
     <td>Same as for <em>-filter</em>.</td>
     <td>Sets the mipmap color <strong>height</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterd_color</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color <strong>depth</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterw_alpha</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap alpha <strong>width</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterh_alpha</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap alpha <strong>height</strong> filter.</td>
   </tr>
   <tr>
     <td>-mip_filterd_alpha</td>
