@@ -994,6 +994,46 @@
   </tr>
 </table>
 
+<h3>Quality Settings</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>-quality_highest<br>-very_slow</td>
+    <td></td>
+    <td>The highest quality setting for compressing textures in BC*, EAC, ETC*, PVR, and ASTC formats.</td>
+  </tr>
+  <tr>
+    <td>-quality_production<br>-slow</td>
+    <td></td>
+    <td>The 2<sup>nd</sup>-highest quality setting for compressing textures in BC*, EAC, ETC*, PVR, and ASTC formats.</td>
+  </tr>
+  <tr>
+    <td>-quality_normal<br>-basic</td>
+    <td></td>
+    <td>The normal quality setting for compressing textures in BC*, EAC, ETC*, PVR, and ASTC formats.</td>
+  </tr>
+  <tr>
+    <td>-fast</td>
+    <td></td>
+    <td>A fast but somewhat low-quality setting for compressing textures in BC*, EAC, ETC*, PVR, and ASTC formats.</td>
+  </tr>
+  <tr>
+    <td>-quick<br>-veryfast</td>
+    <td></td>
+    <td>A faster but lower-quality setting for compressing textures in BC*, EAC, ETC*, PVR, and ASTC formats.</td>
+  </tr>
+  <tr>
+    <td>-ultrafast</td>
+    <td></td>
+    <td>The fastest but lowest-quality setting for compressing textures in BC*, EAC, ETC*, PVR, and ASTC formats.</td>
+  </tr>
+</table>
+
 <h3>Misc.</h3>
 
 <table border="1" cellpadding="5">
