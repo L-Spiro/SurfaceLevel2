@@ -8,7 +8,7 @@
 * Almost all texture formats for Vulkan, Metal, OpenGL, and Direct3D 12 are supported.  Literally hundreds of formats, and more to come!
 * Normal-map generation, swizzling, channel swapping, image flipping, pre-multiplying alpha, and more!
 * Handles 1-D, 2-D, and 3-D textures, multiple faces, texture arrays, and mipmaps.
-* Currently exports to **PNG**, **BMP**, **TGA**, **JPG**, **J2K**, **JP2**, **EXR**, **DDS**, **KTX**, and **PVR**.
+* Currently exports to **PNG**, **BMP**, **TGA**, **JPG**, **J2K**, **JP2**, **EXR**, **DDS**, **KTX**, **PVR**, and **YUV** (and variants).
 <h2>Commands</h2>
 
 <h3>File</h3>
@@ -25,9 +25,61 @@
     <td>A path to an image file to load and convert. The <em>-file</em> and <em>-outfile</em> commands can be used multiple times to load and save multiple files.</td>
   </tr>
   <tr>
+    <td>-yuv_file</td>
+    <td>&lt;file_path&gt;<br>&lt;width&gt; &lt;height&gt;</td>
+    <td>
+      Path to a YUV file to load. If the extension does not indicate the YUV encoding, then <em>yuv_input_format</em> must be called to specify the YUV encoding.<br>
+      Recognized file extensions:<br>
+      yuv444p16<br>
+      yuv444p12le<br>
+      yuv444p10le<br>
+      yuv444p<br>
+      yuv444y16<br>
+      yuv444y12le<br>
+      yuv444y10le<br>
+      yuv444y<br>
+      yuv422p16<br>
+      yuv422p12le<br>
+      yuv422p10le<br>
+      yuv422p<br>
+      yuv422y16<br>
+      yuv422y12le<br>
+      yuv422y10le<br>
+      yuv422y<br>
+      yuv420p16<br>
+      yuv420p12le<br>
+      yuv420p10le<br>
+      yuv420p<br>
+      yuv420y16<br>
+      yuv420y12le<br>
+      yuv420y10le<br>
+      yuv420y<br>
+      yuva12le<br>
+      yuva10le<br>
+      uyvy16<br>
+      uyvy1612le<br>
+      uyvy<br>
+      y210<br>
+      yuy2<br>
+      yuy12<br>
+      yv12<br>
+      p016<br>
+      p010<br>
+      y012<br>
+      y010<br>
+      nv12<br>
+      yuv420y<br>
+      nv21<br>
+      y416<br>
+      y410<br>
+      avuv<br>
+      Extensions other than these will require the format to be explicitly set.
+    </td>
+  </tr>
+  <tr>
     <td>-outfile</td>
     <td>&lt;file_path&gt;</td>
-    <td>The path to which to save the file supplied with the last <em>-file</em> command. The destination file format is determined by the file extension.<br>Currently supported formats:<br>PNG<br>BMP<br>TGA<br>JPG<br>J2K<br>JP2<br>EXR<br>DDS<br>KTX<br>PVR</td>
+    <td>The path to which to save the file supplied with the last <em>-file</em> command. The destination file format is determined by the file extension.<br>Currently supported formats:<br>PNG<br>BMP<br>TGA<br>JPG<br>J2K<br>JP2<br>EXR<br>DDS<br>KTX<br>PVR<br>YUV (and variants)</td>
   </tr>
 </table>
 
@@ -559,6 +611,200 @@
     <td>-border_color</td>
     <td>&lt;r&gt; &lt;g&gt; &lt;b&gt;</em></td>
     <td>Sets the border color for the U, V, and W coordinates.<br>Defaults to <strong>0.0 0.0 0.0</strong></td>
+  </tr>
+</table>
+
+<h3>YUV Options</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td rowspan="15">-yuv_input_format</td>
+    <td>&lt;any Vulkan, DXGI, or Metal YUV format&gt;</td>
+    <td>Sets the format (encoding) of the YUV file being loaded.</td>
+  </tr>
+  <tr>
+    <td>nv12</td>
+    <td>DXGI_FORMAT_NV12/ VK_FORMAT_G8_B8R8_2PLANE_420_UNORM</td>
+  </tr>
+  <tr>
+    <td>nv21</td>
+    <td>DXGI_FORMAT_NV21/ VK_FORMAT_NV21</td>
+  </tr>
+  <tr>
+    <td>yv12</td>
+    <td>DXGI_FORMAT_YV12</td>
+  </tr>
+  <tr>
+    <td>yuy2</td>
+    <td>DXGI_FORMAT_YUY2</td>
+  </tr>
+  <tr>
+    <td>vyuy</td>
+    <td>DXGI_FORMAT_R8G8_B8G8_UNORM/ VK_FORMAT_B8G8R8G8_422_UNORM/ MTLPixelFormatBGRG422</td>
+  </tr>
+  <tr>
+    <td>p010</td>
+    <td>DXGI_FORMAT_P010/ VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16</td>
+  </tr>
+  <tr>
+    <td>p016</td>
+    <td>DXGI_FORMAT_P016/ VK_FORMAT_G16_B16R16_2PLANE_420_UNORM</td>
+  </tr>
+  <tr>
+    <td>p210</td>
+    <td>DXGI_FORMAT_P210/ VK_FORMAT_G10X6_B10X6R10X6_2PLANE_422_UNORM_3PACK16</td>
+  </tr>
+  <tr>
+    <td>p216</td>
+    <td>DXGI_FORMAT_P216/ VK_FORMAT_G16_B16R16_2PLANE_422_UNORM</td>
+  </tr>
+  <tr>
+    <td>y210</td>
+    <td>DXGI_FORMAT_Y210/ VK_FORMAT_G10X6_B10X6R10X6R10X6_422_UNORM_4PACK16</td>
+  </tr>
+  <tr>
+    <td>y216</td>
+    <td>DXGI_FORMAT_Y216/ VK_FORMAT_G16B16G16R16_422_UNORM</td>
+  </tr>
+  <tr>
+    <td>y410</td>
+    <td>DXGI_FORMAT_Y410</td>
+  </tr>
+  <tr>
+    <td>y416</td>
+    <td>DXGI_FORMAT_Y416</td>
+  </tr>
+  <tr>
+    <td>ayuv</td>
+    <td>DXGI_FORMAT_AYUV</td>
+  </tr>
+  <tr>
+    <td>-yuv_format</td>
+    <td>Same as <em>-yuv_input_format</em></td>
+    <td>Sets the encoding when saving to a YUV format.</td>
+  </tr>
+  <tr>
+    <td>-yuv_input_use_approx</td>
+    <td></td>
+    <td>Uses a common approximate YUV -> RGB conversion when loading a YUV file. By default the full YUV -> RGB algorithm is used.</td>
+  </tr>
+  <tr>
+    <td>-yuv_use_approx</td>
+    <td></td>
+    <td>Uses a common approximate RGB -> YUV conversion when writing to a YUV file. By default the full RGB -> YUV algorithm is used.</td>
+  </tr>
+  <tr>
+    <td rowspan="7">-yuv_input_kr_kb</td>
+    <td>REC_709<br>REC709</td>
+    <td>
+      Sets the Kr and Kb factors according to the ITU-R Recommendation BT.709-5 standard.<br>
+      0.212639005871510 and 0.072192315360734.<br>
+      This is the default.
+    </td>
+  </tr>
+  <tr>
+    <td>REC_2020<br>REC2020</td>
+    <td>
+      Sets the Kr and Kb factors according to the ITU-R Recommendation BT.2020 standard.<br>
+      0.2627 and 0.0593.
+    </td>
+  </tr>
+  <tr>
+    <td>SMPTC</td>
+    <td>Sets the Kr and Kb factors according to the SMPTE C standard.<br>0.2124 and 0.0866.</td>
+  </tr>
+  <tr>
+    <td>REC_601<br>REC601</td>
+    <td>
+      Sets the Kr and Kb factors according to the ITU-R Recommendation BT.601 standard.<br>
+      0.2988390 and 0.1143500.
+    </td>
+  </tr>
+  <tr>
+    <td>CIE_1931<br>CIE1931</td>
+    <td>
+      Sets the Kr and Kb factors according to the CIE 1931 standard.<br>
+      0.3086 and 0.0820.
+    </td>
+  </tr>
+  <tr>
+    <td>NTSC_1953<br>NTSC1953</td>
+    <td>Sets the Kr and Kb factors according to the NTSC 1953 standard.<br>0.3 and 0.11.</td>
+  </tr>
+  <tr>
+    <td>EBU_TECH_3213<br>EBUTECH3213</td>
+    <td>
+      Sets the Kr and Kb factors according to the EBU Tech. 3213 standard.<br>
+      0.2988390 and 0.1143500.
+    </td>
+  </tr>
+  <tr>
+    <td>-yuv_kr_kb</td>
+    <td>Same as <em>-yuv_input_kr_kb</em></td>
+    <td>Sets the output Kr and Kb factors when saving to a YUV file.</td>
+  </tr>
+  <tr>
+    <td>-yuv_input_set_kr_kb</td>
+    <td>&lt;kr&gt; &lt;kb&gt;</td>
+    <td>Manually specifies the Kr and Kb factors for loading a YUV file.</td>
+  </tr>
+  <tr>
+    <td>-yuv_set_kr_kb</td>
+    <td>&lt;kr&gt; &lt;kb&gt;</td>
+    <td>Manually specifies the Kr and Kb factors for saving to a YUV file.</td>
+  </tr>
+  <tr>
+    <td>-yuv_input_set_z<br>-yuv_input_set_black</td>
+    <td>&lt;black level&gt;</td>
+    <td>Sets the black level (0..1) for loading a YUV file. Defaults to 0.0.</td>
+  </tr>
+  <tr>
+    <td>-yuv_set_z<br>-yuv_set_black</td>
+    <td>&lt;black level&gt;</td>
+    <td>Sets the black level (0..1) for saving to a YUV file. Defaults to 0.0.</td>
+  </tr>
+  <tr>
+    <td>-yuv_input_set_s<br>-yuv_input_set_scale</td>
+    <td>&lt;scale&gt;</td>
+    <td>Sets the scaler (0..1) for loading a YUV file. Defaults to 1.0.</td>
+  </tr>
+  <tr>
+    <td>-yuv_set_s<br>-yuv_set_scale</td>
+    <td>&lt;scale&gt;</td>
+    <td>Sets the scaler (0..1) for saving to a YUV file. Defaults to 1.0.</td>
+  </tr>
+  <tr>
+    <td>-yuv_input_pc</td>
+    <td></td>
+    <td>
+      Sets the black level to 0.0, scale to 1.0, Kr and Kb to the ITU-R Recommendation BT.709-5 standard, and enables the full non-approximate conversion routine for loading YUV files.
+    </td>
+  </tr>
+  <tr>
+    <td>-yuv_pc</td>
+    <td></td>
+    <td>
+      Sets the black level to 0.0, scale to 1.0, Kr and Kb to the ITU-R Recommendation BT.709-5 standard, and enables the full non-approximate conversion routine for save to a YUV file.
+    </td>
+  </tr>
+  <tr>
+    <td>-yuv_input_studio</td>
+    <td></td>
+    <td>
+      Sets the black level to (16.0 / 255.0), scale to (219.0 / 255.0), Kr and Kb to the ITU-R Recommendation BT.709-5 standard, and enables the full non-approximate conversion routine for loading YUV files.
+    </td>
+  </tr>
+  <tr>
+    <td>-yuv_studio</td>
+    <td></td>
+    <td>
+      Sets the black level to (16.0 / 255.0), scale to (219.0 / 255.0), Kr and Kb to the ITU-R Recommendation BT.709-5 standard, and enables the full non-approximate conversion routine for save to a YUV file.
+    </td>
   </tr>
 </table>
 
