@@ -956,6 +956,16 @@
     <th>Description</th>
   </tr>
   <tr>
+    <td>-format</td>
+    <td>&lt;any Vulkan, DXGI, or Metal format&gt;</td>
+    <td>Converts the loaded image to the given texture format.</td>
+  </tr>
+  <tr>
+    <td>-ogl_format</td>
+    <td>&lt;internal format&gt; &lt;type&gt; &lt;base internal format&gt;</td>
+    <td>Converts the loaded image to the given OpenGL texture format.</td>
+  </tr>
+  <tr>
     <td>-ignore_alpha</td>
     <td></td>
     <td>Any alpha channel is set to all 1’s.</td>
@@ -981,6 +991,77 @@
     <td>-swap</td>
     <td></td>
     <td>Swaps the R and B channels.</td>
+  </tr>
+</table>
+
+<h3>Misc.</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>-weight<br>-weights</td>
+    <td>&lt;red weight&gt; &lt;green weight&gt; &lt;blue weight&gt;</td>
+    <td>Sets the luminance weight factors manually.</td>
+  </tr>
+  <tr>
+    <td rowspan="7">-luma</td>
+    <td>REC_709<br>REC709</td>
+    <td>
+      Sets the luminance weight factors according to the ITU-R Recommendation BT.709-5 standard.<br>
+      0.212639005871510, 0.715168678767756, and 0.072192315360734.<br>
+      This is the default.
+    </td>
+  </tr>
+  <tr>
+    <td>REC_2020<br>REC2020</td>
+    <td>
+      Sets the luminance weight factors according to the ITU-R Recommendation BT.2020 standard.<br>
+      0.2627, 0.678, and 0.0593.
+    </td>
+  </tr>
+  <tr>
+    <td>SMPTC</td>
+    <td>
+      Sets the luminance weight factors according to the SMPTE C standard.<br>
+      0.2124, 0.7011, and 0.0866.
+    </td>
+  </tr>
+  <tr>
+    <td>REC_601<br>REC601</td>
+    <td>
+      Sets the luminance weight factors according to the ITU-R Recommendation BT.601 standard.<br>
+      0.2988390, 0.5868110, and 0.1143500.
+    </td>
+  </tr>
+  <tr>
+    <td>CIE_1931<br>CIE1931</td>
+    <td>
+      Sets the luminance weight factors according to the CIE 1931 standard.<br>
+      0.3086, 0.6094, and 0.0820.
+    </td>
+  </tr>
+  <tr>
+    <td>NTSC_1953<br>NTSC1953</td>
+    <td>
+      Sets the luminance weight factors according to the NTSC 1953 standard.<br>
+      0.3, 0.59, and 0.11.
+    </td>
+  </tr>
+  <tr>
+    <td>EBU_TECH_3213<br>EBUTECH3213</td>
+    <td>
+      Sets the luminance weight factors according to the EBU Tech. 3213 standard.<br>
+      0.2988390, 0.5868110, and 0.1143500.
+    </td>
+  </tr>
+  <tr>
+    <td>-printformats<br>-print_formats</td>
+    <td></td>
+    <td>Prints all supported formats that can be supplied to <em>-format</em>.</td>
   </tr>
 </table>
 
