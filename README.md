@@ -464,56 +464,6 @@
     <td>Sets the non-mipmap alpha <strong>depth</strong> filter.</td>
   </tr>
   <tr>
-    <td>-mip_filter</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Applies the selected filter to all mipmap filters.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterw</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap color and alpha <strong>width</strong> filter.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterh</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap color and alpha <strong>height</strong> filter.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterd</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap color and alpha <strong>depth</strong> filter.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterw_color</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap color <strong>width</strong> filter.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterh_color</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap color <strong>height</strong> filter.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterd_color</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap color <strong>depth</strong> filter.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterw_alpha</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap alpha <strong>width</strong> filter.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterh_alpha</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap alpha <strong>height</strong> filter.</td>
-  </tr>
-  <tr>
-    <td>-mip_filterd_alpha</td>
-    <td>Same as for <em>-filter</em>.</td>
-    <td>Sets the mipmap alpha <strong>depth</strong> filter.</td>
-  </tr>
-  <tr>
     <td>-prescale</td>
     <td>&lt;new width&gt; &lt;new height&gt;</td>
     <td>Resamples the image to the given width/height using the selected non-mipmap filters.</td>
@@ -834,6 +784,87 @@
     <td>
       Sets the black level to (16.0 / 255.0), scale to (219.0 / 255.0), Kr and Kb to the ITU-R Recommendation BT.709-5 standard, and enables the full non-approximate conversion routine for saving to a YUV file.
     </td>
+  </tr>
+</table>
+
+<h3>Mipmaps</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>-nomips<br>-nomipmaps<br>-no_mips<br>-no_mipmaps</td>
+    <td></td>
+    <td>No mipmaps are generated and existing mipmaps are discarded.</td>
+  </tr>
+  <tr>
+    <td>-nmips</td>
+    <td>&lt;total mipmaps&gt;</td>
+    <td>
+      Sets the total number of mipmaps desired. Set to 0 to generate (or keep) a full mipmap chain.<br>
+      Defaults to <strong>0</strong>.
+    </td>
+  </tr>
+  <tr>
+    <td>-keepmips<br>-keepmipmaps<br>-keep_mips<br>-keep_mipmaps</td>
+    <td></td>
+    <td>
+      By default, new mipmaps will be generated as specified by <em>-nmips</em> (which defaults to 0, so a full chain is generated).<br>
+      This command allows existing mipmaps to be retained instead of overwritten. Existing mipmaps beyond the <em>-nmips</em> specification will be truncated, and if <em>-nmips</em> extends beyond the number of existing mipmaps, then new mipmaps will be generated to fill the gap.
+    </td>
+  </tr>
+    <tr>
+    <td>-mip_filter</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Applies the selected filter to all mipmap filters.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterw</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color and alpha <strong>width</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterh</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color and alpha <strong>height</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterd</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color and alpha <strong>depth</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterw_color</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color <strong>width</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterh_color</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color <strong>height</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterd_color</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap color <strong>depth</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterw_alpha</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap alpha <strong>width</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterh_alpha</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap alpha <strong>height</strong> filter.</td>
+  </tr>
+  <tr>
+    <td>-mip_filterd_alpha</td>
+    <td>Same as for <em>-filter</em>.</td>
+    <td>Sets the mipmap alpha <strong>depth</strong> filter.</td>
   </tr>
 </table>
 
