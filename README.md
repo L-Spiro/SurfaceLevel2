@@ -557,17 +557,17 @@
     <td>Applies only to the W coordinate.</td>
   </tr>
   <tr>
-    <td>-textureaddressingw_opaque<br>-taw_opaque</td>
+    <td>-textureaddressingw_color<br>-taw_color</td>
     <td>Same as <em>-ta.</em></td>
     <td>Applies only to the U coordinate and to color channels.</td>
   </tr>
   <tr>
-    <td>-textureaddressingh_opaque<br>-tah_opaque</td>
+    <td>-textureaddressingh_color<br>-tah_color</td>
     <td>Same as <em>-ta.</em></td>
     <td>Applies only to the V coordinate and to color channels.</td>
   </tr>
   <tr>
-    <td>-textureaddressingd_opaque<br>-tad_opaque</td>
+    <td>-textureaddressingd_color<br>-tad_color</td>
     <td>Same as <em>-ta.</em></td>
     <td>Applies only to the W coordinate and to color channels.</td>
   </tr>
@@ -1587,7 +1587,7 @@ These image formats supported:
  | DXGI_FORMAT_P216 |
  | DXGI_FORMAT_P210 |
  | DXGI_FORMAT_P208 |
- | DXGI_FORMAT_420_OPAQUE |
+ | DXGI_FORMAT_420_color |
  | DXGI_FORMAT_YV12 |
  | DXGI_FORMAT_P016 |
  | DXGI_FORMAT_P010 |
