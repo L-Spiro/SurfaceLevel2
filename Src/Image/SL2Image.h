@@ -909,7 +909,7 @@ namespace sl2 {
 
 		ui64SrcBaseSize = CFormat::GetFormatSize( m_pkifdYuvFormat, m_ui32YuvW, m_ui32YuvH, uint32_t( ui64Depth ) );
 		if ( uint64_t( size_t( ui64SrcBaseSize ) ) != ui64SrcBaseSize ) { return SL2_E_UNSUPPORTEDSIZE; }
-
+		if ( ui64SrcBaseSize != _vData.size() ) { return SL2_E_BADFORMAT; }
 		// Convert to NV12.
 		/*uint32_t ui32ChromaW = std::max( (m_ui32YuvW + 1U) / 2U, 1U );
 		uint32_t ui32ChromaH = std::max( (m_ui32YuvH + 1U) / 2U, 1U );
@@ -956,6 +956,7 @@ namespace sl2 {
 
 		ui64SrcBaseSize = CFormat::GetFormatSize( m_pkifdYuvFormat, m_ui32YuvW, m_ui32YuvH, uint32_t( ui64Depth ) );
 		if ( uint64_t( size_t( ui64SrcBaseSize ) ) != ui64SrcBaseSize ) { return SL2_E_UNSUPPORTEDSIZE; }
+		if ( ui64SrcBaseSize != _vData.size() ) { return SL2_E_BADFORMAT; }
 
 		std::memcpy( Data(), _vData.data(), _vData.size() );
 		return SL2_E_SUCCESS;

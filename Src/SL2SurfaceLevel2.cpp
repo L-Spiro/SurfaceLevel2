@@ -464,7 +464,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
             }
             if ( SL2_CHECK( 2, alpha_threshold ) ) {
                 double dVal = ::_wtof( _wcpArgV[1] );
-                if ( dVal < 0.0 || dVal > 255 ) {
+                if ( dVal < 0.0 || dVal > 255.0 ) {
                     SL2_ERRORT( std::format( L"Invalid \"alpha_threshold\": \"{}\". Must be between 0 and 255.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
@@ -775,7 +775,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 SL2_ADV( 2 );
             }
 
-            if ( SL2_CHECK( 2, textureaddressingw_opaque ) || SL2_CHECK( 2, taw_opaque ) ) {
+            if ( SL2_CHECK( 2, textureaddressingw_color ) || SL2_CHECK( 2, taw_color ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_CLAMP;
                 }
@@ -795,13 +795,13 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
                 }
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingw_opaque\"|\"taw_opaque\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingw_color\"|\"taw_color\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 oOptions.rMipResample.taColorW = oOptions.rResample.taColorW;
                 SL2_ADV( 2 );
             }
-            if ( SL2_CHECK( 2, textureaddressingh_opaque ) || SL2_CHECK( 2, tah_opaque ) ) {
+            if ( SL2_CHECK( 2, textureaddressingh_color ) || SL2_CHECK( 2, tah_color ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
                     oOptions.rResample.taColorH = sl2::SL2_TA_CLAMP;
                 }
@@ -821,13 +821,13 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
                 }
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingh_opaque\"|\"tah_opaque\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingh_color\"|\"tah_color\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 oOptions.rMipResample.taColorH = oOptions.rResample.taColorH;
                 SL2_ADV( 2 );
             }
-            if ( SL2_CHECK( 2, textureaddressingd_opaque ) || SL2_CHECK( 2, tad_opaque ) ) {
+            if ( SL2_CHECK( 2, textureaddressingd_color ) || SL2_CHECK( 2, tad_color ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
                     oOptions.rResample.taColorD = sl2::SL2_TA_CLAMP;
                 }
@@ -847,7 +847,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
                 }
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingd_opaque\"|\"tad_opaque\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingd_color\"|\"tad_color\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 oOptions.rMipResample.taColorD = oOptions.rResample.taColorD;
@@ -933,14 +933,16 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 SL2_ADV( 2 );
             }
 
-            if ( SL2_CHECK( 4, border_color ) ) {
+            if ( SL2_CHECK( 5, border_color ) ) {
 				oOptions.rResample.dBorderColor[0] = ::_wtoi( _wcpArgV[1] );
 				oOptions.rResample.dBorderColor[1] = ::_wtoi( _wcpArgV[2] );
                 oOptions.rResample.dBorderColor[2] = ::_wtoi( _wcpArgV[3] );
+                oOptions.rResample.dBorderColor[3] = ::_wtoi( _wcpArgV[4] );
                 oOptions.rMipResample.dBorderColor[0] = oOptions.rResample.dBorderColor[0];
                 oOptions.rMipResample.dBorderColor[1] = oOptions.rResample.dBorderColor[1];
                 oOptions.rMipResample.dBorderColor[2] = oOptions.rResample.dBorderColor[2];
-				SL2_ADV( 4 );
+                oOptions.rMipResample.dBorderColor[3] = oOptions.rResample.dBorderColor[3];
+				SL2_ADV( 5 );
 			}
 
             // TODO: bake_tex_mapping_u, bake_tex_mapping_v, bake_tex_mapping_w.
@@ -1026,7 +1028,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 
             
             if ( SL2_CHECK( 1, png_default ) ) {
-                oOptions.iPngSaveOption = (oOptions.iPngSaveOption & 0xFF00) | PNG_DEFAULT;
+                oOptions.iPngSaveOption = (oOptions.iPngSaveOption & 0xFF00) | PNG_Z_DEFAULT_COMPRESSION;
                 SL2_ADV( 1 );
             }
             if ( SL2_CHECK( 1, png_bestspeed ) ) {
@@ -1376,7 +1378,6 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 sl2::CFormat::m_ycoRgbToYuv.dKb = sl2::CFormat::Luma( sl2::SL2_LS_REC_709 ).dRgb[2];
                 SL2_ADV( 1 );
             }
-
             if ( SL2_CHECK( 1, yuv_input_studio ) ) {
                 sl2::CFormat::m_ycoYuvToRgb.bFullAlgorithm = true;
                 sl2::CFormat::m_ycoYuvToRgb.dBlack = 16.0 / 255.0;
@@ -1393,7 +1394,6 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 sl2::CFormat::m_ycoRgbToYuv.dKb = sl2::CFormat::Luma( sl2::SL2_LS_REC_709 ).dRgb[2];
                 SL2_ADV( 1 );
             }
-
             if ( SL2_CHECK( 2, yuv_input_set_s ) || SL2_CHECK( 2, yuv_input_set_scale ) ) {
 				sl2::CFormat::m_ycoYuvToRgb.dS = ::_wtof( _wcpArgV[1] );
                 if ( sl2::CFormat::m_ycoYuvToRgb.dS < 0.0 || sl2::CFormat::m_ycoYuvToRgb.dS > 1.0 ) {
@@ -3886,9 +3886,11 @@ namespace sl2 {
         // Create the tTexture header.
         sl2::CImage::SL2_PVRTEXTUREHEADER thHeader( ::PVRTexLib_CreateTextureHeader( &cpCreateParms ) );
         if ( !thHeader.thHeader ) { return SL2_E_OUTOFMEMORY; }
+        ::PVRTexLib_SetTextureVulkanFormat( thHeader.thHeader, 56 );
 
         // Create the tTexture object with the header.
         sl2::CImage::SL2_PVRTEXTURE tTexture( ::PVRTexLib_CreateTexture( thHeader.thHeader, nullptr ) );
+        
 
         if ( _iImage.Format()->bCompressed ) {
             for ( PVRTuint32 M = 0; M < cpCreateParms.numMipMaps; ++M ) {
@@ -4211,6 +4213,62 @@ namespace sl2 {
             }
         }
 
+        return SL2_E_SUCCESS;
+    }
+
+    /**
+	 * Exports as PBM.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS ExportAsPbm( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions ) {
+        if ( _iImage.Mipmaps() == 1 && _iImage.ArraySize() == 1 && _iImage.Faces() == 1 ) {
+            return ExportAsPbm( _iImage, _sPath, _oOptions, 0, 0, 0, 0 );
+        }
+        else {
+            wchar_t szBuffer[64];
+            std::u16string sRoot = CUtilities::GetFilePath( _sPath ) + CUtilities::NoExtension( _sPath );
+            std::u16string u16Ext = CUtilities::GetFileExtension( _sPath );
+            for ( uint32_t M = 0; M < _iImage.Mipmaps(); ++M ) {
+                for ( uint32_t A = 0; A < _iImage.ArraySize(); ++A ) {
+                    for ( uint32_t F = 0; F < _iImage.Faces(); ++F ) {
+                        for ( uint32_t D = 0; D < _iImage.Depth(); ++D ) {
+                            wchar_t * pwcBuf = szBuffer;
+                            if ( _iImage.Mipmaps() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_M%.2u", M ); }
+                            if ( _iImage.ArraySize() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_A%.2u", A ); }
+                            if ( _iImage.Faces() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_F%.2u", F ); }
+                            if ( _iImage.Depth() > 1 ) { pwcBuf += ::wsprintfW( pwcBuf, L"_D%.2u", D ); }
+                            pwcBuf += ::wsprintfW( pwcBuf, L"." );
+                            std::u16string u16Final = CUtilities::Append( sRoot, szBuffer );
+                            try { u16Final.append( u16Ext ); }
+                            catch ( ... ) { return SL2_E_OUTOFMEMORY; }
+                            //::wsprintfW( szBuffer, L"_M%.2u_A%.2u_F%.2u_D%.2u.png", M, A, F, D );
+                            SL2_ERRORS eErr = ExportAsPbm( _iImage, u16Final, _oOptions, M, A, F, 0 );
+                            if ( eErr != SL2_E_SUCCESS ) { return eErr; }
+                        }
+                    }
+                }
+            }
+        }
+        return SL2_E_SUCCESS;
+    }
+
+	/**
+	 * Exports as PBM.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \param _sMip The mipmap level to export.
+	 * \param _sArray The array index to export.
+	 * \param _sFace The face to export.
+	 * \param _sSlice The slice to export.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS ExportAsPbm( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice ) {
         return SL2_E_SUCCESS;
     }
 
