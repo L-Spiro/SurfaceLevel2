@@ -557,17 +557,17 @@
     <td>Applies only to the W coordinate.</td>
   </tr>
   <tr>
-    <td>-textureaddressingw_opaque<br>-taw_opaque</td>
+    <td>-textureaddressingw_color<br>-taw_color</td>
     <td>Same as <em>-ta.</em></td>
     <td>Applies only to the U coordinate and to color channels.</td>
   </tr>
   <tr>
-    <td>-textureaddressingh_opaque<br>-tah_opaque</td>
+    <td>-textureaddressingh_color<br>-tah_color</td>
     <td>Same as <em>-ta.</em></td>
     <td>Applies only to the V coordinate and to color channels.</td>
   </tr>
   <tr>
-    <td>-textureaddressingd_opaque<br>-tad_opaque</td>
+    <td>-textureaddressingd_color<br>-tad_color</td>
     <td>Same as <em>-ta.</em></td>
     <td>Applies only to the W coordinate and to color channels.</td>
   </tr>
@@ -588,8 +588,8 @@
   </tr>
   <tr>
     <td>-border_color</td>
-    <td>&lt;r&gt; &lt;g&gt; &lt;b&gt;</em></td>
-    <td>Sets the border color for the U, V, and W coordinates.<br>Defaults to <strong>0.0 0.0 0.0</strong></td>
+    <td>&lt;r&gt; &lt;g&gt; &lt;b&gt; &lt;a&gt;</em></td>
+    <td>Sets the border color for the U, V, and W coordinates.<br>Defaults to <strong>0.0 0.0 0.0 1.0</strong></td>
   </tr>
 </table>
 
@@ -1116,7 +1116,7 @@
   <tr>
     <td>-png_default</td>
     <td></td>
-    <td>Default PNG compression (0) will be used.<br>The default compression level is 6.</td>
+    <td>Default PNG compression (6) will be used.</td>
   </tr>
   <tr>
     <td>-png_bestspeed</td>
@@ -1146,7 +1146,7 @@
   <tr>
     <td rowspan="8">-png_format</td>
     <td>R8G8B8<br>RGB24<br>RGB</td>
-    <td rowspan="8">Specifies the PNG format to which to save.</td>
+    <td rowspan="8">Specifies the PNG format to which to save.<br>If the format is not specified, the closest format to what was specified by <em>-format</em> (or the original file’s format if <em>-format</em> is not specified) will be used.</td>
   </tr>
   <tr>
     <td>R8G8B8_SRGB<br>RGB24_SRGB<br>RGB_SRGB</td>
@@ -1168,6 +1168,130 @@
   </tr>
   <tr>
     <td>L16<br>LUMINANCE16<br>GREYSCALE16<br>GRAYSCALE16</td>
+  </tr>
+</table>
+
+<h3>BMP Options</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>-bmp_rle</td>
+    <td></td>
+    <td>
+      RLE encoding will be used to save the BMP file.<br>
+      <em>This is not set by default.</em>
+    </td>
+  </tr>
+  <tr>
+    <td>-bmp_noalpha</td>
+    <td></td>
+    <td>
+      Alpha will not be saved or will be set to 1 in the BMP file.<br>
+      The default is to store alpha when available.
+    </td>
+  </tr>
+  <tr>
+    <td>-bmp_nobitmask<br>-bmp_nomask</td>
+    <td></td>
+    <td>
+      By default, the BMP file will contain masks for the R, G, B, and A channels.<br>
+      This setting causes the BMP file to be saved without the masks.<br>
+    </td>
+  </tr>
+  <tr>
+    <td rowspan="18">-bmp_format</td>
+    <td>R8G8B8<br>RGB24<br>RGB</td>
+    <td rowspan="18">
+      Specifies the BMP format to which to save.<br>If the format is not specified, the closest format to what was specified by <em>-format</em> (or the original file’s format if <em>-format</em> is not specified) will be used.</td>
+    </td>
+  </tr>
+  <tr>
+    <td>R8G8B8_SRGB<br>RGB24_SRGB<br>RGB_SRGB</td>
+  </tr>
+  <tr>
+    <td>R8G8B8A8<br>RGBA32<br>RGBA</td>
+  </tr>
+  <tr>
+    <td>R8G8B8A8_SRGB<br>RGBA32_SRGB<br>RGBA_SRGB</td>
+  </tr>
+  <tr>
+    <td>B8G8R8A8</td>
+  </tr>
+  <tr>
+    <td>B8G8R8A8_SRGB</td>
+  </tr>
+  <tr>
+    <td>A8B8G8R8</td>
+  </tr>
+  <tr>
+    <td>A8B8G8R8_SRGB</td>
+  </tr>
+  <tr>
+    <td>R4G4B4A4</td>
+  </tr>
+  <tr>
+    <td>B4G4R4A4</td>
+  </tr>
+  <tr>
+    <td>A4R4G4B4</td>
+  </tr>
+  <tr>
+    <td>A4B4G4R4</td>
+  </tr>
+  <tr>
+    <td>R5G6B5</td>
+  </tr>
+  <tr>
+    <td>B5G6R5</td>
+  </tr>
+  <tr>
+    <td>R5G5B5A1</td>
+  </tr>
+  <tr>
+    <td>A1B5G5R5</td>
+  </tr>
+  <tr>
+    <td>A4B4G4R4</td>
+  </tr>
+</table>
+
+<h3>TGA Options</h3>
+
+<table border="1" cellpadding="5">
+  <tr>
+    <th>Command</th>
+    <th>Parameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>-tga_rle</td>
+    <td></td>
+    <td>The TGA file will be saved with RLE encoding.</td>
+  </tr>
+  <tr>
+    <td rowspan="6">-tga_format</td>
+    <td>R8G8B8<br>RGB24<br>RGB</td>
+    <td rowspan="6">Specifies the TGA format to which to save.<br>If the format is not specified, the closest format to what was specified by <em>-format</em> (or the original file’s format if <em>-format</em> is not specified) will be used.</td>
+  </tr>
+  <tr>
+    <td>R8G8B8_SRGB<br>RGB24_SRGB<br>RGB_SRGB</td>
+  </tr>
+  <tr>
+    <td>R8G8B8A8<br>RGBA32<br>RGBA</td>
+  </tr>
+  <tr>
+    <td>R8G8B8A8_SRGB<br>RGBA32_SRGB<br>RGBA_SRGB</td>
+  </tr>
+  <tr>
+    <td>A1R5G5B5<br>A1RGB5</td>
+  </tr>
+  <tr>
+    <td>L8<br>LUMINANCE8<br>GREYSCALE8<br>GRAYSCALE8</td>
   </tr>
 </table>
 
@@ -1498,7 +1622,7 @@ These image formats supported:
  | DXGI_FORMAT_P216 |
  | DXGI_FORMAT_P210 |
  | DXGI_FORMAT_P208 |
- | DXGI_FORMAT_420_OPAQUE |
+ | DXGI_FORMAT_420_color |
  | DXGI_FORMAT_YV12 |
  | DXGI_FORMAT_P016 |
  | DXGI_FORMAT_P010 |
