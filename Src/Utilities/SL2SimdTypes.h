@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <immintrin.h>
+
 
 #define SL2_ST_RAW					0
 #define SL2_ST_NEON					1

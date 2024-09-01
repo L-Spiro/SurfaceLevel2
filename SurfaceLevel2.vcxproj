@@ -47,6 +47,7 @@
     <ClInclude Include="Src\Image\ETCPACK\etcpack.h" />
     <ClInclude Include="Src\Image\ICC\SL2Icc.h" />
     <ClInclude Include="Src\Image\ICC\SL2IccDefs.h" />
+    <ClInclude Include="Src\Image\ISPC\cielab_ispc.h" />
     <ClInclude Include="Src\Image\ISPC\ispc_texcomp.h" />
     <ClInclude Include="Src\Image\KTX-Software\include\ktx.h" />
     <ClInclude Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu.h" />
@@ -87,6 +88,7 @@
     <ClInclude Include="Src\Image\SL2Image.h" />
     <ClInclude Include="Src\Image\SL2Kernel.h" />
     <ClInclude Include="Src\Image\SL2KtxTexture.h" />
+    <ClInclude Include="Src\Image\SL2Palette.h" />
     <ClInclude Include="Src\Image\SL2Surface.h" />
     <ClInclude Include="Src\Image\SL2TextureAddressing.h" />
     <ClInclude Include="Src\Image\Squish\alpha.h" />
@@ -117,7 +119,7 @@
     <ClInclude Include="Src\Utilities\SL2SimdTypes.h" />
     <ClInclude Include="Src\Utilities\SL2Stream.h" />
     <ClInclude Include="Src\Utilities\SL2Utilities.h" />
-    <ClInclude Include="Src\Utilities\SL2Vector.h" />
+    <ClInclude Include="Src\Utilities\SL2Vector4.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Files\SL2FileBase.cpp" />
@@ -236,6 +238,7 @@
     <ClCompile Include="Src\Image\SL2Formats.cpp" />
     <ClCompile Include="Src\Image\SL2Image.cpp" />
     <ClCompile Include="Src\Image\SL2Kernel.cpp" />
+    <ClCompile Include="Src\Image\SL2Palette.cpp" />
     <ClCompile Include="Src\Image\SL2Surface.cpp" />
     <ClCompile Include="Src\Image\SL2TextureAddressing.cpp" />
     <ClCompile Include="Src\Image\Squish\alpha.cpp" />
@@ -284,6 +287,17 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
     </CustomBuild>
     <None Include="Src\Image\astc-encoder\astcenccli_version.h.in" />
+    <CustomBuild Include="Src\Image\ISPC\cielab.ispc">
+      <FileType>Document</FileType>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+    </CustomBuild>
     <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_astc.inc" />
     <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_astc_0_255.inc" />
     <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_atc_55.inc" />

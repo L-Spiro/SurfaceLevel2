@@ -16,9 +16,11 @@
 
 #include "../Utilities/SL2Resampler.h"
 #include "ICC/SL2Icc.h"
+#include "ISPC/cielab_ispc.h"
 #include "PVRTexTool/PVRTexLib.hpp"
 #include "SL2Formats.h"
 #include "SL2Kernel.h"
+#include "SL2Palette.h"
 #include "SL2Surface.h"
 
 #include <cstdint>
@@ -555,6 +557,13 @@ namespace sl2 {
 		}
 
 		/**
+		 * Gets a reference to the palette.
+		 * 
+		 * \return Returns a reference to the palette.
+		 **/
+		inline CPalette &									Palette() { return m_pPalette; }
+
+		/**
 		 * Gets the final size of a byte buffer to be used as a texture plane.  The plane will be over-allocated by 8 bytes and then rounded up to the nearest 8 bytes.
 		 *	So if a 1-by-1 32-bit tecture is being allocated, 4 will be passed to _sSize, and 16 will be returned ((4+8) -> 16).
 		 * 
@@ -580,6 +589,8 @@ namespace sl2 {
 		 **/
 		static double										ApplyKernel( double * _pdImage, uint32_t _ui32X, uint32_t _ui32Y, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D, const CKernel &_kKernel,
 			SL2_TEXTURE_ADDRESSING _taAddressW, SL2_TEXTURE_ADDRESSING _taAddressH, double _dBorder );
+
+		
 
 
 	protected :
@@ -630,6 +641,9 @@ namespace sl2 {
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *		m_pkifdYuvFormat;						/**< The YUV file format. */
 		uint32_t											m_ui32YuvW;								/**< The width of a YUV image. */
 		uint32_t											m_ui32YuvH;								/**< The height of a YUV image. */
+
+		CPalette											m_pPalette;								/**< The palette. */
+
 
 		// == Functions.
 		/**

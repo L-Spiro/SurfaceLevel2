@@ -3886,7 +3886,7 @@ namespace sl2 {
         // Create the tTexture header.
         sl2::CImage::SL2_PVRTEXTUREHEADER thHeader( ::PVRTexLib_CreateTextureHeader( &cpCreateParms ) );
         if ( !thHeader.thHeader ) { return SL2_E_OUTOFMEMORY; }
-        ::PVRTexLib_SetTextureVulkanFormat( thHeader.thHeader, 56 );
+        //::PVRTexLib_SetTextureVulkanFormat( thHeader.thHeader, 56 );
 
         // Create the tTexture object with the header.
         sl2::CImage::SL2_PVRTEXTURE tTexture( ::PVRTexLib_CreateTexture( thHeader.thHeader, nullptr ) );

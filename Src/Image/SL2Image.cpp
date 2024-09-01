@@ -15,7 +15,7 @@
 #include "SL2Image.h"
 #include "../Files/SL2StdFile.h"
 #include "../Utilities/SL2Stream.h"
-#include "../Utilities/SL2Vector.h"
+#include "../Utilities/SL2Vector4.h"
 #include "DDS/SL2Dds.h"
 #include "SL2KtxTexture.h"
 
@@ -114,6 +114,7 @@ namespace sl2 {
 			m_bIgnoreSourceColorspaceGamma = _iOther.m_bIgnoreSourceColorspaceGamma;
 			m_ui32YuvW = _iOther.m_ui32YuvW;
 			m_ui32YuvH = _iOther.m_ui32YuvH;
+			m_pPalette = _iOther.m_pPalette;
 			
 			_iOther.m_sArraySize = 0;
 			_iOther.m_kKernel.SetSize( 0 );
@@ -152,6 +153,7 @@ namespace sl2 {
 			_iOther.m_bApplyOutputColorSpaceTransfer = false;
 			_iOther.m_bIgnoreSourceColorspaceGamma = false;
 			_iOther.m_ui32YuvW = _iOther.m_ui32YuvH = 0;
+			_iOther.m_pPalette.Reset();
 		}
 
 		return (*this);
@@ -209,6 +211,7 @@ namespace sl2 {
 		m_bApplyOutputColorSpaceTransfer = false;
 		m_bIgnoreSourceColorspaceGamma = false;
 		m_ui32YuvW = m_ui32YuvH = 0;
+		m_pPalette.Reset();
 	}
 
 	/**
@@ -1091,9 +1094,9 @@ namespace sl2 {
 						dBorder = m_rResample.dBorderColor[SL2_CA_R] * CFormat::Luma().dRgb[0] + m_rResample.dBorderColor[SL2_CA_G] * CFormat::Luma().dRgb[1] + m_rResample.dBorderColor[SL2_CA_B] * CFormat::Luma().dRgb[2];
 					}
 					else if ( m_caKernelChannal == SL2_CA_MAX ) {
-						CVector vVec( _prgbaData[sIdx].dRgba );
+						CVector4<SL2_ST_AVX512> vVec( _prgbaData[sIdx].dRgba );
 						vBuffer[sIdx] = vVec.Max();
-						CVector vVecBorder( m_rResample.dBorderColor );
+						CVector4<SL2_ST_AVX512> vVecBorder( m_rResample.dBorderColor );
 						dBorder = vVecBorder.Max();
 					}
 					else {
@@ -1112,7 +1115,7 @@ namespace sl2 {
 					size_t sIdx = (sPageSize * D) + (size_t( H ) * size_t( _ui32W )) + size_t( W );
 					double dVal0 = ApplyKernel( vBuffer.data(), W, H, _ui32W, _ui32H, D, m_kKernel, m_rResample.taColorW, m_rResample.taColorH, dBorder );
 					double dVal1 = ApplyKernel( vBuffer.data(), W, H, _ui32W, _ui32H, D, kTransp, m_rResample.taColorW, m_rResample.taColorH, dBorder );
-					CVector vTmp( dVal0, dVal1, m_dKernelScale, 0.0 );
+					CVector4<SL2_ST_AVX512> vTmp( dVal0, dVal1, m_dKernelScale, 0.0 );
 					vTmp.Normalize();
 					_prgbaData[sIdx].dRgba[SL2_CA_R] = -vTmp[0] * 0.5 + 0.5;
 					_prgbaData[sIdx].dRgba[SL2_CA_G] = (vTmp[1] * m_dKernelYAxis) * 0.5 + 0.5;
@@ -1187,15 +1190,15 @@ namespace sl2 {
 
 			/*sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigRedColorantTag, sSize );
 			if ( sOffset ) {
-				CVector vTmp( 0.43603515625, 0.2224884033203125, 0.013916015625, 0.0 );
-				CVector vTmp1( vTmp[0] / vTmp[1], 1.0, vTmp[2] / vTmp[1], 0.0 );
-				CVector vTmp2 = vTmp1;
+				CVector4<SL2_ST_AVX512> vTmp( 0.43603515625, 0.2224884033203125, 0.013916015625, 0.0 );
+				CVector4<SL2_ST_AVX512> vTmp1( vTmp[0] / vTmp[1], 1.0, vTmp[2] / vTmp[1], 0.0 );
+				CVector4<SL2_ST_AVX512> vTmp2 = vTmp1;
 				vTmp2.Normalize();
 				double dX = vTmp1[0] / (vTmp1[0] + vTmp1[1] + vTmp1[2]);
 				double dY = vTmp1[1] / (vTmp1[0] + vTmp1[1] + vTmp1[2]);
 				double dChromaX, dChromaZ;
 				CUtilities::XYZtoChromaticity( 0.43603515625, 0.2224884033203125, 0.013916015625, dChromaX, dChromaZ );
-				CVector vChroma( dX * (0.2224884033203125 / dY), 0.2224884033203125, (1.0 - dX - dY) * (0.2224884033203125 / dY), 0.0 );
+				CVector4<SL2_ST_AVX512> vChroma( dX * (0.2224884033203125 / dY), 0.2224884033203125, (1.0 - dX - dY) * (0.2224884033203125 / dY), 0.0 );
 				vTmp = vChroma;
 				vTmp.Normalize();
 				uint8_t * pui8Data = static_cast<uint8_t *>(pProfile->data) + sOffset;

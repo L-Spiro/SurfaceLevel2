@@ -435,9 +435,6 @@
     <ClInclude Include="Src\Image\SL2Kernel.h">
       <Filter>Header Files\Image</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Utilities\SL2Vector.h">
-      <Filter>Header Files\Utilities</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Image\ICC\SL2Icc.h">
       <Filter>Header Files\Image\ICC</Filter>
     </ClInclude>
@@ -458,6 +455,15 @@
     </ClInclude>
     <ClInclude Include="Src\Image\Little-CMS\src\lcms2_internal.h">
       <Filter>Header Files\Image\Little-CMS\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\SL2Palette.h">
+      <Filter>Header Files\Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Utilities\SL2Vector4.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Image\ISPC\cielab_ispc.h">
+      <Filter>Header Files\Image\ISPC</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -839,6 +845,9 @@
     <ClCompile Include="Src\Image\Little-CMS\src\cmsxform.c">
       <Filter>Source Files\Image\Little-CMS\src</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Image\SL2Palette.cpp">
+      <Filter>Source Files\Image</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Image\KTX-Software\lib\texture_funcs.inl">
@@ -889,6 +898,9 @@
       <Filter>Source Files\Image\ISPC</Filter>
     </CustomBuild>
     <CustomBuild Include="Src\Image\ISPC\kernel_astc.ispc">
+      <Filter>Source Files\Image\ISPC</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Src\Image\ISPC\cielab.ispc">
       <Filter>Source Files\Image\ISPC</Filter>
     </CustomBuild>
   </ItemGroup>
