@@ -89,6 +89,12 @@
 /** Gets a YUV flag. */
 #define SL2_GET_YUV_FLAG( VAL )														(((VAL) >> 17) & 0x1)
 
+/** Makes an indexed flag. */
+#define SL2_MAKE_IDX_FLAG															(1 << 18)
+
+/** Gets an indexed flag. */
+#define SL2_GET_IDX_FLAG( VAL )														(((VAL) >> 18) & 0x1)
+
 
 #pragma warning( push )
 
@@ -1604,7 +1610,7 @@ namespace sl2 {
 			double																	dKb = 0.072192315360734;			/**< Kb. */
 			double																	dBlack = 0.0;//16.0 / 255.0;		/**< Black level. */
 			double																	dS = 1.0;//219.0 / 255.0;			/**< S. */
-			bool																	bFullAlgorithm = true;				/**< Use the studio version? */
+			bool																	bFullAlgorithm = true;				/**< Use the full version? */
 		};
 
 
@@ -1702,6 +1708,22 @@ namespace sl2 {
 		 * \return Returns the requested format by index.  The index bounds are not checked.
 		 **/
 		static const SL2_KTX_INTERNAL_FORMAT_DATA *									FormatByIdx( size_t _sIdx ) { return &m_kifdInternalFormats[_sIdx]; }
+
+		/**
+		 * Finds format data given its OpenGL format identifier.
+		 * 
+		 * \param _mpfFormat The format to find.
+		 * \return Returns the matching SL2_KTX_INTERNAL_FORMAT_DATA data, or nullptr.
+		 **/
+		static const SL2_KTX_INTERNAL_FORMAT_DATA *									FindPaletteFormatData( SL2_KTX_INTERNAL_FORMAT _kifFormat );
+
+		/**
+		 * Finds format data given its OpenGL format string.
+		 * 
+		 * \param _pcFormat The format to find by name.
+		 * \return Returns the matching SL2_KTX_INTERNAL_FORMAT_DATA data, or nullptr.
+		 **/
+		static const SL2_KTX_INTERNAL_FORMAT_DATA *									FindPaletteFormatData( const char * _pcFormat );
 
 		/**
 		 * Gets the size, in bytes, of a texel format.
@@ -2416,6 +2438,8 @@ namespace sl2 {
 		// == Members.
 		/** The data for internal formats. */
 		static const SL2_KTX_INTERNAL_FORMAT_DATA									m_kifdInternalFormats[];
+		/** The data for palette formats. */
+		static const SL2_KTX_INTERNAL_FORMAT_DATA									m_kifdPaletteFormats[];
 		/** Whether to use NVIDA's decoding of block formats or not. */
 		static bool																	m_bUseNVidiaDecode;
 		/** The luma coefficients for each standard. */
@@ -3880,7 +3904,7 @@ namespace sl2 {
 		// YUV FORMATS
 		// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 		/**
-		 * Returns the total size of a YUV YUV444 image given its width and height.
+		 * Returns the total size of a YUV YUV444 image given its width, height, and depth.
 		 *
 		 * \param _ui32Width Width in pixels.
 		 * \param _ui32Height Height in pixels.
@@ -3895,7 +3919,7 @@ namespace sl2 {
 		}
 
 		/**
-		 * Returns the total size of a YUV YUVA444 image given its width and height.
+		 * Returns the total size of a YUV YUVA444 image given its width, height, and depth.
 		 *
 		 * \param _ui32Width Width in pixels.
 		 * \param _ui32Height Height in pixels.
@@ -3910,7 +3934,7 @@ namespace sl2 {
 		}
 
 		/**
-		 * Returns the total size of a YUV YUV422P image given its width and height.
+		 * Returns the total size of a YUV YUV422P image given its width, height, and depth.
 		 *
 		 * \param _ui32Width Width in pixels.
 		 * \param _ui32Height Height in pixels.
@@ -3926,7 +3950,7 @@ namespace sl2 {
 		}
 
 		/**
-		 * Returns the total size of a YUV YUV420P image given its width and height.
+		 * Returns the total size of a YUV YUV420P image given its width, height, and depth.
 		 *
 		 * \param _ui32Width Width in pixels.
 		 * \param _ui32Height Height in pixels.
@@ -3943,7 +3967,7 @@ namespace sl2 {
 		}
 
 		/**
-		 * Returns the total size of a YUV YUY2/UVUY image given its width and height.
+		 * Returns the total size of a YUV YUY2/UVUY image given its width, height, and depth.
 		 *
 		 * \param _ui32Width Width in pixels.
 		 * \param _ui32Height Height in pixels.
@@ -5250,6 +5274,39 @@ namespace sl2 {
 			return true;
 		}
 
+
+		// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		// INDEXED FORMATS
+		// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		/**
+		 * Returns the total size of an indexed image given its width, height, and depth.
+		 *
+		 * \param _ui32Width Width in pixels.
+		 * \param _ui32Height Height in pixels.
+		 * \param _ui32Depth Unused.
+		 * \param _ui32Factor Multiplier.
+		 * \param _pvParms Unused.
+		 * \return Returns the size of the compressed data.
+		 */
+		template <typename _tBackingType = uint8_t>
+		static uint64_t																GetSizeIndexed( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, uint32_t /*_ui32Factor*/, const void * /*_pvParms*/ ) {
+			return (uint64_t( _ui32Width ) * _ui32Height * _ui32Depth) * sizeof( _tBackingType );
+		}
+
+		/**
+		 * Returns the maximum size of a palette.
+		 *
+		 * \param _ui32Width Width in pixels.
+		 * \param _ui32Height Height in pixels.
+		 * \param _ui32Depth Unused.
+		 * \param _ui32Factor Multiplier.
+		 * \param _pvParms Unused.
+		 * \return Returns the size of the compressed data.
+		 */
+		template <unsigned _uSize>
+		static uint64_t																GetSizePalette( uint32_t /*_ui32Width*/, uint32_t /*_ui32Height*/, uint32_t /*_ui32Depth*/, uint32_t /*_ui32Factor*/, const void * /*_pvParms*/ ) {
+			return _uSize / 8;
+		}
 	};
 	
 

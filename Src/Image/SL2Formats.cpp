@@ -522,22 +522,12 @@ namespace sl2 {
 		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_ATC_RGBA_EXPLICIT_ALPHA_AMD, GL_UNSIGNED_BYTE, GL_RGBA ),			0x02, 0, 128, 4, 4, 1, 1, 1, false, true, false, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
 		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD, GL_UNSIGNED_BYTE, GL_RGBA ),		0x02, 0, 128, 4, 4, 1, 1, 1, false, true, false, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
 		
-		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_RGB8_OES, GL_UNSIGNED_BYTE, GL_RGB ),						0x04, 384, 4, 1, 1, 1, 1, 1, false, false, true, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_RGBA8_OES, GL_UNSIGNED_BYTE, GL_RGBA ),					0x04, 512, 4, 1, 1, 1, 1, 1, false, false, true, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_R5_G6_B5_OES, GL_UNSIGNED_SHORT_5_6_5, GL_RGB ),			0x04, 256, 4, 1, 1, 1, 1, 1, false, false, true, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_RGBA4_OES, GL_UNSIGNED_SHORT_4_4_4_4, GL_RGBA ),			0x04, 256, 4, 1, 1, 1, 1, 1, false, false, true, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_RGB5_A1_OES, GL_UNSIGNED_SHORT_5_5_5_1, GL_RGBA ),			0x04, 256, 4, 1, 1, 1, 1, 1, false, false, true, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_RGB8_OES, GL_UNSIGNED_BYTE, GL_RGB ),						0x04, 6144, 8, 1, 1, 1, 1, 1, false, false, true, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_RGBA8_OES, GL_UNSIGNED_BYTE, GL_RGBA ),					0x04, 8192, 8, 1, 1, 1, 1, 1, false, false, true, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_R5_G6_B5_OES, GL_UNSIGNED_SHORT_5_6_5, GL_RGB ),			0x04, 4096, 8, 1, 1, 1, 1, 1, false, false, true, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_RGBA4_OES, GL_UNSIGNED_SHORT_4_4_4_4, GL_RGBA ),			0x04, 4096, 8, 1, 1, 1, 1, 1, false, false, true, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_RGB5_A1_OES, GL_UNSIGNED_SHORT_5_5_5_1, GL_RGBA ),			0x04, 4096, 8, 1, 1, 1, 1, 1, false, false, true, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX1_EXT, GL_INVALID, GL_INVALID ),							0x00, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(1, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,										nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX2_EXT, GL_INVALID, GL_INVALID ),							0x00, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(2, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,										nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX4_EXT, GL_INVALID, GL_INVALID ),							0x00, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(4, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,										nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX8_EXT, GL_INVALID, GL_INVALID ),							0x00, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(8, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,										nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX12_EXT, GL_INVALID, GL_INVALID ),						0x00, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(12, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,									nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX16_EXT, GL_INVALID, GL_INVALID ),						0x00, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(16, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,									nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX1_EXT, GL_INVALID, GL_INVALID ),							SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint8_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,					nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX2_EXT, GL_INVALID, GL_INVALID ),							SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint8_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,					nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX4_EXT, GL_INVALID, GL_INVALID ),							SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint8_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,					nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX8_EXT, GL_INVALID, GL_INVALID ),							SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint8_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,					nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX12_EXT, GL_INVALID, GL_INVALID ),							SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint8_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,					nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX16_EXT, GL_INVALID, GL_INVALID ),							SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint16_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,					nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
 		
 		{ SL2_ID( VK_FORMAT_D16_UNORM, DXGI_FORMAT_D16_UNORM, MTLPixelFormatDepth16Unorm, GL_DEPTH_COMPONENT16, GL_UNSIGNED_SHORT, GL_DEPTH_COMPONENT ),	0x08, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(16, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,									nullptr, PVRTGENPIXELID1( 'd', 16 ), PVRTLVT_UnsignedShortNorm, { PVRTLCN_Depth }, },
 		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_DEPTH_COMPONENT24, GL_UNSIGNED_INT, GL_DEPTH_COMPONENT ),				0x08, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(24, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth24ToRgba64F, CFormat::Depth24FromRgba64F,									nullptr, PVRTGENPIXELID1( 'd', 24 ), PVRTLVT_UnsignedIntegerNorm, { PVRTLCN_Depth }, },
@@ -614,6 +604,23 @@ namespace sl2 {
 
 		
 		
+
+	};
+
+	/** The data for palette formats. */
+	const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA CFormat::m_kifdPaletteFormats[] {
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_RGB8_OES, GL_UNSIGNED_BYTE, GL_RGB ),						0x04, 384, 4, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<384>, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0), nullptr, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_RGBA8_OES, GL_UNSIGNED_BYTE, GL_RGBA ),						0x04, 512, 4, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<512>, SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), nullptr, nullptr,							nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_R5_G6_B5_OES, GL_UNSIGNED_SHORT_5_6_5, GL_RGB ),				0x04, 256, 4, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<256>, SL2_TBITS(5, 6, 5, 0), SL2_TSHIFTS(0, 5, 11, 0), nullptr, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_RGBA4_OES, GL_UNSIGNED_SHORT_4_4_4_4, GL_RGBA ),				0x04, 256, 4, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<256>, SL2_TBITS(4, 4, 4, 4), SL2_TSHIFTS(0, 4, 8, 12), nullptr, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_RGB5_A1_OES, GL_UNSIGNED_SHORT_5_5_5_1, GL_RGBA ),			0x04, 256, 4, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<256>, SL2_TBITS(5, 5, 5, 1), SL2_TSHIFTS(0, 5, 10, 15), nullptr, nullptr,							nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_RGB8_OES, GL_UNSIGNED_BYTE, GL_RGB ),						0x04, 6144, 8, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<6144>, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(8, 8, 16, 0), nullptr, nullptr,							nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_RGBA8_OES, GL_UNSIGNED_BYTE, GL_RGBA ),						0x04, 8192, 8, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<8192>, SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), nullptr, nullptr,							nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_R5_G6_B5_OES, GL_UNSIGNED_SHORT_5_6_5, GL_RGB ),				0x04, 4096, 8, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<4096>, SL2_TBITS(5, 6, 5, 0), SL2_TSHIFTS(0, 5, 11, 0), nullptr, nullptr,							nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_RGBA4_OES, GL_UNSIGNED_SHORT_4_4_4_4, GL_RGBA ),				0x04, 4096, 8, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<4096>, SL2_TBITS(4, 4, 4, 4), SL2_TSHIFTS(0, 4, 8, 12), nullptr, nullptr,							nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_RGB5_A1_OES, GL_UNSIGNED_SHORT_5_5_5_1, GL_RGBA ),			0x04, 4096, 8, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<4096>, SL2_TBITS(5, 5, 5, 1), SL2_TSHIFTS(0, 5, 10, 15), nullptr, nullptr,							nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+	};
+
 #undef SL2_ID
 #undef SL2_GEN_INT
 #undef SL2_CONV_IN
@@ -624,7 +631,6 @@ namespace sl2 {
 #undef SL2_LSHIFTS
 #undef SL2_TSHIFTS
 #undef SL2_TBITS
-	};
 
 	/** YUV -> RGB conversion settings. */
 	CFormat::SL2_YUV_CONVERSION_OPTIONS CFormat::m_ycoYuvToRgb;
@@ -987,6 +993,32 @@ namespace sl2 {
 	 * \return Returns the total number of formats recognized by this library.
 	 **/
 	size_t CFormat::TotalFormats() { return SL2_ELEMENTS( m_kifdInternalFormats ); }
+
+	/**
+	 * Finds format data given its OpenGL format identifier.
+	 * 
+	 * \param _mpfFormat The format to find.
+	 * \return Returns the matching SL2_KTX_INTERNAL_FORMAT_DATA data, or nullptr.
+	 **/
+	const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * CFormat::FindPaletteFormatData( SL2_KTX_INTERNAL_FORMAT _kifFormat ) {
+		for ( size_t I = 0; I < SL2_ELEMENTS( m_kifdPaletteFormats ); ++I ) {
+			if ( m_kifdPaletteFormats[I].kifInternalFormat == _kifFormat ) { return &m_kifdPaletteFormats[I]; }
+		}
+		return nullptr;
+	}
+
+	/**
+	 * Finds format data given its OpenGL format string.
+	 * 
+	 * \param _pcFormat The format to find by name.
+	 * \return Returns the matching SL2_KTX_INTERNAL_FORMAT_DATA data, or nullptr.
+	 **/
+	const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * CFormat::FindPaletteFormatData( const char * _pcFormat ) {
+		for ( size_t I = 0; I < SL2_ELEMENTS( m_kifdPaletteFormats ); ++I ) {
+			if ( std::strcmp( m_kifdPaletteFormats[I].pcOglInternalFormat, _pcFormat ) == 0 ) { return &m_kifdPaletteFormats[I]; }
+		}
+		return nullptr;
+	}
 
 	/**
 	 * Gets the pitch of a format without any extra padding.

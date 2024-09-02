@@ -1883,9 +1883,9 @@ namespace sl2 {
 							if ( ui32Index >= lpbfhInfo->ui32ColorsInPalette ) { return SL2_E_INVALIDFILETYPE; }
 
 							// Get the color from the palette.
-							uint32_t ui32R = (lpbpPalette[ui32Index].ui32Color >> 0) & 0xFF;
+							uint32_t ui32B = (lpbpPalette[ui32Index].ui32Color >> 0) & 0xFF;
 							uint32_t ui32G = (lpbpPalette[ui32Index].ui32Color >> 8) & 0xFF;
-							uint32_t ui32B = (lpbpPalette[ui32Index].ui32Color >> 16) & 0xFF;
+							uint32_t ui32R = (lpbpPalette[ui32Index].ui32Color >> 16) & 0xFF;
 							uint32_t ui32A = (lpbpPalette[ui32Index].ui32Color >> 24) & 0xFF;
 							CFormat::SL2_RGBA_UNORM ruColor;
 							ruColor.ui8Rgba[SL2_PC_R] = static_cast<uint8_t>(ui32R);

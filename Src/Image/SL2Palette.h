@@ -9,6 +9,7 @@
 #pragma once
 
 #include "../Utilities/SL2Vector4.h"
+#include "SL2Formats.h"
 
 #include <vector>
 
@@ -29,10 +30,10 @@ namespace sl2 {
 
 		// == Types.
 		/** A color. */
-		typedef CVector4<SL2_ST_AVX512>							CColor;
+		typedef CVector4<SL2_ST_AVX512>						CColor;
 
 		/** The palette. */
-		typedef std::vector<CColor>								CPal;
+		typedef std::vector<CColor>							CPal;
 
 
 		// == Functions.
@@ -42,24 +43,24 @@ namespace sl2 {
 		 * \param _cColor The color to add.
 		 * \return Returns true if the color was appended successfully.
 		 **/
-		inline bool												Add( const CColor &_cColor );
+		inline bool											Add( const CColor &_cColor );
 
 		/**
 		 * Resets the palette back to scratch.
 		 **/
-		void													Reset();
+		void												Reset();
 
 		/**
 		 * Gets a constant pointer to the array of colors.
 		 * 
 		 * \return Returns a constant pointer to the array of colors.
 		 **/
-		inline const CPal &										Palette() const { return m_pPalette; }
+		inline const CPal &									Palette() const { return m_pPalette; }
 
 
 	protected :
-		/** The actual palette. */
-		CPal													m_pPalette;
+		CPal												m_pPalette;								/**< The actual palette. */
+		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *		m_pkifFormat = nullptr;					/**< The palette format. */
 	};
 
 

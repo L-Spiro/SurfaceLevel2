@@ -24,6 +24,7 @@ namespace sl2 {
 	void CPalette::Reset() {
 		m_pPalette.clear();
 		m_pPalette = CPal();
+		m_pkifFormat = nullptr;
 	}
 
 }	// namespace sl2
