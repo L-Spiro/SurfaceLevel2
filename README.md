@@ -903,7 +903,7 @@
   </tr>
   <tr>
     <td>colorspace</td>
-    <td>The normal map will be generated using the weighted average value between the RGB channels. Use <em>-luma</em> to select from predefined weights or <strong>-weight</strong> to manually specify weights.</td>
+    <td>The normal map will be generated using the weighted average value between the RGB channels. Use <em>-luma</em> to select from predefined weights or <em>-weight</em> to manually specify weights.</td>
   </tr>
   <tr>
     <td>-norm<br>-normalize</td>
