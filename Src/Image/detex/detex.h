@@ -1057,7 +1057,7 @@ static DETEX_INLINE_ONLY uint64_t detexPack64R16(uint32_t r16) {
 }
 
 static DETEX_INLINE_ONLY uint64_t detexPack64G16(uint32_t g16) {
-	return g16 << 16;
+	return g16 << 16ULL;
 }
 
 static DETEX_INLINE_ONLY uint64_t detexPack64B16(uint32_t b16) {

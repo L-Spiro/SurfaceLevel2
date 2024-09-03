@@ -1766,7 +1766,7 @@ namespace sl2 {
 		// We only handle bits-per-pixels of 1, 4, 8, 16, 24, and 32.
 		switch ( lpbfhInfo->ui16BitsPerPixel ) {
 			case 1 : {}
-			case 4 : { return SL2_E_INVALIDFILETYPE; }	// Temporarily.
+			case 4 : { /*return SL2_E_INVALIDFILETYPE;*/ }	// Temporarily.
 			case 8 : {
 				if ( lpbfhInfo->ui32ColorsInPalette > 256 ) { return SL2_E_INVALIDFILETYPE; }
 				if ( _vData.size() < sizeof( SL2_BITMAPFILEHEADER ) + sizeof( SL2_BITMAPINFOHEADER ) + sizeof( SL2_BITMAPPALETTE ) * lpbfhInfo->ui32ColorsInPalette ) { return SL2_E_INVALIDFILETYPE; }
@@ -1779,6 +1779,7 @@ namespace sl2 {
 		}
 
 		SL2_VKFORMAT vFormat = SL2_VK_FORMAT_UNDEFINED;
+		SL2_OP
 		uint32_t ui32BytesPerPixel;
 		uint32_t ui32BytesPerPixelDst;
 		uint32_t ui32BitMask = 0x0;

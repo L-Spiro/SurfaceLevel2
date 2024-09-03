@@ -169,7 +169,7 @@ namespace sl2 {
 			return true;
 		}
 		try {
-			m_vKernel.resize( _ui32Size * _ui32Size );
+			m_vKernel.resize( size_t( _ui32Size * _ui32Size ) );
 		}
 		catch ( ... ) { m_ui32Size = 0; return false; }
 

@@ -57,6 +57,13 @@ namespace sl2 {
 		 **/
 		inline const CPal &									Palette() const { return m_pPalette; }
 
+		/**
+		 * Sets the palette format.
+		 * 
+		 * \param _pkifdFormat The format of the palette.
+		 **/
+		inline void											SetFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifdFormat );
+
 
 	protected :
 		CPal												m_pPalette;								/**< The actual palette. */
@@ -79,6 +86,15 @@ namespace sl2 {
 			m_pPalette.push_back( _cColor );
 		}
 		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * Sets the palette format.
+	 * 
+	 * \param _pkifdFormat The format of the palette.
+	 **/
+	inline void CPalette::SetFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifdFormat ) {
+		m_pkifFormat = _pkifdFormat;
 	}
 
 }	// namespace sl2

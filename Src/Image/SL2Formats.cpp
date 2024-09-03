@@ -7,6 +7,7 @@
  */
 
 #include "SL2Formats.h"
+#include "SL2Image.h"
 
 
 namespace sl2 {
@@ -522,13 +523,14 @@ namespace sl2 {
 		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_ATC_RGBA_EXPLICIT_ALPHA_AMD, GL_UNSIGNED_BYTE, GL_RGBA ),			0x02, 0, 128, 4, 4, 1, 1, 1, false, true, false, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
 		//{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD, GL_UNSIGNED_BYTE, GL_RGBA ),		0x02, 0, 128, 4, 4, 1, 1, 1, false, true, false, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
 		
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX1_EXT, GL_INVALID, GL_INVALID ),							SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint8_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,					nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX2_EXT, GL_INVALID, GL_INVALID ),							SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint8_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,					nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX4_EXT, GL_INVALID, GL_INVALID ),							SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint8_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,					nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX8_EXT, GL_INVALID, GL_INVALID ),							SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint8_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,					nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX12_EXT, GL_INVALID, GL_INVALID ),							SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint8_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,					nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX16_EXT, GL_INVALID, GL_INVALID ),							SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint16_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,					nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX1_EXT, GL_UNSIGNED_BYTE, GL_COLOR_INDEX ),					SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint8_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::IndexedToRgba64F<uint8_t, 1>, CFormat::IndexedFromRgba64F<uint8_t, 1>,						nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX2_EXT, GL_UNSIGNED_BYTE, GL_COLOR_INDEX ),					SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint8_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::IndexedToRgba64F<uint8_t, 2>, CFormat::IndexedFromRgba64F<uint8_t, 2>,						nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX4_EXT, GL_UNSIGNED_BYTE, GL_COLOR_INDEX ),					SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint8_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::IndexedToRgba64F<uint8_t, 4>, CFormat::IndexedFromRgba64F<uint8_t, 4>,						nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX8_EXT, GL_UNSIGNED_BYTE, GL_COLOR_INDEX ),					SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint8_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::IndexedToRgba64F<uint8_t, 8>, CFormat::IndexedFromRgba64F<uint8_t, 8>,						nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX12_EXT, GL_UNSIGNED_SHORT, GL_COLOR_INDEX ),				SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint8_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::IndexedToRgba64F<uint16_t, 12>, CFormat::IndexedFromRgba64F<uint16_t, 12>,					nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_COLOR_INDEX16_EXT, GL_UNSIGNED_SHORT, GL_COLOR_INDEX ),				SL2_MAKE_IDX_FLAG, 0, 0, 1, 1, 1, 1, 1, false, false, false, false, GetSizeIndexed<uint16_t>, SL2_TBITS(0, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::IndexedToRgba64F<uint16_t, 16>, CFormat::IndexedFromRgba64F<uint16_t, 16>,					nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
 		
+
 		{ SL2_ID( VK_FORMAT_D16_UNORM, DXGI_FORMAT_D16_UNORM, MTLPixelFormatDepth16Unorm, GL_DEPTH_COMPONENT16, GL_UNSIGNED_SHORT, GL_DEPTH_COMPONENT ),	0x08, 0, 16, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(16, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth16ToRgba64F, CFormat::Depth16FromRgba64F,									nullptr, PVRTGENPIXELID1( 'd', 16 ), PVRTLVT_UnsignedShortNorm, { PVRTLCN_Depth }, },
 		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_DEPTH_COMPONENT24, GL_UNSIGNED_INT, GL_DEPTH_COMPONENT ),				0x08, 0, 24, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(24, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth24ToRgba64F, CFormat::Depth24FromRgba64F,									nullptr, PVRTGENPIXELID1( 'd', 24 ), PVRTLVT_UnsignedIntegerNorm, { PVRTLCN_Depth }, },
 		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_DEPTH_COMPONENT32, GL_UNSIGNED_INT, GL_DEPTH_COMPONENT ),				0x08, 0, 32, 1, 1, 1, 1, 1, false, false, false, false, nullptr, SL2_TBITS(32, 0, 0, 0), SL2_TSHIFTS(0, 0, 0, 0), CFormat::Depth32ToRgba64F, CFormat::Depth32FromRgba64F,									nullptr, PVRTGENPIXELID1( 'd', 32 ), PVRTLVT_UnsignedIntegerNorm, { PVRTLCN_Depth }, },
@@ -609,16 +611,18 @@ namespace sl2 {
 
 	/** The data for palette formats. */
 	const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA CFormat::m_kifdPaletteFormats[] {
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_RGB8_OES, GL_UNSIGNED_BYTE, GL_RGB ),						0x04, 384, 4, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<384>, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(0, 8, 16, 0), nullptr, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_RGBA8_OES, GL_UNSIGNED_BYTE, GL_RGBA ),						0x04, 512, 4, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<512>, SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), nullptr, nullptr,							nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_R5_G6_B5_OES, GL_UNSIGNED_SHORT_5_6_5, GL_RGB ),				0x04, 256, 4, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<256>, SL2_TBITS(5, 6, 5, 0), SL2_TSHIFTS(0, 5, 11, 0), nullptr, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_RGBA4_OES, GL_UNSIGNED_SHORT_4_4_4_4, GL_RGBA ),				0x04, 256, 4, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<256>, SL2_TBITS(4, 4, 4, 4), SL2_TSHIFTS(0, 4, 8, 12), nullptr, nullptr,								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_RGB5_A1_OES, GL_UNSIGNED_SHORT_5_5_5_1, GL_RGBA ),			0x04, 256, 4, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<256>, SL2_TBITS(5, 5, 5, 1), SL2_TSHIFTS(0, 5, 10, 15), nullptr, nullptr,							nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_RGB8_OES, GL_UNSIGNED_BYTE, GL_RGB ),						0x04, 6144, 8, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<6144>, SL2_TBITS(8, 8, 8, 0), SL2_TSHIFTS(8, 8, 16, 0), nullptr, nullptr,							nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_RGBA8_OES, GL_UNSIGNED_BYTE, GL_RGBA ),						0x04, 8192, 8, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<8192>, SL2_TBITS(8, 8, 8, 8), SL2_TSHIFTS(0, 8, 16, 24), nullptr, nullptr,							nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_R5_G6_B5_OES, GL_UNSIGNED_SHORT_5_6_5, GL_RGB ),				0x04, 4096, 8, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<4096>, SL2_TBITS(5, 6, 5, 0), SL2_TSHIFTS(0, 5, 11, 0), nullptr, nullptr,							nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_RGBA4_OES, GL_UNSIGNED_SHORT_4_4_4_4, GL_RGBA ),				0x04, 4096, 8, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<4096>, SL2_TBITS(4, 4, 4, 4), SL2_TSHIFTS(0, 4, 8, 12), nullptr, nullptr,							nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
-		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_RGB5_A1_OES, GL_UNSIGNED_SHORT_5_5_5_1, GL_RGBA ),			0x04, 4096, 8, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<4096>, SL2_TBITS(5, 5, 5, 1), SL2_TSHIFTS(0, 5, 10, 15), nullptr, nullptr,							nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+#define SL2_FUNC( R, G, B, A, Rs, Gs, Bs, As )				R, G, B, A, Rs, Gs, Bs, As, StdIntToRgba64F_Palette<R, G, B, A, Rs, Gs, Bs, As, false, true, false>, StdIntFromRgba64F_Palette<R, G, B, A, Rs, Gs, Bs, As, false, true, false>
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_RGB8_OES, GL_UNSIGNED_BYTE, GL_RGB ),						0x04, 384, 4, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<384>, SL2_FUNC(8, 8, 8, 0, 0, 8, 16, 0), 								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_RGBA8_OES, GL_UNSIGNED_BYTE, GL_RGBA ),						0x04, 512, 4, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<512>, SL2_FUNC(8, 8, 8, 8, 0, 8, 16, 24),								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_R5_G6_B5_OES, GL_UNSIGNED_SHORT_5_6_5, GL_RGB ),				0x04, 256, 4, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<256>, SL2_FUNC(5, 6, 5, 0, 0, 5, 11, 0),									nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_RGBA4_OES, GL_UNSIGNED_SHORT_4_4_4_4, GL_RGBA ),				0x04, 256, 4, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<256>, SL2_FUNC(4, 4, 4, 4, 0, 4, 8, 12),									nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE4_RGB5_A1_OES, GL_UNSIGNED_SHORT_5_5_5_1, GL_RGBA ),			0x04, 256, 4, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<256>, SL2_FUNC(5, 5, 5, 1, 0, 5, 10, 15),								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_RGB8_OES, GL_UNSIGNED_BYTE, GL_RGB ),						0x04, 6144, 8, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<6144>, SL2_FUNC(8, 8, 8, 0, 8, 8, 16, 0),								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_RGBA8_OES, GL_UNSIGNED_BYTE, GL_RGBA ),						0x04, 8192, 8, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<8192>, SL2_FUNC(8, 8, 8, 8, 0, 8, 16, 24),								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_R5_G6_B5_OES, GL_UNSIGNED_SHORT_5_6_5, GL_RGB ),				0x04, 4096, 8, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<4096>, SL2_FUNC(5, 6, 5, 0, 0, 5, 11, 0),								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_RGBA4_OES, GL_UNSIGNED_SHORT_4_4_4_4, GL_RGBA ),				0x04, 4096, 8, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<4096>, SL2_FUNC(4, 4, 4, 4, 0, 4, 8, 12),								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+		{ SL2_ID( VK_FORMAT_UNDEFINED, DXGI_FORMAT_UNKNOWN, MTLPixelFormatInvalid, GL_PALETTE8_RGB5_A1_OES, GL_UNSIGNED_SHORT_5_5_5_1, GL_RGBA ),			0x04, 4096, 8, 1, 1, 1, 1, 1, false, false, true, false, GetSizePalette<4096>, SL2_FUNC(5, 5, 5, 1, 0, 5, 10, 15),								nullptr, 0, PVRTLVT_Invalid, { PVRTLCN_NoChannel }, },
+#undef SL2_FUNC
 	};
 
 #undef SL2_ID
@@ -2833,7 +2837,7 @@ namespace sl2 {
 	 * \param _ui32Depth Depth of the image.
 	 * \param _pvParms Optional parameters for the conversion.
 	 */
-	bool CFormat::Etc1ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+	bool CFormat::Etc1ToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
 		struct SL2_ETC1_BLOCK {
 			uint64_t ui64Block0;
 		};
@@ -2878,7 +2882,7 @@ namespace sl2 {
 	 * \param _ui32Depth Depth of the image.
 	 * \param _pvParms Optional parameters for the conversion.
 	 */
-	bool CFormat::Etc1FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+	bool CFormat::Etc1FromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
 		struct SL2_ETC1_BLOCK {
 			uint64_t ui64Block0;
 		};
@@ -2909,6 +2913,106 @@ namespace sl2 {
 
 			_pui8Dst += ui32SliceSize;
 			_pui8Src += ui32SrcSlice;
+		}
+		return true;
+	}
+
+	/**
+	 * Indexed -> RGBA32F conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template<typename _tType, unsigned _uBits>
+	bool CFormat::IndexedToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		if ( !_pvParms ) { return false; }
+		const SL2_KTX_INTERNAL_FORMAT_DATA * pkifdData = reinterpret_cast< const SL2_KTX_INTERNAL_FORMAT_DATA *>(_pvParms);
+		if ( !pkifdData->pvCustom ) { return false; }
+		CImage * piImage = reinterpret_cast<CImage *>(pkifdData->pvCustom);
+
+		const _tType * ptSrc = reinterpret_cast<const _tType *>(_pui8Src);
+		SL2_RGBA64F * prgbaDst = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+		constexpr uint32_t ui32Mask = (1 << _uBits) - 1;
+
+
+		for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+			for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+				for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+					size_t sIdx = size_t( H * _ui32Width + W );
+					uint32_t ui32Idx = ptSrc[sIdx] & ui32Mask;
+					if ( ui32Idx >= piImage->Palette().Palette().size() ) { return false; }
+
+					prgbaDst[sIdx].dRgba[SL2_PC_R] = piImage->Palette().Palette()[ui32Idx].m_dElements[0];
+					prgbaDst[sIdx].dRgba[SL2_PC_G] = piImage->Palette().Palette()[ui32Idx].m_dElements[1];
+					prgbaDst[sIdx].dRgba[SL2_PC_B] = piImage->Palette().Palette()[ui32Idx].m_dElements[2];
+					prgbaDst[sIdx].dRgba[SL2_PC_A] = piImage->Palette().Palette()[ui32Idx].m_dElements[3];
+				}
+			}
+
+			ptSrc += _ui32Width * _ui32Height;
+			prgbaDst += _ui32Width * _ui32Height;
+		}
+		return true;
+	}
+
+	/**
+	 * RGBA32F -> Indexed conversion.
+	 *
+	 * \param _pui8Src Source texels.
+	 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+	 * \param _ui32Width Width of the image.
+	 * \param _ui32Height Height of the image.
+	 * \param _ui32Depth Depth of the image.
+	 * \param _pvParms Optional parameters for the conversion.
+	 */
+	template<typename _tType, unsigned _uBits>
+	bool CFormat::IndexedFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms ) {
+		if ( !_pvParms ) { return false; }
+		const SL2_KTX_INTERNAL_FORMAT_DATA * pkifdData = reinterpret_cast< const SL2_KTX_INTERNAL_FORMAT_DATA *>(_pvParms);
+		if ( !pkifdData->pvCustom ) { return false; }
+		CImage * piImage = reinterpret_cast<CImage *>(pkifdData->pvCustom);
+		std::vector<ispc::ColorLABA> vLabBuffer, vPalette;
+		if ( uint32_t( _ui32Width * _ui32Height ) != (uint64_t( _ui32Width ) * _ui32Height) ) { return false; }
+		try {
+			vLabBuffer.resize( size_t( _ui32Width * _ui32Height ) );
+			vPalette.resize( piImage->Palette().Palette().size() );
+		}
+		catch ( ... ) { false; }
+
+		_tType * ptDst = reinterpret_cast<_tType *>(_pui8Dst);
+		const SL2_RGBA64F * prgbaSrc = reinterpret_cast<const SL2_RGBA64F *>(_pui8Src);
+		constexpr uint32_t ui32Mask = (1 << _uBits) - 1;
+
+		ispc::ispc_rgb2lab( reinterpret_cast<const ispc::ColorRGBA *>(piImage->Palette().Palette().data()), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()), uint32_t( piImage->Palette().Palette().size() ) );
+		for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+			// Convert this slice to LAB.
+			ispc::ispc_rgb2lab( reinterpret_cast<const ispc::ColorRGBA *>(prgbaSrc), reinterpret_cast<ispc::ColorLABA *>(vLabBuffer.data()), uint32_t( _ui32Width * _ui32Height ) );
+			
+
+			for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+				for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+					size_t sIdx = size_t( H * _ui32Width + W );
+					size_t sWinner = piImage->Palette().Palette().size();
+					double dDist = std::numeric_limits<double>::infinity();
+					for ( auto I = piImage->Palette().Palette().size(); I--; ) {
+						double dThisDist = ispc::ispc_deltaE_CIEDE2000( vLabBuffer[sIdx].l, vLabBuffer[sIdx].a, vLabBuffer[sIdx].b, vLabBuffer[sIdx].alpha,
+							vPalette[I&ui32Mask].l, vPalette[I&ui32Mask].a, vPalette[I&ui32Mask].b, vPalette[I&ui32Mask].alpha );
+						if ( dThisDist <= dDist ) {
+							dDist = dThisDist;
+							sWinner = I & ui32Mask;
+						}
+					}
+					if ( sWinner == piImage->Palette().Palette().size() ) { return false; }
+					ptDst[sIdx] = _tType( sWinner );
+				}
+			}
+
+			ptDst += _ui32Width * _ui32Height;
+			prgbaSrc += _ui32Width * _ui32Height;
 		}
 		return true;
 	}

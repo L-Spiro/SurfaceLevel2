@@ -14,7 +14,7 @@ export struct ColorLABA {
 };
 
 // Convert RGB to LAB
-export void ispc_rgb2lab(uniform ColorRGBA rgb[], uniform ColorLABA lab[], uniform int n) {
+export void ispc_rgb2lab(const uniform ColorRGBA rgb[], uniform ColorLABA lab[], uniform uint32 n) {
     foreach (i = 0 ... n) {
         double r = rgb[i].r / 255.0d;
         double g = rgb[i].g / 255.0d;
@@ -37,7 +37,7 @@ export void ispc_rgb2lab(uniform ColorRGBA rgb[], uniform ColorLABA lab[], unifo
 }
 
 // Convert LAB to RGB
-export void ispc_lab2rgb(uniform ColorLABA lab[], uniform ColorRGBA rgb[], uniform int n) {
+export void ispc_lab2rgb(const uniform ColorLABA lab[], uniform ColorRGBA rgb[], uniform uint32 n) {
     foreach (i = 0 ... n) {
         double y = (lab[i].l + 16.0d) / 116.0d;
         double x = lab[i].a / 500.0d + y;

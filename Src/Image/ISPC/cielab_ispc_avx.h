@@ -81,9 +81,9 @@ extern "C" {
     extern double ispc_deltaE_CIE94_textiles(const struct ColorLABA *labA, const struct ColorLABA *labB);
 #endif // ispc_deltaE_CIE94_textiles function declaraion
     extern double ispc_deltaE_CIEDE2000(double L1, double a1, double b1, double alpha1, double L2, double a2, double b2, double alpha2);
-    extern void ispc_lab2rgb(struct ColorLABA * lab, struct ColorRGBA * rgb, int32_t n);
+    extern void ispc_lab2rgb(const struct ColorLABA * lab, struct ColorRGBA * rgb, uint32_t n);
     extern void ispc_medianCutQuantization(struct Color * colors, int32_t imageSize, int32_t paletteSize, struct Color * palette);
-    extern void ispc_rgb2lab(struct ColorRGBA * rgb, struct ColorLABA * lab, int32_t n);
+    extern void ispc_rgb2lab(const struct ColorRGBA * rgb, struct ColorLABA * lab, uint32_t n);
 #if defined(__cplusplus) && (! defined(__ISPC_NO_EXTERN_C) || !__ISPC_NO_EXTERN_C )
 } /* end extern C */
 #endif // __cplusplus

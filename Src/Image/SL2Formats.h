@@ -5307,6 +5307,87 @@ namespace sl2 {
 		static uint64_t																GetSizePalette( uint32_t /*_ui32Width*/, uint32_t /*_ui32Height*/, uint32_t /*_ui32Depth*/, uint32_t /*_ui32Factor*/, const void * /*_pvParms*/ ) {
 			return _uSize / 8;
 		}
+
+		/**
+		 * Indexed -> RGBA32F conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template<typename _tType = uint8_t, unsigned _uBits = 8>
+		static bool																	IndexedToRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms );
+
+		/**
+		 * RGBA32F -> Indexed conversion.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA32F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template<typename _tType = uint8_t, unsigned _uBits = 8>
+		static bool																	IndexedFromRgba64F( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * _pvParms );
+
+		/**
+		 * Generic integer format -> RGBA64F conversion, but for a single color.
+		 *
+		 * \param _pui8Src Source texels.
+		 * \param _pui8Dst Destination texels known to be in RGBA64F format.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
+			unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
+			unsigned _bSigned = false, unsigned _bNorm = true, unsigned _bSrgb = false>
+		static bool																	StdIntToRgba64F_Palette( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t /*_ui32Width*/, uint32_t /*_ui32Height*/, uint32_t /*_ui32Depth*/, const void * /*_pvParms*/ ) {
+		
+			SL2_RGBA64F & rgbaThis = reinterpret_cast<SL2_RGBA64F &>(_pui8Dst[0]);
+			const uint64_t * pui64Src = reinterpret_cast<const uint64_t *>(&_pui8Src[0]);
+			rgbaThis.dRgba[SL2_PC_R] = _bNorm ? StdIntComponentTo64F_Norm<_uRBits, _uRShift, _bSigned, _bSrgb>( (*pui64Src), 0.0 ) : StdIntComponentTo64F<_uRBits, _uRShift, _bSigned>( (*pui64Src), 0.0 );
+			rgbaThis.dRgba[SL2_PC_G] = _bNorm ? StdIntComponentTo64F_Norm<_uGBits, _uGShift, _bSigned, _bSrgb>( (*pui64Src), 0.0 ) : StdIntComponentTo64F<_uGBits, _uGShift, _bSigned>( (*pui64Src), 0.0 );
+			rgbaThis.dRgba[SL2_PC_B] = _bNorm ? StdIntComponentTo64F_Norm<_uBBits, _uBShift, _bSigned, _bSrgb>( (*pui64Src), 0.0 ) : StdIntComponentTo64F<_uBBits, _uBShift, _bSigned>( (*pui64Src), 0.0 );
+			rgbaThis.dRgba[SL2_PC_A] = _bNorm ? StdIntComponentTo64F_Norm<_uABits, _uAShift, _bSigned, false>( (*pui64Src), 1.0 ) : StdIntComponentTo64F<_uABits, _uAShift, _bSigned>( (*pui64Src), 1.0 );
+
+			return true;
+		}
+
+		/**
+		 * Generic RGBA64F -> integer format conversion, but for a single color.
+		 *
+		 * \param _pui8Src Source texels known to be in RGBA64F format.
+		 * \param _pui8Dst Destination texels.
+		 * \param _ui32Width Width of the image.
+		 * \param _ui32Height Height of the image.
+		 * \param _ui32Depth Depth of the image.
+		 * \param _pvParms Optional parameters for the conversion.
+		 */
+		template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
+			unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
+			unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
+		static bool																	StdIntFromRgba64F_Palette( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t /*_ui32Width*/, uint32_t /*_ui32Height*/, uint32_t /*_ui32Depth*/, const void * /*_pvParms*/ ) {
+			struct SL2_RGBA64F {
+				double dRgba[4];
+			};
+			const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[0]);
+			uint64_t * pui64Dst = reinterpret_cast<uint64_t *>(&_pui8Dst[0]);
+			if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uRBits, _uRShift, _bSigned, _bSrgb>( rgbaThis.dRgba[SL2_PC_R], (*pui64Dst) ); }
+			else { Std64FToIntComponent<_uRBits, _uRShift, _bSigned>( rgbaThis.dRgba[SL2_PC_R], (*pui64Dst) ); }
+			if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uGBits, _uGShift, _bSigned, _bSrgb>( rgbaThis.dRgba[SL2_PC_G], (*pui64Dst) ); }
+			else { Std64FToIntComponent<_uGBits, _uGShift, _bSigned>( rgbaThis.dRgba[SL2_PC_G], (*pui64Dst) ); }
+			if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uBBits, _uBShift, _bSigned, _bSrgb>( rgbaThis.dRgba[SL2_PC_B], (*pui64Dst) ); }
+			else { Std64FToIntComponent<_uBBits, _uBShift, _bSigned>( rgbaThis.dRgba[SL2_PC_B], (*pui64Dst) ); }
+			if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uABits, _uAShift, _bSigned, false>( rgbaThis.dRgba[SL2_PC_A], (*pui64Dst) ); }
+			else { Std64FToIntComponent<_uABits, _uAShift, _bSigned>( rgbaThis.dRgba[SL2_PC_A], (*pui64Dst) ); }
+			return true;
+		}
 	};
 	
 
@@ -8526,6 +8607,8 @@ namespace sl2 {
 		if ( ASTCENC_SUCCESS != eStatus ) { return false; }
 		return true;
 	}
+
+	
 
 }	// namespace sl2
 
