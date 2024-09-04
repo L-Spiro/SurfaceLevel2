@@ -532,6 +532,7 @@ namespace sl2 {
 			_iDst.m_vIccProfile = m_vOutIccProfile;
 			_iDst.m_vOutIccProfile = m_vOutIccProfile;
 			_iDst.m_bApplyInputColorSpaceTransfer = m_bApplyInputColorSpaceTransfer;
+			_iDst.m_pPalette = m_pPalette;
 			if ( !_iDst.m_vOutIccProfile.size() ) {
 				_iDst.m_bApplyInputColorSpaceTransfer = false;
 			}
@@ -563,6 +564,7 @@ namespace sl2 {
 		_iDst.m_vIccProfile = m_vOutIccProfile;
 		_iDst.m_vOutIccProfile = m_vOutIccProfile;
 		_iDst.m_bApplyInputColorSpaceTransfer = m_bApplyInputColorSpaceTransfer;
+		_iDst.m_pPalette = m_pPalette;
 		if ( !_iDst.m_vOutIccProfile.size() ) {
 			_iDst.m_bApplyInputColorSpaceTransfer = false;
 		}
@@ -1779,27 +1781,30 @@ namespace sl2 {
 		}
 
 		SL2_VKFORMAT vFormat = SL2_VK_FORMAT_UNDEFINED;
-		SL2_OP
+		SL2_KTX_INTERNAL_FORMAT kifOglFormat = SL2_KIF_GL_INVALID;
 		uint32_t ui32BytesPerPixel;
 		uint32_t ui32BytesPerPixelDst;
 		uint32_t ui32BitMask = 0x0;
 		switch ( lpbfhInfo->ui16BitsPerPixel ) {
 			case 1 : {
-				vFormat = SL2_VK_FORMAT_R8G8B8_UNORM;
+				//vFormat = SL2_VK_FORMAT_R8G8B8_UNORM;
+				kifOglFormat = SL2_KIF_GL_COLOR_INDEX1_EXT;
 				ui32BytesPerPixel = 1;
 				ui32BytesPerPixelDst = 3;
 				ui32BitMask = 0x1;
 				break;
 			}
 			case 4 : {
-				vFormat = SL2_VK_FORMAT_R8G8B8_UNORM;
+				//vFormat = SL2_VK_FORMAT_R8G8B8_UNORM;
+				kifOglFormat = SL2_KIF_GL_COLOR_INDEX4_EXT;
 				ui32BytesPerPixel = 4;
 				ui32BytesPerPixelDst = 3;
 				ui32BitMask = 0xF;
 				break;
 			}
 			case 8 : {
-				vFormat = SL2_VK_FORMAT_R8G8B8_UNORM;
+				kifOglFormat = SL2_KIF_GL_COLOR_INDEX8_EXT;
+				//vFormat = SL2_VK_FORMAT_R8G8B8_UNORM;
 				ui32BytesPerPixel = 8;
 				ui32BytesPerPixelDst = 3;
 				ui32BitMask = 0xFF;
@@ -1838,22 +1843,36 @@ namespace sl2 {
 		}
 
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * pkiffFormat = CFormat::FindFormatDataByVulkan( vFormat );
+		if ( kifOglFormat != SL2_KIF_GL_INVALID ) {
+			pkiffFormat = CFormat::FindFormatDataByOgl( kifOglFormat );
+		}
+		else {
+			pkiffFormat = CFormat::FindFormatDataByVulkan( vFormat );
+		}
 		uint64_t ui64DestRowWidth = CFormat::GetRowSize( pkiffFormat, lpbfhInfo->ui32Width );
 
 		switch ( lpbfhInfo->ui16BitsPerPixel ) {
 			case 8 : {
-				
 				if ( !AllocateTexture( pkiffFormat,
 					lpbfhInfo->ui32Width, ui32Height, 1,
 					1, 1, 1 ) ) { return SL2_E_OUTOFMEMORY; }
+				m_pPalette.SetFormat( CFormat::FindPaletteFormatData( SL2_KIF_GL_PALETTE8_RGB8_OES ) );
 
 				uint32_t ui32ActualOffset = lpbfhHeader->ui32Offset;
 
 				// Pointer to the palette data.
 				const SL2_BITMAPPALETTE * lpbpPalette = reinterpret_cast<const SL2_BITMAPPALETTE *>(&_vData.data()[sizeof( SL2_BITMAPFILEHEADER )+sizeof( SL2_BITMAPINFOHEADER )]);
+				for ( uint32_t I = 0; I < lpbfhInfo->ui32ColorsInPalette; ++I ) {
+					uint32_t ui32B = (lpbpPalette[I].ui32Color >> 0) & 0xFF;
+					uint32_t ui32G = (lpbpPalette[I].ui32Color >> 8) & 0xFF;
+					uint32_t ui32R = (lpbpPalette[I].ui32Color >> 16) & 0xFF;
+					uint32_t ui32A = (lpbpPalette[I].ui32Color >> 24) & 0xFF;
+					m_pPalette.Add( CPalette::CColor( ui32R / 255.0, ui32G / 255.0, ui32B / 255.0, ui32A / 255.0 ) );
+				}
 
 				// If it is RLE-compressed.
-				if ( i32Compression == 1 ) {
+				if ( i32Compression == BI_RLE8 ) {
+					return SL2_E_FEATURENOTSUPPORTED;
 				}
 				else {
 					uint32_t ui32EightOverBytes = 8 / ui32BytesPerPixel;
@@ -1882,38 +1901,39 @@ namespace sl2 {
 
 							// Sanity check.
 							if ( ui32Index >= lpbfhInfo->ui32ColorsInPalette ) { return SL2_E_INVALIDFILETYPE; }
+							pui8Dest[X] = uint8_t( ui32Index );
 
 							// Get the color from the palette.
-							uint32_t ui32B = (lpbpPalette[ui32Index].ui32Color >> 0) & 0xFF;
-							uint32_t ui32G = (lpbpPalette[ui32Index].ui32Color >> 8) & 0xFF;
-							uint32_t ui32R = (lpbpPalette[ui32Index].ui32Color >> 16) & 0xFF;
-							uint32_t ui32A = (lpbpPalette[ui32Index].ui32Color >> 24) & 0xFF;
-							CFormat::SL2_RGBA_UNORM ruColor;
-							ruColor.ui8Rgba[SL2_PC_R] = static_cast<uint8_t>(ui32R);
-							ruColor.ui8Rgba[SL2_PC_G] = static_cast<uint8_t>(ui32G);
-							ruColor.ui8Rgba[SL2_PC_B] = static_cast<uint8_t>(ui32B);
-							ruColor.ui8Rgba[SL2_PC_A] = static_cast<uint8_t>(ui32A);
+							//uint32_t ui32B = (lpbpPalette[ui32Index].ui32Color >> 0) & 0xFF;
+							//uint32_t ui32G = (lpbpPalette[ui32Index].ui32Color >> 8) & 0xFF;
+							//uint32_t ui32R = (lpbpPalette[ui32Index].ui32Color >> 16) & 0xFF;
+							//uint32_t ui32A = (lpbpPalette[ui32Index].ui32Color >> 24) & 0xFF;
+							//CFormat::SL2_RGBA_UNORM ruColor;
+							//ruColor.ui8Rgba[SL2_PC_R] = static_cast<uint8_t>(ui32R);
+							//ruColor.ui8Rgba[SL2_PC_G] = static_cast<uint8_t>(ui32G);
+							//ruColor.ui8Rgba[SL2_PC_B] = static_cast<uint8_t>(ui32B);
+							//ruColor.ui8Rgba[SL2_PC_A] = static_cast<uint8_t>(ui32A);
 
-							// Convert to the destination format.
-							uint32_t ui32Final = (*reinterpret_cast<uint32_t *>(&ruColor.ui8Rgba));
+							//// Convert to the destination format.
+							//uint32_t ui32Final = (*reinterpret_cast<uint32_t *>(&ruColor.ui8Rgba));
 
-							static const uint32_t ui32Mask[] = {
-								0xFFFFFFFF,
-								0xFFFFFF00,
-								0xFFFF0000,
-								0xFF000000,
-								0x00000000
-							};
-							static const uint32_t ui32Sizes[] = {
-								0x00000000,
-								0x000000FF,
-								0x0000FFFF,
-								0x00FFFFFF,
-								0xFFFFFFFF
-							};
+							//static const uint32_t ui32Mask[] = {
+							//	0xFFFFFFFF,
+							//	0xFFFFFF00,
+							//	0xFFFF0000,
+							//	0xFF000000,
+							//	0x00000000
+							//};
+							//static const uint32_t ui32Sizes[] = {
+							//	0x00000000,
+							//	0x000000FF,
+							//	0x0000FFFF,
+							//	0x00FFFFFF,
+							//	0xFFFFFFFF
+							//};
 
-							uint32_t * pui32Dst = reinterpret_cast<uint32_t *>(&pui8Dest[X*ui32BytesPerPixelDst]);
-							(*pui32Dst) = ((*pui32Dst) & ui32Mask[ui32BytesPerPixelDst]) | (ui32Final & ui32Sizes[ui32BytesPerPixelDst]);
+							//uint32_t * pui32Dst = reinterpret_cast<uint32_t *>(&pui8Dest[X*ui32BytesPerPixelDst]);
+							//(*pui32Dst) = ((*pui32Dst) & ui32Mask[ui32BytesPerPixelDst]) | (ui32Final & ui32Sizes[ui32BytesPerPixelDst]);
 						}
 					}
 				}
@@ -2015,7 +2035,7 @@ namespace sl2 {
 					//	when there is an alpha channel.  In the end, it turns out that this only
 					//	works on 24-bit bitmaps.  But that is not so bad since they are actually
 					//	fairly common.
-					if ( i32Compression == 0 &&
+					if ( i32Compression == BI_RGB &&
 						ui32RShift == offsetof( CFormat::SL2_RGBA_UNORM, ui8Rgba[SL2_PC_R] ) &&
 						ui32GShift == offsetof( CFormat::SL2_RGBA_UNORM, ui8Rgba[SL2_PC_G] ) &&
 						ui32BShift == offsetof( CFormat::SL2_RGBA_UNORM, ui8Rgba[SL2_PC_B] ) &&
@@ -2035,25 +2055,25 @@ namespace sl2 {
 							switch ( vFormat ) {
 								case SL2_VK_FORMAT_R5G6B5_UNORM_PACK16 : {
 									CFormat::SL2_R5G6B5_PACKED * prgbDst = reinterpret_cast<CFormat::SL2_R5G6B5_PACKED *>(&pui8Dest[X*ui32BytesPerPixelDst]);
-									prgbDst->ui16R = static_cast<uint8_t>(std::round( ui32R / ((1 << ui32RBits) - 1.0) * ((1 << 5) - 1) ));
-									prgbDst->ui16G = static_cast<uint8_t>(std::round( ui32G / ((1 << ui32GBits) - 1.0) * ((1 << 6) - 1) ));
-									prgbDst->ui16B = static_cast<uint8_t>(std::round( ui32B / ((1 << ui32BBits) - 1.0) * ((1 << 5) - 1) ));
+									prgbDst->ui16R = static_cast<uint8_t>(std::round( ui32R / ((1ULL << ui32RBits) - 1.0) * ((1ULL << 5) - 1) ));
+									prgbDst->ui16G = static_cast<uint8_t>(std::round( ui32G / ((1ULL << ui32GBits) - 1.0) * ((1ULL << 6) - 1) ));
+									prgbDst->ui16B = static_cast<uint8_t>(std::round( ui32B / ((1ULL << ui32BBits) - 1.0) * ((1ULL << 5) - 1) ));
 									break;
 								}
 								case SL2_VK_FORMAT_R5G5B5A1_UNORM_PACK16 : {
 									CFormat::SL2_A1R5G6B5_PACKED * prgbDst = reinterpret_cast<CFormat::SL2_A1R5G6B5_PACKED *>(&pui8Dest[X*ui32BytesPerPixelDst]);
-									prgbDst->ui16R = static_cast<uint8_t>(std::round( ui32R / ((1 << ui32RBits) - 1.0) * ((1 << 5) - 1) ));
-									prgbDst->ui16G = static_cast<uint8_t>(std::round( ui32G / ((1 << ui32GBits) - 1.0) * ((1 << 5) - 1) ));
-									prgbDst->ui16B = static_cast<uint8_t>(std::round( ui32B / ((1 << ui32BBits) - 1.0) * ((1 << 5) - 1) ));
-									prgbDst->ui16A = static_cast<uint8_t>(std::round( ui32A / ((1 << ui32ABits) - 1.0) * ((1 << 1) - 1) ));
+									prgbDst->ui16R = static_cast<uint8_t>(std::round( ui32R / ((1ULL << ui32RBits) - 1.0) * ((1ULL << 5) - 1) ));
+									prgbDst->ui16G = static_cast<uint8_t>(std::round( ui32G / ((1ULL << ui32GBits) - 1.0) * ((1ULL << 5) - 1) ));
+									prgbDst->ui16B = static_cast<uint8_t>(std::round( ui32B / ((1ULL << ui32BBits) - 1.0) * ((1ULL << 5) - 1) ));
+									prgbDst->ui16A = static_cast<uint8_t>(std::round( ui32A / ((1ULL << ui32ABits) - 1.0) * ((1ULL << 1) - 1) ));
 									break;
 								}
 								case SL2_VK_FORMAT_R4G4B4A4_UNORM_PACK16 : {
 									CFormat::SL2_RGBA4_PACKED * prgbDst = reinterpret_cast<CFormat::SL2_RGBA4_PACKED *>(&pui8Dest[X*ui32BytesPerPixelDst]);
-									prgbDst->ui16R = static_cast<uint8_t>(std::round( ui32R / ((1 << ui32RBits) - 1.0) * ((1 << 4) - 1) ));
-									prgbDst->ui16G = static_cast<uint8_t>(std::round( ui32G / ((1 << ui32GBits) - 1.0) * ((1 << 4) - 1) ));
-									prgbDst->ui16B = static_cast<uint8_t>(std::round( ui32B / ((1 << ui32BBits) - 1.0) * ((1 << 4) - 1) ));
-									prgbDst->ui16A = static_cast<uint8_t>(std::round( ui32A / ((1 << ui32ABits) - 1.0) * ((1 << 4) - 1) ));
+									prgbDst->ui16R = static_cast<uint8_t>(std::round( ui32R / ((1ULL << ui32RBits) - 1.0) * ((1ULL << 4) - 1) ));
+									prgbDst->ui16G = static_cast<uint8_t>(std::round( ui32G / ((1ULL << ui32GBits) - 1.0) * ((1ULL << 4) - 1) ));
+									prgbDst->ui16B = static_cast<uint8_t>(std::round( ui32B / ((1ULL << ui32BBits) - 1.0) * ((1ULL << 4) - 1) ));
+									prgbDst->ui16A = static_cast<uint8_t>(std::round( ui32A / ((1ULL << ui32ABits) - 1.0) * ((1ULL << 4) - 1) ));
 									break;
 								}
 								case SL2_VK_FORMAT_R8G8B8_UNORM : {

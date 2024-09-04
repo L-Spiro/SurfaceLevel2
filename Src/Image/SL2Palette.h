@@ -86,6 +86,7 @@ namespace sl2 {
 			m_pPalette.push_back( _cColor );
 		}
 		catch ( ... ) { return false; }
+		return true;
 	}
 
 	/**

@@ -2987,10 +2987,10 @@ namespace sl2 {
 		const SL2_RGBA64F * prgbaSrc = reinterpret_cast<const SL2_RGBA64F *>(_pui8Src);
 		constexpr uint32_t ui32Mask = (1 << _uBits) - 1;
 
-		ispc::ispc_rgb2lab( reinterpret_cast<const ispc::ColorRGBA *>(piImage->Palette().Palette().data()), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()), uint32_t( piImage->Palette().Palette().size() ) );
+		ispc::ispc_rgb2lab( reinterpret_cast<const ispc::ColorRGBA *>(piImage->Palette().Palette().data()), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()), piImage->Palette().Palette().size() );
 		for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
 			// Convert this slice to LAB.
-			ispc::ispc_rgb2lab( reinterpret_cast<const ispc::ColorRGBA *>(prgbaSrc), reinterpret_cast<ispc::ColorLABA *>(vLabBuffer.data()), uint32_t( _ui32Width * _ui32Height ) );
+			ispc::ispc_rgb2lab( reinterpret_cast<const ispc::ColorRGBA *>(prgbaSrc), reinterpret_cast<ispc::ColorLABA *>(vLabBuffer.data()), uint64_t( _ui32Width ) * _ui32Height );
 			
 
 			for ( uint32_t H = 0; H < _ui32Height; ++H ) {

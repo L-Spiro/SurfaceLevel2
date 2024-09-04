@@ -14,7 +14,7 @@ export struct ColorLABA {
 };
 
 // Convert RGB to LAB
-export void ispc_rgb2lab(const uniform ColorRGBA rgb[], uniform ColorLABA lab[], uniform uint32 n) {
+export void ispc_rgb2lab(const uniform ColorRGBA rgb[], uniform ColorLABA lab[], uniform uint64 n) {
     foreach (i = 0 ... n) {
         double r = rgb[i].r / 255.0d;
         double g = rgb[i].g / 255.0d;
@@ -37,7 +37,7 @@ export void ispc_rgb2lab(const uniform ColorRGBA rgb[], uniform ColorLABA lab[],
 }
 
 // Convert LAB to RGB
-export void ispc_lab2rgb(const uniform ColorLABA lab[], uniform ColorRGBA rgb[], uniform uint32 n) {
+export void ispc_lab2rgb(const uniform ColorLABA lab[], uniform ColorRGBA rgb[], uniform uint64 n) {
     foreach (i = 0 ... n) {
         double y = (lab[i].l + 16.0d) / 116.0d;
         double x = lab[i].a / 500.0d + y;
@@ -195,29 +195,30 @@ export struct Color {
 };
 
 export struct ColorCube {
-    int start, end;  // Indexes into the color array
+    int64 start, end;  // Indexes into the color array
     double rMin, rMax, gMin, gMax, bMin, bMax, aMin, aMax;
 };
 
 // Manual sorting function
-inline void sortColors(uniform Color colors[], int start, int end, int channel) {
-    for (int i = start; i < end - 1; i++) {
-        for (int j = i + 1; j < end; j++) {
-            bool condition = false;
+inline void sortColors(uniform Color colors[], uniform int start, uniform int end, int channel) {
+    for (uniform int i = start; i < end - 1; i++) {
+        for (uniform int j = i + 1; j < end; j++) {
+            uniform bool condition = false;
             if (channel == 0)      condition = colors[i].r > colors[j].r;
             else if (channel == 1) condition = colors[i].g > colors[j].g;
             else if (channel == 2) condition = colors[i].b > colors[j].b;
             else if (channel == 3) condition = colors[i].a > colors[j].a;
 
             if (condition) {
-                // Swap colors[i] and colors[j]
-                Color temp = colors[i];
+                uniform Color temp = colors[i];
                 colors[i] = colors[j];
                 colors[j] = temp;
             }
         }
     }
 }
+
+
 
 inline void splitCube(uniform Color colors[], uniform ColorCube cubes[], uniform int cubeIndex, uniform int &cubeCount) {
     uniform ColorCube cube = cubes[cubeIndex];
@@ -293,8 +294,8 @@ inline void splitCube(uniform Color colors[], uniform ColorCube cubes[], uniform
 }
 
 
-export void ispc_medianCutQuantization(uniform Color colors[], uniform int imageSize, uniform int paletteSize, uniform Color palette[]) {
-    uniform ColorCube cubes[0x10000]; // Adjusted to support up to 65536 cubes
+export void ispc_medianCutQuantization(uniform Color colors[], uniform int64 imageSize, uniform Color palette[], uniform int paletteSize) {
+    uniform ColorCube cubes[0x10000];
     uniform int cubeCount = 0;
 
     // Initialize the initialCube manually
