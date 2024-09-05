@@ -49,11 +49,9 @@ namespace sl2 {
 		struct SL2_CMS_PROFILE {
 			SL2_CMS_PROFILE() {}
 			SL2_CMS_PROFILE( const uint8_t * _pui8Data, size_t _sSize ) :
-				hProfile( ::cmsOpenProfileFromMem( _pui8Data, static_cast<cmsUInt32Number>(_sSize) ) ),
-				bFree( true ) {}
+				hProfile( ::cmsOpenProfileFromMem( _pui8Data, static_cast<cmsUInt32Number>(_sSize) ) ) {}
 			SL2_CMS_PROFILE( cmsHPROFILE _hProfile, bool _bFree = false ) :
-				hProfile( _hProfile ),
-				bFree( _bFree ) {
+				hProfile( _hProfile ) {
 			}
 			~SL2_CMS_PROFILE() {
 				Reset();
@@ -67,9 +65,6 @@ namespace sl2 {
 			void												Reset() {
 				if ( hProfile ) {
 					::cmsCloseProfile( hProfile );
-					if ( bFree ) {
-						//::free( hProfile );
-					}
 					hProfile = nullptr;
 				}
 			}
@@ -80,17 +75,15 @@ namespace sl2 {
 			 * \param _hTransform The transform to set.
 			 * \return Returns a reference to this object.
 			 **/
-			SL2_CMS_PROFILE &									Set( cmsHPROFILE _hProfile, bool _bFree = false ) {
+			SL2_CMS_PROFILE &									Set( cmsHPROFILE _hProfile ) {
 				Reset();
 				hProfile = _hProfile;
-				bFree = _bFree;
 				return (*this);
 			}
 
 
 			// == Members.
 			cmsHPROFILE											hProfile = nullptr;
-			bool												bFree = true;
 		};
 
 		/** Little CMS cmsHTRANSFORM wrapper. */
@@ -337,6 +330,14 @@ namespace sl2 {
 		 * \return Returns true if all allocations succeed.
 		 **/
 		static bool												CreateProfile( cmsContext _cContextID, SL2_COLORSPACE_GAMMA_CURVES _cgcCurve, SL2_CMS_PROFILE &_cpProfile, bool _bIncludeCurves = false );
+
+		/**
+		 * Creates a basic CMYK profile.
+		 * 
+		 * \param _cpProfile Holds the created CMYK profile.
+		 * \return Returns true if the operation succeeded.
+		 **/
+		static bool												CreateCmykProfile( SL2_CMS_PROFILE &_cpProfile );
 
 		/**
 		 * Creates an in-memory ICC file.

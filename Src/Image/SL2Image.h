@@ -564,6 +564,18 @@ namespace sl2 {
 		inline CPalette &									Palette() { return m_pPalette; }
 
 		/**
+		 * Creates a CMYK verion of the given texture slice.
+		 * 
+		 * \param _ui32Slice The slice to convert.
+		 * \param _sMip The mip level to convert.
+		 * \param _sArray The array index to convert.
+		 * \param _sFace The face to convert.
+		 * \param _vResult Holds the resulting CMYK values as 4 doubles per texel.
+		 * \return Returns true if allocation of the target buffer and an internal buffer succeed.
+		 **/
+		bool												ToCmyk( uint32_t _ui32Slice, size_t _sMip, size_t _sArray, size_t _sFace, std::vector<uint8_t> &_vResult );
+
+		/**
 		 * Gets the final size of a byte buffer to be used as a texture plane.  The plane will be over-allocated by 8 bytes and then rounded up to the nearest 8 bytes.
 		 *	So if a 1-by-1 32-bit tecture is being allocated, 4 will be passed to _sSize, and 16 will be returned ((4+8) -> 16).
 		 * 

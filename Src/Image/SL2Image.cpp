@@ -529,8 +529,7 @@ namespace sl2 {
 			_iDst.m_bFullyOpaque = bOpaque;
 			_iDst.m_dGamma = _iDst.m_dTargetGamma = m_dTargetGamma;
 			_iDst.m_cgcInputCurve = _iDst.m_cgcOutputCurve = m_cgcOutputCurve;
-			_iDst.m_vIccProfile = m_vOutIccProfile;
-			_iDst.m_vOutIccProfile = m_vOutIccProfile;
+			_iDst.m_vIccProfile = _iDst.m_vOutIccProfile = m_vOutIccProfile;
 			_iDst.m_bApplyInputColorSpaceTransfer = m_bApplyInputColorSpaceTransfer;
 			_iDst.m_pPalette = m_pPalette;
 			if ( !_iDst.m_vOutIccProfile.size() ) {
@@ -561,8 +560,7 @@ namespace sl2 {
 		_iDst.m_bFullyOpaque = bOpaque;
 		_iDst.m_dGamma = _iDst.m_dTargetGamma = m_dTargetGamma;
 		_iDst.m_cgcInputCurve = _iDst.m_cgcOutputCurve = m_cgcOutputCurve;
-		_iDst.m_vIccProfile = m_vOutIccProfile;
-		_iDst.m_vOutIccProfile = m_vOutIccProfile;
+		_iDst.m_vIccProfile = _iDst.m_vOutIccProfile = m_vOutIccProfile;
 		_iDst.m_bApplyInputColorSpaceTransfer = m_bApplyInputColorSpaceTransfer;
 		_iDst.m_pPalette = m_pPalette;
 		if ( !_iDst.m_vOutIccProfile.size() ) {
@@ -701,6 +699,69 @@ namespace sl2 {
 		m_dKernelScale = _dScale;
 		m_caKernelChannal = _caNormalChannel;
 		m_dKernelYAxis = _dY;
+
+		return true;
+	}
+
+	/**
+	 * Creates a CMYK verion of the given texture slice.
+	 * 
+	 * \param _ui32Slice The slice to convert.
+	 * \param _sMip The mip level to convert.
+	 * \param _sArray The array index to convert.
+	 * \param _sFace The face to convert.
+	 * \param _vResult Holds the resulting CMYK values as 4 doubles per texel.
+	 * \return Returns true if allocation of the target buffer and an internal buffer succeed.
+	 **/
+	bool CImage::ToCmyk( uint32_t _ui32Slice, size_t _sMip, size_t _sArray, size_t _sFace, std::vector<uint8_t> &_vResult ) {
+		if ( _sMip >= Mipmaps() ) { return false; }
+		if ( _ui32Slice >= Depth() ) { return false; }
+		if ( _sArray >= ArraySize() ) { return false; }
+		if ( _sFace >= Faces() ) { return false; }
+		uint32_t ui32W = GetMipmaps()[_sMip]->Width();
+		uint32_t ui32H = GetMipmaps()[_sMip]->Height();
+		uint64_t ui64Size = uint64_t( ui32W ) * ui32H;
+		if ( ui64Size != cmsUInt32Number( ui64Size ) ) { return false; }
+
+		//std::vector<CFormat::SL2_RGBA64F> vLinearBuffer;
+		try {
+			//vLinearBuffer.resize( ui64Size );
+			_vResult.resize( ui64Size * sizeof( CFormat::SL2_RGBA64F ) );
+		}
+		catch ( ... ) { return false; }
+
+		if ( !Format() || !Format()->pfToRgba64F ) { return false; }
+
+		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*Format());
+		ifdData.pvCustom = this;
+		if ( !Format()->pfToRgba64F( Data( _sMip, _ui32Slice, _sArray, _sFace ), reinterpret_cast<uint8_t *>(_vResult.data()), ui32W, ui32H, 1, &ifdData ) ) { return false; }
+
+		if ( m_dTargetGamma ) {
+			BakeGamma( reinterpret_cast<uint8_t *>(_vResult.data()), 1.0 / m_dTargetGamma, ui32W, ui32H, 1, CFormat::TransferFunc( m_cgcOutputCurve ) );
+		}
+
+
+
+		CIcc::SL2_CMS_PROFILE pSrc, pDst;
+		std::vector<uint8_t> vPro;
+		std::vector<uint8_t> * pvUseMe = &m_vOutIccProfile;
+		if ( m_vOutIccProfile.size() == 0 ) {
+			// If there is an output colorspace, we need to provide a starting point for it.
+			CIcc::SL2_CMS_PROFILE cpTmp;
+			if ( !CIcc::CreateProfile( NULL, m_cgcInputCurve, cpTmp, false ) ) { return false; }
+			if ( !CIcc::SaveProfileToMemory( cpTmp, vPro ) ) { return false; }
+			pvUseMe = &vPro;
+		}
+
+		if ( pvUseMe->size() != static_cast<size_t>(static_cast<cmsUInt32Number>(pvUseMe->size())) || static_cast<cmsUInt32Number>(pvUseMe->size()) <= 0 ) { return false; }
+		if ( pSrc.Set( ::cmsOpenProfileFromMem( pvUseMe->data(), static_cast<cmsUInt32Number>(pvUseMe->size()) ) ).hProfile == NULL ) { return false; }
+
+		if ( !CIcc::CreateCmykProfile( pDst ) ) { return false; }
+
+		CIcc::SL2_CMS_TRANSFORM tTransform( ::cmsCreateTransform( pSrc.hProfile, TYPE_RGBA_DBL, pDst.hProfile, TYPE_CMYK_DBL, INTENT_PERCEPTUAL/*m_i32OutRenderingIntent*/, 0 ) );
+		if ( tTransform.hTransform == NULL ) { return false; }
+
+		::cmsDoTransform( tTransform.hTransform, _vResult.data(), _vResult.data(), cmsUInt32Number( ui64Size ) );
 
 		return true;
 	}
@@ -940,7 +1001,7 @@ namespace sl2 {
 	bool CImage::ApplySrcColorSpace( uint8_t * _pui8Buffer, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) {
 		if ( !_pui8Buffer ) { return false; }
 		if ( m_cgcInputCurve == SL2_CGC_NONE && m_vIccProfile.size() == 0 && m_vOutIccProfile.size() ) {
-			// If there is an output color space, we need to provide a starting point for it.
+			// If there is an output colorspace, we need to provide a starting point for it.
 			CIcc::SL2_CMS_PROFILE cpTmp;
 			if ( !CIcc::CreateProfile( NULL, SL2_CGC_sRGB_PRECISE, cpTmp, false ) ) { return false; }
 			if ( !CIcc::SaveProfileToMemory( cpTmp, m_vIccProfile ) ) { return false; }
@@ -957,7 +1018,7 @@ namespace sl2 {
 				if ( !CIcc::CreateLinearProfile( m_vIccProfile, pSrc ) ) { return false; }
 			}
 			else {
-				if ( pSrc.Set( ::cmsOpenProfileFromMem( m_vIccProfile.data(), static_cast<cmsUInt32Number>(m_vIccProfile.size()) ), true ).hProfile == NULL ) { return false; }
+				if ( pSrc.Set( ::cmsOpenProfileFromMem( m_vIccProfile.data(), static_cast<cmsUInt32Number>(m_vIccProfile.size()) ) ).hProfile == NULL ) { return false; }
 			}
 		}
 		else if ( m_cgcInputCurve != SL2_CGC_NONE ) {
@@ -966,7 +1027,7 @@ namespace sl2 {
 				// That's weird.  This can't happen but anyway we can still fall back to the embedded profile.
 				if ( m_vIccProfile.size() ) {
 					if ( m_vIccProfile.size() != static_cast<size_t>(static_cast<cmsUInt32Number>(m_vIccProfile.size())) || static_cast<cmsUInt32Number>(m_vIccProfile.size()) <= 0 ) { return false; }
-					if ( pSrc.Set( ::cmsOpenProfileFromMem( m_vIccProfile.data(), static_cast<cmsUInt32Number>(m_vIccProfile.size()) ), true ).hProfile == NULL ) { return false; }
+					if ( pSrc.Set( ::cmsOpenProfileFromMem( m_vIccProfile.data(), static_cast<cmsUInt32Number>(m_vIccProfile.size()) ) ).hProfile == NULL ) { return false; }
 				}
 			}
 		}
@@ -1007,7 +1068,7 @@ namespace sl2 {
 		if ( !CIcc::CreateLinearProfile( m_vOutIccProfile, pSrc ) ) { return false; }
 
 		if ( m_vOutIccProfile.size() != static_cast<size_t>(static_cast<cmsUInt32Number>(m_vOutIccProfile.size())) || static_cast<cmsUInt32Number>(m_vOutIccProfile.size()) <= 0 ) { return false; }
-		if ( pDst.Set( ::cmsOpenProfileFromMem( m_vOutIccProfile.data(), static_cast<cmsUInt32Number>(m_vOutIccProfile.size()) ), true ).hProfile == NULL ) { return false; }
+		if ( pDst.Set( ::cmsOpenProfileFromMem( m_vOutIccProfile.data(), static_cast<cmsUInt32Number>(m_vOutIccProfile.size()) ) ).hProfile == NULL ) { return false; }
 
 		CIcc::SL2_CMS_TRANSFORM tTransform( ::cmsCreateTransform( pSrc.hProfile, TYPE_RGBA_DBL, pDst.hProfile, TYPE_RGBA_DBL, INTENT_PERCEPTUAL/*m_i32OutRenderingIntent*/, 0 ) );
 		if ( tTransform.hTransform == NULL ) { return false; }

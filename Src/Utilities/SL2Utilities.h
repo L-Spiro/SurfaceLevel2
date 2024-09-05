@@ -1041,7 +1041,7 @@ namespace sl2 {
 		}
 
 		/**
-		 * A proper CRT curve with WHITE and BRIGHTNESS controls.
+		 * A proper CRT curve based on measurements with WHITE and BRIGHTNESS controls.
 		 * 
 		 * \param param _dVal The value to convert.
 		 * \param _dLw Screen luminance for white, reference setting is LW = 100 cd/m2.
@@ -1085,6 +1085,44 @@ namespace sl2 {
 				return std::pow( _dVal / std::pow( dVc + _dB, (dAlpha1 - dAlpha2) ), 1.0 / dAlpha2 ) - _dB;
 			}
 			return std::pow( _dVal, 1.0 / dAlpha1 ) - _dB;
+		}
+
+		/**
+		 * A proper CRT curve based on measurements.
+		 * 
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					CrtProper2ToLinear( double _dVal ) {
+			constexpr double dAlpha = 0.1115721959217312597711924126997473649680614471435546875;
+			constexpr double dBeta = 1.1115721959217312875267680283286608755588531494140625;
+			constexpr double dCut = 0.0912863421177801115380390228892792947590351104736328125;
+			if ( _dVal >= 0.36 ) { return std::pow( _dVal, 2.31 ); }
+			double dFrac = _dVal / 0.36;
+			return ((_dVal <= dCut ?
+				_dVal / 4.0 :
+				std::pow( (_dVal + dAlpha) / dBeta, 1.0 / 0.45 ))
+				* (1.0 - dFrac))
+				+ (dFrac * std::pow( _dVal, 2.31 ));
+		}
+
+		/**
+		 * The inverse of CrtProper2ToLinear().
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to SMPTE 240M space.
+		 */
+		static inline double SL2_FASTCALL					LinearToCrtProper2( double _dVal ) {
+			constexpr double dAlpha = 0.1115721959217312597711924126997473649680614471435546875;
+			constexpr double dBeta = 1.1115721959217312875267680283286608755588531494140625;
+			constexpr double dCut = 0.022821585529445027884509755722319823689758777618408203125;
+			if ( _dVal >= 0.36 ) { return std::pow( _dVal, 1.0 / 2.31 ); }
+			double dFrac = _dVal / 0.36;
+			return ((_dVal <= dCut ?
+				_dVal * 4.0 :
+				dBeta * std::pow( _dVal, 0.45 ) - dAlpha)
+				* (1.0 - dFrac))
+				+ (dFrac * std::pow( _dVal, 1.0 / 2.31 ));
 		}
 
 		/**

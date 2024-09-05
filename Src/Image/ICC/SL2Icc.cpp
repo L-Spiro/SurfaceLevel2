@@ -445,7 +445,7 @@ namespace sl2 {
 				ptcGamma[0] = ptcGamma[1] = ptcGamma[2] = tcCurve.Set( ::cmsBuildTabulatedToneCurveFloat( _cContextID, static_cast<cmsUInt32Number>(vValues.size()), vValues.data() ) ).tcCurve;
 				if ( ptcGamma[0] == NULL ) { return false; }
 
-				if ( !_cpProfile.Set( ::cmsCreateRGBProfileTHR( _cContextID, &cieD65, &ciePrimaries, ptcGamma ), true ).hProfile ) { return false; }
+				if ( !_cpProfile.Set( ::cmsCreateRGBProfileTHR( _cContextID, &cieD65, &ciePrimaries, ptcGamma ) ).hProfile ) { return false; }
 
 			}
 			else {
@@ -454,7 +454,7 @@ namespace sl2 {
 				ptcGamma[0] = ptcGamma[1] = ptcGamma[2] = tcCurve.Set( ::cmsBuildParametricToneCurve( _cContextID, tfFunc.i32CurveType, tfFunc.dParaCurve ) ).tcCurve;
 				if ( ptcGamma[0] == NULL ) { return false; }
 
-				if ( !_cpProfile.Set( ::cmsCreateRGBProfileTHR( _cContextID, &cieD65, &ciePrimaries, ptcGamma ), true ).hProfile ) { return false; }
+				if ( !_cpProfile.Set( ::cmsCreateRGBProfileTHR( _cContextID, &cieD65, &ciePrimaries, ptcGamma ) ).hProfile ) { return false; }
 			}
 		}
 		else {
@@ -464,11 +464,29 @@ namespace sl2 {
 			ptcGamma[0] = ptcGamma[1] = ptcGamma[2] = tcCurve.Set( ::cmsBuildParametricToneCurve( _cContextID, 1, f64nParm ) ).tcCurve;
 			if ( ptcGamma[0] == NULL ) { return false; }
 
-			if ( !_cpProfile.Set( ::cmsCreateRGBProfileTHR( _cContextID, &cieD65, &ciePrimaries, ptcGamma ), true ).hProfile ) { return false; }
+			if ( !_cpProfile.Set( ::cmsCreateRGBProfileTHR( _cContextID, &cieD65, &ciePrimaries, ptcGamma ) ).hProfile ) { return false; }
 		}
 		if ( !SetTextTags( _cpProfile.hProfile, tfFunc.pwcDesc )) { return false; }
 
 		return true;
+	}
+
+	/**
+	 * Creates a basic CMYK profile.
+	 * 
+	 * \param _cpProfile Holds the created CMYK profile.
+	 * \return Returns true if the operation succeeded.
+	 **/
+	bool CIcc::CreateCmykProfile( SL2_CMS_PROFILE &_cpProfile ) {
+		SL2_CMS_TONECURVE tcCurves[4];
+		cmsToneCurve * ptcCurves[4];
+		for ( int I = 0; I < 4; ++I ) {
+			ptcCurves[I] = tcCurves[I].Set( ::cmsBuildGamma( NULL, 1.0 ) ).tcCurve;  // Create a linear tone curve for each channel (C, M, Y, K).
+		}
+
+		// Create the CMYK profile using linear tone curves.
+		_cpProfile.Set( ::cmsCreateLinearizationDeviceLink( cmsSigCmykData, ptcCurves ) );
+		return _cpProfile.hProfile != NULL;
 	}
 
 	/**
@@ -497,7 +515,7 @@ namespace sl2 {
 	 **/
 	bool CIcc::CreateLinearProfile( std::vector<uint8_t> &_vFile, SL2_CMS_PROFILE &_pProfile ) {
 		if ( _vFile.size() != static_cast<size_t>(static_cast<cmsUInt32Number>(_vFile.size())) || static_cast<cmsUInt32Number>(_vFile.size()) <= 0 ) { return false; }
-		if ( _pProfile.Set( ::cmsOpenProfileFromMem( _vFile.data(), static_cast<cmsUInt32Number>(_vFile.size()) ), true ).hProfile == NULL ) { return false; }
+		if ( _pProfile.Set( ::cmsOpenProfileFromMem( _vFile.data(), static_cast<cmsUInt32Number>(_vFile.size()) ) ).hProfile == NULL ) { return false; }
 		CIcc::SL2_CMS_TONECURVE tcGamma( ::cmsBuildGamma( NULL, 1.0 ) );
 		if ( !tcGamma.tcCurve ) { return false; }
 		cmsToneCurve * ptcCurves[4] = { tcGamma.tcCurve, tcGamma.tcCurve, tcGamma.tcCurve, tcGamma.tcCurve };
