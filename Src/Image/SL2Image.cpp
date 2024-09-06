@@ -36,6 +36,7 @@ namespace sl2 {
 		m_sArraySize( 0 ),
 		m_sFaces( 0 ),
 		m_pkifFormat( nullptr ),
+		m_pkifdYuvFormat( nullptr ),
 		m_caKernelChannal( SL2_CA_R ),
 		m_dKernelScale( 1.0 ),
 		m_dKernelYAxis( 1.0 ),
@@ -112,6 +113,7 @@ namespace sl2 {
 			m_bApplyInputColorSpaceTransfer = _iOther.m_bApplyInputColorSpaceTransfer;
 			m_bApplyOutputColorSpaceTransfer = _iOther.m_bApplyOutputColorSpaceTransfer;
 			m_bIgnoreSourceColorspaceGamma = _iOther.m_bIgnoreSourceColorspaceGamma;
+			m_pkifdYuvFormat = _iOther.m_pkifdYuvFormat;
 			m_ui32YuvW = _iOther.m_ui32YuvW;
 			m_ui32YuvH = _iOther.m_ui32YuvH;
 			m_pPalette = _iOther.m_pPalette;
@@ -152,6 +154,7 @@ namespace sl2 {
 			_iOther.m_bApplyInputColorSpaceTransfer = true;
 			_iOther.m_bApplyOutputColorSpaceTransfer = false;
 			_iOther.m_bIgnoreSourceColorspaceGamma = false;
+			_iOther.m_pkifdYuvFormat = nullptr;
 			_iOther.m_ui32YuvW = _iOther.m_ui32YuvH = 0;
 			_iOther.m_pPalette.Reset();
 		}
@@ -210,6 +213,7 @@ namespace sl2 {
 		m_bApplyInputColorSpaceTransfer = true;
 		m_bApplyOutputColorSpaceTransfer = false;
 		m_bIgnoreSourceColorspaceGamma = false;
+		m_pkifdYuvFormat = nullptr;
 		m_ui32YuvW = m_ui32YuvH = 0;
 		m_pPalette.Reset();
 	}
@@ -764,6 +768,15 @@ namespace sl2 {
 		::cmsDoTransform( tTransform.hTransform, _vResult.data(), _vResult.data(), cmsUInt32Number( ui64Size ) );
 
 		return true;
+	}
+
+	/**
+	 * Generates a palette with the given number of entries.  The palette format is used to determine the color format.
+	 * 
+	 * \param _ui32Total The total number of entries to generate.
+	 * \return Returns true if all necessary allocations succeed.
+	 **/
+	bool CImage::GeneratePalette( uint32_t _ui32Total ) {
 	}
 
 	/**

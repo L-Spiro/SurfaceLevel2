@@ -358,7 +358,7 @@ namespace sl2 {
 		 * \param _uiExpBits Exponent bits.
 		 * \return Returns an exponent with all bits set.
 		 **/
-		static uint64_t					AllExpBitsSet( uint16_t _uiExpBits ) { return (1 << _uiExpBits) - 1; }
+		static uint64_t					AllExpBitsSet( uint16_t _uiExpBits ) { return (1ULL << _uiExpBits) - 1; }
 
 		/**
 		 * Gets the exponent bias.
@@ -366,7 +366,7 @@ namespace sl2 {
 		 * \param _uiExpBits Exponent bits.
 		 * \return Returns the exponent bias.
 		 **/
-		static const double				ExpBias( uint16_t _uiExpBits ) { return double( (1 << (_uiExpBits - 1)) - 1 ); }
+		static const double				ExpBias( uint16_t _uiExpBits ) { return double( (1ULL << (_uiExpBits - 1)) - 1 ); }
 
 		/**
 		 * Gets the maximum normalized exponent bias for a given number of bits.
@@ -374,7 +374,7 @@ namespace sl2 {
 		 * \param _uiExpBits Exponent bits.
 		 * \return Returns the maximum normalized exponent bias for a given number of bits.
 		 **/
-		static const double				MaxExpBias( uint16_t _uiExpBits ) { return double( (1 << (_uiExpBits - 1)) - 1 ); }
+		static const double				MaxExpBias( uint16_t _uiExpBits ) { return double( (1ULL << (_uiExpBits - 1)) - 1 ); }
 
 		/**
 		 * Gets the minimum normalized exponent bias for a given number of bits.
@@ -382,7 +382,7 @@ namespace sl2 {
 		 * \param _uiExpBits Exponent bits.
 		 * \return Returns the minimum normalized exponent bias for a given number of bits.
 		 **/
-		static const double				MinExpBias( uint16_t _uiExpBits ) { return double( (1 << (_uiExpBits - 1)) - 1 ); }
+		static const double				MinExpBias( uint16_t _uiExpBits ) { return double( (1ULL << (_uiExpBits - 1)) - 1 ); }
 
 		/**
 		 * Gets the maximum number of bits in a sign.

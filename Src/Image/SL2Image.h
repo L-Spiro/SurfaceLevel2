@@ -576,6 +576,14 @@ namespace sl2 {
 		bool												ToCmyk( uint32_t _ui32Slice, size_t _sMip, size_t _sArray, size_t _sFace, std::vector<uint8_t> &_vResult );
 
 		/**
+		 * Generates a palette with the given number of entries.  The palette format is used to determine the color format.
+		 * 
+		 * \param _ui32Total The total number of entries to generate.
+		 * \return Returns true if all necessary allocations succeed.
+		 **/
+		bool												GeneratePalette( uint32_t _ui32Total );
+
+		/**
 		 * Gets the final size of a byte buffer to be used as a texture plane.  The plane will be over-allocated by 8 bytes and then rounded up to the nearest 8 bytes.
 		 *	So if a 1-by-1 32-bit tecture is being allocated, 4 will be passed to _sSize, and 16 will be returned ((4+8) -> 16).
 		 * 

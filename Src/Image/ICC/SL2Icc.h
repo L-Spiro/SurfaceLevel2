@@ -171,7 +171,7 @@ namespace sl2 {
 		struct SL2_TRANSFER_FUNC {
 			PfTransferFunc										pfXtoLinear = PassThrough;						/**< X-to-linear function. */
 			PfTransferFunc										pfLinearToX = PassThrough;						/**< Linear-to-X function. */
-			SL2_PARA											pPara;											/**< Parametric parameters. */
+			SL2_PARA											pPara = { 0 };									/**< Parametric parameters. */
 			SL2_CURV											cCurv;											/**< Curve parameters. */
 			void *												pvParm = nullptr;								/**< Points to either pPara or cCurv. */
 
