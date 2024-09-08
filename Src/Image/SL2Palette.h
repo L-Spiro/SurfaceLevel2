@@ -64,6 +64,28 @@ namespace sl2 {
 		 **/
 		inline void											SetFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifdFormat );
 
+		/**
+		 * Gets the palette format.
+		 * 
+		 * \return Returns the palette format.
+		 **/
+		inline const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *Format() const;
+
+		/**
+		 * Sets the size of the palette.
+		 * 
+		 * \param _ui32Size The new size of the palette.
+		 * \return Returns true if allocation of the new palette size succeds.
+		 **/
+		bool												SetSize( uint32_t _ui32Size );
+
+		/**
+		 * Gets a pointer to the palette data.
+		 * 
+		 * \return Returns a pointer to the palette data.
+		 **/
+		inline CColor *										Data();
+
 
 	protected :
 		CPal												m_pPalette;								/**< The actual palette. */
@@ -97,5 +119,19 @@ namespace sl2 {
 	inline void CPalette::SetFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifdFormat ) {
 		m_pkifFormat = _pkifdFormat;
 	}
+
+	/**
+	 * Gets the palette format.
+	 * 
+	 * \return Returns the palette format.
+	 **/
+	inline const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * CPalette::Format() const { return m_pkifFormat; }
+
+	/**
+	 * Gets a pointer to the palette data.
+	 * 
+	 * \return Returns a pointer to the palette data.
+	 **/
+	inline CPalette::CColor * CPalette::Data() { return m_pPalette.data(); }
 
 }	// namespace sl2

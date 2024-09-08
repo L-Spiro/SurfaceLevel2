@@ -5372,20 +5372,26 @@ namespace sl2 {
 		template <unsigned _uRBits, unsigned _uGBits, unsigned _uBBits, unsigned _uABits,
 			unsigned _uRShift, unsigned _uGShift, unsigned _uBShift, unsigned _uAShift,
 			unsigned _bSigned, unsigned _bNorm, unsigned _bSrgb>
-		static bool																	StdIntFromRgba64F_Palette( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t /*_ui32Width*/, uint32_t /*_ui32Height*/, uint32_t /*_ui32Depth*/, const void * /*_pvParms*/ ) {
-			struct SL2_RGBA64F {
-				double dRgba[4];
-			};
-			const SL2_RGBA64F & rgbaThis = reinterpret_cast<const SL2_RGBA64F &>(_pui8Src[0]);
-			uint64_t * pui64Dst = reinterpret_cast<uint64_t *>(&_pui8Dst[0]);
-			if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uRBits, _uRShift, _bSigned, _bSrgb>( rgbaThis.dRgba[SL2_PC_R], (*pui64Dst) ); }
-			else { Std64FToIntComponent<_uRBits, _uRShift, _bSigned>( rgbaThis.dRgba[SL2_PC_R], (*pui64Dst) ); }
-			if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uGBits, _uGShift, _bSigned, _bSrgb>( rgbaThis.dRgba[SL2_PC_G], (*pui64Dst) ); }
-			else { Std64FToIntComponent<_uGBits, _uGShift, _bSigned>( rgbaThis.dRgba[SL2_PC_G], (*pui64Dst) ); }
-			if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uBBits, _uBShift, _bSigned, _bSrgb>( rgbaThis.dRgba[SL2_PC_B], (*pui64Dst) ); }
-			else { Std64FToIntComponent<_uBBits, _uBShift, _bSigned>( rgbaThis.dRgba[SL2_PC_B], (*pui64Dst) ); }
-			if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uABits, _uAShift, _bSigned, false>( rgbaThis.dRgba[SL2_PC_A], (*pui64Dst) ); }
-			else { Std64FToIntComponent<_uABits, _uAShift, _bSigned>( rgbaThis.dRgba[SL2_PC_A], (*pui64Dst) ); }
+		static bool																	StdIntFromRgba64F_Palette( const uint8_t * _pui8Src, uint8_t * _pui8Dst, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const void * /*_pvParms*/ ) {
+			const SL2_RGBA64F * prgbaThis = reinterpret_cast<const SL2_RGBA64F *>(_pui8Src);
+			SL2_RGBA64F * prgbaDst = reinterpret_cast<SL2_RGBA64F *>(_pui8Dst);
+			uint64_t ui64Total = uint64_t( _ui32Width ) * _ui32Height * _ui32Depth;
+			for ( uint64_t I = 0; I < ui64Total; ++I ) {
+				uint64_t ui64This = 0;
+				if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uRBits, _uRShift, _bSigned, _bSrgb>( prgbaThis[I].dRgba[SL2_PC_R], ui64This ); }
+				else { Std64FToIntComponent<_uRBits, _uRShift, _bSigned>( prgbaThis[I].dRgba[SL2_PC_R], ui64This ); }
+				if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uGBits, _uGShift, _bSigned, _bSrgb>( prgbaThis[I].dRgba[SL2_PC_G], ui64This ); }
+				else { Std64FToIntComponent<_uGBits, _uGShift, _bSigned>( prgbaThis[I].dRgba[SL2_PC_G], ui64This ); }
+				if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uBBits, _uBShift, _bSigned, _bSrgb>( prgbaThis[I].dRgba[SL2_PC_B], ui64This ); }
+				else { Std64FToIntComponent<_uBBits, _uBShift, _bSigned>( prgbaThis[I].dRgba[SL2_PC_B], ui64This ); }
+				if constexpr ( _bNorm ) { Std64FToIntComponent_Norm<_uABits, _uAShift, _bSigned, false>( prgbaThis[I].dRgba[SL2_PC_A], ui64This ); }
+				else { Std64FToIntComponent<_uABits, _uAShift, _bSigned>( prgbaThis[I].dRgba[SL2_PC_A], ui64This ); }
+
+				prgbaDst[I].dRgba[SL2_PC_R] = _bNorm ? StdIntComponentTo64F_Norm<_uRBits, _uRShift, _bSigned, _bSrgb>( ui64This, 0.0 ) : StdIntComponentTo64F<_uRBits, _uRShift, _bSigned>( ui64This, 0.0 );
+				prgbaDst[I].dRgba[SL2_PC_G] = _bNorm ? StdIntComponentTo64F_Norm<_uGBits, _uGShift, _bSigned, _bSrgb>( ui64This, 0.0 ) : StdIntComponentTo64F<_uGBits, _uGShift, _bSigned>( ui64This, 0.0 );
+				prgbaDst[I].dRgba[SL2_PC_B] = _bNorm ? StdIntComponentTo64F_Norm<_uBBits, _uBShift, _bSigned, _bSrgb>( ui64This, 0.0 ) : StdIntComponentTo64F<_uBBits, _uBShift, _bSigned>( ui64This, 0.0 );
+				prgbaDst[I].dRgba[SL2_PC_A] = _bNorm ? StdIntComponentTo64F_Norm<_uABits, _uAShift, _bSigned, false>( ui64This, 1.0 ) : StdIntComponentTo64F<_uABits, _uAShift, _bSigned>( ui64This, 1.0 );
+			}
 			return true;
 		}
 	};

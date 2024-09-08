@@ -777,6 +777,53 @@ namespace sl2 {
 	 * \return Returns true if all necessary allocations succeed.
 	 **/
 	bool CImage::GeneratePalette( uint32_t _ui32Total ) {
+		// All colors from all slices, faces, and mipmaps must be considered.
+		uint64_t ui64Size = 0ULL;
+		for ( auto I = GetMipmaps().size(); I--; ) {
+			ui64Size += uint64_t( GetMipmaps()[I]->Width() ) * GetMipmaps()[I]->Height() * GetMipmaps()[I]->Depth() *
+				Faces() * ArraySize();
+		}
+		if ( ui64Size != size_t( ui64Size ) ) { return false; }
+		std::vector<CFormat::SL2_RGBA64F> vBuffer;
+		try {
+			vBuffer.resize( size_t( ui64Size ) );
+			Palette().SetSize( _ui32Total );
+		}
+		catch ( ... ) { return false; }
+		if ( !Format() || !Format()->pfToRgba64F ) { return false; }
+		if ( !Palette().Format() || !Palette().Format()->pfFromRgba64F ) { return false; }
+
+		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*Format());
+		ifdData.pvCustom = this;
+		
+
+		size_t sOff = 0;
+		for ( auto M = GetMipmaps().size(); M--; ) {
+			ui64Size = uint64_t( GetMipmaps()[M]->Width() ) * GetMipmaps()[M]->Height() * GetMipmaps()[M]->Depth();
+			for ( auto F = Faces(); F--; ) {
+				for ( auto A = ArraySize(); A--; ) {
+					if ( !Format()->pfToRgba64F( Data( M, 0, A, F ), reinterpret_cast<uint8_t *>(vBuffer.data() + sOff),
+						GetMipmaps()[M]->Width(), GetMipmaps()[M]->Height(), GetMipmaps()[M]->Depth(), &ifdData ) ) { return false; }
+					sOff += size_t( ui64Size );
+				}
+			}
+		}
+		// Convert the texels to the appropriate color depth as per the palette format.
+		sOff = 0;
+		for ( auto I = vBuffer.size(); I--; ) {
+			ui64Size = uint64_t( GetMipmaps()[I]->Width() ) * GetMipmaps()[I]->Height() * GetMipmaps()[I]->Depth();
+			for ( auto F = Faces(); F--; ) {
+				for ( auto A = ArraySize(); A--; ) {
+					if ( !Format()->pfFromRgba64F( reinterpret_cast<uint8_t *>(vBuffer.data() + sOff), reinterpret_cast<uint8_t *>(vBuffer.data() + sOff),
+						GetMipmaps()[I]->Width(), GetMipmaps()[I]->Height(), GetMipmaps()[I]->Depth(), &ifdData ) ) { return false; }
+					sOff += size_t( ui64Size );
+				}
+			}
+		}
+
+		ispc::ispc_medianCutQuantization( reinterpret_cast<ispc::Color *>(vBuffer.data()), vBuffer.size(),
+			reinterpret_cast<ispc::Color *>(Palette().Data()), static_cast<int32_t>(Palette().Palette().size()) );
+		return true;
 	}
 
 	/**

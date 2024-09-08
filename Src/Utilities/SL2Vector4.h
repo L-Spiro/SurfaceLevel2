@@ -244,7 +244,7 @@ namespace sl2 {
 		 *	unit length (1 unit in length) while maintaining its direction.
 		 * Accuracy/speed depends on the LSM_PERFORMANCE macro.
 		 */
-		inline CVector4											Normalize() {
+		inline CVector4<_uSimd>									Normalize() {
 			CVector4 vCopy;
 #ifdef __AVX__
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
@@ -334,6 +334,20 @@ namespace sl2 {
 			}
 #endif	// #ifdef __AVX__
 			return std::min( std::min( std::min( m_dElements[0], m_dElements[1] ), m_dElements[2] ), m_dElements[3] );
+		}
+
+		/**
+		 * Sets the vector to 0.
+		 **/
+		inline CVector4<_uSimd>									Zero() {
+#ifdef __AVX__
+			if constexpr ( SL2_ST_AVX <= _uSimd ) {
+				_mm256_store_pd( m_dElements, _mm256_setzero_pd() );
+				return (*this);
+			}
+#endif	// #ifdef __AVX__
+			m_dElements[0] = m_dElements[1] = m_dElements[2] = m_dElements[3] = 0.0;
+			return (*this);
 		}
 
 		/**
