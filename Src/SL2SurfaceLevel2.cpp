@@ -2339,77 +2339,102 @@ namespace sl2 {
 
             { CFormat::FindFormatDataByOgl( SL2_KIF_GL_LUMINANCE8 ) },
             { CFormat::FindFormatDataByOgl( SL2_KIF_GL_LUMINANCE16 ) },
+
+            { CFormat::FindFormatDataByOgl( SL2_KIF_GL_COLOR_INDEX1_EXT ) },
+            { CFormat::FindFormatDataByOgl( SL2_KIF_GL_COLOR_INDEX2_EXT ) },
+            { CFormat::FindFormatDataByOgl( SL2_KIF_GL_COLOR_INDEX4_EXT ) },
+            { CFormat::FindFormatDataByOgl( SL2_KIF_GL_COLOR_INDEX8_EXT ) },
         };
-        const CFormat::SL2_BEST_INTERNAL_FORMAT * pkifdUseMe = nullptr;
+        const CFormat::SL2_BEST_INTERNAL_FORMAT * pbifUseMe = nullptr;
 
         if ( _oOptions.pkifdPngFormat ) {
             switch ( _oOptions.pkifdPngFormat->vfVulkanFormat ) {
                 case SL2_VK_FORMAT_R8G8B8_UNORM : {
-                    pkifdUseMe = &bifFormats[0];
+                    pbifUseMe = &bifFormats[0];
                     break;
                 }
                 case SL2_VK_FORMAT_R8G8B8A8_UNORM : {
-                    pkifdUseMe = &bifFormats[1];
+                    pbifUseMe = &bifFormats[1];
                     break;
                 }
                 case SL2_VK_FORMAT_R16G16B16_UNORM : {
-                    pkifdUseMe = &bifFormats[2];
+                    pbifUseMe = &bifFormats[2];
                     break;
                 }
                 case SL2_VK_FORMAT_R16G16B16A16_UNORM : {
-                    pkifdUseMe = &bifFormats[3];
+                    pbifUseMe = &bifFormats[3];
                     break;
                 }
             }
             switch ( _oOptions.pkifdPngFormat->kifInternalFormat ) {
                 case SL2_KIF_GL_LUMINANCE8 : {
-                    pkifdUseMe = &bifFormats[4];
+                    pbifUseMe = &bifFormats[4];
                     break;
                 }
                 case SL2_KIF_GL_LUMINANCE16 : {
-                    pkifdUseMe = &bifFormats[5];
+                    pbifUseMe = &bifFormats[5];
+                    break;
+                }
+                case SL2_KIF_GL_COLOR_INDEX1_EXT : {
+                    pbifUseMe = &bifFormats[6];
+                    break;
+                }
+                case SL2_KIF_GL_COLOR_INDEX2_EXT : {
+                    pbifUseMe = &bifFormats[7];
+                    break;
+                }
+                case SL2_KIF_GL_COLOR_INDEX4_EXT : {
+                    pbifUseMe = &bifFormats[8];
+                    break;
+                }
+                case SL2_KIF_GL_COLOR_INDEX8_EXT : {
+                    pbifUseMe = &bifFormats[9];
                     break;
                 }
             }
         }
-        else { pkifdUseMe = CFormat::FindBestFormat( _iImage.Format(), bifFormats, SL2_ELEMENTS( bifFormats ) ); }
+        else { pbifUseMe = CFormat::FindBestFormat( _iImage.Format(), bifFormats, SL2_ELEMENTS( bifFormats ) ); }
 
-        if ( !pkifdUseMe ) {
+        if ( !pbifUseMe ) {
             return SL2_E_BADFORMAT;
         }
         FREE_IMAGE_TYPE fitType = FIT_BITMAP;
-        if ( pkifdUseMe->pkifdFormat->kifInternalFormat == SL2_KIF_GL_LUMINANCE8 ) {
+        if ( pbifUseMe->pkifdFormat->kifInternalFormat == SL2_KIF_GL_LUMINANCE8 ) {
         }
-        else if ( pkifdUseMe->pkifdFormat->kifInternalFormat == SL2_KIF_GL_LUMINANCE16 ) {
+        else if ( pbifUseMe->pkifdFormat->kifInternalFormat == SL2_KIF_GL_LUMINANCE16 ) {
             fitType = FIT_UINT16;
         }
-        else if ( pkifdUseMe->pkifdFormat->kifInternalFormat == SL2_KIF_GL_LUMINANCE8_ALPHA8 ) {
+        else if ( pbifUseMe->pkifdFormat->kifInternalFormat == SL2_KIF_GL_LUMINANCE8_ALPHA8 ) {
         }
-        else if ( pkifdUseMe->pkifdFormat->kifInternalFormat == SL2_KIF_GL_LUMINANCE16_ALPHA16 ) {
+        else if ( pbifUseMe->pkifdFormat->kifInternalFormat == SL2_KIF_GL_LUMINANCE16_ALPHA16 ) {
             fitType = FIT_RGBA16;
         }
-        else if ( pkifdUseMe->pkifdFormat->ui32BlockSizeInBits == 16 * 3 ) {
+        else if ( pbifUseMe->pkifdFormat->ui32BlockSizeInBits == 16 * 3 ) {
             fitType = FIT_RGB16;
         }
-        else if ( pkifdUseMe->pkifdFormat->ui32BlockSizeInBits == 16 * 4 ) {
+        else if ( pbifUseMe->pkifdFormat->ui32BlockSizeInBits == 16 * 4 ) {
             fitType = FIT_RGBA16;
         }
-        CImage::SL2_FREEIMAGE_ALLOCATET fiImage( fitType, _iImage.GetMipmaps()[_sMip]->Width(), _iImage.GetMipmaps()[_sMip]->Height(), pkifdUseMe->pkifdFormat->ui32BlockSizeInBits );
+
+        if ( SL2_GET_IDX_FLAG( pbifUseMe->pkifdFormat->ui32Flags ) ) {
+            return ExportAsPng_Indexed( _iImage, _sPath, _oOptions, _sMip, _sArray, _sFace, _sSlice, pbifUseMe );
+        }
+        CImage::SL2_FREEIMAGE_ALLOCATET fiImage( fitType, _iImage.GetMipmaps()[_sMip]->Width(), _iImage.GetMipmaps()[_sMip]->Height(), pbifUseMe->pkifdFormat->ui32BlockSizeInBits );
 		if ( !fiImage.pbBitmap ) { return SL2_E_OUTOFMEMORY; }
 
         std::vector<uint8_t> vConverted;
-        SL2_ERRORS eError = _iImage.ConvertToFormat( pkifdUseMe->pkifdFormat, _sMip, _sArray, _sFace, vConverted, true );
+        SL2_ERRORS eError = _iImage.ConvertToFormat( pbifUseMe->pkifdFormat, _sMip, _sArray, _sFace, vConverted, true );
         if ( eError != SL2_E_SUCCESS ) { return eError; }
 
 
-        size_t sPitch = CFormat::GetRowSize( pkifdUseMe->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
+        size_t sPitch = CFormat::GetRowSize( pbifUseMe->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
         uint32_t ui32Slice = uint32_t( sPitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
         for ( uint32_t H = 0; H < _iImage.GetMipmaps()[_sMip]->Height(); ++H ) {
             BYTE * pui8Bits = ::FreeImage_GetScanLine( fiImage.pbBitmap, int( H ) );
             uint8_t * pui8Src = vConverted.data() + ui32Slice + sPitch * H;
             switch ( fitType ) {
                 case FIT_BITMAP : {
-                    switch ( pkifdUseMe->pkifdFormat->ui32BlockSizeInBits ) {
+                    switch ( pbifUseMe->pkifdFormat->ui32BlockSizeInBits ) {
                         case 8 * 1 : {
                             for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
                                 uint8_t * prgbDst = pui8Bits + X;
@@ -2484,6 +2509,90 @@ namespace sl2 {
             }
         }
 
+
+        CImage::SL2_FREE_IMAGE fiBuffer;
+        if ( !fiBuffer.pmMemory ) { return SL2_E_OUTOFMEMORY; }
+
+        if ( _oOptions.bEmbedColorProfile && _iImage.OutputColorSpace().size() && static_cast<size_t>(static_cast<long>(_iImage.OutputColorSpace().size())) == _iImage.OutputColorSpace().size() && static_cast<long>(_iImage.OutputColorSpace().size()) > 0 ) {
+            if ( !::FreeImage_CreateICCProfile( fiImage.pbBitmap, static_cast<void *>(const_cast<uint8_t *>(_iImage.OutputColorSpace().data())), static_cast<long>(_iImage.OutputColorSpace().size()) ) ) { return SL2_E_OUTOFMEMORY; }
+        }
+
+        if ( !::FreeImage_SaveToMemory( FIF_PNG, fiImage.pbBitmap, fiBuffer.pmMemory, _oOptions.iPngSaveOption ) ) {
+            return SL2_E_OUTOFMEMORY;
+        }
+        
+
+        BYTE * pbData = nullptr;
+        DWORD dwSize = 0;
+        if ( !::FreeImage_AcquireMemory( fiBuffer.pmMemory, &pbData, &dwSize ) ) {
+            return SL2_E_INTERNALERROR;
+        }
+        try {
+            vConverted.resize( dwSize );
+        }
+        catch ( ... ) {
+            return SL2_E_OUTOFMEMORY;
+        }
+        std::memcpy( vConverted.data(), pbData, dwSize );
+        {
+            CStdFile sfFile;
+            if ( !sfFile.Create( _sPath.c_str() ) ) {
+                return SL2_E_INVALIDWRITEPERMISSIONS;
+            }
+            if ( !sfFile.WriteToFile( vConverted ) ) {
+                return SL2_E_FILEWRITEERROR;
+            }
+        }
+
+        return SL2_E_SUCCESS;
+    }
+
+    /**
+	 * Exports as PNG.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \param _sMip The mipmap level to export.
+	 * \param _sArray The array index to export.
+	 * \param _sFace The face to export.
+	 * \param _sSlice The slice to export.
+	 * \param _pbifFormat The target indexed format.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS ExportAsPng_Indexed( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice,
+		const CFormat::SL2_BEST_INTERNAL_FORMAT * _pbifFormat ) {
+        size_t sMax = size_t( 1ULL << _pbifFormat->pkifdFormat->ui32BlockSizeInBits );
+        _iImage.GeneratePalette( uint32_t( sMax ) );
+        if ( _iImage.Palette().Palette().size() > sMax ) { return SL2_E_UNSUPPORTEDSIZE; }
+
+        CImage::SL2_FREEIMAGE_ALLOCATET fiImage( FIT_BITMAP, _iImage.GetMipmaps()[_sMip]->Width(), _iImage.GetMipmaps()[_sMip]->Height(), _pbifFormat->pkifdFormat->ui32BlockSizeInBits );
+		if ( !fiImage.pbBitmap ) { return SL2_E_OUTOFMEMORY; }
+
+        std::vector<uint8_t> vConverted;
+        SL2_ERRORS eError = _iImage.ConvertToFormat( _pbifFormat->pkifdFormat, _sMip, _sArray, _sFace, vConverted, true );
+        if ( eError != SL2_E_SUCCESS ) { return eError; }
+
+        // Set the palette.
+        RGBQUAD * prgbVal = ::FreeImage_GetPalette( fiImage.pbBitmap );
+        for ( size_t I = 0; I < _iImage.Palette().Palette().size(); ++I ) {
+            prgbVal[I].rgbRed = static_cast<BYTE>(std::clamp( std::round( _iImage.Palette().Palette()[I].X() * 255.0 ), 0.0, 255.0 ));
+            prgbVal[I].rgbGreen = static_cast<BYTE>(std::clamp( std::round( _iImage.Palette().Palette()[I].Y() * 255.0 ), 0.0, 255.0 ));
+            prgbVal[I].rgbBlue = static_cast<BYTE>(std::clamp( std::round( _iImage.Palette().Palette()[I].Z() * 255.0 ), 0.0, 255.0 ));
+            prgbVal[I].rgbReserved = static_cast<BYTE>(std::clamp( std::round( _iImage.Palette().Palette()[I].W() * 255.0 ), 0.0, 255.0 ));
+        }
+
+        size_t sPitch = CFormat::GetRowSize( _pbifFormat->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
+        uint32_t ui32Slice = uint32_t( sPitch * _iImage.GetMipmaps()[_sMip]->Height() * _sSlice );
+        for ( uint32_t H = 0; H < _iImage.GetMipmaps()[_sMip]->Height(); ++H ) {
+            BYTE * pui8Bits = ::FreeImage_GetScanLine( fiImage.pbBitmap, int( H ) );
+            uint8_t * pui8Src = vConverted.data() + ui32Slice + sPitch * H;
+            for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
+                uint8_t * prgbDst = pui8Bits + X;
+                const uint8_t * pui8This = pui8Src + X;
+                (*prgbDst) = (*pui8This);
+            }
+        }
 
         CImage::SL2_FREE_IMAGE fiBuffer;
         if ( !fiBuffer.pmMemory ) { return SL2_E_OUTOFMEMORY; }

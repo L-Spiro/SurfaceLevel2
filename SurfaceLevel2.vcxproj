@@ -393,6 +393,8 @@
       </IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
+      <StackReserveSize>
+      </StackReserveSize>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.dll" "$(SolutionDir)$(Platform)\$(Configuration)\PVRTexLib.dll"</Command>
@@ -422,6 +424,8 @@
       </IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
+      <StackReserveSize>
+      </StackReserveSize>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.dll" "$(SolutionDir)$(Platform)\$(Configuration)\PVRTexLib.dll"</Command>
@@ -448,6 +452,8 @@
       </IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
+      <StackReserveSize>
+      </StackReserveSize>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.dll" "$(SolutionDir)$(Platform)\$(Configuration)\PVRTexLib.dll"</Command>
@@ -477,6 +483,8 @@
       </IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
+      <StackReserveSize>
+      </StackReserveSize>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.dll" "$(SolutionDir)$(Platform)\$(Configuration)\PVRTexLib.dll"</Command>

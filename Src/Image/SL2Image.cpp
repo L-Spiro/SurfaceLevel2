@@ -777,6 +777,9 @@ namespace sl2 {
 	 * \return Returns true if all necessary allocations succeed.
 	 **/
 	bool CImage::GeneratePalette( uint32_t _ui32Total ) {
+		if ( !Palette().Format() ) {
+			Palette().SetFormat( CFormat::FindPaletteFormatData( SL2_KIF_GL_PALETTE8_RGB8_OES ) );
+		}
 		// All colors from all slices, faces, and mipmaps must be considered.
 		uint64_t ui64Size = 0ULL;
 		for ( auto I = GetMipmaps().size(); I--; ) {
@@ -810,19 +813,25 @@ namespace sl2 {
 		}
 		// Convert the texels to the appropriate color depth as per the palette format.
 		sOff = 0;
-		for ( auto I = vBuffer.size(); I--; ) {
-			ui64Size = uint64_t( GetMipmaps()[I]->Width() ) * GetMipmaps()[I]->Height() * GetMipmaps()[I]->Depth();
+		ifdData = (*Palette().Format());
+		ifdData.pvCustom = this;
+		for ( auto M = GetMipmaps().size(); M--; ) {
+			ui64Size = uint64_t( GetMipmaps()[M]->Width() ) * GetMipmaps()[M]->Height() * GetMipmaps()[M]->Depth();
 			for ( auto F = Faces(); F--; ) {
 				for ( auto A = ArraySize(); A--; ) {
-					if ( !Format()->pfFromRgba64F( reinterpret_cast<uint8_t *>(vBuffer.data() + sOff), reinterpret_cast<uint8_t *>(vBuffer.data() + sOff),
-						GetMipmaps()[I]->Width(), GetMipmaps()[I]->Height(), GetMipmaps()[I]->Depth(), &ifdData ) ) { return false; }
+					if ( !Palette().Format()->pfFromRgba64F( reinterpret_cast<uint8_t *>(vBuffer.data() + sOff), reinterpret_cast<uint8_t *>(vBuffer.data() + sOff),
+						GetMipmaps()[M]->Width(), GetMipmaps()[M]->Height(), GetMipmaps()[M]->Depth(), &ifdData ) ) { return false; }
 					sOff += size_t( ui64Size );
 				}
 			}
 		}
 
-		ispc::ispc_medianCutQuantization( reinterpret_cast<ispc::Color *>(vBuffer.data()), vBuffer.size(),
-			reinterpret_cast<ispc::Color *>(Palette().Data()), static_cast<int32_t>(Palette().Palette().size()) );
+		return Palette().GenPalette_kMeans( reinterpret_cast<const std::vector<CPalette::CColor> *>(&vBuffer),
+			_ui32Total );
+		/*ispc::ispc_medianCutQuantization( reinterpret_cast<ispc::Color *>(vBuffer.data()), vBuffer.size(),
+			reinterpret_cast<ispc::Color *>(Palette().Data()), static_cast<int32_t>(Palette().Palette().size()) );*/
+		/*ispc::ispc_kMeansColorQuantization( reinterpret_cast<ispc::Color *>(vBuffer.data()), vBuffer.size(),
+			reinterpret_cast<ispc::Color *>(Palette().Data()), static_cast<int32_t>(Palette().Palette().size()), 2 );*/
 		return true;
 	}
 

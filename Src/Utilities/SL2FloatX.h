@@ -448,7 +448,7 @@ namespace sl2 {
 		 * \return Returns the number of bits in a given representation.
 		 **/
 		static uint64_t					TotalBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {
-			return (_uiExpBits + _uiManBits) + (_bHasSign ? 1ULL : 0ULL) - (_bImplicitMantissaBit ? 1ULL : 0ULL);
+			return (uint64_t( _uiExpBits ) + _uiManBits) + (_bHasSign ? 1ULL : 0ULL) - (_bImplicitMantissaBit ? 1ULL : 0ULL);
 		}
 
 		/**

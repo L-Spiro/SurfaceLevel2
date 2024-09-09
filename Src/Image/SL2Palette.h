@@ -86,10 +86,54 @@ namespace sl2 {
 		 **/
 		inline CColor *										Data();
 
+		/**
+		 * Generates a palette of a given size using K-Means.
+		 * 
+		 * \param _pvColors The input array of colors.
+		 * \param _ui32Size Size of the palette to generate.
+		 * \param _sIterations Number of refinement iterations.
+		 * \return Returns true if all internal allocations succeed.
+		 **/
+		bool												GenPalette_kMeans( const std::vector<CColor> * _pvColors, uint32_t _ui32Size, size_t _sIterations = 10 );
+
 
 	protected :
 		CPal												m_pPalette;								/**< The actual palette. */
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *		m_pkifFormat = nullptr;					/**< The palette format. */
+
+
+		// == Functions.
+		/**
+		 * Cluster assignment.  It's pretty cool.
+		 * 
+		 * \param _vColors Input array of colors.
+		 * \param _vCentroids Input array of centroids.
+		 * \param _vClusterAssignment Output cluster-assignment results.
+		 * \param _sK A pretty cool dude IMO.
+		 **/
+		static void											AssignClusters( const std::vector<CColor> & _vColors, const std::vector<CColor> & _vCentroids, std::vector<size_t> & _vClusterAssignment, size_t _sK );
+
+		/**
+		 * Updates centroids like a BOSS.
+		 * 
+		 * \param _vColors Input array of colors.
+		 * \param _vCentroids Output array of centroids.
+		 * \param _vClusterAssignment Output cluster-assignment results.
+		 * \param _vClusterSize Output cluster-size results.
+		 * \param _sK A pretty cool dude IMO.
+		 **/
+		static void											UpdateCentroids( const std::vector<CColor> & _vColors, std::vector<CColor> & _vCentroids, std::vector<size_t> & _vClusterAssignment, std::vector<size_t> & _vClusterSize, size_t _sK );
+
+		/**
+		 * Implements K-Means color quantization to generate a palette.
+		 * 
+		 * \param _vColors Input array of colors.
+		 * \param _pPalette The palette to generate.
+		 * \param _sK A pretty cool dude IMO.
+		 * \param _sIterations Number of iterations.
+		 * \return Returns true if all internal allocations succeed.
+		 **/
+		static bool											kMeansColorQuantization( const std::vector<CColor> & _vColors, CPal & _pPalette, size_t _sK, size_t _sIterations );
 	};
 
 

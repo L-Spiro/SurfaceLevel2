@@ -173,6 +173,22 @@ namespace sl2 {
 	SL2_ERRORS															ExportAsPng( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice );
 
 	/**
+	 * Exports as PNG.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \param _sMip The mipmap level to export.
+	 * \param _sArray The array index to export.
+	 * \param _sFace The face to export.
+	 * \param _sSlice The slice to export.
+	 * \param _pbifFormat The target indexed format.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS															ExportAsPng_Indexed( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice,
+		const CFormat::SL2_BEST_INTERNAL_FORMAT * _pbifFormat );
+
+	/**
 	 * Exports as BMP.
 	 * 
 	 * \param _iImage The image to export.

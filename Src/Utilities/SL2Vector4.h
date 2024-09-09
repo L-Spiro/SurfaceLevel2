@@ -137,104 +137,193 @@ namespace sl2 {
 		 */
 		inline double &											operator [] ( size_t _sIndex ) { return m_dElements[_sIndex]; }
 
+//		/**
+//		 * Copy.
+//		 * 
+//		 * \param _vOther The vector to copy.
+//		 * \return Returns the copied item.
+//		 **/
+//		inline CVector4<_uSimd> &								operator == ( const CVector4<SL2_ST_RAW> &_vOther ) {
+//#ifdef __AVX__
+//			if constexpr ( SL2_ST_AVX <= _uSimd ) {
+//				_mm256_store_pd( m_dElements, _mm256_load_pd( _vOther.m_dElements ) );
+//				return (*this);
+//			}
+//#endif	// #ifdef __AVX__
+//			m_dElements[0] = _vOther[0];
+//			m_dElements[1] = _vOther[1];
+//			m_dElements[2] = _vOther[2];
+//			m_dElements[3] = _vOther[3];
+//			return (*this);
+//		}
+//
+//		/**
+//		 * Copy.
+//		 * 
+//		 * \param _vOther The vector to copy.
+//		 * \return Returns the copied item.
+//		 **/
+//		inline CVector4<_uSimd> &								operator == ( const CVector4<SL2_ST_NEON> &_vOther ) {
+//#ifdef __AVX__
+//			if constexpr ( SL2_ST_AVX <= _uSimd ) {
+//				_mm256_store_pd( m_dElements, _mm256_load_pd( _vOther.m_dElements ) );
+//				return (*this);
+//			}
+//#endif	// #ifdef __AVX__
+//			m_dElements[0] = _vOther[0];
+//			m_dElements[1] = _vOther[1];
+//			m_dElements[2] = _vOther[2];
+//			m_dElements[3] = _vOther[3];
+//			return (*this);
+//		}
+//
+//		/**
+//		 * Copy.
+//		 * 
+//		 * \param _vOther The vector to copy.
+//		 * \return Returns the copied item.
+//		 **/
+//		inline CVector4<_uSimd> &								operator == ( const CVector4<SL2_ST_SSE4_1> &_vOther ) {
+//#ifdef __AVX__
+//			if constexpr ( SL2_ST_AVX <= _uSimd ) {
+//				_mm256_store_pd( m_dElements, _mm256_load_pd( _vOther.m_dElements ) );
+//				return (*this);
+//			}
+//#endif	// #ifdef __AVX__
+//			m_dElements[0] = _vOther[0];
+//			m_dElements[1] = _vOther[1];
+//			m_dElements[2] = _vOther[2];
+//			m_dElements[3] = _vOther[3];
+//			return (*this);
+//		}
+//
+//		/**
+//		 * Copy.
+//		 * 
+//		 * \param _vOther The vector to copy.
+//		 * \return Returns the copied item.
+//		 **/
+//		inline CVector4<_uSimd> &								operator == ( const CVector4<SL2_ST_AVX> &_vOther ) {
+//#ifdef __AVX__
+//			if constexpr ( SL2_ST_AVX <= _uSimd ) {
+//				_mm256_store_pd( m_dElements, _mm256_load_pd( _vOther.m_dElements ) );
+//				return (*this);
+//			}
+//#endif	// #ifdef __AVX__
+//			m_dElements[0] = _vOther[0];
+//			m_dElements[1] = _vOther[1];
+//			m_dElements[2] = _vOther[2];
+//			m_dElements[3] = _vOther[3];
+//			return (*this);
+//		}
+//
+//		/**
+//		 * Copy.
+//		 * 
+//		 * \param _vOther The vector to copy.
+//		 * \return Returns the copied item.
+//		 **/
+//		inline CVector4<_uSimd> &								operator == ( const CVector4<SL2_ST_AVX512> &_vOther ) {
+//#ifdef __AVX__
+//			if constexpr ( SL2_ST_AVX <= _uSimd ) {
+//				_mm256_store_pd( m_dElements, _mm256_load_pd( _vOther.m_dElements ) );
+//				return (*this);
+//			}
+//#endif	// #ifdef __AVX__
+//			m_dElements[0] = _vOther[0];
+//			m_dElements[1] = _vOther[1];
+//			m_dElements[2] = _vOther[2];
+//			m_dElements[3] = _vOther[3];
+//			return (*this);
+//		}
+
 		/**
-		 * Copy.
+		 * The += operator.
 		 * 
-		 * \param _vOther The vector to copy.
-		 * \return Returns the copied item.
+		 * \param _vOther The vector to add to this one.
+		 * \return Returns a reference to this vector after the operation.
 		 **/
-		inline CVector4<_uSimd> &								operator == ( const CVector4<SL2_ST_RAW> &_vOther ) {
+		inline CVector4<_uSimd> &								operator += ( const CVector4<_uSimd> &_vOther ) {
 #ifdef __AVX__
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
-				_mm256_store_pd( m_dElements, _mm256_load_pd( _vOther.m_dElements ) );
+				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
+				__m256d mOthrVec = _mm256_load_pd( _vOther.m_dElements );	// Load _vOther's elements into another AVX register.
+				mThisVec = _mm256_add_pd( mThisVec, mOthrVec );				// Perform vectorized addition.
+				_mm256_store_pd( m_dElements, mThisVec );					// Store the result back into this object's elements.
 				return (*this);
 			}
 #endif	// #ifdef __AVX__
-			m_dElements[0] = _vOther[0];
-			m_dElements[1] = _vOther[1];
-			m_dElements[2] = _vOther[2];
-			m_dElements[3] = _vOther[3];
+			m_dElements[0] += _vOther[0];
+			m_dElements[1] += _vOther[1];
+			m_dElements[2] += _vOther[2];
+			m_dElements[3] += _vOther[3];
 			return (*this);
 		}
 
 		/**
-		 * Copy.
+		 * The -= operator.
 		 * 
-		 * \param _vOther The vector to copy.
-		 * \return Returns the copied item.
+		 * \param _vOther The vector to subtract from this one.
+		 * \return Returns a reference to this vector after the operation.
 		 **/
-		inline CVector4<_uSimd> &								operator == ( const CVector4<SL2_ST_NEON> &_vOther ) {
+		inline CVector4<_uSimd> &								operator -= ( const CVector4<_uSimd> &_vOther ) {
 #ifdef __AVX__
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
-				_mm256_store_pd( m_dElements, _mm256_load_pd( _vOther.m_dElements ) );
+				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
+				__m256d mOthrVec = _mm256_load_pd( _vOther.m_dElements );	// Load _vOther's elements into another AVX register.
+				mThisVec = _mm256_sub_pd( mThisVec, mOthrVec );				// Perform vectorized subtraction.
+				_mm256_store_pd( m_dElements, mThisVec );					// Store the result back into this object's elements.
 				return (*this);
 			}
 #endif	// #ifdef __AVX__
-			m_dElements[0] = _vOther[0];
-			m_dElements[1] = _vOther[1];
-			m_dElements[2] = _vOther[2];
-			m_dElements[3] = _vOther[3];
+			m_dElements[0] -= _vOther[0];
+			m_dElements[1] -= _vOther[1];
+			m_dElements[2] -= _vOther[2];
+			m_dElements[3] -= _vOther[3];
 			return (*this);
 		}
 
 		/**
-		 * Copy.
+		 * The / operator.
 		 * 
-		 * \param _vOther The vector to copy.
-		 * \return Returns the copied item.
+		 * \param _vOther The vector by which to divide this one.
+		 * \return Returns a reference to this vector after the operation.
 		 **/
-		inline CVector4<_uSimd> &								operator == ( const CVector4<SL2_ST_SSE4_1> &_vOther ) {
+		inline CVector4<_uSimd>									operator / ( const CVector4<_uSimd> &_vOther ) const {
 #ifdef __AVX__
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
-				_mm256_store_pd( m_dElements, _mm256_load_pd( _vOther.m_dElements ) );
-				return (*this);
+				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
+				__m256d mOthrVec = _mm256_load_pd( _vOther.m_dElements );	// Load _vOther's elements into another AVX register.
+				mThisVec = _mm256_div_pd( mThisVec, mOthrVec );				// Perform vectorized division.
+				return CVector4<_uSimd>( reinterpret_cast<const double *>(&mThisVec) );
 			}
 #endif	// #ifdef __AVX__
-			m_dElements[0] = _vOther[0];
-			m_dElements[1] = _vOther[1];
-			m_dElements[2] = _vOther[2];
-			m_dElements[3] = _vOther[3];
-			return (*this);
+			return CVector4<_uSimd>( m_dElements[0] / _vOther[0],
+				m_dElements[1] / _vOther[1],
+				m_dElements[2] / _vOther[2],
+				m_dElements[3] / _vOther[3] );
 		}
 
 		/**
-		 * Copy.
+		 * The / operator.
 		 * 
-		 * \param _vOther The vector to copy.
-		 * \return Returns the copied item.
+		 * \param _dVal The value by which to divide this one.
+		 * \return Returns a reference to this vector after the operation.
 		 **/
-		inline CVector4<_uSimd> &								operator == ( const CVector4<SL2_ST_AVX> &_vOther ) {
+		inline CVector4<_uSimd>									operator / ( double _dVal ) const {
 #ifdef __AVX__
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
-				_mm256_store_pd( m_dElements, _mm256_load_pd( _vOther.m_dElements ) );
-				return (*this);
+				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
+				__m256d mOthrVec = _mm256_set1_pd( _dVal );					// Broadcast the scalar to all elements of the AVX register.
+				mThisVec = _mm256_div_pd( mThisVec, mOthrVec );				// Perform vectorized division.
+				return CVector4<_uSimd>( reinterpret_cast<const double *>(&mThisVec) );
 			}
 #endif	// #ifdef __AVX__
-			m_dElements[0] = _vOther[0];
-			m_dElements[1] = _vOther[1];
-			m_dElements[2] = _vOther[2];
-			m_dElements[3] = _vOther[3];
-			return (*this);
-		}
-
-		/**
-		 * Copy.
-		 * 
-		 * \param _vOther The vector to copy.
-		 * \return Returns the copied item.
-		 **/
-		inline CVector4<_uSimd> &								operator == ( const CVector4<SL2_ST_AVX512> &_vOther ) {
-#ifdef __AVX__
-			if constexpr ( SL2_ST_AVX <= _uSimd ) {
-				_mm256_store_pd( m_dElements, _mm256_load_pd( _vOther.m_dElements ) );
-				return (*this);
-			}
-#endif	// #ifdef __AVX__
-			m_dElements[0] = _vOther[0];
-			m_dElements[1] = _vOther[1];
-			m_dElements[2] = _vOther[2];
-			m_dElements[3] = _vOther[3];
-			return (*this);
+			double dDiv = 1.0 / _dVal;
+			return CVector4<_uSimd>( m_dElements[0] * dDiv,
+				m_dElements[1] * dDiv,
+				m_dElements[2] * dDiv,
+				m_dElements[3] * dDiv );
 		}
 
 
@@ -242,7 +331,6 @@ namespace sl2 {
 		/**
 		 * Normalizes this vector.  Normalization is the process of adjusting the length of the vector so that it is
 		 *	unit length (1 unit in length) while maintaining its direction.
-		 * Accuracy/speed depends on the LSM_PERFORMANCE macro.
 		 */
 		inline CVector4<_uSimd>									Normalize() {
 			CVector4 vCopy;
@@ -277,14 +365,14 @@ namespace sl2 {
 		 * Performs a dot-product operation.  The dot product of two normalized vectors is the cosine of the angle between
 		 *	them.
 		 *
-		 * \param _v4bOther The vector against which the dot product is to be determined.
+		 * \param _vOther The vector against which the dot product is to be determined.
 		 * \return Returns the dot product between the two vectors.
 		 */
-		inline double 											Dot( const CVector4 &_v4bOther ) const {
+		inline double 											Dot( const CVector4<SL2_ST_AVX512> &_vOther ) const {
 #ifdef __AVX__
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
 				__m256d mVec1 = _mm256_load_pd( m_dElements );														// Load elements of the first vector into an AVX register.
-				__m256d mVec2 = _mm256_load_pd( _v4bOther.m_dElements );											// Load elements of the second vector into an AVX register.
+				__m256d mVec2 = _mm256_load_pd( _vOther.m_dElements );												// Load elements of the second vector into an AVX register.
 				__m256d mMul = _mm256_mul_pd( mVec1, mVec2 );														// Multiply corresponding elements.
 				__m256d mHAdd = _mm256_hadd_pd( mMul, mMul );														// Horizontally add the results.
 
@@ -295,7 +383,7 @@ namespace sl2 {
 				return _mm_cvtsd_f64( mFinalSum );																	// Return the dot product.
 			}
 #endif	// #ifdef __AVX__
-			return m_dElements[0] * _v4bOther.m_dElements[0] + m_dElements[1] * _v4bOther.m_dElements[1] + m_dElements[2] * _v4bOther.m_dElements[2] + m_dElements[3] * _v4bOther.m_dElements[3];
+			return m_dElements[0] * _vOther.m_dElements[0] + m_dElements[1] * _vOther.m_dElements[1] + m_dElements[2] * _vOther.m_dElements[2] + m_dElements[3] * _vOther.m_dElements[3];
 		}
 
 		/**
@@ -377,6 +465,49 @@ namespace sl2 {
 		 * \return Returns X.
 		 **/
 		inline double 											W() const { return m_dElements[3]; }
+
+		/**
+		 * Quick color distance.
+		 * 
+		 * \param _vLeft The left operand.
+		 * \param _vRight The right operand.
+		 * \return Returns a quick color distance between the given vectors.
+		 **/
+		static inline double									ColorDistance( const CVector4<SL2_ST_AVX512> &_vLeft, const CVector4<SL2_ST_AVX512> &_vRight ) {
+#ifdef __AVX__
+			if constexpr ( SL2_ST_AVX <= _uSimd ) {
+				__m256d mVa = _mm256_load_pd( _vLeft.m_dElements );
+				__m256d mVb = _mm256_load_pd( _vRight.m_dElements );
+
+				// Calculate the difference between the components.
+				__m256d mDiff = _mm256_sub_pd( mVa, mVb );
+
+				// Square the differences.
+				__m256d mSqr = _mm256_mul_pd( mDiff, mDiff );
+
+				// Sum the squared differences.
+				__m256d mSum = _mm256_hadd_pd( mSqr, mSqr );	// Horizontal add.
+				mSum = _mm256_hadd_pd( mSum, mSum );			// Second horizontal add.
+
+				// Extract the lower 128-bit part.
+				__m128d mLow = _mm256_castpd256_pd128( mSum );
+
+				double dTmp = _mm_cvtsd_f64( mLow );
+				double dTmp2 = (_vLeft.m_dElements[0] - _vRight.m_dElements[0]) * (_vLeft.m_dElements[0] - _vRight.m_dElements[0]) +
+				   (_vLeft.m_dElements[1] - _vRight.m_dElements[1]) * (_vLeft.m_dElements[1] - _vRight.m_dElements[1]) +
+				   (_vLeft.m_dElements[2] - _vRight.m_dElements[2]) * (_vLeft.m_dElements[2] - _vRight.m_dElements[2]) +
+				   (_vLeft.m_dElements[3] - _vRight.m_dElements[3]) * (_vLeft.m_dElements[3] - _vRight.m_dElements[3]);
+				if ( dTmp != dTmp2 ) {
+					volatile int gjhghg = 0;
+				}
+				return _mm_cvtsd_f64( mLow );
+			}
+#endif	// #ifdef __AVX__
+			return (_vLeft.m_dElements[0] - _vRight.m_dElements[0]) * (_vLeft.m_dElements[0] - _vRight.m_dElements[0]) +
+			   (_vLeft.m_dElements[1] - _vRight.m_dElements[1]) * (_vLeft.m_dElements[1] - _vRight.m_dElements[1]) +
+			   (_vLeft.m_dElements[2] - _vRight.m_dElements[2]) * (_vLeft.m_dElements[2] - _vRight.m_dElements[2]) +
+			   (_vLeft.m_dElements[3] - _vRight.m_dElements[3]) * (_vLeft.m_dElements[3] - _vRight.m_dElements[3]);
+		}
 
 
 		// == Members.

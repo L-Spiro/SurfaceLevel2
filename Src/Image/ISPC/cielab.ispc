@@ -218,10 +218,12 @@ inline void sortColors(uniform Color colors[], uniform int start, uniform int en
     }
 }
 
-
-
 inline void splitCube(uniform Color colors[], uniform ColorCube cubes[], uniform int cubeIndex, uniform int &cubeCount) {
     uniform ColorCube cube = cubes[cubeIndex];
+
+    // Handle empty cubes
+    if (cube.start == cube.end) return;
+
     cubeCount--;
 
     double rRange = cube.rMax - cube.rMin;
@@ -293,9 +295,8 @@ inline void splitCube(uniform Color colors[], uniform ColorCube cubes[], uniform
     cubes[cubeCount++] = cube2;
 }
 
-
 export void ispc_medianCutQuantization(uniform Color colors[], uniform int64 imageSize, uniform Color palette[], uniform int paletteSize) {
-    uniform ColorCube cubes[0x10000];
+    uniform ColorCube cubes[0x100];  // You can increase this size if needed
     uniform int cubeCount = 0;
 
     // Initialize the initialCube manually
@@ -311,6 +312,7 @@ export void ispc_medianCutQuantization(uniform Color colors[], uniform int64 ima
     initialCube.aMin = 1.0d;
     initialCube.aMax = 0.0d;
 
+    // Set the min and max for the initial cube
     for (uniform int c = initialCube.start; c < initialCube.end; ++c) {
         initialCube.rMin = min(initialCube.rMin, colors[c].r);
         initialCube.rMax = max(initialCube.rMax, colors[c].r);
@@ -324,7 +326,8 @@ export void ispc_medianCutQuantization(uniform Color colors[], uniform int64 ima
 
     cubes[cubeCount++] = initialCube;
 
-    while (cubeCount < paletteSize) {
+    // Ensure we don't exceed cube array size and handle empty splits
+    while (cubeCount < paletteSize && cubeCount < 0x100) {
         splitCube(colors, cubes, cubeCount - 1, cubeCount);
     }
 
@@ -346,10 +349,14 @@ export void ispc_medianCutQuantization(uniform Color colors[], uniform int64 ima
 
         uniform double colorCountUniform = (double)(cube.end - cube.start);
 
+        // Prevent division by zero
+        if (colorCountUniform == 0.0d) {
+            colorCountUniform = 1.0d;
+        }
+
         palette[i].r = rSumUniform / colorCountUniform;
         palette[i].g = gSumUniform / colorCountUniform;
         palette[i].b = bSumUniform / colorCountUniform;
         palette[i].a = aSumUniform / colorCountUniform;
     }
 }
-
