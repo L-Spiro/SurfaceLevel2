@@ -68,11 +68,11 @@ namespace sl2 {
 	void CPalette::AssignClusters( const std::vector<CColor> & _vColors, const std::vector<CColor> & _vCentroids, std::vector<size_t> & _vClusterAssignment, size_t _sK ) {
 		auto aImgSize = _vColors.size();
 		for ( size_t C = 0; C < aImgSize; ++C ) {
-			double dBestDist = CColor::ColorDistance( _vColors[C], _vCentroids[0] );
+			double dBestDist = CColor::EuclideanDistanceSq( _vColors[C], _vCentroids[0] );
 			size_t sBest = 0;
 
 			for ( size_t J = 1; J < _sK; ++J ) {
-				double dDIst = CColor::ColorDistance( _vColors[C], _vCentroids[J] );
+				double dDIst = CColor::EuclideanDistanceSq( _vColors[C], _vCentroids[J] );
 				if (dDIst < dBestDist) {
 					dBestDist = dDIst;
 					sBest = J;

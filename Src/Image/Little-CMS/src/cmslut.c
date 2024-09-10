@@ -1727,7 +1727,7 @@ void IncDelta(cmsFloat32Number *Val)
 
 // Euclidean distance between two vectors of n elements each one
 static
-cmsFloat32Number EuclideanDistance(cmsFloat32Number a[], cmsFloat32Number b[], int n)
+cmsFloat32Number EuclideanDistanceSq(cmsFloat32Number a[], cmsFloat32Number b[], int n)
 {
     cmsFloat32Number sum = 0;
     int i;
@@ -1792,7 +1792,7 @@ cmsBool CMSEXPORT cmsPipelineEvalReverseFloat(cmsFloat32Number Target[],
         cmsPipelineEvalFloat(x, fx, lut);
 
         // Compute error
-        error = EuclideanDistance(fx, Target, 3);
+        error = EuclideanDistanceSq(fx, Target, 3);
 
         // If not convergent, return last safe value
         if (error >= LastError)

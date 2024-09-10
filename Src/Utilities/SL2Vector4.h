@@ -467,13 +467,13 @@ namespace sl2 {
 		inline double 											W() const { return m_dElements[3]; }
 
 		/**
-		 * Quick color distance.
+		 * Quick squared Euclidean distance.
 		 * 
 		 * \param _vLeft The left operand.
 		 * \param _vRight The right operand.
-		 * \return Returns a quick color distance between the given vectors.
+		 * \return Returns a quick squared Euclidean distance between the given vectors.
 		 **/
-		static inline double									ColorDistance( const CVector4<SL2_ST_AVX512> &_vLeft, const CVector4<SL2_ST_AVX512> &_vRight ) {
+		static inline double									EuclideanDistanceSq( const CVector4<SL2_ST_AVX512> &_vLeft, const CVector4<SL2_ST_AVX512> &_vRight ) {
 #ifdef __AVX__
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
 				__m256d mVa = _mm256_load_pd( _vLeft.m_dElements );
