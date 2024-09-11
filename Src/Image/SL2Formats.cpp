@@ -2101,6 +2101,71 @@ namespace sl2 {
 	}
 
 	/**
+	 * Applies Floyd-Steinberg Dithering to a given color buffer.
+	 * 
+	 * \param _prgbaColors The in/out color buffer.
+	 * \param _ui32Width The width of the image.
+	 * \param _ui32Height The height of the image.
+	 * \param _pPalette The palette.
+	 * \param _pclLabPal The palette in LAB.
+	 **/
+	bool CFormat::FloydSteinbergDithering( SL2_RGBA64F * _prgbaColors, uint32_t _ui32Width, uint32_t _ui32Height, const CPalette &_pPalette, const ispc::ColorLABA * _pclLabPal ) {
+		for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+			for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+				size_t sIdx = size_t( H * _ui32Width + W );
+
+				/*CPalette::CColor cTmp = reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx]).Clamp( 0.0, 1.0 );
+				SL2_RGBA64F rgbaOld = reinterpret_cast<SL2_RGBA64F &>(cTmp);//_prgbaColors[sIdx];*/
+				SL2_RGBA64F rgbaOld = _prgbaColors[sIdx];
+				ispc::ColorLABA clLab;
+				ispc::ispc_rgb2lab_single( (*reinterpret_cast<const ispc::ColorRGBA *>(&rgbaOld)), clLab );
+
+				size_t sWinner = _pPalette.Palette().size();
+				double dDist = std::numeric_limits<double>::infinity();
+				for ( auto I = _pPalette.Palette().size(); I--; ) {
+					double dThisDist = ispc::ispc_deltaE_CIEDE2000( clLab.l, clLab.a, clLab.b, clLab.alpha,
+						_pclLabPal[I].l, _pclLabPal[I].a, _pclLabPal[I].b, _pclLabPal[I].alpha );
+					if ( dThisDist <= dDist ) {
+						dDist = dThisDist;
+						sWinner = I;
+					}
+				}
+
+				_prgbaColors[sIdx] = (*reinterpret_cast<const SL2_RGBA64F *>(&_pPalette.Palette()[sWinner]));
+				CPalette::CColor cError = reinterpret_cast<CPalette::CColor &>(rgbaOld) - reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx]);
+
+				if ( W + 1 < _ui32Width ) {
+					reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += (cError * (7.0 / 16.0));  // Right pixel
+				}
+				if ( W > 0 && H + 1 < _ui32Height ) {
+					reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += (cError * (3.0 / 16.0));  // Bottom-left pixel
+				}
+				if ( H + 1 < _ui32Height ) {
+					reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += (cError * (5.0 / 16.0));  // Bottom pixel
+				}
+				if ( W + 1 < _ui32Width && H + 1 < _ui32Height ) {
+					reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += (cError * (1.0 / 16.0));  // Bottom-right pixel
+				}
+
+				//if ( W + 1 < _ui32Width ) {
+				//	reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += (cError * (7.0 / 16.0)).Clamp( 0.0, 1.0 );  // Right pixel
+				//}
+				//if ( W > 0 && H + 1 < _ui32Height ) {
+				//	reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += (cError * (3.0 / 16.0)).Clamp( 0.0, 1.0 );  // Bottom-left pixel
+				//}
+				//if ( H + 1 < _ui32Height ) {
+				//	reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += (cError * (5.0 / 16.0)).Clamp( 0.0, 1.0 );  // Bottom pixel
+				//}
+				//if ( W + 1 < _ui32Width && H + 1 < _ui32Height ) {
+				//	reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += (cError * (1.0 / 16.0)).Clamp( 0.0, 1.0 );  // Bottom-right pixel
+				//}
+
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Gets the PVR texture format (and channels) given an internal format.  If one is supplied by the format it is returned, otherwise one is generated.
 	 * 
 	 * \param _kifdFormat The format whose format and channel data is to be obtained.
@@ -2976,10 +3041,17 @@ namespace sl2 {
 		if ( !pkifdData->pvCustom ) { return false; }
 		CImage * piImage = reinterpret_cast<CImage *>(pkifdData->pvCustom);
 		std::vector<ispc::ColorLABA> vLabBuffer, vPalette;
+		std::vector<CFormat::SL2_RGBA64F, CAlignmentAllocator<CFormat::SL2_RGBA64F, 64>> vQuant;
+
 		if ( uint32_t( _ui32Width * _ui32Height ) != (uint64_t( _ui32Width ) * _ui32Height) ) { return false; }
+		bool bDither = true;
 		try {
-			vLabBuffer.resize( size_t( _ui32Width * _ui32Height ) );
+			vLabBuffer.resize( size_t( size_t( _ui32Width ) * _ui32Height ) );
 			vPalette.resize( piImage->Palette().Palette().size() );
+
+			if ( bDither ) {
+				vQuant.resize( size_t( size_t( _ui32Width ) * _ui32Height ) );
+			}
 		}
 		catch ( ... ) { false; }
 
@@ -2989,8 +3061,17 @@ namespace sl2 {
 
 		ispc::ispc_rgb2lab( reinterpret_cast<const ispc::ColorRGBA *>(piImage->Palette().Palette().data()), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()), piImage->Palette().Palette().size() );
 		for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+			const SL2_RGBA64F * prgbaUseMe = prgbaSrc;
+
+			if ( bDither ) {
+				// Copy to dithered RGB.
+				std::memcpy( vQuant.data(), prgbaSrc, vQuant.size() * sizeof( CFormat::SL2_RGBA64F ) );
+				FloydSteinbergDithering( vQuant.data(), _ui32Width, _ui32Height, piImage->Palette(), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()) );
+				prgbaUseMe = vQuant.data();
+			}
+
 			// Convert this slice to LAB.
-			ispc::ispc_rgb2lab( reinterpret_cast<const ispc::ColorRGBA *>(prgbaSrc), reinterpret_cast<ispc::ColorLABA *>(vLabBuffer.data()), uint64_t( _ui32Width ) * _ui32Height );
+			ispc::ispc_rgb2lab( reinterpret_cast<const ispc::ColorRGBA *>(prgbaUseMe), reinterpret_cast<ispc::ColorLABA *>(vLabBuffer.data()), uint64_t( _ui32Width ) * _ui32Height );
 			
 
 			for ( uint32_t H = 0; H < _ui32Height; ++H ) {

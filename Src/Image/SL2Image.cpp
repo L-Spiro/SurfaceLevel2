@@ -55,7 +55,8 @@ namespace sl2 {
 		m_bApplyOutputColorSpaceTransfer( false ),
 		m_bIgnoreSourceColorspaceGamma( false ),
 		m_ui32YuvW( 0 ),
-		m_ui32YuvH( 0 ) {
+		m_ui32YuvH( 0 ),
+		m_bGenPalette( false ) {
 		m_sSwizzle = CFormat::DefaultSwizzle();
 	}
 	CImage::~CImage() {
@@ -117,6 +118,7 @@ namespace sl2 {
 			m_ui32YuvW = _iOther.m_ui32YuvW;
 			m_ui32YuvH = _iOther.m_ui32YuvH;
 			m_pPalette = _iOther.m_pPalette;
+			m_bGenPalette = _iOther.m_bGenPalette;
 			
 			_iOther.m_sArraySize = 0;
 			_iOther.m_kKernel.SetSize( 0 );
@@ -157,6 +159,7 @@ namespace sl2 {
 			_iOther.m_pkifdYuvFormat = nullptr;
 			_iOther.m_ui32YuvW = _iOther.m_ui32YuvH = 0;
 			_iOther.m_pPalette.Reset();
+			_iOther.m_bGenPalette = false;
 		}
 
 		return (*this);
@@ -216,6 +219,7 @@ namespace sl2 {
 		m_pkifdYuvFormat = nullptr;
 		m_ui32YuvW = m_ui32YuvH = 0;
 		m_pPalette.Reset();
+		m_bGenPalette = false;
 	}
 
 	/**
@@ -525,6 +529,18 @@ namespace sl2 {
 				}
 			}
 		}
+
+		if ( SL2_GET_IDX_FLAG( _pkifFormat->ui32Flags ) ) {
+			// Converting to an indexed format?  May need to generate a palette.
+			size_t sMax = size_t( 1ULL << _pkifFormat->ui32BlockSizeInBits );
+			if ( m_bGenPalette || Palette().Palette().size() == 0 || Palette().Palette().size() > sMax ) {
+				uint64_t ui64Total = uint64_t( iTmp.Width() ) * iTmp.Height() * iTmp.Depth() * iTmp.Faces() * iTmp.ArraySize();
+				if ( ui64Total ) {
+					if ( !GeneratePalette( iTmp.Data( 0, 0, 0, 0 ), ui64Total, uint32_t( sMax ) ) ) { return SL2_E_OUTOFMEMORY; }
+				}
+			}
+		}
+
 		if ( _pkifFormat->vfVulkanFormat == SL2_VK_FORMAT_R64G64B64A64_SFLOAT ) {
 			// We already did the conversion.
 			_iDst = std::move( iTmp );
@@ -536,6 +552,7 @@ namespace sl2 {
 			_iDst.m_vIccProfile = _iDst.m_vOutIccProfile = m_vOutIccProfile;
 			_iDst.m_bApplyInputColorSpaceTransfer = m_bApplyInputColorSpaceTransfer;
 			_iDst.m_pPalette = m_pPalette;
+			_iDst.m_bGenPalette = false;
 			if ( !_iDst.m_vOutIccProfile.size() ) {
 				_iDst.m_bApplyInputColorSpaceTransfer = false;
 			}
@@ -567,6 +584,7 @@ namespace sl2 {
 		_iDst.m_vIccProfile = _iDst.m_vOutIccProfile = m_vOutIccProfile;
 		_iDst.m_bApplyInputColorSpaceTransfer = m_bApplyInputColorSpaceTransfer;
 		_iDst.m_pPalette = m_pPalette;
+		_iDst.m_bGenPalette = false;
 		if ( !_iDst.m_vOutIccProfile.size() ) {
 			_iDst.m_bApplyInputColorSpaceTransfer = false;
 		}
@@ -680,11 +698,27 @@ namespace sl2 {
 			CFormat::FlipY( vTmp.data(), m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth() );
 		}
 
+		// Back up our palette.
+		CPalette pTmp;
+		pTmp = Palette();
+		if ( SL2_GET_IDX_FLAG( _pkifFormat->ui32Flags ) ) {
+			// Converting to an indexed format?  May need to generate a palette.
+			size_t sMax = size_t( 1ULL << _pkifFormat->ui32BlockSizeInBits );
+			if ( m_bGenPalette || Palette().Palette().size() == 0 || Palette().Palette().size() > sMax ) {
+				uint64_t ui64Total = ui64BaseSize / sizeof( CFormat::SL2_RGBA64F );
+				if ( ui64Total ) {
+					if ( !GeneratePalette( vTmp.data(), ui64Total, uint32_t( sMax ) ) ) { return SL2_E_OUTOFMEMORY; }
+				}
+			}
+		}
+
 		ifdData = (*_pkifFormat);
 		ifdData.pvCustom = this;
 		if ( !_pkifFormat->pfFromRgba64F( vTmp.data(), _pui8Dst, m_vMipMaps[_sMip]->Width(), m_vMipMaps[_sMip]->Height(), m_vMipMaps[_sMip]->Depth(), &ifdData ) ) {
+			m_pPalette = pTmp;
 			return SL2_E_INTERNALERROR;
 		}
+		m_pPalette = pTmp;
 		return SL2_E_SUCCESS;
 	}
 
@@ -771,71 +805,6 @@ namespace sl2 {
 	}
 
 	/**
-	 * Generates a palette with the given number of entries.  The palette format is used to determine the color format.
-	 * 
-	 * \param _ui32Total The total number of entries to generate.
-	 * \return Returns true if all necessary allocations succeed.
-	 **/
-	bool CImage::GeneratePalette( uint32_t _ui32Total ) {
-		if ( !Palette().Format() ) {
-			Palette().SetFormat( CFormat::FindPaletteFormatData( SL2_KIF_GL_PALETTE8_RGB8_OES ) );
-		}
-		// All colors from all slices, faces, and mipmaps must be considered.
-		uint64_t ui64Size = 0ULL;
-		for ( auto I = GetMipmaps().size(); I--; ) {
-			ui64Size += uint64_t( GetMipmaps()[I]->Width() ) * GetMipmaps()[I]->Height() * GetMipmaps()[I]->Depth() *
-				Faces() * ArraySize();
-		}
-		if ( ui64Size != size_t( ui64Size ) ) { return false; }
-		std::vector<CFormat::SL2_RGBA64F> vBuffer;
-		try {
-			vBuffer.resize( size_t( ui64Size ) );
-			Palette().SetSize( _ui32Total );
-		}
-		catch ( ... ) { return false; }
-		if ( !Format() || !Format()->pfToRgba64F ) { return false; }
-		if ( !Palette().Format() || !Palette().Format()->pfFromRgba64F ) { return false; }
-
-		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*Format());
-		ifdData.pvCustom = this;
-		
-
-		size_t sOff = 0;
-		for ( auto M = GetMipmaps().size(); M--; ) {
-			ui64Size = uint64_t( GetMipmaps()[M]->Width() ) * GetMipmaps()[M]->Height() * GetMipmaps()[M]->Depth();
-			for ( auto F = Faces(); F--; ) {
-				for ( auto A = ArraySize(); A--; ) {
-					if ( !Format()->pfToRgba64F( Data( M, 0, A, F ), reinterpret_cast<uint8_t *>(vBuffer.data() + sOff),
-						GetMipmaps()[M]->Width(), GetMipmaps()[M]->Height(), GetMipmaps()[M]->Depth(), &ifdData ) ) { return false; }
-					sOff += size_t( ui64Size );
-				}
-			}
-		}
-		// Convert the texels to the appropriate color depth as per the palette format.
-		sOff = 0;
-		ifdData = (*Palette().Format());
-		ifdData.pvCustom = this;
-		for ( auto M = GetMipmaps().size(); M--; ) {
-			ui64Size = uint64_t( GetMipmaps()[M]->Width() ) * GetMipmaps()[M]->Height() * GetMipmaps()[M]->Depth();
-			for ( auto F = Faces(); F--; ) {
-				for ( auto A = ArraySize(); A--; ) {
-					if ( !Palette().Format()->pfFromRgba64F( reinterpret_cast<uint8_t *>(vBuffer.data() + sOff), reinterpret_cast<uint8_t *>(vBuffer.data() + sOff),
-						GetMipmaps()[M]->Width(), GetMipmaps()[M]->Height(), GetMipmaps()[M]->Depth(), &ifdData ) ) { return false; }
-					sOff += size_t( ui64Size );
-				}
-			}
-		}
-
-		return Palette().GenPalette_kMeans( reinterpret_cast<const std::vector<CPalette::CColor> *>(&vBuffer),
-			_ui32Total );
-		/*ispc::ispc_medianCutQuantization( reinterpret_cast<ispc::Color *>(vBuffer.data()), vBuffer.size(),
-			reinterpret_cast<ispc::Color *>(Palette().Data()), static_cast<int32_t>(Palette().Palette().size()) );*/
-		/*ispc::ispc_kMeansColorQuantization( reinterpret_cast<ispc::Color *>(vBuffer.data()), vBuffer.size(),
-			reinterpret_cast<ispc::Color *>(Palette().Data()), static_cast<int32_t>(Palette().Palette().size()), 2 );*/
-		return true;
-	}
-
-	/**
 	 * Applies a kernel to the given double image.
 	 * 
 	 * \param _pdImage The buffer on which to operate.
@@ -907,14 +876,18 @@ namespace sl2 {
 			m_vMipMaps.resize( _sMips );
 			for ( size_t I = 0; I < _sMips; ++I ) {
 				uint64_t ui64ThisBaseSize = GetActualPlaneSize( CFormat::GetFormatSize( _pkifFormat, _ui32Width, _ui32Height, _ui32Depth ) );
+				if ( _pkifFormat->vfVulkanFormat == SL2_VK_FORMAT_R64G64B64A64_SFLOAT ) {
+					// Special case for RGBA64F.  Keep them tightly packed.
+					ui64ThisBaseSize = ui64BaseSize;
+				}
 				uint64_t ui64FullSize = ui64ThisBaseSize * _sArray * _sFaces;
 				if ( !ui64FullSize || (uint64_t( size_t( ui64FullSize ) ) != ui64FullSize) ) { Reset(); return false; }
 
 				if ( m_vMipMaps[I].get() ) {
-					if ( !m_vMipMaps[I]->Reallocate( size_t( ui64FullSize ), size_t( ui64BaseSize ), _ui32Width, _ui32Height, _ui32Depth ) ) { Reset(); return false; }
+					if ( !m_vMipMaps[I]->Reallocate( size_t( ui64FullSize ), size_t( ui64ThisBaseSize ), _ui32Width, _ui32Height, _ui32Depth ) ) { Reset(); return false; }
 				}
 				else {
-					m_vMipMaps[I] = std::make_unique<CSurface>( size_t( ui64FullSize ), size_t( ui64BaseSize ), _ui32Width, _ui32Height, _ui32Depth );
+					m_vMipMaps[I] = std::make_unique<CSurface>( size_t( ui64FullSize ), size_t( ui64ThisBaseSize ), _ui32Width, _ui32Height, _ui32Depth );
 				}
 
 				_ui32Width = CUtilities::Max<uint32_t>( _ui32Width >> 1, 1 );
@@ -1148,6 +1121,55 @@ namespace sl2 {
 	}
 
 	/**
+	 * Generates a palette with the given number of entries.  The palette format is used to determine the color format.
+	 * 
+	 * \param _pui8Buffer The pointer to the buffer of colors.
+	 * \param _ui64Total The total number of RGBA64F colors to which _pui8Buffer points.
+	 * \param _ui32PalTotal The total number of entries to generate in the palette.
+	 * \return Returns true if all necessary allocations succeed.
+	 **/
+	bool CImage::GeneratePalette( const uint8_t * _pui8Buffer, uint64_t _ui64Total, uint32_t _ui32PalTotal ) {
+		if ( _ui64Total != size_t( _ui64Total ) ) { return false; }
+		if ( !Palette().Format() ) {
+			bool bAlpha = m_bIgnoreAlpha ? false : AlphaIsFullyEqualTo( _pui8Buffer, 1.0, _ui64Total );
+			if ( bAlpha ) {
+				Palette().SetFormat( CFormat::FindPaletteFormatData( SL2_KIF_GL_PALETTE8_RGBA8_OES ) );
+			}
+			else {
+				Palette().SetFormat( CFormat::FindPaletteFormatData( SL2_KIF_GL_PALETTE8_RGB8_OES ) );
+			}
+		}
+
+		//Palette().SetFormat( CFormat::FindPaletteFormatData( SL2_KIF_GL_PALETTE4_RGBA4_OES ) );
+		if ( !Palette().Format() || !Palette().Format()->pfFromRgba64F ) { return false; }
+
+		// Create a quantized copy of the image.
+		std::vector<CFormat::SL2_RGBA64F, CAlignmentAllocator<CFormat::SL2_RGBA64F, 64>> vQuant;
+		try {
+			vQuant.resize( size_t( _ui64Total ) );
+		}
+		catch ( ... ) { return false; }
+
+		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*Palette().Format());
+		ifdData.pvCustom = this;
+		size_t sOff = 0;
+		while ( sOff < vQuant.size() ) {
+			uint64_t ui64Total = vQuant.size() - sOff;
+			if ( ui64Total > ~uint32_t( 0 ) ) {
+				ui64Total = ~uint32_t( 0 );
+			}
+			if ( !Palette().Format()->pfFromRgba64F( _pui8Buffer + (sOff * sizeof( CFormat::SL2_RGBA64F )),
+				reinterpret_cast<uint8_t *>(vQuant.data() + sOff),
+				uint32_t( ui64Total ), 1, 1, &ifdData ) ) { return false; }
+			sOff += uint32_t( ui64Total );
+		}
+
+
+		return Palette().GenPalette_kMeans( reinterpret_cast<const CPalette::CColor *>(vQuant.data()), vQuant.size(),
+			_ui32PalTotal, _ui32PalTotal );
+	}
+
+	/**
 	 * Sets alpha to 1.0.
 	 *
 	 * \param _pui8Buffer The texture texels.
@@ -1180,17 +1202,22 @@ namespace sl2 {
 	 * \param _ui32Depth The depth of the image.
 	 * \return Returns true if all values in the alpha channel are euqal to _dValue.
 	 **/
-	bool CImage::AlphaIsFullyEqualTo( uint8_t * _pui8Buffer, double _dValue, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) {
-		CFormat::SL2_RGBA64F * prDst = reinterpret_cast<CFormat::SL2_RGBA64F *>(_pui8Buffer);
-		for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
-			uint32_t ui32Slice = _ui32Width * _ui32Height * D;
-			for ( uint32_t H = 0; H < _ui32Height; ++H ) {
-				uint32_t ui32Row = _ui32Width * H;
-				for ( uint32_t W = 0; W < _ui32Width; ++W ) {
-					CFormat::SL2_RGBA64F * prThis = &prDst[ui32Slice+ui32Row+W];
-					if ( prThis->dRgba[SL2_PC_A] != _dValue ) { return false; }
-				}
-			}
+	bool CImage::AlphaIsFullyEqualTo( const uint8_t * _pui8Buffer, double _dValue, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth ) {
+		return AlphaIsFullyEqualTo( _pui8Buffer, _dValue, uint64_t( _ui32Width ) * _ui32Height * _ui32Depth );
+	}
+
+	/**
+	 * Tests alpha for being entirely of a given value.
+	 *
+	 * \param _pui8Buffer The texture texels.
+	 * \param _dValue The value to check.
+	 * \param _ui64Total The total number of texels to which _pui8Buffer points.
+	 * \return Returns true if all values in the alpha channel are euqal to _dValue.
+	 **/
+	bool CImage::AlphaIsFullyEqualTo( const uint8_t * _pui8Buffer, double _dValue, uint64_t _ui64Total ) {
+		const CFormat::SL2_RGBA64F * prDst = reinterpret_cast<const CFormat::SL2_RGBA64F *>(_pui8Buffer);
+		for ( uint64_t I = 0; I < _ui64Total; ++I ) {
+			if ( prDst[I].dRgba[SL2_PC_A] != _dValue ) { return false; }
 		}
 		return true;
 	}
@@ -1296,6 +1323,7 @@ namespace sl2 {
 			}
 			catch ( ... ) { return SL2_E_OUTOFMEMORY; }
 			m_dGamma = 0.0;
+			m_dTargetGamma = 0.0;
 			size_t sSize;
 			size_t sOffset = CIcc::GetTagDataOffset( static_cast<uint8_t *>(pProfile->data), pProfile->size, icSigRedTRCTag, sSize );
 			if ( sOffset ) {

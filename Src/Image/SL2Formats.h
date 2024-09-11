@@ -18,6 +18,7 @@
 #include "DDS/SL2Dds.h"
 #include "detex/detex.h"
 #include "ETCPACK/etcpack.h"
+#include "ISPC/cielab_ispc.h"
 #include "ISPC/ispc_texcomp.h"
 #include "PVRTexTool/PVRTexLib.hpp"
 #include "Squish/squish.h"
@@ -2338,6 +2339,17 @@ namespace sl2 {
 			double &_dR, double &_dG, double &_dB,
 			double _dKr, double _dKb,
 			size_t _sM = 8, uint32_t _ui32BlackLevel = 0, uint32_t _ui32S = 255 );
+
+		/**
+		 * Applies Floyd-Steinberg Dithering to a given color buffer.
+		 * 
+		 * \param _prgbaColors The in/out color buffer.
+		 * \param _ui32Width The width of the image.
+		 * \param _ui32Height The height of the image.
+		 * \param _pPalette The palette.
+		 * \param _pclLabPal The palette in LAB.
+		 **/
+		static bool																	FloydSteinbergDithering( SL2_RGBA64F * _prgbaColors, uint32_t _ui32Width, uint32_t _ui32Height, const class CPalette &_pPalette, const ispc::ColorLABA * _pclLabPal );
 
 		/**
 		 * Gets a constant reference to the current transfer functions.

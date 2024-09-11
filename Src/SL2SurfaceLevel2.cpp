@@ -2563,7 +2563,7 @@ namespace sl2 {
 	SL2_ERRORS ExportAsPng_Indexed( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice,
 		const CFormat::SL2_BEST_INTERNAL_FORMAT * _pbifFormat ) {
         size_t sMax = size_t( 1ULL << _pbifFormat->pkifdFormat->ui32BlockSizeInBits );
-        _iImage.GeneratePalette( uint32_t( sMax ) );
+        //_iImage.GeneratePalette( uint32_t( sMax ) );
         if ( _iImage.Palette().Palette().size() > sMax ) { return SL2_E_UNSUPPORTEDSIZE; }
 
         CImage::SL2_FREEIMAGE_ALLOCATET fiImage( FIT_BITMAP, _iImage.GetMipmaps()[_sMip]->Width(), _iImage.GetMipmaps()[_sMip]->Height(), _pbifFormat->pkifdFormat->ui32BlockSizeInBits );

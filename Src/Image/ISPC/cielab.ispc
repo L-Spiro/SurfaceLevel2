@@ -35,6 +35,25 @@ export void ispc_rgb2lab(const uniform ColorRGBA rgb[], uniform ColorLABA lab[],
         lab[i].alpha = rgb[i].a; // Preserve alpha channel
     }
 }
+export void ispc_rgb2lab_single(const uniform ColorRGBA &rgb, uniform ColorLABA &lab) {
+    uniform double r = rgb.r / 255.0d;
+    uniform double g = rgb.g / 255.0d;
+    uniform double b = rgb.b / 255.0d;
+
+    uniform double x = (r * 0.4124d + g * 0.3576d + b * 0.1805d) / 0.95047d;
+    uniform double y = (r * 0.2126d + g * 0.7152d + b * 0.0722d) / 1.00000d;
+    uniform double z = (r * 0.0193d + g * 0.1192d + b * 0.9505d) / 1.08883d;
+
+    x = (x > 0.008856d) ? pow(x, (1.0d / 3.0d)) : (7.787037037037037037d * x) + 16.0d / 116.0d;
+    y = (y > 0.008856d) ? pow(y, (1.0d / 3.0d)) : (7.787037037037037037d * y) + 16.0d / 116.0d;
+    z = (z > 0.008856d) ? pow(z, (1.0d / 3.0d)) : (7.787037037037037037d * z) + 16.0d / 116.0d;
+
+    lab.l = (116.0d * y) - 16.0d;
+    lab.a = 500.0d * (x - y);
+    lab.b = 200.0d * (y - z);
+    lab.alpha = rgb.a; // Preserve alpha channel
+}
+
 
 // Convert LAB to RGB
 export void ispc_lab2rgb(const uniform ColorLABA lab[], uniform ColorRGBA rgb[], uniform uint64 n) {
@@ -57,6 +76,25 @@ export void ispc_lab2rgb(const uniform ColorLABA lab[], uniform ColorRGBA rgb[],
         rgb[i].a = lab[i].alpha; // Preserve alpha channel
     }
 }
+export void ispc_lab2rgb_single(const uniform ColorLABA &lab, uniform ColorRGBA &rgb) {
+    uniform double y = (lab.l + 16.0d) / 116.0d;
+    uniform double x = lab.a / 500.0d + y;
+    uniform double z = y - lab.b / 200.0d;
+
+    x = 0.95047d * ((x * x * x > 0.008856d) ? x * x * x : (x - 16.0d / 116.0d) / 7.787037037037037037d);
+    y = 1.00000d * ((y * y * y > 0.008856d) ? y * y * y : (y - 16.0d / 116.0d) / 7.787037037037037037d);
+    z = 1.08883d * ((z * z * z > 0.008856d) ? z * z * z : (z - 16.0d / 116.0d) / 7.787037037037037037d);
+
+    uniform double r = x * 3.240625477069124789d + y * -1.537207972210696894d + z * -0.498628598698778035d;
+    uniform double g = x * -0.968913997741625519d + y * 1.875880503887304647d + z * 0.041503284783317432d;
+    uniform double b = x * 0.055710120445510620d + y * -0.204022945751467327d + z * 1.056995942254388236d;
+
+    rgb.r = clamp(r, 0.0d, 1.0d) * 255.0d;
+    rgb.g = clamp(g, 0.0d, 1.0d) * 255.0d;
+    rgb.b = clamp(b, 0.0d, 1.0d) * 255.0d;
+    rgb.a = lab.alpha; // Preserve alpha channel
+}
+
 
 // Calculate Delta E between two LAB colors (CIE94).
 export uniform double ispc_deltaE_CIE94(const uniform ColorLABA &labA, const uniform ColorLABA &labB) {

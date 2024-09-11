@@ -564,6 +564,16 @@ namespace sl2 {
 		inline CPalette &									Palette() { return m_pPalette; }
 
 		/**
+		 * By default the old palette is kept if available.  A new palette is always generated if there is no old palette.
+		 *	Palettes are generated using only the top-level mipmap.
+		 * 
+		 * \param _bGenNew Whether to generate a new palette or not.
+		 **/
+		inline void											SetGenPalette( bool _bGenNew ) {
+			m_bGenPalette = _bGenNew;
+		}
+
+		/**
 		 * Creates a CMYK verion of the given texture slice.
 		 * 
 		 * \param _ui32Slice The slice to convert.
@@ -574,14 +584,6 @@ namespace sl2 {
 		 * \return Returns true if allocation of the target buffer and an internal buffer succeed.
 		 **/
 		bool												ToCmyk( uint32_t _ui32Slice, size_t _sMip, size_t _sArray, size_t _sFace, std::vector<uint8_t> &_vResult );
-
-		/**
-		 * Generates a palette with the given number of entries.  The palette format is used to determine the color format.
-		 * 
-		 * \param _ui32Total The total number of entries to generate.
-		 * \return Returns true if all necessary allocations succeed.
-		 **/
-		bool												GeneratePalette( uint32_t _ui32Total );
 
 		/**
 		 * Gets the final size of a byte buffer to be used as a texture plane.  The plane will be over-allocated by 8 bytes and then rounded up to the nearest 8 bytes.
@@ -663,6 +665,7 @@ namespace sl2 {
 		uint32_t											m_ui32YuvH;								/**< The height of a YUV image. */
 
 		CPalette											m_pPalette;								/**< The palette. */
+		bool												m_bGenPalette;							/**< Generate a new palette? */
 
 
 		// == Functions.
@@ -746,6 +749,16 @@ namespace sl2 {
 		bool												ApplyDstColorSpace( uint8_t * _pui8Buffer, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth );
 
 		/**
+		 * Generates a palette with the given number of entries.  The palette format is used to determine the color format.
+		 * 
+		 * \param _pui8Buffer The pointer to the buffer of colors.
+		 * \param _ui64Total The total number of RGBA64F colors to which _pui8Buffer points.
+		 * \param _ui32PalTotal The total number of entries to generate in the palette.
+		 * \return Returns true if all necessary allocations succeed.
+		 **/
+		bool												GeneratePalette( const uint8_t * _pui8Buffer, uint64_t _ui64Total, uint32_t _ui32PalTotal );
+
+		/**
 		 * Sets alpha to _dValue.
 		 * 
 		 * \param _pui8Buffer The texture texels.
@@ -766,7 +779,17 @@ namespace sl2 {
 		 * \param _ui32Depth The depth of the image.
 		 * \return Returns true if all values in the alpha channel are euqal to _dValue.
 		 **/
-		bool												AlphaIsFullyEqualTo( uint8_t * _pui8Buffer, double _dValue, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth );
+		bool												AlphaIsFullyEqualTo( const uint8_t * _pui8Buffer, double _dValue, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth );
+
+		/**
+		 * Tests alpha for being entirely of a given value.
+		 *
+		 * \param _pui8Buffer The texture texels.
+		 * \param _dValue The value to check.
+		 * \param _ui64Total The total number of texels to which _pui8Buffer points.
+		 * \return Returns true if all values in the alpha channel are euqal to _dValue.
+		 **/
+		bool												AlphaIsFullyEqualTo( const uint8_t * _pui8Buffer, double _dValue, uint64_t _ui64Total );
 
 		/**
 		 * Converts a given RGBA64F buffer to a normal map.

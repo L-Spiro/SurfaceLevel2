@@ -89,12 +89,13 @@ namespace sl2 {
 		/**
 		 * Generates a palette of a given size using K-Means.
 		 * 
-		 * \param _pvColors The input array of colors.
+		 * \param _pcColors Input array of colors.
+		 * \param _sColorsSize Number of colors to which _pcColors points.
 		 * \param _ui32Size Size of the palette to generate.
 		 * \param _sIterations Number of refinement iterations.
 		 * \return Returns true if all internal allocations succeed.
 		 **/
-		bool												GenPalette_kMeans( const std::vector<CColor> * _pvColors, uint32_t _ui32Size, size_t _sIterations = 10 );
+		bool												GenPalette_kMeans( const CColor * _pcColors, size_t _sColorsSize, uint32_t _ui32Size, size_t _sIterations = 10 );
 
 
 	protected :
@@ -104,36 +105,59 @@ namespace sl2 {
 
 		// == Functions.
 		/**
+		 * A better distruction of initial clusters.
+		 * 
+		 * \param _pcColors Input array of colors.
+		 * \param _sColorsSize Number of colors to which _pcColors points.
+		 * \param _vCentroids Input array of centroids.
+		 * \param _sK A pretty cool dude IMO.
+		 **/
+		static void											InitializeCentroidsKMeansPlusPlus( const CColor * _pcColors, size_t _sColorsSize, std::vector<CColor> &_vCentroids, size_t _sK );
+
+		/**
+		 * Checks for convergence between 2 centroid lists.
+		 * 
+		 * \param _vOldCentroids The old centroid list.
+		 * \param _vNewCentroids The new centroid list.
+		 * \param _dTolerance Tolerance for change.
+		 * \return Returns true if the given lists are the same within tolerance.
+		 **/
+		static bool											HasConverged( const std::vector<CColor> &_vOldCentroids, const std::vector<CColor> &_vNewCentroids, double _dTolerance );
+
+		/**
 		 * Cluster assignment.  It's pretty cool.
 		 * 
-		 * \param _vColors Input array of colors.
+		 * \param _pcColors Input array of colors.
+		 * \param _sColorsSize Number of colors to which _pcColors points.
 		 * \param _vCentroids Input array of centroids.
 		 * \param _vClusterAssignment Output cluster-assignment results.
 		 * \param _sK A pretty cool dude IMO.
 		 **/
-		static void											AssignClusters( const std::vector<CColor> & _vColors, const std::vector<CColor> & _vCentroids, std::vector<size_t> & _vClusterAssignment, size_t _sK );
+		static void											AssignClusters( const CColor * _pcColors, size_t _sColorsSize, const std::vector<CColor> & _vCentroids, std::vector<size_t> & _vClusterAssignment, size_t _sK );
 
 		/**
 		 * Updates centroids like a BOSS.
 		 * 
-		 * \param _vColors Input array of colors.
+		 * \param _pcColors Input array of colors.
+		 * \param _sColorsSize Number of colors to which _pcColors points.
 		 * \param _vCentroids Output array of centroids.
 		 * \param _vClusterAssignment Output cluster-assignment results.
 		 * \param _vClusterSize Output cluster-size results.
 		 * \param _sK A pretty cool dude IMO.
 		 **/
-		static void											UpdateCentroids( const std::vector<CColor> & _vColors, std::vector<CColor> & _vCentroids, std::vector<size_t> & _vClusterAssignment, std::vector<size_t> & _vClusterSize, size_t _sK );
+		static void											UpdateCentroids( const CColor * _pcColors, size_t _sColorsSize, std::vector<CColor> & _vCentroids, std::vector<size_t> & _vClusterAssignment, std::vector<size_t> & _vClusterSize, size_t _sK );
 
 		/**
 		 * Implements K-Means color quantization to generate a palette.
 		 * 
-		 * \param _vColors Input array of colors.
+		 * \param _pcColors Input array of colors.
+		 * \param _sColorsSize Number of colors to which _pcColors points.
 		 * \param _pPalette The palette to generate.
 		 * \param _sK A pretty cool dude IMO.
 		 * \param _sIterations Number of iterations.
 		 * \return Returns true if all internal allocations succeed.
 		 **/
-		static bool											kMeansColorQuantization( const std::vector<CColor> & _vColors, CPal & _pPalette, size_t _sK, size_t _sIterations );
+		static bool											kMeansColorQuantization( const CColor * _pcColors, size_t _sColorsSize, CPal & _pPalette, size_t _sK, size_t _sIterations );
 	};
 
 

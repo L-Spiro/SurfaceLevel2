@@ -119,6 +119,12 @@ namespace sl2 {
 			m_dElements[3] = _vOther[3];
 		}
 
+#ifdef __AVX__
+		CVector4( __m256d _mOther ) {
+			_mm256_store_pd( m_dElements, _mOther );
+		}
+#endif	// #ifdef __AVX__
+
 
 		// == Operators.
 		/**
@@ -261,6 +267,27 @@ namespace sl2 {
 		}
 
 		/**
+		 * The + operator.
+		 * 
+		 * \param _vOther The vector to add to this one.
+		 * \return Returns a resulting vector.
+		 **/
+		inline CVector4<_uSimd>									operator + ( const CVector4<_uSimd> &_vOther ) const {
+#ifdef __AVX__
+			if constexpr ( SL2_ST_AVX <= _uSimd ) {
+				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
+				__m256d mOthrVec = _mm256_load_pd( _vOther.m_dElements );	// Load _vOther's elements into another AVX register.
+				mThisVec = _mm256_add_pd( mThisVec, mOthrVec );				// Perform vectorized division.
+				return mThisVec;
+			}
+#endif	// #ifdef __AVX__
+			return CVector4<_uSimd>( m_dElements[0] + _vOther[0],
+				m_dElements[1] + _vOther[1],
+				m_dElements[2] + _vOther[2],
+				m_dElements[3] + _vOther[3] );
+		}
+
+		/**
 		 * The -= operator.
 		 * 
 		 * \param _vOther The vector to subtract from this one.
@@ -284,10 +311,52 @@ namespace sl2 {
 		}
 
 		/**
+		 * The - operator.
+		 * 
+		 * \param _vOther The vector to subtract from this one.
+		 * \return Returns a resulting vector.
+		 **/
+		inline CVector4<_uSimd>									operator - ( const CVector4<_uSimd> &_vOther ) const {
+#ifdef __AVX__
+			if constexpr ( SL2_ST_AVX <= _uSimd ) {
+				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
+				__m256d mOthrVec = _mm256_load_pd( _vOther.m_dElements );	// Load _vOther's elements into another AVX register.
+				mThisVec = _mm256_sub_pd( mThisVec, mOthrVec );				// Perform vectorized division.
+				return mThisVec;
+			}
+#endif	// #ifdef __AVX__
+			return CVector4<_uSimd>( m_dElements[0] - _vOther[0],
+				m_dElements[1] - _vOther[1],
+				m_dElements[2] - _vOther[2],
+				m_dElements[3] - _vOther[3] );
+		}
+
+		/**
+		 * The * operator.
+		 * 
+		 * \param _vOther The vector to add to this one.
+		 * \return Returns a resulting vector.
+		 **/
+		inline CVector4<_uSimd>									operator * ( double _dVal ) const {
+#ifdef __AVX__
+			if constexpr ( SL2_ST_AVX <= _uSimd ) {
+				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
+				__m256d mOthrVec = _mm256_set1_pd( _dVal );					// Broadcast the scalar to all elements of the AVX register.
+				mThisVec = _mm256_mul_pd( mThisVec, mOthrVec );				// Perform vectorized division.
+				return mThisVec;
+			}
+#endif	// #ifdef __AVX__
+			return CVector4<_uSimd>( m_dElements[0] * _dVal,
+				m_dElements[1] * _dVal,
+				m_dElements[2] * _dVal,
+				m_dElements[3] * _dVal );
+		}
+
+		/**
 		 * The / operator.
 		 * 
 		 * \param _vOther The vector by which to divide this one.
-		 * \return Returns a reference to this vector after the operation.
+		 * \return Returns a resulting vector.
 		 **/
 		inline CVector4<_uSimd>									operator / ( const CVector4<_uSimd> &_vOther ) const {
 #ifdef __AVX__
@@ -295,7 +364,7 @@ namespace sl2 {
 				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
 				__m256d mOthrVec = _mm256_load_pd( _vOther.m_dElements );	// Load _vOther's elements into another AVX register.
 				mThisVec = _mm256_div_pd( mThisVec, mOthrVec );				// Perform vectorized division.
-				return CVector4<_uSimd>( reinterpret_cast<const double *>(&mThisVec) );
+				return mThisVec;
 			}
 #endif	// #ifdef __AVX__
 			return CVector4<_uSimd>( m_dElements[0] / _vOther[0],
@@ -316,7 +385,7 @@ namespace sl2 {
 				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
 				__m256d mOthrVec = _mm256_set1_pd( _dVal );					// Broadcast the scalar to all elements of the AVX register.
 				mThisVec = _mm256_div_pd( mThisVec, mOthrVec );				// Perform vectorized division.
-				return CVector4<_uSimd>( reinterpret_cast<const double *>(&mThisVec) );
+				return mThisVec;
 			}
 #endif	// #ifdef __AVX__
 			double dDiv = 1.0 / _dVal;
@@ -439,6 +508,28 @@ namespace sl2 {
 		}
 
 		/**
+		 * Clamps all components of the vector into the given range.
+		 * 
+		 * \param PARM DESC
+		 * \param PARM DESC
+		 * \return DESC
+		 **/
+		inline CVector4<_uSimd>									Clamp( double _dMin, double _dMax ) const {
+#ifdef __AVX__
+			if constexpr ( SL2_ST_AVX <= _uSimd ) {
+				__m256d vMin = _mm256_set1_pd( _dMin );
+				__m256d vMax = _mm256_set1_pd( _dMax );
+				__m256d vElems = _mm256_load_pd( m_dElements );
+				return _mm256_max_pd( vMin, _mm256_min_pd( vElems, vMax ) );
+			}
+#endif	// #ifdef __AVX__
+			return CVector4<_uSimd>( std::clamp( m_dElements[0], _dMin, _dMax ),
+				std::clamp( m_dElements[1], _dMin, _dMax ),
+				std::clamp( m_dElements[2], _dMin, _dMax ),
+				std::clamp( m_dElements[3], _dMin, _dMax ) );
+		}
+
+		/**
 		 * X.
 		 * 
 		 * \return Returns X.
@@ -486,21 +577,9 @@ namespace sl2 {
 				__m256d mSqr = _mm256_mul_pd( mDiff, mDiff );
 
 				// Sum the squared differences.
-				__m256d mSum = _mm256_hadd_pd( mSqr, mSqr );	// Horizontal add.
-				mSum = _mm256_hadd_pd( mSum, mSum );			// Second horizontal add.
-
-				// Extract the lower 128-bit part.
-				__m128d mLow = _mm256_castpd256_pd128( mSum );
-
-				double dTmp = _mm_cvtsd_f64( mLow );
-				double dTmp2 = (_vLeft.m_dElements[0] - _vRight.m_dElements[0]) * (_vLeft.m_dElements[0] - _vRight.m_dElements[0]) +
-				   (_vLeft.m_dElements[1] - _vRight.m_dElements[1]) * (_vLeft.m_dElements[1] - _vRight.m_dElements[1]) +
-				   (_vLeft.m_dElements[2] - _vRight.m_dElements[2]) * (_vLeft.m_dElements[2] - _vRight.m_dElements[2]) +
-				   (_vLeft.m_dElements[3] - _vRight.m_dElements[3]) * (_vLeft.m_dElements[3] - _vRight.m_dElements[3]);
-				if ( dTmp != dTmp2 ) {
-					volatile int gjhghg = 0;
-				}
-				return _mm_cvtsd_f64( mLow );
+				__m256d mSum = _mm256_add_pd( mSqr, _mm256_permute2f128_pd( mSqr, mSqr, 1 ) );
+				mSum = _mm256_hadd_pd( mSum, mSum );
+				return _mm256_cvtsd_f64( mSum );
 			}
 #endif	// #ifdef __AVX__
 			return (_vLeft.m_dElements[0] - _vRight.m_dElements[0]) * (_vLeft.m_dElements[0] - _vRight.m_dElements[0]) +

@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include "../Utilities/SL2AlignmentAllocator.h"
+
 #include <vector>
 
 
@@ -20,10 +22,10 @@ namespace sl2 {
 	 * Description: A surface is a single slice of an image.  It is basically a chunk of memory that can be treated as any arrangement of texel data needed.
 	 */
 	//typedef std::vector<uint8_t>						CSurface;
-	class CSurface : public std::vector<uint8_t> {
+	class CSurface : public std::vector<uint8_t, CAlignmentAllocator<uint8_t, 64>> {
 	public :
 		CSurface( size_t _sAllocSize, size_t _sBaseSize, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D ) :
-			std::vector<uint8_t>( _sAllocSize ),
+			std::vector<uint8_t, CAlignmentAllocator<uint8_t, 64>>( _sAllocSize ),
 			m_sBaseSize( _sBaseSize ),
 			m_ui32Width( _ui32W ),
 			m_ui32Height( _ui32H ),
