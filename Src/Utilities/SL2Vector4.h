@@ -277,7 +277,7 @@ namespace sl2 {
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
 				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
 				__m256d mOthrVec = _mm256_load_pd( _vOther.m_dElements );	// Load _vOther's elements into another AVX register.
-				mThisVec = _mm256_add_pd( mThisVec, mOthrVec );				// Perform vectorized division.
+				mThisVec = _mm256_add_pd( mThisVec, mOthrVec );				// Perform vectorized addition.
 				return mThisVec;
 			}
 #endif	// #ifdef __AVX__
@@ -321,7 +321,7 @@ namespace sl2 {
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
 				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
 				__m256d mOthrVec = _mm256_load_pd( _vOther.m_dElements );	// Load _vOther's elements into another AVX register.
-				mThisVec = _mm256_sub_pd( mThisVec, mOthrVec );				// Perform vectorized division.
+				mThisVec = _mm256_sub_pd( mThisVec, mOthrVec );				// Perform vectorized subtraction.
 				return mThisVec;
 			}
 #endif	// #ifdef __AVX__
@@ -334,7 +334,28 @@ namespace sl2 {
 		/**
 		 * The * operator.
 		 * 
-		 * \param _vOther The vector to add to this one.
+		 * \param _vOther The vector by which to multiply this vector.
+		 * \return Returns a resulting vector.
+		 **/
+		inline CVector4<_uSimd>									operator * ( const CVector4<_uSimd> &_vOther ) const {
+#ifdef __AVX__
+			if constexpr ( SL2_ST_AVX <= _uSimd ) {
+				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
+				__m256d mOthrVec = _mm256_load_pd( _vOther.m_dElements );	// Load _vOther's elements into another AVX register.
+				mThisVec = _mm256_mul_pd( mThisVec, mOthrVec );				// Perform vectorized multiplication.
+				return mThisVec;
+			}
+#endif	// #ifdef __AVX__
+			return CVector4<_uSimd>( m_dElements[0] * _vOther[0],
+				m_dElements[1] * _vOther[1],
+				m_dElements[2] * _vOther[2],
+				m_dElements[3] * _vOther[3] );
+		}
+
+		/**
+		 * The * operator.
+		 * 
+		 * \param _dVal The value by which to multiply this vector.
 		 * \return Returns a resulting vector.
 		 **/
 		inline CVector4<_uSimd>									operator * ( double _dVal ) const {
@@ -342,7 +363,7 @@ namespace sl2 {
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
 				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
 				__m256d mOthrVec = _mm256_set1_pd( _dVal );					// Broadcast the scalar to all elements of the AVX register.
-				mThisVec = _mm256_mul_pd( mThisVec, mOthrVec );				// Perform vectorized division.
+				mThisVec = _mm256_mul_pd( mThisVec, mOthrVec );				// Perform vectorized multiplication.
 				return mThisVec;
 			}
 #endif	// #ifdef __AVX__

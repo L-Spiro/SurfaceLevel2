@@ -2110,6 +2110,11 @@ namespace sl2 {
 	 * \param _pclLabPal The palette in LAB.
 	 **/
 	bool CFormat::FloydSteinbergDithering( SL2_RGBA64F * _prgbaColors, uint32_t _ui32Width, uint32_t _ui32Height, const CPalette &_pPalette, const ispc::ColorLABA * _pclLabPal ) {
+		CPalette::CColor cWeights( m_lCurCoeffs.dRgb[0], m_lCurCoeffs.dRgb[1], m_lCurCoeffs.dRgb[2], 0.0 );
+		cWeights = cWeights.Normalize();
+		cWeights.m_dElements[3] = 1.0;
+		cWeights = CPalette::CColor( 0.925, 0.925, 0.925, 0.925 );
+		//cWeights = CPalette::CColor( 1.0, 1.0, 1.0, 1.0 );
 		for ( uint32_t H = 0; H < _ui32Height; ++H ) {
 			for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 				size_t sIdx = size_t( H * _ui32Width + W );
@@ -2117,14 +2122,37 @@ namespace sl2 {
 				/*CPalette::CColor cTmp = reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx]).Clamp( 0.0, 1.0 );
 				SL2_RGBA64F rgbaOld = reinterpret_cast<SL2_RGBA64F &>(cTmp);//_prgbaColors[sIdx];*/
 				SL2_RGBA64F rgbaOld = _prgbaColors[sIdx];
+				constexpr bool bUseAdvanced = false;
 				ispc::ColorLABA clLab;
-				ispc::ispc_rgb2lab_single( (*reinterpret_cast<const ispc::ColorRGBA *>(&rgbaOld)), clLab );
+				/*if ( reinterpret_cast<CPalette::CColor &>(rgbaOld).Min() < 0.0 || reinterpret_cast<CPalette::CColor &>(rgbaOld).Max() > 1.0 ) {
+					bUseAdvanced = false;
+				}
+				
+				if ( bUseAdvanced ) {
+					ispc::ispc_rgb2lab_single( (*reinterpret_cast<const ispc::ColorRGBA *>(&rgbaOld)), clLab );
+				}*/
+				/*ispc::ColorRGBA crRgba;
+				ispc::ispc_lab2rgb_single( clLab, crRgba );*/
+				//if ( reinterpret_cast<CPalette::CColor &>(rgbaOld).Min() < 0.0 || reinterpret_cast<CPalette::CColor &>(rgbaOld).Max() > 1.0 ) {
+					/*volatile double dDst = CPalette::CColor::EuclideanDistanceSq( reinterpret_cast<CPalette::CColor &>(rgbaOld), reinterpret_cast<CPalette::CColor &>(crRgba) );
+					if ( dDst >= 0.1 ) {
+						return false;
+					}*/
+				//}
 
 				size_t sWinner = _pPalette.Palette().size();
 				double dDist = std::numeric_limits<double>::infinity();
 				for ( auto I = _pPalette.Palette().size(); I--; ) {
-					double dThisDist = ispc::ispc_deltaE_CIEDE2000( clLab.l, clLab.a, clLab.b, clLab.alpha,
-						_pclLabPal[I].l, _pclLabPal[I].a, _pclLabPal[I].b, _pclLabPal[I].alpha );
+					double dThisDist;
+					if ( bUseAdvanced ) {
+						dThisDist = ispc::ispc_deltaE_CIEDE2000( clLab.l, clLab.a, clLab.b, clLab.alpha,
+							_pclLabPal[I].l, _pclLabPal[I].a, _pclLabPal[I].b, _pclLabPal[I].alpha );
+					}
+					else {
+						dThisDist = CPalette::CColor::EuclideanDistanceSq( reinterpret_cast<CPalette::CColor &>(rgbaOld), _pPalette.Palette()[I] );
+					}
+					/*double dThisDist = ispc::ispc_deltaE_CIEDE2000( clLab.l, clLab.a, clLab.b, clLab.alpha,
+						_pclLabPal[I].l, _pclLabPal[I].a, _pclLabPal[I].b, _pclLabPal[I].alpha );*/
 					if ( dThisDist <= dDist ) {
 						dDist = dThisDist;
 						sWinner = I;
@@ -2133,6 +2161,7 @@ namespace sl2 {
 
 				_prgbaColors[sIdx] = (*reinterpret_cast<const SL2_RGBA64F *>(&_pPalette.Palette()[sWinner]));
 				CPalette::CColor cError = reinterpret_cast<CPalette::CColor &>(rgbaOld) - reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx]);
+				cError = cError * cWeights;
 
 				if ( W + 1 < _ui32Width ) {
 					reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += (cError * (7.0 / 16.0));  // Right pixel
