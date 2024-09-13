@@ -1071,10 +1071,23 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R16G16B16A16_UNORM );
                 }
                 else if ( ::_wcsicmp( _wcpArgV[1], L"L8" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GREYSCALE8" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GRAYSCALE8" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"LUMINANCE8" ) == 0 ) {
-                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE8 );
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_LUMINANCE8 );
                 }
                 else if ( ::_wcsicmp( _wcpArgV[1], L"L16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GREYSCALE16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GRAYSCALE16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"LUMINANCE16" ) == 0 ) {
-                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE16 );
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_LUMINANCE16 );
+                }
+
+                else if ( ::_wcsicmp( _wcpArgV[1], L"I1" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"INDEXED1" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_COLOR_INDEX1_EXT );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"I2" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"INDEXED2" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_COLOR_INDEX2_EXT );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"I4" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"INDEXED4" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_COLOR_INDEX4_EXT );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"I8" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"INDEXED8" ) == 0 ) {
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_COLOR_INDEX8_EXT );
                 }
                 else {
                     SL2_ERRORT( std::format( L"Invalid \"bmp_format\": \"{}\". Must be R8G8B8, R8G8B8_SRGB, R8G8B8A8, R8G8B8A8_SRGB, R16G16B16, R16G16B16A16, L8, or L16.",
@@ -1221,7 +1234,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8A8_SRGB );
                 }
                 else if ( ::_wcsicmp( _wcpArgV[1], L"L16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GREYSCALE16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GRAYSCALE16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"LUMINANCE16" ) == 0 ) {
-                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE16 );
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_LUMINANCE16 );
                 }
                 else if ( ::_wcsicmp( _wcpArgV[1], L"RGB16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R16G16B16" ) == 0 ) {
                     oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R16G16B16_UNORM );
@@ -1258,7 +1271,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R8G8B8A8_SRGB );
                 }
                 else if ( ::_wcsicmp( _wcpArgV[1], L"L16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GREYSCALE16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"GRAYSCALE16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"LUMINANCE16" ) == 0 ) {
-                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE16 );
+                    oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_LUMINANCE16 );
                 }
                 else if ( ::_wcsicmp( _wcpArgV[1], L"RGB16" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"R16G16B16" ) == 0 ) {
                     oOptions.pkifdPngFormat = sl2::CFormat::FindFormatDataByVulkan( sl2::SL2_VK_FORMAT_R16G16B16_UNORM );
@@ -1732,29 +1745,29 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 #undef SL2_RESAMPLE
 
                 if ( SL2_CHECK( 1, dxt1c ) || SL2_CHECK( 1, bc1 ) ) {
-                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGB_S3TC_DXT1_EXT );
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_COMPRESSED_RGB_S3TC_DXT1_EXT );
                     SL2_ADV( 1 );
                 }
                 if ( SL2_CHECK( 1, dxt1a ) || SL2_CHECK( 1, bc1a ) ) {
-                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGBA_S3TC_DXT1_EXT );
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_COMPRESSED_RGBA_S3TC_DXT1_EXT );
                     SL2_ADV( 1 );
                 }
                 if ( SL2_CHECK( 1, dxt2 ) ) {
-                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGBA_S3TC_DXT3_EXT );
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_COMPRESSED_RGBA_S3TC_DXT3_EXT );
                     oOptions.bNeedsPreMultiply = true;
                     SL2_ADV( 1 );
                 }
                 if ( SL2_CHECK( 1, dxt3 ) || SL2_CHECK( 1, bc2 ) ) {
-                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGBA_S3TC_DXT3_EXT );
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_COMPRESSED_RGBA_S3TC_DXT3_EXT );
                     SL2_ADV( 1 );
                 }
                 if ( SL2_CHECK( 1, dxt4 ) ) {
-                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGBA_S3TC_DXT5_EXT );
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_COMPRESSED_RGBA_S3TC_DXT5_EXT );
                     oOptions.bNeedsPreMultiply = true;
                     SL2_ADV( 1 );
                 }
                 if ( SL2_CHECK( 1, dxt5 ) || SL2_CHECK( 1, bc3 ) ) {
-                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_COMPRESSED_RGBA_S3TC_DXT5_EXT );
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_COMPRESSED_RGBA_S3TC_DXT5_EXT );
                     SL2_ADV( 1 );
                 }
                 if ( SL2_CHECK( 1, bc4 ) ) {
@@ -1802,7 +1815,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     SL2_ADV( 1 );
                 }
                 if ( SL2_CHECK( 1, R5G5B5X1 ) ) {
-                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_RGB5 );
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_RGB5 );
                     SL2_ADV( 1 );
                 }
                 if ( SL2_CHECK( 1, R5G6B5 ) ) {
@@ -1810,7 +1823,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     SL2_ADV( 1 );
                 }
                 if ( SL2_CHECK( 1, A8 ) ) {
-                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_ALPHA8 );
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_ALPHA8 );
                     SL2_ADV( 1 );
                 }
                 if ( SL2_CHECK( 1, B8G8R8X8 ) ) {
@@ -1830,19 +1843,19 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     SL2_ADV( 1 );
                 }
                 if ( SL2_CHECK( 1, L8A8 ) ) {
-                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE8_ALPHA8 );
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_LUMINANCE8_ALPHA8 );
                     SL2_ADV( 1 );
                 }
                 if ( SL2_CHECK( 1, L16 ) ) {
-                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE16 );
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_LUMINANCE16 );
                     SL2_ADV( 1 );
                 }
                 if ( SL2_CHECK( 1, L8 ) ) {
-                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE8 );
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_LUMINANCE8 );
                     SL2_ADV( 1 );
                 }
                 if ( SL2_CHECK( 1, L4A4 ) ) {
-                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_KIF_GL_LUMINANCE4_ALPHA4 );
+                    oOptions.pkifdFinalFormat = sl2::CFormat::FindFormatDataByOgl( sl2::SL2_GL_LUMINANCE4_ALPHA4 );
                     SL2_ADV( 1 );
                 }
             }
@@ -2337,13 +2350,13 @@ namespace sl2 {
             { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16G16B16_UNORM ) },
             { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R16G16B16A16_UNORM ) },
 
-            { CFormat::FindFormatDataByOgl( SL2_KIF_GL_LUMINANCE8 ) },
-            { CFormat::FindFormatDataByOgl( SL2_KIF_GL_LUMINANCE16 ) },
+            { CFormat::FindFormatDataByOgl( SL2_GL_LUMINANCE8 ) },
+            { CFormat::FindFormatDataByOgl( SL2_GL_LUMINANCE16 ) },
 
-            { CFormat::FindFormatDataByOgl( SL2_KIF_GL_COLOR_INDEX1_EXT ) },
-            { CFormat::FindFormatDataByOgl( SL2_KIF_GL_COLOR_INDEX2_EXT ) },
-            { CFormat::FindFormatDataByOgl( SL2_KIF_GL_COLOR_INDEX4_EXT ) },
-            { CFormat::FindFormatDataByOgl( SL2_KIF_GL_COLOR_INDEX8_EXT ) },
+            { CFormat::FindFormatDataByOgl( SL2_GL_COLOR_INDEX1_EXT ) },
+            { CFormat::FindFormatDataByOgl( SL2_GL_COLOR_INDEX2_EXT ) },
+            { CFormat::FindFormatDataByOgl( SL2_GL_COLOR_INDEX4_EXT ) },
+            { CFormat::FindFormatDataByOgl( SL2_GL_COLOR_INDEX8_EXT ) },
         };
         const CFormat::SL2_BEST_INTERNAL_FORMAT * pbifUseMe = nullptr;
 
@@ -2367,27 +2380,27 @@ namespace sl2 {
                 }
             }
             switch ( _oOptions.pkifdPngFormat->kifInternalFormat ) {
-                case SL2_KIF_GL_LUMINANCE8 : {
+                case SL2_GL_LUMINANCE8 : {
                     pbifUseMe = &bifFormats[4];
                     break;
                 }
-                case SL2_KIF_GL_LUMINANCE16 : {
+                case SL2_GL_LUMINANCE16 : {
                     pbifUseMe = &bifFormats[5];
                     break;
                 }
-                case SL2_KIF_GL_COLOR_INDEX1_EXT : {
+                case SL2_GL_COLOR_INDEX1_EXT : {
                     pbifUseMe = &bifFormats[6];
                     break;
                 }
-                case SL2_KIF_GL_COLOR_INDEX2_EXT : {
+                case SL2_GL_COLOR_INDEX2_EXT : {
                     pbifUseMe = &bifFormats[7];
                     break;
                 }
-                case SL2_KIF_GL_COLOR_INDEX4_EXT : {
+                case SL2_GL_COLOR_INDEX4_EXT : {
                     pbifUseMe = &bifFormats[8];
                     break;
                 }
-                case SL2_KIF_GL_COLOR_INDEX8_EXT : {
+                case SL2_GL_COLOR_INDEX8_EXT : {
                     pbifUseMe = &bifFormats[9];
                     break;
                 }
@@ -2399,14 +2412,14 @@ namespace sl2 {
             return SL2_E_BADFORMAT;
         }
         FREE_IMAGE_TYPE fitType = FIT_BITMAP;
-        if ( pbifUseMe->pkifdFormat->kifInternalFormat == SL2_KIF_GL_LUMINANCE8 ) {
+        if ( pbifUseMe->pkifdFormat->kifInternalFormat == SL2_GL_LUMINANCE8 ) {
         }
-        else if ( pbifUseMe->pkifdFormat->kifInternalFormat == SL2_KIF_GL_LUMINANCE16 ) {
+        else if ( pbifUseMe->pkifdFormat->kifInternalFormat == SL2_GL_LUMINANCE16 ) {
             fitType = FIT_UINT16;
         }
-        else if ( pbifUseMe->pkifdFormat->kifInternalFormat == SL2_KIF_GL_LUMINANCE8_ALPHA8 ) {
+        else if ( pbifUseMe->pkifdFormat->kifInternalFormat == SL2_GL_LUMINANCE8_ALPHA8 ) {
         }
-        else if ( pbifUseMe->pkifdFormat->kifInternalFormat == SL2_KIF_GL_LUMINANCE16_ALPHA16 ) {
+        else if ( pbifUseMe->pkifdFormat->kifInternalFormat == SL2_GL_LUMINANCE16_ALPHA16 ) {
             fitType = FIT_RGBA16;
         }
         else if ( pbifUseMe->pkifdFormat->ui32BlockSizeInBits == 16 * 3 ) {
@@ -2587,10 +2600,49 @@ namespace sl2 {
         for ( uint32_t H = 0; H < _iImage.GetMipmaps()[_sMip]->Height(); ++H ) {
             BYTE * pui8Bits = ::FreeImage_GetScanLine( fiImage.pbBitmap, int( H ) );
             uint8_t * pui8Src = vConverted.data() + ui32Slice + sPitch * H;
-            for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
-                uint8_t * prgbDst = pui8Bits + X;
-                const uint8_t * pui8This = pui8Src + X;
-                (*prgbDst) = (*pui8This);
+            switch ( _pbifFormat->pkifdFormat->ui32BlockSizeInBits ) {
+                case 1 : {
+                    size_t sMask = size_t( (1LL << _pbifFormat->pkifdFormat->ui32BlockSizeInBits) - 1 );
+                    size_t sSegs = 8 / _pbifFormat->pkifdFormat->ui32BlockSizeInBits;
+                    for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
+                        size_t sOff = X * _pbifFormat->pkifdFormat->ui32BlockSizeInBits / 8L;
+                        size_t sShift = ((sSegs) - (X & ((sSegs) - 1)) - 1) * _pbifFormat->pkifdFormat->ui32BlockSizeInBits;
+                        uint8_t * prgbDst = pui8Bits + sOff;
+                        const uint8_t * pui8This = pui8Src + X;
+                        (*prgbDst) = (((*pui8This) & sMask) << sShift) | ((*prgbDst) & ~(sMask << sShift));
+                    }
+                    break;
+                }
+                case 2 : {
+                    size_t sMask = size_t( (1LL << _pbifFormat->pkifdFormat->ui32BlockSizeInBits) - 1 );
+                    for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
+                        uint8_t * prgbDst = pui8Bits + X;
+                        const uint8_t * pui8This = pui8Src + X;
+                        (*prgbDst) = (*pui8This) & sMask;
+                    }
+                    break;
+                }
+                case 4 : {
+                    size_t sMask = size_t( (1LL << _pbifFormat->pkifdFormat->ui32BlockSizeInBits) - 1 );
+                    size_t sSegs = 8 / _pbifFormat->pkifdFormat->ui32BlockSizeInBits;
+                    for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
+                        size_t sOff = X * _pbifFormat->pkifdFormat->ui32BlockSizeInBits / 8L;
+                        size_t sShift = uint8_t( !(X & 1L) ) * _pbifFormat->pkifdFormat->ui32BlockSizeInBits;
+                        //size_t sShift = ((sSegs) - (X & ((sSegs) - 1)) - 1) * _pbifFormat->pkifdFormat->ui32BlockSizeInBits;
+                        uint8_t * prgbDst = pui8Bits + sOff;
+                        const uint8_t * pui8This = pui8Src + X;
+                        (*prgbDst) = (((*pui8This) & sMask) << sShift) | ((*prgbDst) & ~(sMask << sShift));
+                    }
+                    break;
+                }
+                case 8 : {
+                    for ( uint32_t X = 0; X < _iImage.GetMipmaps()[_sMip]->Width(); ++X ) {
+                        uint8_t * prgbDst = pui8Bits + X;
+                        const uint8_t * pui8This = pui8Src + X;
+                        (*prgbDst) = (*pui8This);
+                    }
+                    break;
+                }
             }
         }
 
@@ -3604,7 +3656,7 @@ namespace sl2 {
         if ( _iImage.Format()->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN ) {
             pfdDdsData = sl2::CDds::DxgiIsSupported( _iImage.Format()->pcDxName );
         }
-        if ( nullptr == pfdDdsData && _iImage.Format()->kifInternalFormat != SL2_KIF_GL_INVALID ) {
+        if ( nullptr == pfdDdsData && _iImage.Format()->kifInternalFormat != SL2_GL_INVALID ) {
             pfdDdsData = sl2::CDds::FindByOgl( _iImage.Format()->pcOglInternalFormat, _iImage.Format()->pcOglType, _iImage.Format()->pcOglBaseInternalFormat );
         }
         if ( nullptr == pfdDdsData ) {
@@ -3836,7 +3888,7 @@ namespace sl2 {
 	 **/
 	SL2_ERRORS ExportAsKtx1( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions ) {
         //if ( _iImage.Format()->vfVulkanFormat == SL2_VK_FORMAT_UNDEFINED
-        if ( _iImage.Format()->kifInternalFormat == SL2_KIF_GL_INVALID || _iImage.Format()->ktType == SL2_KT_GL_INVALID || _iImage.Format()->kbifBaseInternalFormat == SL2_KBIF_GL_INVALID ) { return SL2_E_BADFORMAT; }
+        if ( _iImage.Format()->kifInternalFormat == SL2_GL_INVALID || _iImage.Format()->ktType == SL2_KT_GL_INVALID || _iImage.Format()->kbifBaseInternalFormat == SL2_KBIF_GL_INVALID ) { return SL2_E_BADFORMAT; }
 
         ::ktxTextureCreateInfo createInfo;
         createInfo.glInternalformat = _iImage.Format()->kifInternalFormat;
@@ -3953,7 +4005,7 @@ namespace sl2 {
 
             { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_A1R5G5B5_UNORM_PACK16 ),   FIT_BITMAP, },
 
-            { CFormat::FindFormatDataByOgl( SL2_KIF_GL_LUMINANCE8 ),                    FIT_BITMAP },
+            { CFormat::FindFormatDataByOgl( SL2_GL_LUMINANCE8 ),                    FIT_BITMAP },
         };
         const CFormat::SL2_BEST_INTERNAL_FORMAT * pkifdUseMe = nullptr;
         if ( _oOptions.vkTgaFormat != SL2_VK_FORMAT_UNDEFINED ) {
@@ -4115,7 +4167,7 @@ namespace sl2 {
 
             { CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_A1R5G5B5_UNORM_PACK16 ),   FIT_BITMAP, },
 
-            { CFormat::FindFormatDataByOgl( SL2_KIF_GL_LUMINANCE8 ),                    FIT_BITMAP },
+            { CFormat::FindFormatDataByOgl( SL2_GL_LUMINANCE8 ),                    FIT_BITMAP },
         };
         const CFormat::SL2_BEST_INTERNAL_FORMAT * pkifdUseMe = nullptr;
         if ( _oOptions.vkTgaFormat != SL2_VK_FORMAT_UNDEFINED ) {

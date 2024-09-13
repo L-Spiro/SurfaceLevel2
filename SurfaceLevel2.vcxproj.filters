@@ -465,6 +465,9 @@
     <ClInclude Include="Src\Image\ISPC\cielab_ispc.h">
       <Filter>Header Files\Image\ISPC</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Image\SL2Dither.h">
+      <Filter>Header Files\Image</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\SL2SurfaceLevel2.cpp">

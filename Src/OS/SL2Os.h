@@ -47,3 +47,18 @@ inline uint64_t _byteswap_uint64( uint64_t _ui64Val ) { return (_ui64Val >> 56) 
 	((_ui64Val << 40) & 0x00FF000000000000ULL) |
 	(_ui64Val << 56); }
 #endif	// #if defined( __APPLE__ )
+
+
+inline void SetThreadAffinity( size_t sCoreId ) {
+#ifdef _WIN32
+	// Set thread affinity to the specified core on Windows
+	DWORD_PTR dwptrMask = DWORD_PTR( 1 ) << sCoreId;
+	::SetThreadAffinityMask( ::GetCurrentThread(), dwptrMask );
+#elif defined( __APPLE__ ) || defined( __linux__ )
+	// Set thread affinity on Linux
+	cpu_set_t cpuset;
+	CPU_ZERO( &cpuset );
+	CPU_SET( sCoreId, &cpuset );
+	::pthread_setaffinity_np( ::pthread_self(), sizeof( cpu_set_t ), &cpuset );
+#endif
+}

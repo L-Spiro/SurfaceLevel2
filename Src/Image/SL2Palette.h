@@ -97,6 +97,43 @@ namespace sl2 {
 		 **/
 		bool												GenPalette_kMeans( const CColor * _pcColors, size_t _sColorsSize, uint32_t _ui32Size, size_t _sIterations = 10 );
 
+		/**
+		 * RGBA32F -> Indexed conversion (worker thread).
+		 * 
+		 * \param _ptDst The destination image.
+		 * \param _ui32Start The row at which to begin.
+		 * \param _ui32Stop The row at which to stop.
+		 * \param _ui32Width The width of the image.
+		 * \param _cLabBuffer The input LAB color buffer.
+		 * \param _pLabPalette The palette in LAB.
+		 * \param _pRgbPalette The palette in RGB.
+		 * \param _sCore The core to which to assign the thread.
+		 * \param _bRet Holds the return value.
+		 **/
+		template<typename _tType = uint8_t, unsigned _uBits = 8>
+		static void											IndexedFromRgba64F_Thread( _tType * _ptDst, uint32_t _ui32Start, uint32_t _ui32Stop, uint32_t _ui32Width, const std::vector<ispc::ColorLABA> &_cLabBuffer, const std::vector<ispc::ColorLABA> &_pLabPalette, const CPalette::CPal &_pRgbPalette, size_t _sCore, bool &_bRet ) {
+			::SetThreadAffinity( _sCore );
+			constexpr uint32_t ui32Mask = (1 << _uBits) - 1;
+			for ( uint32_t H = _ui32Start; H < _ui32Stop; ++H ) {
+				for ( uint32_t W = 0; W < _ui32Width; ++W ) {
+					size_t sIdx = size_t( H * _ui32Width + W );
+					size_t sWinner = _pRgbPalette.size();
+					double dDist = std::numeric_limits<double>::infinity();
+					for ( auto I = _pRgbPalette.size(); I--; ) {
+						double dThisDist = ispc::ispc_deltaE_CIEDE2000( _cLabBuffer[sIdx].l, _cLabBuffer[sIdx].a, _cLabBuffer[sIdx].b, _cLabBuffer[sIdx].alpha,
+							_pLabPalette[I&ui32Mask].l, _pLabPalette[I&ui32Mask].a, _pLabPalette[I&ui32Mask].b, _pLabPalette[I&ui32Mask].alpha );
+						if ( dThisDist <= dDist ) {
+							dDist = dThisDist;
+							sWinner = I & ui32Mask;
+						}
+					}
+					if ( sWinner == _pRgbPalette.size() ) { _bRet = false; return; }
+					_ptDst[sIdx] = _tType( sWinner );
+				}
+			}
+			
+		}
+
 
 	protected :
 		CPal												m_pPalette;								/**< The actual palette. */

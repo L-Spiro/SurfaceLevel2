@@ -84,6 +84,7 @@
     <ClInclude Include="Src\Image\PVRTexTool\PVRTexLib.hpp" />
     <ClInclude Include="Src\Image\PVRTexTool\PVRTexLibDefines.h" />
     <ClInclude Include="Src\Image\PVRTexTool\PVRTextureVersion.h" />
+    <ClInclude Include="Src\Image\SL2Dither.h" />
     <ClInclude Include="Src\Image\SL2Formats.h" />
     <ClInclude Include="Src\Image\SL2Image.h" />
     <ClInclude Include="Src\Image\SL2Kernel.h" />

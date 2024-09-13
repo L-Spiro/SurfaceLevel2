@@ -25,7 +25,7 @@ namespace sl2 {
 #define SL2_CONV_L( TTO, TFROM, TBITS, TSHIFTS, TSIZE, SIGNED, NORM, TSRGB )	(CFormat::LumAlphaToRgba64F<TBITS, TSHIFTS, TSIZE, SIGNED, NORM, TSRGB>), (CFormat::LumAlphaFromRgba64F<TBITS, TSHIFTS, TSIZE, SIGNED, NORM, TSRGB>)
 #define SL2_CONV_IN( TTO, TFROM, TBITS, TSIZE, SIGNED, NORM, TFLOAT )			TBITS, SL2_TSHIFTS( 0, 0, 0, 0 ), (TTO<TBITS, TSIZE, SIGNED, NORM, TFLOAT>), (TFROM<TBITS, TSIZE, SIGNED, NORM, TFLOAT>)
 #define SL2_GEN_INT( TBITS, TSHIFTS, TSIZE, SIGNED, NORM, TSRGB )				SL2_CONV_I( CFormat::StdIntToRgba64F, CFormat::StdIntFromRgba64F, TBITS, TSHIFTS, TSIZE, SIGNED, NORM, TSRGB )
-#define SL2_ID( VULKAN, DX, METAL, OGLINTERNAL, OGLTYPE, OGLBASE )				#VULKAN, #DX, #METAL, #OGLINTERNAL, #OGLTYPE, #OGLBASE, SL2_ ## VULKAN, SL2_ ## DX, SL2_ ## METAL, SL2_KIF_ ## OGLINTERNAL, SL2_KT_ ## OGLTYPE, SL2_KBIF_ ## OGLBASE
+#define SL2_ID( VULKAN, DX, METAL, OGLINTERNAL, OGLTYPE, OGLBASE )				#VULKAN, #DX, #METAL, #OGLINTERNAL, #OGLTYPE, #OGLBASE, SL2_ ## VULKAN, SL2_ ## DX, SL2_ ## METAL, SL2_ ## OGLINTERNAL, SL2_KT_ ## OGLTYPE, SL2_KBIF_ ## OGLBASE
 		//		  vfVulkanFormat		dfDxFormat		mfMetalFormat		kifInternalFormat		ktType		kbifBaseInternalFormat						ui32Flags
 		//																																						  ui32PaletteSizeInBits
 		//																																						  |  ui32BlockSizeInBits
@@ -642,6 +642,12 @@ namespace sl2 {
 	/** RGB -> YUV conversion settings. */
 	CFormat::SL2_YUV_CONVERSION_OPTIONS CFormat::m_ycoRgbToYuv;
 
+	/** Dithering mode. */
+	SL2_DITHER CFormat::m_dDither = SL2_D_BURKES;
+
+	/** Dithering factor. */
+	CVector4<SL2_ST_RAW> CFormat::m_vDitherFactor = CVector4<SL2_ST_RAW>( 0.925, 0.925, 0.925, 1.0 );
+
 	/** Whether to use NVIDA's decoding of block formats or not. */
 	bool CFormat::m_bUseNVidiaDecode = true;
 
@@ -1178,7 +1184,7 @@ namespace sl2 {
 					((_pkifFormat->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED && _pkifFormat->vfVulkanFormat == _ppkifFormats[I].pkifdFormat->vfVulkanFormat) ||
 					(_pkifFormat->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN && _pkifFormat->dfDxFormat == _ppkifFormats[I].pkifdFormat->dfDxFormat) ||
 					(_pkifFormat->mfMetalFormat != SL2_MTLPixelFormatInvalid && _pkifFormat->mfMetalFormat == _ppkifFormats[I].pkifdFormat->mfMetalFormat) ||
-					(_pkifFormat->kifInternalFormat != SL2_KIF_GL_INVALID && _pkifFormat->kifInternalFormat == _ppkifFormats[I].pkifdFormat->kifInternalFormat)) ) {
+					(_pkifFormat->kifInternalFormat != SL2_GL_INVALID && _pkifFormat->kifInternalFormat == _ppkifFormats[I].pkifdFormat->kifInternalFormat)) ) {
 					// Exact match with the input.
 					if ( _pfScore ) { (*_pfScore) = 100.0f; }
 					return &_ppkifFormats[I];
@@ -1991,7 +1997,7 @@ namespace sl2 {
 
 		sTmp += "\r\n | OpenGL Formats |\r\n | --- |\r\n";
 		for ( size_t I = 0; I < SL2_ELEMENTS( m_kifdInternalFormats ); ++I ) {
-			if ( m_kifdInternalFormats[I].kifInternalFormat != SL2_KIF_GL_INVALID ) {
+			if ( m_kifdInternalFormats[I].kifInternalFormat != SL2_GL_INVALID ) {
 				sTmp += " | ";
 				sTmp += m_kifdInternalFormats[I].pcOglInternalFormat;
 				sTmp += "\t ";
@@ -2109,12 +2115,14 @@ namespace sl2 {
 	 * \param _pPalette The palette.
 	 * \param _pclLabPal The palette in LAB.
 	 **/
-	bool CFormat::FloydSteinbergDithering( SL2_RGBA64F * _prgbaColors, uint32_t _ui32Width, uint32_t _ui32Height, const CPalette &_pPalette, const ispc::ColorLABA * _pclLabPal ) {
-		CPalette::CColor cWeights( m_lCurCoeffs.dRgb[0], m_lCurCoeffs.dRgb[1], m_lCurCoeffs.dRgb[2], 0.0 );
+	template <unsigned _uDither>
+	bool CFormat::Dither( SL2_RGBA64F * _prgbaColors, uint32_t _ui32Width, uint32_t _ui32Height, const CPalette &_pPalette, const ispc::ColorLABA * _pclLabPal ) {
+		/*CPalette::CColor cWeights( m_lCurCoeffs.dRgb[0], m_lCurCoeffs.dRgb[1], m_lCurCoeffs.dRgb[2], 0.0 );
 		cWeights = cWeights.Normalize();
 		cWeights.m_dElements[3] = 1.0;
-		cWeights = CPalette::CColor( 0.925, 0.925, 0.925, 0.925 );
+		cWeights = CPalette::CColor( 0.925, 0.925, 0.925, 0.925 );*/
 		//cWeights = CPalette::CColor( 1.0, 1.0, 1.0, 1.0 );
+		CPalette::CColor cWeights( m_vDitherFactor );
 		for ( uint32_t H = 0; H < _ui32Height; ++H ) {
 			for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 				size_t sIdx = size_t( H * _ui32Width + W );
@@ -2163,17 +2171,147 @@ namespace sl2 {
 				CPalette::CColor cError = reinterpret_cast<CPalette::CColor &>(rgbaOld) - reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx]);
 				cError = cError * cWeights;
 
-				if ( W + 1 < _ui32Width ) {
-					reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += (cError * (7.0 / 16.0));  // Right pixel
+				if constexpr ( _uDither == SL2_D_JARVIS_JUDICE_NINKE ) {
+					CPalette::CColor c1 = cError * (1.0 / 48.0);
+					CPalette::CColor c3 = cError * (3.0 / 48.0);
+					CPalette::CColor c5 = cError * (5.0 / 48.0);
+					CPalette::CColor c7 = cError * (7.0 / 48.0);
+					if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c7; }
+					if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c5; }
+
+					if ( H + 1 < _ui32Height ) {
+						if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-2]) += c3; }
+						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c5; }
+						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c7;
+						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c5; }
+						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+2]) += c3; }
+					}
+
+					if ( H + 2 < _ui32Height ) {
+						if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width-2]) += c1; }
+						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width-1]) += c3; }
+						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width]) += c5;
+						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width+1]) += c3; }
+						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width+2]) += c1; }
+					}
 				}
-				if ( W > 0 && H + 1 < _ui32Height ) {
-					reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += (cError * (3.0 / 16.0));  // Bottom-left pixel
+				else if constexpr ( _uDither == SL2_D_STUCKI ) {
+					CPalette::CColor c1 = cError * (1.0 / 42.0);
+					CPalette::CColor c2 = cError * (2.0 / 42.0);
+					CPalette::CColor c4 = cError * (4.0 / 42.0);
+					CPalette::CColor c8 = cError * (8.0 / 42.0);
+					if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c8; }
+					if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c4; }
+
+					if ( H + 1 < _ui32Height ) {
+						if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-2]) += c2; }
+						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c4; }
+						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c8;
+						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c4; }
+						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+2]) += c2; }
+					}
+
+					if ( H + 2 < _ui32Height ) {
+						if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width-2]) += c1; }
+						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width-1]) += c2; }
+						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width]) += c4;
+						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width+1]) += c2; }
+						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width+2]) += c1; }
+					}
 				}
-				if ( H + 1 < _ui32Height ) {
-					reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += (cError * (5.0 / 16.0));  // Bottom pixel
+				else if constexpr ( _uDither == SL2_D_BURKES ) {
+					CPalette::CColor c1 = cError * (1.0 / 32.0);
+					CPalette::CColor c2 = cError * (2.0 / 32.0);
+					CPalette::CColor c4 = cError * (4.0 / 32.0);
+					CPalette::CColor c8 = cError * (8.0 / 32.0);
+					if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c8; }
+					if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c4; }
+
+					if ( H + 1 < _ui32Height ) {
+						if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-2]) += c2; }
+						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c4; }
+						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c8;
+						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c4; }
+						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+2]) += c2; }
+					}
 				}
-				if ( W + 1 < _ui32Width && H + 1 < _ui32Height ) {
-					reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += (cError * (1.0 / 16.0));  // Bottom-right pixel
+				else if constexpr ( _uDither == SL2_D_SIERRA ) {
+					CPalette::CColor c2 = cError * (2.0 / 32.0);
+					CPalette::CColor c3 = cError * (3.0 / 32.0);
+					CPalette::CColor c4 = cError * (4.0 / 32.0);
+					CPalette::CColor c5 = cError * (5.0 / 32.0);
+					if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c5; }
+					if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c3; }
+
+					if ( H + 1 < _ui32Height ) {
+						if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-2]) += c2; }
+						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c4; }
+						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c5;
+						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c4; }
+						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+2]) += c2; }
+					}
+
+					if ( H + 2 < _ui32Height ) {
+						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width-1]) += c2; }
+						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width]) += c3;
+						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width+1]) += c2; }
+					}
+				}
+				else if constexpr ( _uDither == SL2_D_SIERRA_2 ) {
+					CPalette::CColor c1 = cError * (1.0 / 16.0);
+					CPalette::CColor c2 = cError * (2.0 / 16.0);
+					CPalette::CColor c3 = cError * (3.0 / 16.0);
+					CPalette::CColor c4 = cError * (4.0 / 16.0);
+					if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c4; }
+					if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c3; }
+
+					if ( H + 1 < _ui32Height ) {
+						if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-2]) += c1; }
+						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c2; }
+						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c3;
+						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c2; }
+						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+2]) += c1; }
+					}
+				}
+				else if constexpr ( _uDither == SL2_D_SIERRA_LITE ) {
+					CPalette::CColor c1 = cError * (1.0 / 4.0);
+					CPalette::CColor c2 = cError * (2.0 / 4.0);
+					if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c2; }
+
+					if ( H + 1 < _ui32Height ) {
+						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c1; }
+						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c1;
+					}
+				}
+				else if constexpr ( _uDither == SL2_D_ATKINSON ) {
+					CPalette::CColor c1 = cError * (1.0 / 8.0);
+					if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c1; }
+					if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c1; }
+
+					if ( H + 1 < _ui32Height ) {
+						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c1; }
+						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c1;
+						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c1; }
+					}
+
+					if ( H + 2 < _ui32Height ) {
+						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width]) += c1;
+					}
+				}
+
+				else {
+					if ( W + 1 < _ui32Width ) {
+						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += (cError * (7.0 / 16.0));				// Right pixel
+					}
+					if ( W > 0 && H + 1 < _ui32Height ) {
+						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += (cError * (3.0 / 16.0));	// Bottom-left pixel
+					}
+					if ( H + 1 < _ui32Height ) {
+						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += (cError * (5.0 / 16.0));		// Bottom pixel
+					}
+					if ( W + 1 < _ui32Width && H + 1 < _ui32Height ) {
+						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += (cError * (1.0 / 16.0));	// Bottom-right pixel
+					}
 				}
 
 				//if ( W + 1 < _ui32Width ) {
@@ -3095,15 +3233,63 @@ namespace sl2 {
 			if ( bDither ) {
 				// Copy to dithered RGB.
 				std::memcpy( vQuant.data(), prgbaSrc, vQuant.size() * sizeof( CFormat::SL2_RGBA64F ) );
-				FloydSteinbergDithering( vQuant.data(), _ui32Width, _ui32Height, piImage->Palette(), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()) );
+				switch ( m_dDither ) {
+					case SL2_D_ATKINSON : {
+						Dither<SL2_D_ATKINSON>( vQuant.data(), _ui32Width, _ui32Height, piImage->Palette(), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()) );
+						break;
+					}
+					case SL2_D_SIERRA_LITE : {
+						Dither<SL2_D_SIERRA_LITE>( vQuant.data(), _ui32Width, _ui32Height, piImage->Palette(), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()) );
+						break;
+					}
+					case SL2_D_SIERRA_2 : {
+						Dither<SL2_D_SIERRA_2>( vQuant.data(), _ui32Width, _ui32Height, piImage->Palette(), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()) );
+						break;
+					}
+					case SL2_D_SIERRA : {
+						Dither<SL2_D_SIERRA>( vQuant.data(), _ui32Width, _ui32Height, piImage->Palette(), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()) );
+						break;
+					}
+					case SL2_D_BURKES : {
+						Dither<SL2_D_BURKES>( vQuant.data(), _ui32Width, _ui32Height, piImage->Palette(), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()) );
+						break;
+					}
+					case SL2_D_STUCKI : {
+						Dither<SL2_D_STUCKI>( vQuant.data(), _ui32Width, _ui32Height, piImage->Palette(), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()) );
+						break;
+					}
+					case SL2_D_JARVIS_JUDICE_NINKE : {
+						Dither<SL2_D_JARVIS_JUDICE_NINKE>( vQuant.data(), _ui32Width, _ui32Height, piImage->Palette(), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()) );
+						break;
+					}
+					default : {
+						Dither<SL2_D_FLOYD_STEINBERG>( vQuant.data(), _ui32Width, _ui32Height, piImage->Palette(), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()) );
+					}
+				}
 				prgbaUseMe = vQuant.data();
 			}
 
 			// Convert this slice to LAB.
 			ispc::ispc_rgb2lab( reinterpret_cast<const ispc::ColorRGBA *>(prgbaUseMe), reinterpret_cast<ispc::ColorLABA *>(vLabBuffer.data()), uint64_t( _ui32Width ) * _ui32Height );
 			
+			bool bRet = true;
+			//CPalette::IndexedFromRgba64F_Thread<_tType, _uBits>( ptDst, 0, _ui32Height, _ui32Width, vLabBuffer, vPalette, piImage->Palette().Palette(), bRet );
+			size_t sNumThreads = std::thread::hardware_concurrency();  // Get number of cores
+			std::vector<std::thread> vThreads;
+			size_t sRowsPerThread = _ui32Height / sNumThreads;
 
-			for ( uint32_t H = 0; H < _ui32Height; ++H ) {
+			for ( size_t T = 0; T < sNumThreads; ++T ) {
+				size_t sStart = T * sRowsPerThread;
+				size_t sEnd = (T == sNumThreads - 1) ? _ui32Height : (T + 1) * sRowsPerThread;
+				vThreads.push_back( std::thread( (&CPalette::IndexedFromRgba64F_Thread<_tType, _uBits>), ptDst, uint32_t( sStart ), uint32_t( sEnd ), _ui32Width, vLabBuffer, vPalette, piImage->Palette().Palette(), T, std::ref( bRet ) ) );  // Pass core ID
+			}
+
+			for ( auto & tThis : vThreads ) {
+				tThis.join();
+			}
+			if ( !bRet ) { return false; }
+			
+			/*for ( uint32_t H = 0; H < _ui32Height; ++H ) {
 				for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 					size_t sIdx = size_t( H * _ui32Width + W );
 					size_t sWinner = piImage->Palette().Palette().size();
@@ -3119,7 +3305,7 @@ namespace sl2 {
 					if ( sWinner == piImage->Palette().Palette().size() ) { return false; }
 					ptDst[sIdx] = _tType( sWinner );
 				}
-			}
+			}*/
 
 			ptDst += _ui32Width * _ui32Height;
 			prgbaSrc += _ui32Width * _ui32Height;

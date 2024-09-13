@@ -925,7 +925,7 @@ namespace sl2 {
 			((_pkifFormat->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED && _pkifFormat->vfVulkanFormat == Format()->vfVulkanFormat) ||
 			(_pkifFormat->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN && _pkifFormat->dfDxFormat == Format()->dfDxFormat) ||
 			(_pkifFormat->mfMetalFormat != SL2_MTLPixelFormatInvalid && _pkifFormat->mfMetalFormat == Format()->mfMetalFormat) ||
-			((_pkifFormat->kifInternalFormat != SL2_KIF_GL_INVALID && _pkifFormat->kifInternalFormat == Format()->kifInternalFormat &&
+			((_pkifFormat->kifInternalFormat != SL2_GL_INVALID && _pkifFormat->kifInternalFormat == Format()->kifInternalFormat &&
 				_pkifFormat->kbifBaseInternalFormat != SL2_KBIF_GL_INVALID && _pkifFormat->kbifBaseInternalFormat == Format()->kbifBaseInternalFormat &&
 				_pkifFormat->ktType != SL2_KT_GL_INVALID && _pkifFormat->ktType == Format()->ktType))) ) {
 			if ( (m_rResample.ui32NewW == 0 || m_rResample.ui32NewW == _ui32Width) &&
@@ -1133,14 +1133,14 @@ namespace sl2 {
 		if ( !Palette().Format() ) {
 			bool bAlpha = m_bIgnoreAlpha ? false : AlphaIsFullyEqualTo( _pui8Buffer, 1.0, _ui64Total );
 			if ( bAlpha ) {
-				Palette().SetFormat( CFormat::FindPaletteFormatData( SL2_KIF_GL_PALETTE8_RGBA8_OES ) );
+				Palette().SetFormat( CFormat::FindPaletteFormatData( SL2_GL_PALETTE8_RGBA8_OES ) );
 			}
 			else {
-				Palette().SetFormat( CFormat::FindPaletteFormatData( SL2_KIF_GL_PALETTE8_RGB8_OES ) );
+				Palette().SetFormat( CFormat::FindPaletteFormatData( SL2_GL_PALETTE8_RGB8_OES ) );
 			}
 		}
 
-		//Palette().SetFormat( CFormat::FindPaletteFormatData( SL2_KIF_GL_PALETTE4_RGBA4_OES ) );
+		//Palette().SetFormat( CFormat::FindPaletteFormatData( SL2_GL_PALETTE4_RGBA4_OES ) );
 		if ( !Palette().Format() || !Palette().Format()->pfFromRgba64F ) { return false; }
 
 		// Create a quantized copy of the image.
@@ -1939,14 +1939,14 @@ namespace sl2 {
 		}
 
 		SL2_VKFORMAT vFormat = SL2_VK_FORMAT_UNDEFINED;
-		SL2_KTX_INTERNAL_FORMAT kifOglFormat = SL2_KIF_GL_INVALID;
+		SL2_KTX_INTERNAL_FORMAT kifOglFormat = SL2_GL_INVALID;
 		uint32_t ui32BytesPerPixel;
 		uint32_t ui32BytesPerPixelDst;
 		uint32_t ui32BitMask = 0x0;
 		switch ( lpbfhInfo->ui16BitsPerPixel ) {
 			case 1 : {
 				//vFormat = SL2_VK_FORMAT_R8G8B8_UNORM;
-				kifOglFormat = SL2_KIF_GL_COLOR_INDEX1_EXT;
+				kifOglFormat = SL2_GL_COLOR_INDEX1_EXT;
 				ui32BytesPerPixel = 1;
 				ui32BytesPerPixelDst = 3;
 				ui32BitMask = 0x1;
@@ -1954,14 +1954,14 @@ namespace sl2 {
 			}
 			case 4 : {
 				//vFormat = SL2_VK_FORMAT_R8G8B8_UNORM;
-				kifOglFormat = SL2_KIF_GL_COLOR_INDEX4_EXT;
+				kifOglFormat = SL2_GL_COLOR_INDEX4_EXT;
 				ui32BytesPerPixel = 4;
 				ui32BytesPerPixelDst = 3;
 				ui32BitMask = 0xF;
 				break;
 			}
 			case 8 : {
-				kifOglFormat = SL2_KIF_GL_COLOR_INDEX8_EXT;
+				kifOglFormat = SL2_GL_COLOR_INDEX8_EXT;
 				//vFormat = SL2_VK_FORMAT_R8G8B8_UNORM;
 				ui32BytesPerPixel = 8;
 				ui32BytesPerPixelDst = 3;
@@ -2001,7 +2001,7 @@ namespace sl2 {
 		}
 
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * pkiffFormat = CFormat::FindFormatDataByVulkan( vFormat );
-		if ( kifOglFormat != SL2_KIF_GL_INVALID ) {
+		if ( kifOglFormat != SL2_GL_INVALID ) {
 			pkiffFormat = CFormat::FindFormatDataByOgl( kifOglFormat );
 		}
 		else {
@@ -2014,7 +2014,7 @@ namespace sl2 {
 				if ( !AllocateTexture( pkiffFormat,
 					lpbfhInfo->ui32Width, ui32Height, 1,
 					1, 1, 1 ) ) { return SL2_E_OUTOFMEMORY; }
-				m_pPalette.SetFormat( CFormat::FindPaletteFormatData( SL2_KIF_GL_PALETTE8_RGB8_OES ) );
+				m_pPalette.SetFormat( CFormat::FindPaletteFormatData( SL2_GL_PALETTE8_RGB8_OES ) );
 
 				uint32_t ui32ActualOffset = lpbfhHeader->ui32Offset;
 
