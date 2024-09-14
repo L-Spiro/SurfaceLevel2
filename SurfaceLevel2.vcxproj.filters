@@ -468,6 +468,9 @@
     <ClInclude Include="Src\Image\SL2Dither.h">
       <Filter>Header Files\Image</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Image\SL2PaletteSet.h">
+      <Filter>Header Files\Image</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\SL2SurfaceLevel2.cpp">
@@ -849,6 +852,9 @@
       <Filter>Source Files\Image\Little-CMS\src</Filter>
     </ClCompile>
     <ClCompile Include="Src\Image\SL2Palette.cpp">
+      <Filter>Source Files\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Image\SL2PaletteSet.cpp">
       <Filter>Source Files\Image</Filter>
     </ClCompile>
   </ItemGroup>

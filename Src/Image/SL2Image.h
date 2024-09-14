@@ -21,6 +21,7 @@
 #include "SL2Formats.h"
 #include "SL2Kernel.h"
 #include "SL2Palette.h"
+#include "SL2PaletteSet.h"
 #include "SL2Surface.h"
 
 #include <cstdint>
@@ -561,7 +562,7 @@ namespace sl2 {
 		 * 
 		 * \return Returns a reference to the palette.
 		 **/
-		inline CPalette &									Palette() { return m_pPalette; }
+		inline CPalette &									Palette() { return m_pPalette.Palette(); }
 
 		/**
 		 * By default the old palette is kept if available.  A new palette is always generated if there is no old palette.
@@ -664,7 +665,7 @@ namespace sl2 {
 		uint32_t											m_ui32YuvW;								/**< The width of a YUV image. */
 		uint32_t											m_ui32YuvH;								/**< The height of a YUV image. */
 
-		CPalette											m_pPalette;								/**< The palette. */
+		CPaletteSet											m_pPalette;								/**< The palette. */
 		bool												m_bGenPalette;							/**< Generate a new palette? */
 
 

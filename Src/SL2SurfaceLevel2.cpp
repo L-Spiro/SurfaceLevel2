@@ -977,7 +977,6 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 }
                 SL2_ADV( 2 );
             }
-
             if ( SL2_CHECK( 1, norm ) || SL2_CHECK( 1, normalize ) ) {
                 oOptions.bNormalizeMips = true;
                 SL2_ADV( 1 );
@@ -990,7 +989,6 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.dNormalYAxis = -1.0;
                 SL2_ADV( 1 );
             }
-
             if ( SL2_CHECK( 1, n3x3 ) ) {
                 if ( !oOptions.kKernel.CreateSobel3x3() ) {
                     SL2_ERRORT( std::format( L"\"n3x3\": Out of memory allocating Sobel kernel." ).c_str(), sl2::SL2_E_OUTOFMEMORY );
@@ -1024,6 +1022,121 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 				oOptions.dNormalScale = ::_wtof( _wcpArgV[1] );
 				SL2_ADV( 2 );
 			}
+
+
+            if ( SL2_CHECK( 1, gen_pal ) || SL2_CHECK( 1, gen_palette ) ) {
+                oOptions.bGenNewPalatte = true;
+                SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 2, gen_pal_iterations ) ) {
+				sl2::CFormat::m_skMeansIterations = ::_wtoi( _wcpArgV[1] );
+                SL2_ADV( 2 );
+			}
+            if ( SL2_CHECK( 2, dither_error ) ) {
+				if ( ::_wcsicmp( _wcpArgV[1], L"floyd" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"floyd-steinburg" ) == 0 ) {
+                    sl2::CFormat::m_dDither = sl2::SL2_D_FLOYD_STEINBERG;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"jjn" ) == 0 ) {
+                    sl2::CFormat::m_dDither = sl2::SL2_D_JARVIS_JUDICE_NINKE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"stucki" ) == 0 ) {
+                    sl2::CFormat::m_dDither = sl2::SL2_D_STUCKI;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"burkes" ) == 0 ) {
+                    sl2::CFormat::m_dDither = sl2::SL2_D_BURKES;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"sierra" ) == 0 ) {
+                    sl2::CFormat::m_dDither = sl2::SL2_D_SIERRA;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"sierra2row" ) == 0 ) {
+                    sl2::CFormat::m_dDither = sl2::SL2_D_SIERRA_2;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"sierralite" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"sierra_lite" ) == 0 ) {
+                    sl2::CFormat::m_dDither = sl2::SL2_D_SIERRA_LITE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"atkinson" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"atk" ) == 0 ) {
+                    sl2::CFormat::m_dDither = sl2::SL2_D_ATKINSON;
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"dither_error\": \"{}\". Must be floyd, jjn, stucki, burkes, sierra, sierra2row, sierralite, or atkinson.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+			}
+            if ( SL2_CHECK( 5, dither_error_weight ) || SL2_CHECK( 5, dither_error_weights ) ) {
+				sl2::CFormat::m_vDitherFactor = sl2::CVector4<SL2_ST_RAW>( ::_wtof( _wcpArgV[1] ), ::_wtof( _wcpArgV[2] ), ::_wtof( _wcpArgV[3] ), ::_wtof( _wcpArgV[4] ) );
+                if ( sl2::CFormat::m_vDitherFactor.IsNan() ) {
+                    SL2_ERRORT( std::format( L"Invalid \"dither_error_weight\": \"{}\". Invalid paramater.  Must be <float> <float> <float> <float>.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+				SL2_ADV( 5 );
+            }
+            if ( SL2_CHECK( 1, dither_error_weight_full ) || SL2_CHECK( 1, dither_error_weight_100 ) ) {
+				sl2::CFormat::m_vDitherFactor = sl2::CVector4<SL2_ST_RAW>( 1.0, 1.0, 1.0, 1.0 );
+				SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, dither_error_weight_75 ) ) {
+				sl2::CFormat::m_vDitherFactor = sl2::CVector4<SL2_ST_RAW>( 0.75, 0.75, 0.75, 1.0 );
+				SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, dither_error_weight_half ) || SL2_CHECK( 1, dither_error_weight_50 ) ) {
+				sl2::CFormat::m_vDitherFactor = sl2::CVector4<SL2_ST_RAW>( 0.5, 0.5, 0.5, 1.0 );
+				SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 1, dither_error_weight_25 ) ) {
+				sl2::CFormat::m_vDitherFactor = sl2::CVector4<SL2_ST_RAW>( 0.25, 0.25, 0.25, 1.0 );
+				SL2_ADV( 1 );
+            }
+            if ( SL2_CHECK( 2, dither_error_weight_perceptual ) || SL2_CHECK( 2, dither_error_weight_perc ) ) {
+                if ( ::_wcsicmp( _wcpArgV[1], L"REC_709" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"REC709" ) == 0 ) {
+                    sl2::CFormat::m_vDitherFactor = sl2::CVector4<SL2_ST_RAW>(
+                        sl2::CFormat::Luma( sl2::SL2_LS_REC_709 ).dRgb[0],
+                        sl2::CFormat::Luma( sl2::SL2_LS_REC_709 ).dRgb[1],
+                        sl2::CFormat::Luma( sl2::SL2_LS_REC_709 ).dRgb[2], 1.0 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"REC_2020" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"REC2020" ) == 0 ) {
+                    sl2::CFormat::m_vDitherFactor = sl2::CVector4<SL2_ST_RAW>(
+                        sl2::CFormat::Luma( sl2::SL2_LS_REC_2020 ).dRgb[0],
+                        sl2::CFormat::Luma( sl2::SL2_LS_REC_2020 ).dRgb[1],
+                        sl2::CFormat::Luma( sl2::SL2_LS_REC_2020 ).dRgb[2], 1.0 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"SMPTC" ) == 0 ) {
+                    sl2::CFormat::m_vDitherFactor = sl2::CVector4<SL2_ST_RAW>(
+                        sl2::CFormat::Luma( sl2::SL2_LS_SMPTC ).dRgb[0],
+                        sl2::CFormat::Luma( sl2::SL2_LS_SMPTC ).dRgb[1],
+                        sl2::CFormat::Luma( sl2::SL2_LS_SMPTC ).dRgb[2], 1.0 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"REC_601" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"REC601" ) == 0 ) {
+                    sl2::CFormat::m_vDitherFactor = sl2::CVector4<SL2_ST_RAW>(
+                        sl2::CFormat::Luma( sl2::SL2_LS_REC_601 ).dRgb[0],
+                        sl2::CFormat::Luma( sl2::SL2_LS_REC_601 ).dRgb[1],
+                        sl2::CFormat::Luma( sl2::SL2_LS_REC_601 ).dRgb[2], 1.0 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"CIE_1931" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"CIE1931" ) == 0 ) {
+                    sl2::CFormat::m_vDitherFactor = sl2::CVector4<SL2_ST_RAW>(
+                        sl2::CFormat::Luma( sl2::SL2_LS_CIE_1931 ).dRgb[0],
+                        sl2::CFormat::Luma( sl2::SL2_LS_CIE_1931 ).dRgb[1],
+                        sl2::CFormat::Luma( sl2::SL2_LS_CIE_1931 ).dRgb[2], 1.0 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"NTSC_1953" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"NTSC1953" ) == 0 ) {
+                    sl2::CFormat::m_vDitherFactor = sl2::CVector4<SL2_ST_RAW>(
+                        sl2::CFormat::Luma( sl2::SL2_LS_NTSC_1953 ).dRgb[0],
+                        sl2::CFormat::Luma( sl2::SL2_LS_NTSC_1953 ).dRgb[1],
+                        sl2::CFormat::Luma( sl2::SL2_LS_NTSC_1953 ).dRgb[2], 1.0 );
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"EBU_TECH_3213" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"EBUTECH3213" ) == 0 ) {
+                    sl2::CFormat::m_vDitherFactor = sl2::CVector4<SL2_ST_RAW>(
+                        sl2::CFormat::Luma( sl2::SL2_LS_EBU_TECH_3213 ).dRgb[0],
+                        sl2::CFormat::Luma( sl2::SL2_LS_EBU_TECH_3213 ).dRgb[1],
+                        sl2::CFormat::Luma( sl2::SL2_LS_EBU_TECH_3213 ).dRgb[2], 1.0 );
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"dither_error_weight_perceptual\": \"{}\". Must be REC_709, REC_2020, SMPTC, REC_601, CIE_1931, NTSC_1953, or EBU_TECH_3213.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
+            
 
 
             
@@ -1924,7 +2037,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 			::printf( "Conversion time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
 		}
         cClock.SetStartingTick();
-#define SL2_CHECKEXT( EXT )     ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( oOptions.vOutputs[I] ).c_str()), L ## #EXT ) == 0
+#define SL2_CHECKEXT( EXT )     sl2::CFileBase::CmpFileExtension( oOptions.vOutputs[I], u ## #EXT )
         if ( SL2_CHECKEXT( png ) ) {
             eError = sl2::ExportAsPng( iConverted, oOptions.vOutputs[I], oOptions );
             if ( sl2::SL2_E_SUCCESS != eError ) {

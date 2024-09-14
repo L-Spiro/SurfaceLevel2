@@ -699,8 +699,7 @@ namespace sl2 {
 		}
 
 		// Back up our palette.
-		CPalette pTmp;
-		pTmp = Palette();
+		auto pTmp = m_pPalette;
 		if ( SL2_GET_IDX_FLAG( _pkifFormat->ui32Flags ) ) {
 			// Converting to an indexed format?  May need to generate a palette.
 			size_t sMax = size_t( 1ULL << _pkifFormat->ui32BlockSizeInBits );
@@ -1166,7 +1165,8 @@ namespace sl2 {
 
 
 		return Palette().GenPalette_kMeans( reinterpret_cast<const CPalette::CColor *>(vQuant.data()), vQuant.size(),
-			_ui32PalTotal, _ui32PalTotal );
+			_ui32PalTotal,
+			(CFormat::m_skMeansIterations == ~size_t( 0 )) ? _ui32PalTotal : CFormat::m_skMeansIterations );
 	}
 
 	/**
@@ -2014,7 +2014,7 @@ namespace sl2 {
 				if ( !AllocateTexture( pkiffFormat,
 					lpbfhInfo->ui32Width, ui32Height, 1,
 					1, 1, 1 ) ) { return SL2_E_OUTOFMEMORY; }
-				m_pPalette.SetFormat( CFormat::FindPaletteFormatData( SL2_GL_PALETTE8_RGB8_OES ) );
+				Palette().SetFormat( CFormat::FindPaletteFormatData( SL2_GL_PALETTE8_RGB8_OES ) );
 
 				uint32_t ui32ActualOffset = lpbfhHeader->ui32Offset;
 

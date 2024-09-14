@@ -82,6 +82,8 @@ namespace sl2 {
 		double															dNormalYAxis = 1.0;												/**< Normal map Y axis.  1.0 for OpenGL, -1.0 for DirectX. */
 		bool															bNormalizeMips = false;											/**< If mipmaps should be normalized or not. */
 
+		bool															bGenNewPalatte = false;											/**< Generate a new palette (applies only when there is an existing palette. */
+
 		int																iPngSaveOption = PNG_Z_DEFAULT_COMPRESSION;						/**< Option for saving as PNG. */
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *					pkifdPngFormat = nullptr;										/**< The PNG format. */
 

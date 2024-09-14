@@ -515,6 +515,27 @@ namespace sl2 {
 		}
 
 		/**
+		 * Are any of the components NaN?
+		 * 
+		 * \return Returns true if any of the components are NaN.
+		 **/
+		inline bool												IsNan() const {
+#ifdef __AVX__
+			if constexpr ( SL2_ST_AVX <= _uSimd ) {
+				__m256d vElements = _mm256_load_pd( m_dElements );
+				// Compare each element with itself to check for NaN (NaN is not equal to itself).
+				__m256d vResult = _mm256_cmp_pd( vElements, vElements, _CMP_UNORD_Q );
+				// Move the result mask to integer and check if any comparison returned true (NaN detected).
+				return (_mm256_movemask_pd( vResult ) != 0);
+			}
+#endif	// #ifdef __AVX__
+			return std::isnan( m_dElements[0] ) ||
+				std::isnan( m_dElements[1] ) ||
+				std::isnan( m_dElements[2] ) ||
+				std::isnan( m_dElements[3] );
+		}
+
+		/**
 		 * Sets the vector to 0.
 		 **/
 		inline CVector4<_uSimd>									Zero() {

@@ -173,6 +173,18 @@ namespace sl2 {
 	}
 
 	/**
+	 * Compares the extention from a given file path to a given extension string.
+	 * 
+	 * \param _s16Path The file path whose extension is to be checked.
+	 * \param _pcExt The extension to check for being in _s16Path.
+	 * \return Returns true if the given file path's extension matches _pcExt.
+	 **/
+	bool CFileBase::CmpFileExtension( const std::u16string &_s16Path, const char16_t * _pcExt ) {
+		return ::_wcsicmp( reinterpret_cast<const wchar_t *>(sl2::CFileBase::GetFileExtension( _s16Path ).c_str()),
+			reinterpret_cast<const wchar_t *>(_pcExt) ) == 0;
+	}
+
+	/**
 	 * Removes the extension from a file path.
 	 *
 	 * \param _s16Path The file path whose extension is to be removed.

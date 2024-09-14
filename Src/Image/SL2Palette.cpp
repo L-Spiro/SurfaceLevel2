@@ -19,12 +19,84 @@ namespace sl2 {
 
 	// == Functions.
 	/**
+	 * Loads a PAL file from memory.
+	 *
+	 * \param _sFile File to load.
+	 * \param _sFileName The name of the loaded file.
+	 * \return Returns true if the file was successfully loaded.  False indicates an invalid file or lack of RAM.
+	 */
+	bool CPalette::LoadPal( const CStream &_sFile, const std::u16string &_sFileName ) {
+		SL2_PAL_HEADER phHeader;
+		if ( !_sFile.Read( phHeader ) ) { return false; }
+		if ( phHeader.ui32Riff != 0x46464952 ) { return false; }	// RIFF.
+		if ( phHeader.ui64PalData != 0x61746164204C4150ULL ) { return false; }	// PAL data.
+		if ( phHeader.ui8Reserved[0] != 0 || phHeader.ui8Reserved[1] != 3 ) { return false; }
+		
+		//if ( !m_paPalette.Resize( phHeader.ui16PalEntries ) ) { return false; }
+		uint32_t ui32Total = phHeader.ui16PalEntries;
+		for ( uint32_t I = 0; I < ui32Total; ++I ) {
+			SL2_PALETTE_ENTRY peEntry;
+			if ( !_sFile.Read( peEntry ) ) { return false; }
+			try {
+				m_pPalette.push_back( CColor( peEntry.perRgba.ui8R / 255.0,
+					peEntry.perRgba.ui8G / 255.0,
+					peEntry.perRgba.ui8B / 255.0,
+					peEntry.perRgba.ui8A / 255.0 ) );
+			}
+			catch ( ... ) { return false; }
+		}
+
+		if ( _sFile.Remaining() >= sizeof( uint32_t ) ) {
+			if ( !_sFile.ReadUi32( m_ui32Id ) ) { return false; }
+		}
+
+		m_sFilePath = _sFileName;
+		return true;
+	}
+
+	/**
+	 * Loads a PPL file from memory.
+	 *
+	 * \param _sFile The in-memory image of the file.  This points only to the palette data and the ID/type that follow it.  On return,
+	 *	this is adjusted to the end of the palette/ID/type data to the start of the next palette for the database to load.
+	 * \param _sFileName The name of the loaded file.
+	 * \return Returns true if the file was successfully loaded.  False indicates an invalid file or lack of RAM.
+	 */
+	bool CPalette::LoadPpl( const CStream &_sFile, const std::u16string &_sFileName ) {
+		for ( uint32_t I = 0; I < 256; ++I ) {
+			SL2_PALETTE_ENTRY peEntry;
+			if ( !_sFile.Read( peEntry ) ) { return false; }
+			try {
+				m_pPalette.push_back( CColor( peEntry.perRgba.ui8R / 255.0,
+					peEntry.perRgba.ui8G / 255.0,
+					peEntry.perRgba.ui8B / 255.0,
+					peEntry.perRgba.ui8A / 255.0 ) );
+			}
+			catch ( ... ) { return false; }
+		}
+
+		if ( _sFile.Remaining() >= sizeof( uint32_t ) ) {
+			if ( !_sFile.ReadUi32( m_ui32Id ) ) { return false; }
+		}
+		if ( _sFile.Remaining() >= sizeof( uint32_t ) ) {
+			if ( !_sFile.ReadUi32( m_ui32Data ) ) { return false; }
+		}
+
+
+		m_sFilePath = _sFileName;
+		return true;
+	}
+
+	/**
 	 * Resets the palette back to scratch.
 	 **/
 	void CPalette::Reset() {
 		m_pPalette.clear();
 		m_pPalette = CPal();
 		m_pkifFormat = nullptr;
+
+		m_ui32Id = ~uint32_t( 0 );
+		m_sFilePath = std::u16string();
 	}
 
 	/**

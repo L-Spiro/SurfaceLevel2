@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "../Utilities/SL2Stream.h"
 #include "../Utilities/SL2Vector4.h"
 #include "SL2Formats.h"
 
@@ -17,7 +18,7 @@
 namespace sl2 {
 
 	/**
-	 * Class CImage
+	 * Class CPalette
 	 * \brief A palette and palette functionality.
 	 *
 	 * Description: A palette and palette functionality.
@@ -35,8 +36,64 @@ namespace sl2 {
 		/** The palette. */
 		typedef std::vector<CColor>							CPal;
 
+		/** A PAL header. */
+		struct SL2_PAL_HEADER {
+#pragma pack( push, 1 )
+			uint32_t										ui32Riff;								/**< "RIFF". */
+			uint32_t										ui32FileSize;							/**< The file size - 8. */
+
+			uint64_t										ui64PalData;							/**< "PAL data". */
+			uint32_t										ui32DataSize;							/**< The file size - 20. */
+
+			uint8_t											ui8Reserved[2];							/**< [0, 3]. */
+			uint16_t										ui16PalEntries;							/**< The number of palette entries. */
+#pragma pack( pop )
+		};
+
+		/** A palette color entry. */
+		struct SL2_PAL_ENTRY_RGBA {
+#pragma pack( push, 1 )
+			uint8_t											ui8R;									/**< The red component. */
+			uint8_t											ui8G;									/**< The green component. */
+			uint8_t											ui8B;									/**< The blue component. */
+			uint8_t											ui8A;									/**< The alpha component. */
+#pragma pack( pop )
+		};
+
+		/** A palette entry. */
+		union SL2_PALETTE_ENTRY {
+			SL2_PAL_ENTRY_RGBA								perRgba;								/**< The RGBA color value. */
+			uint8_t											ui8Vals[4];								/**< Array access into the RGBA values. 0 = red, 3 = alpha. */
+		};
+
 
 		// == Functions.
+		/**
+		 * Loads a PAL file from memory.
+		 *
+		 * \param _sFile File to load.
+		 * \param _sFileName The name of the loaded file.
+		 * \return Returns true if the file was successfully loaded.  False indicates an invalid file or lack of RAM.
+		 */
+		bool												LoadPal( const CStream &_sFile, const std::u16string &_sFileName );
+
+		/**
+		 * Loads a PPL file from memory.
+		 *
+		 * \param _sFile The in-memory image of the file.  This points only to the palette data and the ID/type that follow it.  On return,
+		 *	this is adjusted to the end of the palette/ID/type data to the start of the next palette for the database to load.
+		 * \param _sFileName The name of the loaded file.
+		 * \return Returns true if the file was successfully loaded.  False indicates an invalid file or lack of RAM.
+		 */
+		bool												LoadPpl( const CStream &_sFile, const std::u16string &_sFileName );
+
+		/**
+		 * Gets the ID.
+		 * 
+		 * \return Returns the palette ID.
+		 **/
+		inline uint32_t										Id() const;
+
 		/**
 		 * Appends a color to the palette.
 		 * 
@@ -98,6 +155,13 @@ namespace sl2 {
 		bool												GenPalette_kMeans( const CColor * _pcColors, size_t _sColorsSize, uint32_t _ui32Size, size_t _sIterations = 10 );
 
 		/**
+		 * Gets the loaded file path.
+		 * 
+		 * \return Returns a reference to the path string.
+		 **/
+		const std::u16string &								Path() const { return m_sFilePath; }
+
+		/**
 		 * RGBA32F -> Indexed conversion (worker thread).
 		 * 
 		 * \param _ptDst The destination image.
@@ -138,6 +202,9 @@ namespace sl2 {
 	protected :
 		CPal												m_pPalette;								/**< The actual palette. */
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *		m_pkifFormat = nullptr;					/**< The palette format. */
+		uint32_t											m_ui32Id = ~uint32_t( 0 );				/**< The ID of the palette. */
+		std::u16string										m_sFilePath;							/**< Path to the loaded file. */
+		uint32_t											m_ui32Data = 0;							/**< Custom data associated with the palette. */
 
 
 		// == Functions.
@@ -203,6 +270,13 @@ namespace sl2 {
 	// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 	// == Functions.
 	/**
+	 * Gets the ID.
+	 * 
+	 * \return Returns the palette ID.
+	 **/
+	inline uint32_t CPalette::Id() const { return m_ui32Id; }
+
+	/**
 	 * Appends a color to the palette.
 	 * 
 	 * \param _cColor The color to add.
@@ -221,9 +295,7 @@ namespace sl2 {
 	 * 
 	 * \param _pkifdFormat The format of the palette.
 	 **/
-	inline void CPalette::SetFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifdFormat ) {
-		m_pkifFormat = _pkifdFormat;
-	}
+	inline void CPalette::SetFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifdFormat ) { m_pkifFormat = _pkifdFormat; }
 
 	/**
 	 * Gets the palette format.

@@ -90,6 +90,7 @@
     <ClInclude Include="Src\Image\SL2Kernel.h" />
     <ClInclude Include="Src\Image\SL2KtxTexture.h" />
     <ClInclude Include="Src\Image\SL2Palette.h" />
+    <ClInclude Include="Src\Image\SL2PaletteSet.h" />
     <ClInclude Include="Src\Image\SL2Surface.h" />
     <ClInclude Include="Src\Image\SL2TextureAddressing.h" />
     <ClInclude Include="Src\Image\Squish\alpha.h" />
@@ -240,6 +241,7 @@
     <ClCompile Include="Src\Image\SL2Image.cpp" />
     <ClCompile Include="Src\Image\SL2Kernel.cpp" />
     <ClCompile Include="Src\Image\SL2Palette.cpp" />
+    <ClCompile Include="Src\Image\SL2PaletteSet.cpp" />
     <ClCompile Include="Src\Image\SL2Surface.cpp" />
     <ClCompile Include="Src\Image\SL2TextureAddressing.cpp" />
     <ClCompile Include="Src\Image\Squish\alpha.cpp" />

@@ -2393,6 +2393,9 @@ namespace sl2 {
 		/** Dithering factor. */
 		static CVector4<SL2_ST_RAW>													m_vDitherFactor;
 
+		/** K-Means iteration count. */
+		static size_t																m_skMeansIterations;
+
 	protected :
 		// == Types.
 		/** A block of texels for DDS encoding. */

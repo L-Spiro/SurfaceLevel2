@@ -648,6 +648,9 @@ namespace sl2 {
 	/** Dithering factor. */
 	CVector4<SL2_ST_RAW> CFormat::m_vDitherFactor = CVector4<SL2_ST_RAW>( 0.925, 0.925, 0.925, 1.0 );
 
+	/** K-Means iteration count. */
+	size_t CFormat::m_skMeansIterations = ~size_t( 0 );
+
 	/** Whether to use NVIDA's decoding of block formats or not. */
 	bool CFormat::m_bUseNVidiaDecode = true;
 

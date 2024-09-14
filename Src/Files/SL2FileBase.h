@@ -115,6 +115,15 @@ namespace sl2 {
 		static std::u16string								GetFileExtension( const std::u16string &_s16Path );
 
 		/**
+		 * Compares the extention from a given file path to a given extension string.
+		 * 
+		 * \param _s16Path The file path whose extension is to be checked.
+		 * \param _pcExt The extension to check for being in _s16Path.
+		 * \return Returns true if the given file path's extension matches _pcExt.
+		 **/
+		static bool											CmpFileExtension( const std::u16string &_s16Path, const char16_t * _pcExt );
+
+		/**
 		 * Removes the extension from a file path.
 		 *
 		 * \param _s16Path The file path whose extension is to be removed.
