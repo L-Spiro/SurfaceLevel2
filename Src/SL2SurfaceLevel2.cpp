@@ -1032,7 +1032,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 				sl2::CFormat::m_skMeansIterations = ::_wtoi( _wcpArgV[1] );
                 SL2_ADV( 2 );
 			}
-            if ( SL2_CHECK( 2, dither_error ) ) {
+            if ( SL2_CHECK( 2, pal_dither ) ) {
 				if ( ::_wcsicmp( _wcpArgV[1], L"floyd" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"floyd-steinburg" ) == 0 ) {
                     sl2::CFormat::m_dDither = sl2::SL2_D_FLOYD_STEINBERG;
                 }
@@ -1057,8 +1057,14 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 else if ( ::_wcsicmp( _wcpArgV[1], L"atkinson" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"atk" ) == 0 ) {
                     sl2::CFormat::m_dDither = sl2::SL2_D_ATKINSON;
                 }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"bayer4" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bayer4x4" ) == 0 ) {
+                    sl2::CFormat::m_dDither = sl2::SL2_D_BAYER_4X4;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"bayer8" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bayer8x8" ) == 0 ) {
+                    sl2::CFormat::m_dDither = sl2::SL2_D_BAYER_8X8;
+                }
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"dither_error\": \"{}\". Must be floyd, jjn, stucki, burkes, sierra, sierra2row, sierralite, or atkinson.",
+                    SL2_ERRORT( std::format( L"Invalid \"pal_dither\": \"{}\". Must be floyd, jjn, stucki, burkes, sierra, sierra2row, sierralite, atkinson, bayer4 or bayer8.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 SL2_ADV( 2 );

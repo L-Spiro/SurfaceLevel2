@@ -22,6 +22,9 @@ namespace sl2 {
 		SL2_D_SIERRA_2,
 		SL2_D_SIERRA_LITE,
 		SL2_D_ATKINSON,
+
+		SL2_D_BAYER_4X4,
+		SL2_D_BAYER_8X8,
 	};
 
 }	// namespace sl2

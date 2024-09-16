@@ -86,6 +86,7 @@ namespace sl2 {
 	 * \return Returns true if the file was loaded.
 	 **/
 	bool CPaletteSet::LoadPaletteFromFile( const CStream &_sFile, CPalette &_pPal ) {
+		return true;
 	}
 
 }	// namespace sl2

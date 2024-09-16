@@ -643,7 +643,7 @@ namespace sl2 {
 	CFormat::SL2_YUV_CONVERSION_OPTIONS CFormat::m_ycoRgbToYuv;
 
 	/** Dithering mode. */
-	SL2_DITHER CFormat::m_dDither = SL2_D_BURKES;
+	SL2_DITHER CFormat::m_dDither = SL2_D_FLOYD_STEINBERG;
 
 	/** Dithering factor. */
 	CVector4<SL2_ST_RAW> CFormat::m_vDitherFactor = CVector4<SL2_ST_RAW>( 0.925, 0.925, 0.925, 1.0 );
@@ -2120,216 +2120,231 @@ namespace sl2 {
 	 **/
 	template <unsigned _uDither>
 	bool CFormat::Dither( SL2_RGBA64F * _prgbaColors, uint32_t _ui32Width, uint32_t _ui32Height, const CPalette &_pPalette, const ispc::ColorLABA * _pclLabPal ) {
-		/*CPalette::CColor cWeights( m_lCurCoeffs.dRgb[0], m_lCurCoeffs.dRgb[1], m_lCurCoeffs.dRgb[2], 0.0 );
-		cWeights = cWeights.Normalize();
-		cWeights.m_dElements[3] = 1.0;
-		cWeights = CPalette::CColor( 0.925, 0.925, 0.925, 0.925 );*/
-		//cWeights = CPalette::CColor( 1.0, 1.0, 1.0, 1.0 );
+		static const double dBayer4[4][4] = {
+			{  0.0 / 16.0,  8.0 / 16.0,  2.0 / 16.0, 10.0 / 16.0 },
+			{ 12.0 / 16.0,  4.0 / 16.0, 14.0 / 16.0,  6.0 / 16.0 },
+			{  3.0 / 16.0, 11.0 / 16.0,  1.0 / 16.0,  9.0 / 16.0 },
+			{ 15.0 / 16.0,  7.0 / 16.0, 13.0 / 16.0,  5.0 / 16.0 }
+		};
+		static const double dBayer8[8][8] = {
+			{  0.0 / 64.0, 48.0 / 64.0, 12.0 / 64.0, 60.0 / 64.0,  3.0 / 64.0, 51.0 / 64.0, 15.0 / 64.0, 63.0 / 64.0 },
+			{ 32.0 / 64.0, 16.0 / 64.0, 44.0 / 64.0, 28.0 / 64.0, 35.0 / 64.0, 19.0 / 64.0, 47.0 / 64.0, 31.0 / 64.0 },
+			{  8.0 / 64.0, 56.0 / 64.0,  4.0 / 64.0, 52.0 / 64.0, 11.0 / 64.0, 59.0 / 64.0,  7.0 / 64.0, 55.0 / 64.0 },
+			{ 40.0 / 64.0, 24.0 / 64.0, 36.0 / 64.0, 20.0 / 64.0, 43.0 / 64.0, 27.0 / 64.0, 39.0 / 64.0, 23.0 / 64.0 },
+			{  2.0 / 64.0, 50.0 / 64.0, 14.0 / 64.0, 62.0 / 64.0,  1.0 / 64.0, 49.0 / 64.0, 13.0 / 64.0, 61.0 / 64.0 },
+			{ 34.0 / 64.0, 18.0 / 64.0, 46.0 / 64.0, 30.0 / 64.0, 33.0 / 64.0, 17.0 / 64.0, 45.0 / 64.0, 29.0 / 64.0 },
+			{ 10.0 / 64.0, 58.0 / 64.0,  6.0 / 64.0, 54.0 / 64.0,  9.0 / 64.0, 57.0 / 64.0,  5.0 / 64.0, 53.0 / 64.0 },
+			{ 42.0 / 64.0, 26.0 / 64.0, 38.0 / 64.0, 22.0 / 64.0, 41.0 / 64.0, 25.0 / 64.0, 37.0 / 64.0, 21.0 / 64.0 }
+		};
+		CPalette::CColor cWeight( 0.212639005871510, 0.715168678767756, 0.072192315360734, 0.0 );
+		//cWeight = cWeight.Normalize();
+		//const double * pdMatrix = dBayer4;
 		CPalette::CColor cWeights( m_vDitherFactor );
 		for ( uint32_t H = 0; H < _ui32Height; ++H ) {
 			for ( uint32_t W = 0; W < _ui32Width; ++W ) {
 				size_t sIdx = size_t( H * _ui32Width + W );
 
-				/*CPalette::CColor cTmp = reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx]).Clamp( 0.0, 1.0 );
-				SL2_RGBA64F rgbaOld = reinterpret_cast<SL2_RGBA64F &>(cTmp);//_prgbaColors[sIdx];*/
-				SL2_RGBA64F rgbaOld = _prgbaColors[sIdx];
-				constexpr bool bUseAdvanced = false;
-				ispc::ColorLABA clLab;
-				/*if ( reinterpret_cast<CPalette::CColor &>(rgbaOld).Min() < 0.0 || reinterpret_cast<CPalette::CColor &>(rgbaOld).Max() > 1.0 ) {
-					bUseAdvanced = false;
+				if constexpr ( _uDither == SL2_D_BAYER_4X4 ) {
+					double dThresh = (dBayer4[W&3][H&3] - 0.5) * 1.0 / 32.0;
+
+					reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx]) = (reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx]) + (cWeight * dThresh)).Clamp( 0.0, 1.0 );
 				}
-				
-				if ( bUseAdvanced ) {
-					ispc::ispc_rgb2lab_single( (*reinterpret_cast<const ispc::ColorRGBA *>(&rgbaOld)), clLab );
-				}*/
-				/*ispc::ColorRGBA crRgba;
-				ispc::ispc_lab2rgb_single( clLab, crRgba );*/
-				//if ( reinterpret_cast<CPalette::CColor &>(rgbaOld).Min() < 0.0 || reinterpret_cast<CPalette::CColor &>(rgbaOld).Max() > 1.0 ) {
-					/*volatile double dDst = CPalette::CColor::EuclideanDistanceSq( reinterpret_cast<CPalette::CColor &>(rgbaOld), reinterpret_cast<CPalette::CColor &>(crRgba) );
-					if ( dDst >= 0.1 ) {
-						return false;
-					}*/
-				//}
+				else if constexpr ( _uDither == SL2_D_BAYER_8X8 ) {
+					double dThresh = (dBayer8[W&7][H&7] - 0.5) * (1.0 / 32.0);
 
-				size_t sWinner = _pPalette.Palette().size();
-				double dDist = std::numeric_limits<double>::infinity();
-				for ( auto I = _pPalette.Palette().size(); I--; ) {
-					double dThisDist;
-					if ( bUseAdvanced ) {
-						dThisDist = ispc::ispc_deltaE_CIEDE2000( clLab.l, clLab.a, clLab.b, clLab.alpha,
-							_pclLabPal[I].l, _pclLabPal[I].a, _pclLabPal[I].b, _pclLabPal[I].alpha );
-					}
-					else {
-						dThisDist = CPalette::CColor::EuclideanDistanceSq( reinterpret_cast<CPalette::CColor &>(rgbaOld), _pPalette.Palette()[I] );
-					}
-					/*double dThisDist = ispc::ispc_deltaE_CIEDE2000( clLab.l, clLab.a, clLab.b, clLab.alpha,
-						_pclLabPal[I].l, _pclLabPal[I].a, _pclLabPal[I].b, _pclLabPal[I].alpha );*/
-					if ( dThisDist <= dDist ) {
-						dDist = dThisDist;
-						sWinner = I;
-					}
+					reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx]) = (reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx]) + (cWeight * dThresh)).Clamp( 0.0, 1.0 );
+					/*reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx]) = (reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx]) + CPalette::CColor(
+						dThresh * 0.212639005871510, dThresh * 0.715168678767756, dThresh * 0.072192315360734, 0.0 )).Clamp( 0.0, 1.0 );*/
 				}
-
-				_prgbaColors[sIdx] = (*reinterpret_cast<const SL2_RGBA64F *>(&_pPalette.Palette()[sWinner]));
-				CPalette::CColor cError = reinterpret_cast<CPalette::CColor &>(rgbaOld) - reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx]);
-				cError = cError * cWeights;
-
-				if constexpr ( _uDither == SL2_D_JARVIS_JUDICE_NINKE ) {
-					CPalette::CColor c1 = cError * (1.0 / 48.0);
-					CPalette::CColor c3 = cError * (3.0 / 48.0);
-					CPalette::CColor c5 = cError * (5.0 / 48.0);
-					CPalette::CColor c7 = cError * (7.0 / 48.0);
-					if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c7; }
-					if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c5; }
-
-					if ( H + 1 < _ui32Height ) {
-						if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-2]) += c3; }
-						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c5; }
-						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c7;
-						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c5; }
-						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+2]) += c3; }
-					}
-
-					if ( H + 2 < _ui32Height ) {
-						if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width-2]) += c1; }
-						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width-1]) += c3; }
-						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width]) += c5;
-						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width+1]) += c3; }
-						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width+2]) += c1; }
-					}
-				}
-				else if constexpr ( _uDither == SL2_D_STUCKI ) {
-					CPalette::CColor c1 = cError * (1.0 / 42.0);
-					CPalette::CColor c2 = cError * (2.0 / 42.0);
-					CPalette::CColor c4 = cError * (4.0 / 42.0);
-					CPalette::CColor c8 = cError * (8.0 / 42.0);
-					if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c8; }
-					if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c4; }
-
-					if ( H + 1 < _ui32Height ) {
-						if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-2]) += c2; }
-						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c4; }
-						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c8;
-						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c4; }
-						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+2]) += c2; }
-					}
-
-					if ( H + 2 < _ui32Height ) {
-						if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width-2]) += c1; }
-						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width-1]) += c2; }
-						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width]) += c4;
-						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width+1]) += c2; }
-						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width+2]) += c1; }
-					}
-				}
-				else if constexpr ( _uDither == SL2_D_BURKES ) {
-					CPalette::CColor c1 = cError * (1.0 / 32.0);
-					CPalette::CColor c2 = cError * (2.0 / 32.0);
-					CPalette::CColor c4 = cError * (4.0 / 32.0);
-					CPalette::CColor c8 = cError * (8.0 / 32.0);
-					if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c8; }
-					if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c4; }
-
-					if ( H + 1 < _ui32Height ) {
-						if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-2]) += c2; }
-						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c4; }
-						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c8;
-						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c4; }
-						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+2]) += c2; }
-					}
-				}
-				else if constexpr ( _uDither == SL2_D_SIERRA ) {
-					CPalette::CColor c2 = cError * (2.0 / 32.0);
-					CPalette::CColor c3 = cError * (3.0 / 32.0);
-					CPalette::CColor c4 = cError * (4.0 / 32.0);
-					CPalette::CColor c5 = cError * (5.0 / 32.0);
-					if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c5; }
-					if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c3; }
-
-					if ( H + 1 < _ui32Height ) {
-						if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-2]) += c2; }
-						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c4; }
-						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c5;
-						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c4; }
-						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+2]) += c2; }
-					}
-
-					if ( H + 2 < _ui32Height ) {
-						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width-1]) += c2; }
-						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width]) += c3;
-						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width+1]) += c2; }
-					}
-				}
-				else if constexpr ( _uDither == SL2_D_SIERRA_2 ) {
-					CPalette::CColor c1 = cError * (1.0 / 16.0);
-					CPalette::CColor c2 = cError * (2.0 / 16.0);
-					CPalette::CColor c3 = cError * (3.0 / 16.0);
-					CPalette::CColor c4 = cError * (4.0 / 16.0);
-					if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c4; }
-					if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c3; }
-
-					if ( H + 1 < _ui32Height ) {
-						if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-2]) += c1; }
-						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c2; }
-						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c3;
-						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c2; }
-						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+2]) += c1; }
-					}
-				}
-				else if constexpr ( _uDither == SL2_D_SIERRA_LITE ) {
-					CPalette::CColor c1 = cError * (1.0 / 4.0);
-					CPalette::CColor c2 = cError * (2.0 / 4.0);
-					if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c2; }
-
-					if ( H + 1 < _ui32Height ) {
-						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c1; }
-						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c1;
-					}
-				}
-				else if constexpr ( _uDither == SL2_D_ATKINSON ) {
-					CPalette::CColor c1 = cError * (1.0 / 8.0);
-					if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c1; }
-					if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c1; }
-
-					if ( H + 1 < _ui32Height ) {
-						if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c1; }
-						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c1;
-						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c1; }
-					}
-
-					if ( H + 2 < _ui32Height ) {
-						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width]) += c1;
-					}
-				}
-
 				else {
-					if ( W + 1 < _ui32Width ) {
-						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += (cError * (7.0 / 16.0));				// Right pixel
+
+					/*CPalette::CColor cTmp = reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx]).Clamp( 0.0, 1.0 );
+					SL2_RGBA64F rgbaOld = reinterpret_cast<SL2_RGBA64F &>(cTmp);//_prgbaColors[sIdx];*/
+					SL2_RGBA64F rgbaOld = _prgbaColors[sIdx];
+					constexpr bool bUseAdvanced = false;
+					ispc::ColorLABA clLab;
+					/*if ( reinterpret_cast<CPalette::CColor &>(rgbaOld).Min() < 0.0 || reinterpret_cast<CPalette::CColor &>(rgbaOld).Max() > 1.0 ) {
+						bUseAdvanced = false;
 					}
-					if ( W > 0 && H + 1 < _ui32Height ) {
-						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += (cError * (3.0 / 16.0));	// Bottom-left pixel
+				
+					if ( bUseAdvanced ) {
+						ispc::ispc_rgb2lab_single( (*reinterpret_cast<const ispc::ColorRGBA *>(&rgbaOld)), clLab );
+					}*/
+					/*ispc::ColorRGBA crRgba;
+					ispc::ispc_lab2rgb_single( clLab, crRgba );*/
+					//if ( reinterpret_cast<CPalette::CColor &>(rgbaOld).Min() < 0.0 || reinterpret_cast<CPalette::CColor &>(rgbaOld).Max() > 1.0 ) {
+						/*volatile double dDst = CPalette::CColor::EuclideanDistanceSq( reinterpret_cast<CPalette::CColor &>(rgbaOld), reinterpret_cast<CPalette::CColor &>(crRgba) );
+						if ( dDst >= 0.1 ) {
+							return false;
+						}*/
+					//}
+
+					size_t sWinner = _pPalette.Palette().size();
+					double dDist = std::numeric_limits<double>::infinity();
+					for ( auto I = _pPalette.Palette().size(); I--; ) {
+						double dThisDist;
+						if ( bUseAdvanced ) {
+							dThisDist = ispc::ispc_deltaE_CIEDE2000( clLab.l, clLab.a, clLab.b, clLab.alpha,
+								_pclLabPal[I].l, _pclLabPal[I].a, _pclLabPal[I].b, _pclLabPal[I].alpha );
+						}
+						else {
+							dThisDist = CPalette::CColor::EuclideanDistanceSq( reinterpret_cast<CPalette::CColor &>(rgbaOld), _pPalette.Palette()[I] );
+						}
+						/*double dThisDist = ispc::ispc_deltaE_CIEDE2000( clLab.l, clLab.a, clLab.b, clLab.alpha,
+							_pclLabPal[I].l, _pclLabPal[I].a, _pclLabPal[I].b, _pclLabPal[I].alpha );*/
+						if ( dThisDist <= dDist ) {
+							dDist = dThisDist;
+							sWinner = I;
+						}
 					}
-					if ( H + 1 < _ui32Height ) {
-						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += (cError * (5.0 / 16.0));		// Bottom pixel
+
+					_prgbaColors[sIdx] = (*reinterpret_cast<const SL2_RGBA64F *>(&_pPalette.Palette()[sWinner]));
+					CPalette::CColor cError = reinterpret_cast<CPalette::CColor &>(rgbaOld) - reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx]);
+					cError = cError * cWeights;
+
+					if constexpr ( _uDither == SL2_D_JARVIS_JUDICE_NINKE ) {
+						CPalette::CColor c1 = cError * (1.0 / 48.0);
+						CPalette::CColor c3 = cError * (3.0 / 48.0);
+						CPalette::CColor c5 = cError * (5.0 / 48.0);
+						CPalette::CColor c7 = cError * (7.0 / 48.0);
+						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c7; }
+						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c5; }
+
+						if ( H + 1 < _ui32Height ) {
+							if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-2]) += c3; }
+							if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c5; }
+							reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c7;
+							if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c5; }
+							if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+2]) += c3; }
+						}
+
+						if ( H + 2 < _ui32Height ) {
+							if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width-2]) += c1; }
+							if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width-1]) += c3; }
+							reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width]) += c5;
+							if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width+1]) += c3; }
+							if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width+2]) += c1; }
+						}
 					}
-					if ( W + 1 < _ui32Width && H + 1 < _ui32Height ) {
-						reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += (cError * (1.0 / 16.0));	// Bottom-right pixel
+					else if constexpr ( _uDither == SL2_D_STUCKI ) {
+						CPalette::CColor c1 = cError * (1.0 / 42.0);
+						CPalette::CColor c2 = cError * (2.0 / 42.0);
+						CPalette::CColor c4 = cError * (4.0 / 42.0);
+						CPalette::CColor c8 = cError * (8.0 / 42.0);
+						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c8; }
+						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c4; }
+
+						if ( H + 1 < _ui32Height ) {
+							if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-2]) += c2; }
+							if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c4; }
+							reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c8;
+							if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c4; }
+							if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+2]) += c2; }
+						}
+
+						if ( H + 2 < _ui32Height ) {
+							if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width-2]) += c1; }
+							if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width-1]) += c2; }
+							reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width]) += c4;
+							if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width+1]) += c2; }
+							if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width+2]) += c1; }
+						}
+					}
+					else if constexpr ( _uDither == SL2_D_BURKES ) {
+						CPalette::CColor c1 = cError * (1.0 / 32.0);
+						CPalette::CColor c2 = cError * (2.0 / 32.0);
+						CPalette::CColor c4 = cError * (4.0 / 32.0);
+						CPalette::CColor c8 = cError * (8.0 / 32.0);
+						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c8; }
+						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c4; }
+
+						if ( H + 1 < _ui32Height ) {
+							if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-2]) += c2; }
+							if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c4; }
+							reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c8;
+							if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c4; }
+							if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+2]) += c2; }
+						}
+					}
+					else if constexpr ( _uDither == SL2_D_SIERRA ) {
+						CPalette::CColor c2 = cError * (2.0 / 32.0);
+						CPalette::CColor c3 = cError * (3.0 / 32.0);
+						CPalette::CColor c4 = cError * (4.0 / 32.0);
+						CPalette::CColor c5 = cError * (5.0 / 32.0);
+						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c5; }
+						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c3; }
+
+						if ( H + 1 < _ui32Height ) {
+							if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-2]) += c2; }
+							if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c4; }
+							reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c5;
+							if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c4; }
+							if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+2]) += c2; }
+						}
+
+						if ( H + 2 < _ui32Height ) {
+							if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width-1]) += c2; }
+							reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width]) += c3;
+							if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width+1]) += c2; }
+						}
+					}
+					else if constexpr ( _uDither == SL2_D_SIERRA_2 ) {
+						CPalette::CColor c1 = cError * (1.0 / 16.0);
+						CPalette::CColor c2 = cError * (2.0 / 16.0);
+						CPalette::CColor c3 = cError * (3.0 / 16.0);
+						CPalette::CColor c4 = cError * (4.0 / 16.0);
+						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c4; }
+						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c3; }
+
+						if ( H + 1 < _ui32Height ) {
+							if ( W > 1 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-2]) += c1; }
+							if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c2; }
+							reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c3;
+							if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c2; }
+							if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+2]) += c1; }
+						}
+					}
+					else if constexpr ( _uDither == SL2_D_SIERRA_LITE ) {
+						CPalette::CColor c1 = cError * (1.0 / 4.0);
+						CPalette::CColor c2 = cError * (2.0 / 4.0);
+						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c2; }
+
+						if ( H + 1 < _ui32Height ) {
+							if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c1; }
+							reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c1;
+						}
+					}
+					else if constexpr ( _uDither == SL2_D_ATKINSON ) {
+						CPalette::CColor c1 = cError * (1.0 / 8.0);
+						if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += c1; }
+						if ( W + 2 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2]) += c1; }
+
+						if ( H + 1 < _ui32Height ) {
+							if ( W > 0 ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += c1; }
+							reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += c1;
+							if ( W + 1 < _ui32Width ) { reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += c1; }
+						}
+
+						if ( H + 2 < _ui32Height ) {
+							reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+2*_ui32Width]) += c1;
+						}
+					}
+
+					else if constexpr ( _uDither == SL2_D_FLOYD_STEINBERG ) {
+						if ( W + 1 < _ui32Width ) {
+							reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += (cError * (7.0 / 16.0));				// Right pixel
+						}
+						if ( W > 0 && H + 1 < _ui32Height ) {
+							reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += (cError * (3.0 / 16.0));	// Bottom-left pixel
+						}
+						if ( H + 1 < _ui32Height ) {
+							reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += (cError * (5.0 / 16.0));		// Bottom pixel
+						}
+						if ( W + 1 < _ui32Width && H + 1 < _ui32Height ) {
+							reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += (cError * (1.0 / 16.0));	// Bottom-right pixel
+						}
 					}
 				}
-
-				//if ( W + 1 < _ui32Width ) {
-				//	reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+1]) += (cError * (7.0 / 16.0)).Clamp( 0.0, 1.0 );  // Right pixel
-				//}
-				//if ( W > 0 && H + 1 < _ui32Height ) {
-				//	reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width-1]) += (cError * (3.0 / 16.0)).Clamp( 0.0, 1.0 );  // Bottom-left pixel
-				//}
-				//if ( H + 1 < _ui32Height ) {
-				//	reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width]) += (cError * (5.0 / 16.0)).Clamp( 0.0, 1.0 );  // Bottom pixel
-				//}
-				//if ( W + 1 < _ui32Width && H + 1 < _ui32Height ) {
-				//	reinterpret_cast<CPalette::CColor &>(_prgbaColors[sIdx+_ui32Width+1]) += (cError * (1.0 / 16.0)).Clamp( 0.0, 1.0 );  // Bottom-right pixel
-				//}
-
 			}
 		}
 		return true;
@@ -3265,8 +3280,18 @@ namespace sl2 {
 						Dither<SL2_D_JARVIS_JUDICE_NINKE>( vQuant.data(), _ui32Width, _ui32Height, piImage->Palette(), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()) );
 						break;
 					}
-					default : {
+					case SL2_D_FLOYD_STEINBERG : {
 						Dither<SL2_D_FLOYD_STEINBERG>( vQuant.data(), _ui32Width, _ui32Height, piImage->Palette(), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()) );
+						break;
+					}
+
+					case SL2_D_BAYER_4X4 : {
+						Dither<SL2_D_BAYER_4X4>( vQuant.data(), _ui32Width, _ui32Height, piImage->Palette(), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()) );
+						break;
+					}
+					case SL2_D_BAYER_8X8 : {
+						Dither<SL2_D_BAYER_8X8>( vQuant.data(), _ui32Width, _ui32Height, piImage->Palette(), reinterpret_cast<ispc::ColorLABA *>(vPalette.data()) );
+						break;
 					}
 				}
 				prgbaUseMe = vQuant.data();
