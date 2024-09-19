@@ -153,7 +153,7 @@ namespace sl2 {
 		}
 
 		/**
-		 * REads a u16char_t string from the stream.
+		 * Reads a u16char_t string from the stream.
 		 * 
 		 * \param _u16String Holds the return string.
 		 * \return Returns true if there was enough space left in the stream to write the string.
