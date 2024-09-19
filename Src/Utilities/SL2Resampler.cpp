@@ -163,7 +163,7 @@ namespace sl2 {
 							dConvolved = ConvolveAligned( m_cContribs[W].dContributions.data(), m_dBuffer.data(), m_cContribs[W].dContributions.size() );
 						}
 						if ( ui32D > 1 || ui32NewD > 1 ) {
-							size_t sDstIdx = ((ui32NewW * ui32D) * H) + (W * ui32D) + D;
+							size_t sDstIdx = ((ui32NewW * ui32D) * W) + (H * ui32D) + D;
 							pdDst2[I][sDstIdx] = dConvolved;
 						}
 						else {
@@ -176,13 +176,54 @@ namespace sl2 {
 		}
 
 		if ( ui32D > 1 || ui32NewD > 1 ) {
+			// Resize D, now aligned horizontally in the buffers.
+			if ( !CreateContribList( ui32D, ui32NewD, _pParms.taColorD, _pParms.fFilterD.pfFunc, _pParms.fFilterD.dfSupport, _pParms.fFilterScale ) ) { return false; }
+			sPagesSize = ui32NewW * ui32D;
+			sNewPagesSize = ui32NewW * ui32NewH;
+			tW = ui32NewD;
+			tH = ui32NewW;
+			uint32_t tD = ui32NewH;
+
+			for ( size_t I = 0; I < (_pParms.bAlpha ? 4 : 3); ++I ) {
+				if ( I == 3 ) {
+					// Alpha channel.
+					if ( !CreateContribList( ui32D, ui32NewD, _pParms.taAlphaD, _pParms.fAlphaFilterD.pfFunc, _pParms.fAlphaFilterD.dfSupport, _pParms.fFilterScale ) ) { return false; }
+				}
+				for ( size_t D = 0; D < tD; ++D ) {
+					for ( size_t H = 0; H < tH; ++H ) {
+						const double * pdRowStart = pdDst2[I] + (sPagesSize * D) + (H * ui32D);
+						for ( size_t W = 0; W < tW; ++W ) {
+							double dConvolved;
+							if ( m_cContribs[W].bInsideBounds ) {
+								dConvolved = ConvolveUnaligned( m_cContribs[W].dContributions.data(), pdRowStart + m_cContribs[W].i32Indices[0], m_cContribs[W].dContributions.size() );
+							}
+							else {
+								for ( size_t J = 0; J < m_cContribs[W].i32Indices.size(); ++J ) {
+									int32_t i32Index = m_cContribs[W].i32Indices[J];
+									if ( i32Index == -1 ) {
+										m_dBuffer[J] = _pParms.dBorderColor[I];
+									}
+									else {
+										m_dBuffer[J] = (*(pdRowStart + i32Index));
+									}
+								}
+								dConvolved = ConvolveAligned( m_cContribs[W].dContributions.data(), m_dBuffer.data(), m_cContribs[W].dContributions.size() );
+							}
+							//size_t sDstIdx = ((sNewPagesSize * W) + (D * ui32NewW) + H) * 4 + I;
+							size_t sDstIdx = ((sNewPagesSize * W) + (D * ui32NewW) + H) * 4 + I;
+							_pdOut[sDstIdx] = dConvolved;
+						}
+					}
+				}
+			}
+
 		}
 
 		{
 			// Add alpha to the output.
 			if ( !_pParms.bAlpha ) {
-				sPagesSize = sNewPagesSize;
-				for ( size_t D = 0; D < ui32D; ++D ) {
+				sPagesSize = ui32NewH * ui32NewW;
+				for ( size_t D = 0; D < ui32NewD; ++D ) {
 					for ( size_t H = 0; H < ui32NewH; ++H ) {
 						for ( size_t W = 0; W < ui32NewW; ++W ) {
 							size_t sDstIdx = ((sPagesSize * D) + (H * ui32NewW) + W) * 4;

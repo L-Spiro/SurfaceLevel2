@@ -3048,6 +3048,7 @@ namespace sl2 {
 		if ( ui32Stride & 0x3 ) {
 			ui32Stride = (ui32Stride & ~3) + 4;
 		}
+        uint64_t ui64SrcStride = CFormat::GetRowSize( pkifdUseMe->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
 
 		CImage::SL2_BITMAPFILEHEADER bmfhHeader = { 0x4D42 };
 		bmfhHeader.ui32Offset = sizeof( CImage::SL2_BITMAPFILEHEADER ) + sizeof( CImage::SL2_BITMAPINFOHEADER ) + sizeof( CImage::SL2_BITMAPCOLORMASK );
@@ -3077,10 +3078,12 @@ namespace sl2 {
             std::vector<uint8_t> vRow;
 		    vRow.resize( ui32Stride );
 
+            uint64_t ui64Page = ui64SrcStride * bihInfo.ui32Height;
+            // _sSlice
             for ( uint32_t Y = 0; Y < bihInfo.ui32Height; ++Y ) {
 			    std::memset( &vRow[0], 0, vRow.size() );
 			    uint8_t * pui8Dst = &vRow[0];
-                const uint8_t * pui8Src = &vConverted[ui32Stride*Y];
+                const uint8_t * pui8Src = &vConverted[ui64Page*_sSlice+ui32Stride*Y];
                 std::memcpy( pui8Dst, pui8Src, ui32FormatBytes * _iImage.GetMipmaps()[_sMip]->Width() );
 
                 if ( sFile.Write( vRow.data(), vRow.size() ) != vRow.size() ) { return SL2_E_OUTOFMEMORY; }
