@@ -335,7 +335,7 @@ namespace sl2 {
 		 * \return Returns an error code.
 		 **/
 		SL2_ERRORS											ConvertToFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat,
-			size_t _sMip, size_t _sArray, size_t _sFace, std::vector<uint8_t> &_vDst, bool _bInvertY = false );
+			size_t _sMip, size_t _sArray, size_t _sFace, std::vector<uint8_t> &_vDst, bool _bInvertY = false, bool _bGenPalette = false, CPalette * _pNewPalette = nullptr );
 
 		/**
 		 * Converts a single texture to a given format.
@@ -349,7 +349,7 @@ namespace sl2 {
 		 * \return Returns an error code.
 		 **/
 		SL2_ERRORS											ConvertToFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat,
-			size_t _sMip, size_t _sArray, size_t _sFace, uint8_t * _pui8Dst, bool _bInvertY = false );
+			size_t _sMip, size_t _sArray, size_t _sFace, uint8_t * _pui8Dst, bool _bInvertY = false, bool _bGenPalette = false, CPalette * _pNewPalette = nullptr );
 
 		/**
 		 * Gets a constant reference to the image's mipmaps.

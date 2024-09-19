@@ -63,7 +63,8 @@ namespace sl2 {
 			m_dElements[2] = (*_pdData++);
 			m_dElements[3] = (*_pdData++);
 		}
-		CVector4( const CVector4<SL2_ST_RAW> &_vOther ) {
+		template <unsigned _uType>
+		CVector4( const CVector4<_uType> &_vOther ) {
 #ifdef __AVX__
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
 				_mm256_store_pd( m_dElements, _mm256_load_pd( _vOther.m_dElements ) );
@@ -74,51 +75,7 @@ namespace sl2 {
 			m_dElements[2] = _vOther[2];
 			m_dElements[3] = _vOther[3];
 		}
-		CVector4( const CVector4<SL2_ST_NEON> &_vOther ) {
-#ifdef __AVX__
-			if constexpr ( SL2_ST_AVX <= _uSimd ) {
-				_mm256_store_pd( m_dElements, _mm256_load_pd( _vOther.m_dElements ) );
-			}
-#endif	// #ifdef __AVX__
-			m_dElements[0] = _vOther[0];
-			m_dElements[1] = _vOther[1];
-			m_dElements[2] = _vOther[2];
-			m_dElements[3] = _vOther[3];
-		}
-		CVector4( const CVector4<SL2_ST_SSE4_1> &_vOther ) {
-#ifdef __AVX__
-			if constexpr ( SL2_ST_AVX <= _uSimd ) {
-				_mm256_store_pd( m_dElements, _mm256_load_pd( _vOther.m_dElements ) );
-			}
-#endif	// #ifdef __AVX__
-			m_dElements[0] = _vOther[0];
-			m_dElements[1] = _vOther[1];
-			m_dElements[2] = _vOther[2];
-			m_dElements[3] = _vOther[3];
-		}
-		CVector4( const CVector4<SL2_ST_AVX> &_vOther ) {
-#ifdef __AVX__
-			if constexpr ( SL2_ST_AVX <= _uSimd ) {
-				_mm256_store_pd( m_dElements, _mm256_load_pd( _vOther.m_dElements ) );
-			}
-#endif	// #ifdef __AVX__
-			m_dElements[0] = _vOther[0];
-			m_dElements[1] = _vOther[1];
-			m_dElements[2] = _vOther[2];
-			m_dElements[3] = _vOther[3];
-		}
-		CVector4( const CVector4<SL2_ST_AVX512> &_vOther ) {
-#ifdef __AVX__
-			if constexpr ( SL2_ST_AVX <= _uSimd ) {
-				_mm256_store_pd( m_dElements, _mm256_load_pd( _vOther.m_dElements ) );
-			}
-#endif	// #ifdef __AVX__
-			m_dElements[0] = _vOther[0];
-			m_dElements[1] = _vOther[1];
-			m_dElements[2] = _vOther[2];
-			m_dElements[3] = _vOther[3];
-		}
-
+		
 #ifdef __AVX__
 		CVector4( __m256d _mOther ) {
 			_mm256_store_pd( m_dElements, _mOther );
@@ -277,8 +234,7 @@ namespace sl2 {
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
 				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
 				__m256d mOthrVec = _mm256_load_pd( _vOther.m_dElements );	// Load _vOther's elements into another AVX register.
-				mThisVec = _mm256_add_pd( mThisVec, mOthrVec );				// Perform vectorized addition.
-				return mThisVec;
+				return _mm256_add_pd( mThisVec, mOthrVec );					// Perform vectorized addition.
 			}
 #endif	// #ifdef __AVX__
 			return CVector4<_uSimd>( m_dElements[0] + _vOther[0],
@@ -321,8 +277,7 @@ namespace sl2 {
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
 				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
 				__m256d mOthrVec = _mm256_load_pd( _vOther.m_dElements );	// Load _vOther's elements into another AVX register.
-				mThisVec = _mm256_sub_pd( mThisVec, mOthrVec );				// Perform vectorized subtraction.
-				return mThisVec;
+				return _mm256_sub_pd( mThisVec, mOthrVec );					// Perform vectorized subtraction.
 			}
 #endif	// #ifdef __AVX__
 			return CVector4<_uSimd>( m_dElements[0] - _vOther[0],
@@ -342,8 +297,7 @@ namespace sl2 {
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
 				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
 				__m256d mOthrVec = _mm256_load_pd( _vOther.m_dElements );	// Load _vOther's elements into another AVX register.
-				mThisVec = _mm256_mul_pd( mThisVec, mOthrVec );				// Perform vectorized multiplication.
-				return mThisVec;
+				return _mm256_mul_pd( mThisVec, mOthrVec );					// Perform vectorized multiplication.
 			}
 #endif	// #ifdef __AVX__
 			return CVector4<_uSimd>( m_dElements[0] * _vOther[0],
@@ -363,8 +317,7 @@ namespace sl2 {
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
 				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
 				__m256d mOthrVec = _mm256_set1_pd( _dVal );					// Broadcast the scalar to all elements of the AVX register.
-				mThisVec = _mm256_mul_pd( mThisVec, mOthrVec );				// Perform vectorized multiplication.
-				return mThisVec;
+				return _mm256_mul_pd( mThisVec, mOthrVec );					// Perform vectorized multiplication.
 			}
 #endif	// #ifdef __AVX__
 			return CVector4<_uSimd>( m_dElements[0] * _dVal,
@@ -384,8 +337,7 @@ namespace sl2 {
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
 				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
 				__m256d mOthrVec = _mm256_load_pd( _vOther.m_dElements );	// Load _vOther's elements into another AVX register.
-				mThisVec = _mm256_div_pd( mThisVec, mOthrVec );				// Perform vectorized division.
-				return mThisVec;
+				return _mm256_div_pd( mThisVec, mOthrVec );					// Perform vectorized division.
 			}
 #endif	// #ifdef __AVX__
 			return CVector4<_uSimd>( m_dElements[0] / _vOther[0],
@@ -405,8 +357,7 @@ namespace sl2 {
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
 				__m256d mThisVec = _mm256_load_pd( m_dElements );			// Load this object's elements into a 256-bit AVX register.
 				__m256d mOthrVec = _mm256_set1_pd( _dVal );					// Broadcast the scalar to all elements of the AVX register.
-				mThisVec = _mm256_div_pd( mThisVec, mOthrVec );				// Perform vectorized division.
-				return mThisVec;
+				return _mm256_div_pd( mThisVec, mOthrVec );					// Perform vectorized division.
 			}
 #endif	// #ifdef __AVX__
 			double dDiv = 1.0 / _dVal;
@@ -423,7 +374,6 @@ namespace sl2 {
 		 *	unit length (1 unit in length) while maintaining its direction.
 		 */
 		inline CVector4<_uSimd>									Normalize() {
-			CVector4 vCopy;
 #ifdef __AVX__
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
 				__m256d mElements = _mm256_load_pd( m_dElements );													// Load mElements into an AVX register.
@@ -438,11 +388,10 @@ namespace sl2 {
 				double dInvLen = 1.0 / dLen;																		// Compute the inverse of the length.
 
 				__m256d mInvLen = _mm256_set1_pd( dInvLen );														// Set all elements of a register to dInvLen.
-				mElements = _mm256_mul_pd( mElements, mInvLen );													// Normalize the elements.
-				_mm256_store_pd( vCopy.m_dElements, mElements );													// Store the result back to memory.
-				return vCopy;
+				return _mm256_mul_pd( mElements, mInvLen );
 			}
 #endif	// #ifdef __AVX__
+			CVector4 vCopy;
 			double dInvLen = 1.0 / std::sqrt( m_dElements[0] * m_dElements[0] + m_dElements[1] * m_dElements[1] + m_dElements[2] * m_dElements[2] + m_dElements[3] * m_dElements[3] );
 			vCopy.m_dElements[0] = m_dElements[0] * dInvLen;
 			vCopy.m_dElements[1] = m_dElements[1] * dInvLen;
@@ -538,7 +487,7 @@ namespace sl2 {
 		/**
 		 * Sets the vector to 0.
 		 **/
-		inline CVector4<_uSimd>									Zero() {
+		inline CVector4<_uSimd> &								Zero() {
 #ifdef __AVX__
 			if constexpr ( SL2_ST_AVX <= _uSimd ) {
 				_mm256_store_pd( m_dElements, _mm256_setzero_pd() );
@@ -552,9 +501,9 @@ namespace sl2 {
 		/**
 		 * Clamps all components of the vector into the given range.
 		 * 
-		 * \param PARM DESC
-		 * \param PARM DESC
-		 * \return DESC
+		 * \param _dMin The min value.
+		 * \param _dMax The max value.
+		 * \return Returns a copy that has been clamped between _dMin and _dMax.
 		 **/
 		inline CVector4<_uSimd>									Clamp( double _dMin, double _dMax ) const {
 #ifdef __AVX__

@@ -396,3 +396,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+Help/PVRTexLib.dll
+Help/SurfaceLevel2.0.rar
+Help/SurfaceLevel2.exe

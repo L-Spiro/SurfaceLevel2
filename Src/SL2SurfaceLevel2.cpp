@@ -2508,19 +2508,19 @@ namespace sl2 {
                     break;
                 }
                 case SL2_GL_COLOR_INDEX1_EXT : {
-                    pbifUseMe = &bifFormats[6];
-                    break;
-                }
-                case SL2_GL_COLOR_INDEX2_EXT : {
-                    pbifUseMe = &bifFormats[7];
-                    break;
-                }
-                case SL2_GL_COLOR_INDEX4_EXT : {
                     pbifUseMe = &bifFormats[8];
                     break;
                 }
-                case SL2_GL_COLOR_INDEX8_EXT : {
+                case SL2_GL_COLOR_INDEX2_EXT : {
                     pbifUseMe = &bifFormats[9];
+                    break;
+                }
+                case SL2_GL_COLOR_INDEX4_EXT : {
+                    pbifUseMe = &bifFormats[10];
+                    break;
+                }
+                case SL2_GL_COLOR_INDEX8_EXT : {
+                    pbifUseMe = &bifFormats[11];
                     break;
                 }
             }
@@ -2696,22 +2696,22 @@ namespace sl2 {
 		const CFormat::SL2_BEST_INTERNAL_FORMAT * _pbifFormat ) {
         size_t sMax = size_t( 1ULL << _pbifFormat->pkifdFormat->ui32BlockSizeInBits );
         //_iImage.GeneratePalette( uint32_t( sMax ) );
-        if ( _iImage.Palette().Palette().size() > sMax ) { return SL2_E_UNSUPPORTEDSIZE; }
-
+        //if ( _iImage.Palette().Palette().size() > sMax ) { return SL2_E_UNSUPPORTEDSIZE; }
+        CPalette pPalette;
         CImage::SL2_FREEIMAGE_ALLOCATET fiImage( FIT_BITMAP, _iImage.GetMipmaps()[_sMip]->Width(), _iImage.GetMipmaps()[_sMip]->Height(), _pbifFormat->pkifdFormat->ui32BlockSizeInBits );
 		if ( !fiImage.pbBitmap ) { return SL2_E_OUTOFMEMORY; }
 
         std::vector<uint8_t> vConverted;
-        SL2_ERRORS eError = _iImage.ConvertToFormat( _pbifFormat->pkifdFormat, _sMip, _sArray, _sFace, vConverted, true );
+        SL2_ERRORS eError = _iImage.ConvertToFormat( _pbifFormat->pkifdFormat, _sMip, _sArray, _sFace, vConverted, true, true, &pPalette );
         if ( eError != SL2_E_SUCCESS ) { return eError; }
 
         // Set the palette.
         RGBQUAD * prgbVal = ::FreeImage_GetPalette( fiImage.pbBitmap );
-        for ( size_t I = 0; I < _iImage.Palette().Palette().size(); ++I ) {
-            prgbVal[I].rgbRed = static_cast<BYTE>(std::clamp( std::round( _iImage.Palette().Palette()[I].X() * 255.0 ), 0.0, 255.0 ));
-            prgbVal[I].rgbGreen = static_cast<BYTE>(std::clamp( std::round( _iImage.Palette().Palette()[I].Y() * 255.0 ), 0.0, 255.0 ));
-            prgbVal[I].rgbBlue = static_cast<BYTE>(std::clamp( std::round( _iImage.Palette().Palette()[I].Z() * 255.0 ), 0.0, 255.0 ));
-            prgbVal[I].rgbReserved = static_cast<BYTE>(std::clamp( std::round( _iImage.Palette().Palette()[I].W() * 255.0 ), 0.0, 255.0 ));
+        for ( size_t I = 0; I < pPalette.Palette().size(); ++I ) {
+            prgbVal[I].rgbRed = static_cast<BYTE>(std::clamp( std::round( pPalette.Palette()[I].X() * 255.0 ), 0.0, 255.0 ));
+            prgbVal[I].rgbGreen = static_cast<BYTE>(std::clamp( std::round( pPalette.Palette()[I].Y() * 255.0 ), 0.0, 255.0 ));
+            prgbVal[I].rgbBlue = static_cast<BYTE>(std::clamp( std::round( pPalette.Palette()[I].Z() * 255.0 ), 0.0, 255.0 ));
+            prgbVal[I].rgbReserved = static_cast<BYTE>(std::clamp( std::round( pPalette.Palette()[I].W() * 255.0 ), 0.0, 255.0 ));
         }
 
         size_t sPitch = CFormat::GetRowSize( _pbifFormat->pkifdFormat, _iImage.GetMipmaps()[_sMip]->Width() );
@@ -4009,30 +4009,32 @@ namespace sl2 {
         //if ( _iImage.Format()->vfVulkanFormat == SL2_VK_FORMAT_UNDEFINED
         if ( _iImage.Format()->kifInternalFormat == SL2_GL_INVALID || _iImage.Format()->ktType == SL2_KT_GL_INVALID || _iImage.Format()->kbifBaseInternalFormat == SL2_KBIF_GL_INVALID ) { return SL2_E_BADFORMAT; }
 
-        ::ktxTextureCreateInfo createInfo;
-        createInfo.glInternalformat = _iImage.Format()->kifInternalFormat;
-        createInfo.baseWidth = _iImage.Width();
-        createInfo.baseHeight = _iImage.Height();
-        createInfo.baseDepth = _iImage.Depth();
+        ::ktxTextureCreateInfo tciCreateInfo;
+        tciCreateInfo.glInternalformat = _iImage.Format()->kifInternalFormat;
+        tciCreateInfo.vkFormat = _iImage.Format()->vfVulkanFormat;
+        tciCreateInfo.pDfd = nullptr;
+        tciCreateInfo.baseWidth = _iImage.Width();
+        tciCreateInfo.baseHeight = _iImage.Height();
+        tciCreateInfo.baseDepth = _iImage.Depth();
         switch ( _iImage.TextureType() ) {
             case SL2_TT_1D : {
-                createInfo.numDimensions = 1;
+                tciCreateInfo.numDimensions = 1;
                 break;
             }
             case SL2_TT_3D : {
-                createInfo.numDimensions = 3;
+                tciCreateInfo.numDimensions = 3;
                 break;
             }
-            default : { createInfo.numDimensions = 2; }
+            default : { tciCreateInfo.numDimensions = 2; }
         }
-        createInfo.numLevels = static_cast<ktx_uint32_t>(_iImage.Mipmaps());
-        createInfo.numLayers = static_cast<ktx_uint32_t>(_iImage.ArraySize());
-        createInfo.numFaces = static_cast<ktx_uint32_t>(_iImage.Faces());
-        createInfo.isArray = _iImage.ArraySize() > 1 ? KTX_TRUE : KTX_FALSE;
-        createInfo.generateMipmaps = KTX_FALSE;
+        tciCreateInfo.numLevels = static_cast<ktx_uint32_t>(_iImage.Mipmaps());
+        tciCreateInfo.numLayers = static_cast<ktx_uint32_t>(_iImage.ArraySize());
+        tciCreateInfo.numFaces = static_cast<ktx_uint32_t>(_iImage.Faces());
+        tciCreateInfo.isArray = _iImage.ArraySize() > 1 ? KTX_TRUE : KTX_FALSE;
+        tciCreateInfo.generateMipmaps = KTX_FALSE;
 
         sl2::CKtxTexture<ktxTexture1> kt1Tex;
-        ::KTX_error_code ecErr = ::ktxTexture1_Create( &createInfo, KTX_TEXTURE_CREATE_ALLOC_STORAGE, kt1Tex.HandlePointer() );
+        ::KTX_error_code ecErr = ::ktxTexture1_Create( &tciCreateInfo, KTX_TEXTURE_CREATE_ALLOC_STORAGE, kt1Tex.HandlePointer() );
         if ( KTX_SUCCESS != ecErr || kt1Tex.Handle() == nullptr ) { return SL2_E_OUTOFMEMORY; }
 
         if ( _iImage.Format()->bCompressed ) {

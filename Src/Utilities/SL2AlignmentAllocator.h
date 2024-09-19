@@ -3,7 +3,7 @@
  *
  * Written by: Shawn (L. Spiro) Wilcoxen
  *
- * Description: A resampler.
+ * Description: An aligned allocator for std::vector.
  */
 
 
@@ -15,20 +15,26 @@
 
 namespace sl2 {
 
+    /**
+	 * Class CAlignmentAllocator
+	 * \brief An aligned allocator for std::vector.
+	 *
+	 * Description: An aligned allocator for std::vector.
+	 */
 	template <typename T, size_t N = 16>
     class CAlignmentAllocator {
     public:
-        typedef T value_type;
-        typedef size_t size_type;
-        typedef ptrdiff_t difference_type;
+        typedef T                                                   value_type;
+        typedef size_t                                              size_type;
+        typedef ptrdiff_t                                           difference_type;
 
-        typedef T * pointer;
-        typedef const T * const_pointer;
+        typedef T *                                                 pointer;
+        typedef const T *                                           const_pointer;
 
-        typedef T & reference;
-        typedef const T & const_reference;
+        typedef T &                                                 reference;
+        typedef const T &                                           const_reference;
 
-        public :
+    public :
         inline                                                      CAlignmentAllocator() throw () {}
 
         template <typename T2>
@@ -36,45 +42,72 @@ namespace sl2 {
 
         inline                                                      ~CAlignmentAllocator() throw () {}
 
-        inline pointer                                              address( reference r ) {
-        return &r;
-        }
 
-        inline const_pointer                                        address( const_reference r ) const { return &r; }
+        // == Functions.
+        /**
+         * Gets a pointer to the given reference.
+         * 
+         * \param _rR The reference whose pointer is to be obtained.
+         * \return Returns a pointer to the given reference.
+         **/
+        inline pointer                                              address( reference _rR ) { return &_rR; }
 
-        inline pointer                                              allocate( size_type n ) { return (pointer)_aligned_malloc(n*sizeof(value_type), N); }
+        /**
+         * Gets a constant pointer to the given reference.
+         * 
+         * \param _rR The reference whose pointer is to be obtained.
+         * \return Returns a constant pointer to the given reference.
+         **/
+        inline const_pointer                                        address( const_reference _rR ) const { return &_rR; }
 
-        inline void                                                 deallocate( pointer p, size_type ) {
-            _aligned_free( p );
-        }
+        /**
+         * Performs an aligned allocation of _sN elements.
+         * 
+         * \param _sN The number of elements to allocate.
+         * \return Returns a pointer to the allocated _sN elements or nullptr.
+         **/
+        inline pointer                                              allocate( size_type _sN ) { return reinterpret_cast<pointer>(::_aligned_malloc( _sN * sizeof( value_type ), N )); }
 
-        inline void                                                 construct( pointer p, const value_type & wert ) {
-        new ( p ) value_type( wert );
-        }
+        /**
+         * Deallocation of the given pointer.
+         * 
+         * \param _pP The pointer to deallocate.
+         **/
+        inline void                                                 deallocate( pointer _pP, size_type ) { ::_aligned_free( _pP ); }
 
-        inline void                                                 destroy( pointer p ) {
-            p->~value_type();
-        }
+        /**
+         * Constructs an object at the given pointer.
+         * 
+         * \param _pP The address at which to construct the object.
+         * \param _vtErt The constructed value.
+         **/
+        inline void                                                 construct( pointer _pP, const value_type &_vtErt ) { new ( _pP ) value_type( _vtErt ); }
 
-        inline size_type                                            max_size() const throw () {
-            return size_type( -1 ) / sizeof( value_type );
-        }
+        /**
+         * Calls the destructor for the given value at address _pP.
+         * 
+         * \param _pP The address of the item to deconstruct.
+         **/
+        inline void                                                 destroy( pointer _pP ) { _pP->~value_type(); }
+
+        /**
+         * Returns the maximum number of items that can fit into the vector.
+         * 
+         * \return * Returns the maximum number of items that can fit into the vector.
+         **/
+        inline size_type                                            max_size() const throw () { return size_type( -1 ) / sizeof( value_type ); }
 
         template <typename T2>
         struct rebind {
             typedef CAlignmentAllocator<T2, N>                       other;
         };
 
-        bool                                                        operator != ( const CAlignmentAllocator<T,N> &other ) const  {
-            return !(*this == other);
-        }
+        bool                                                        operator != ( const CAlignmentAllocator<T, N> &other ) const  { return !((*this) == other); }
 
         // Returns true if and only if storage allocated from *this
         // can be deallocated from other, and vice versa.
         // Always returns true for stateless allocators.
-        bool                                                        operator == ( const CAlignmentAllocator<T,N> &other ) const {
-            return true;
-        }
+        bool                                                        operator == ( const CAlignmentAllocator<T, N> &other ) const { return true; }
     };
 
 

@@ -401,16 +401,16 @@ namespace sl2 {
 				sSrcMips = std::max( std::min( Mipmaps(), m_sTotalMips + 1 ), size_t( 1 ) );
 				sDstMips = std::max( m_sTotalMips + 1, Mipmaps() );
 				if ( !m_sTotalMips ) {
-					sDstMips = CUtilities::Max( size_t( std::round( std::log2( ui32NewW ) ) ), size_t( std::round( std::log2( ui32NewH ) ) ) );
-					sDstMips = CUtilities::Max( size_t( std::round( std::log2( ui32NewD ) ) ), sDstMips ) + 1;
+					sDstMips = CUtilities::Max( size_t( std::floor( std::log2( ui32NewW ) ) ), size_t( std::floor( std::log2( ui32NewH ) ) ) );
+					sDstMips = CUtilities::Max( size_t( std::floor( std::log2( ui32NewD ) ) ), sDstMips ) + 1;
 				}
 				break;
 			}
 			case SL2_MH_GENERATE_NEW : {
 				sSrcMips = 1;
 				if ( !m_sTotalMips ) {
-					sDstMips = CUtilities::Max( size_t( std::round( std::log2( ui32NewW ) ) ), size_t( std::round( std::log2( ui32NewH ) ) ) );
-					sDstMips = CUtilities::Max( size_t( std::round( std::log2( ui32NewD ) ) ), sDstMips ) + 1;
+					sDstMips = CUtilities::Max( size_t( std::floor( std::log2( ui32NewW ) ) ), size_t( std::floor( std::log2( ui32NewH ) ) ) );
+					sDstMips = CUtilities::Max( size_t( std::floor( std::log2( ui32NewD ) ) ), sDstMips ) + 1;
 				}
 				else {
 					sDstMips = m_sTotalMips + 1;
@@ -607,7 +607,7 @@ namespace sl2 {
 	 * \return Returns an error code.
 	 **/
 	SL2_ERRORS CImage::ConvertToFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat,
-		size_t _sMip, size_t _sArray, size_t _sFace, std::vector<uint8_t> &_vDst, bool _bInvertY ) {
+		size_t _sMip, size_t _sArray, size_t _sFace, std::vector<uint8_t> &_vDst, bool _bInvertY, bool _bGenPalette, CPalette * _pNewPalette ) {
 		if ( !_pkifFormat || !Format() ) { return SL2_E_BADFORMAT; }
 		if ( _sMip >= m_vMipMaps.size() ) { return SL2_E_INVALIDCALL; }
 
@@ -618,7 +618,7 @@ namespace sl2 {
 			_vDst.resize( size_t( ui64BaseSize ) );
 		}
 		catch ( ... ) { SL2_E_OUTOFMEMORY; }
-		return ConvertToFormat( _pkifFormat, _sMip, _sArray, _sFace, _vDst.data(), _bInvertY );
+		return ConvertToFormat( _pkifFormat, _sMip, _sArray, _sFace, _vDst.data(), _bInvertY, _bGenPalette, _pNewPalette );
 	}
 
 	/**
@@ -633,7 +633,7 @@ namespace sl2 {
 	 * \return Returns an error code.
 	 **/
 	SL2_ERRORS CImage::ConvertToFormat( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat,
-		size_t _sMip, size_t _sArray, size_t _sFace, uint8_t * _pui8Dst, bool _bInvertY ) {
+		size_t _sMip, size_t _sArray, size_t _sFace, uint8_t * _pui8Dst, bool _bInvertY, bool _bGenPalette, CPalette * _pNewPalette ) {
 		if ( !_pkifFormat || !Format() ) { return SL2_E_BADFORMAT; }
 		if ( _sMip >= m_vMipMaps.size() ) { return SL2_E_INVALIDCALL; }
 
@@ -703,12 +703,16 @@ namespace sl2 {
 		if ( SL2_GET_IDX_FLAG( _pkifFormat->ui32Flags ) ) {
 			// Converting to an indexed format?  May need to generate a palette.
 			size_t sMax = size_t( 1ULL << _pkifFormat->ui32BlockSizeInBits );
-			if ( m_bGenPalette || Palette().Palette().size() == 0 || Palette().Palette().size() > sMax ) {
+			if ( m_bGenPalette || Palette().Palette().size() == 0 || Palette().Palette().size() > sMax || _bGenPalette ) {
 				uint64_t ui64Total = ui64BaseSize / sizeof( CFormat::SL2_RGBA64F );
 				if ( ui64Total ) {
 					if ( !GeneratePalette( vTmp.data(), ui64Total, uint32_t( sMax ) ) ) { return SL2_E_OUTOFMEMORY; }
 				}
 			}
+		}
+
+		if ( _pNewPalette ) {
+			(*_pNewPalette) = m_pPalette.Palette();
 		}
 
 		ifdData = (*_pkifFormat);
@@ -859,8 +863,8 @@ namespace sl2 {
 	bool CImage::AllocateTexture( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, size_t _sMips, size_t _sArray, size_t _sFaces ) {
 		if ( !_pkifFormat ) { return false; }
 		if ( !_sMips ) {
-			_sMips = CUtilities::Max( size_t( std::round( std::log2( _ui32Width ) ) ), size_t( std::round( std::log2( _ui32Height ) ) ) );
-			_sMips = CUtilities::Max( size_t( std::round( std::log2( _ui32Depth ) ) ), _sMips ) + 1;
+			_sMips = CUtilities::Max( size_t( std::floor( std::log2( _ui32Width ) ) ), size_t( std::floor( std::log2( _ui32Height ) ) ) );
+			_sMips = CUtilities::Max( size_t( std::floor( std::log2( _ui32Depth ) ) ), _sMips ) + 1;
 		}
 		if ( !_sMips ) { return false; }
 		

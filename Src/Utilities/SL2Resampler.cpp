@@ -64,10 +64,10 @@ namespace sl2 {
 		std::vector<double> dBufferG;
 		std::vector<double> dBufferB;
 		std::vector<double> dBufferA;
-		/*std::vector<double> dBufferR2;
+		std::vector<double> dBufferR2;
 		std::vector<double> dBufferG2;
 		std::vector<double> dBufferB2;
-		std::vector<double> dBufferA2;*/
+		std::vector<double> dBufferA2;
 
 		uint32_t ui32NewW = std::max( 1U, _pParms.ui32NewW );
 		uint32_t ui32NewH = std::max( 1U, _pParms.ui32NewH );
@@ -83,13 +83,15 @@ namespace sl2 {
 			if ( _pParms.bAlpha ) {
 				dBufferA.resize( sSize );
 			}
-			/*sSize = ui32NewW * ui32NewH * ui32D;
-			dBufferR2.resize( sSize );
-			dBufferG2.resize( sSize );
-			dBufferB2.resize( sSize );
-			if ( _pParms.bAlpha ) {
-				dBufferA2.resize( sSize );
-			}*/
+			if ( ui32D > 1 || ui32NewD > 1 ) {
+				sSize = ui32NewW * ui32NewH * ui32D;
+				dBufferR2.resize( sSize );
+				dBufferG2.resize( sSize );
+				dBufferB2.resize( sSize );
+				if ( _pParms.bAlpha ) {
+					dBufferA2.resize( sSize );
+				}
+			}
 		}
 		catch ( ... ) { return false; }
 
@@ -134,7 +136,7 @@ namespace sl2 {
 		sNewPagesSize = ui32NewW * ui32NewH;
 		uint32_t tW = ui32H;
 		uint32_t tH = ui32NewW;
-		//double * pdDst2[4] = { dBufferR2.data(), dBufferG2.data(), dBufferB2.data(), dBufferA2.data() };
+		double * pdDst2[4] = { dBufferR2.data(), dBufferG2.data(), dBufferB2.data(), dBufferA2.data() };
 		for ( size_t I = 0; I < (_pParms.bAlpha ? 4 : 3); ++I ) {
 			if ( I == 3 ) {
 				// Alpha channel.
@@ -161,6 +163,8 @@ namespace sl2 {
 							dConvolved = ConvolveAligned( m_cContribs[W].dContributions.data(), m_dBuffer.data(), m_cContribs[W].dContributions.size() );
 						}
 						if ( ui32D > 1 || ui32NewD > 1 ) {
+							size_t sDstIdx = ((ui32NewW * ui32D) * H) + (W * ui32D) + D;
+							pdDst2[I][sDstIdx] = dConvolved;
 						}
 						else {
 							size_t sDstIdx = ((sNewPagesSize * D) + (W * ui32NewW) + H) * 4 + I;
@@ -173,7 +177,8 @@ namespace sl2 {
 
 		if ( ui32D > 1 || ui32NewD > 1 ) {
 		}
-		else {
+
+		{
 			// Add alpha to the output.
 			if ( !_pParms.bAlpha ) {
 				sPagesSize = sNewPagesSize;
