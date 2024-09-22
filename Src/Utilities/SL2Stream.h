@@ -384,6 +384,13 @@ namespace sl2 {
 		 **/
 		inline size_t								Remaining() const { return m_vStream.size() - m_stPos; }
 
+		/**
+		 * Gets the current position of the stream.
+		 *
+		 * \return Returns the current position of the stream.
+		 **/
+		inline size_t								Pos() const { return m_stPos; }
+
 
 
 	protected :
