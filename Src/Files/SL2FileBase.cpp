@@ -116,35 +116,40 @@ namespace sl2 {
 	 **/
 	std::vector<std::u16string> & CFileBase::FindFiles( const char16_t * _pcFolderPath, const char16_t * _pcSearchString, bool _bIncludeFolders, std::vector<std::u16string> &_vResult ) {
 #ifdef SL2_WINDOWS
-		std::u16string sPath = CUtilities::Replace( _pcFolderPath, u'/', u'\\' );
-		while ( sPath.size() && sPath[sPath.size()-1] == u'\\' ) { sPath.pop_back(); }
-		sPath.push_back( u'\\' );
-		std::u16string sSearch;
-		if ( _pcSearchString ) {
-			sSearch = CUtilities::Replace( _pcSearchString, u'/', u'\\' );
-			while ( sSearch[0] == u'\\' ) {
-				sSearch.erase( sSearch.begin() );
-			}
-		}
-		else {
-			sSearch = u"*";
-		}
+		std::filesystem::path sPath = std::filesystem::path( _pcFolderPath ).make_preferred();
+
+		std::filesystem::path sSearch;
+		if ( _pcSearchString ) { sSearch = std::filesystem::path( _pcSearchString ).make_preferred(); }
+		else { sSearch = L"*"; }
 
 
-		std::u16string sSearchPath = sPath + sSearch;
-		/*if ( sSearchPath.FindString( 0, L"\\\\?\\" ).ui32Start != 0 ) {
-			if ( !sSearchPath.Insert( 0, L"\\\\?\\" ) ) { return false; }
-		}*/
+		std::filesystem::path sSearchPath = (sPath / sSearch).make_preferred();
+		// Add the "\\?\" prefix to the path to support long paths
+		std::wstring wsSearchPath = sSearchPath.native();
+		if ( wsSearchPath.compare( 0, 4, L"\\\\?\\" ) != 0 ) {
+			wsSearchPath = L"\\\\?\\" + wsSearchPath;
+		}
+
 		WIN32_FIND_DATAW wfdData;
-		HANDLE hDir = ::FindFirstFileW( reinterpret_cast<LPCWSTR>(sSearchPath.c_str()), &wfdData );
+		HANDLE hDir = ::FindFirstFileW( wsSearchPath.c_str(), &wfdData );
 		if ( INVALID_HANDLE_VALUE == hDir ) { return _vResult; }
 		
 		do {
-			if ( wfdData.cFileName[0] == u'.' ) { continue; }
+			if ( wfdData.cFileName[0] == L'.' ) { continue; }
 			bool bIsFolder = ((wfdData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0);
 			if ( !_bIncludeFolders && bIsFolder ) { continue; }
 			try {
-				_vResult.push_back( sPath + reinterpret_cast<const char16_t *>(wfdData.cFileName) );
+				// Construct the full path to the file
+				std::filesystem::path pFilePath = sPath / wfdData.cFileName;
+				pFilePath = pFilePath.make_preferred();
+
+				// Add the "\\?\" prefix if it's not already present
+				std::u16string wsFilePath = pFilePath.u16string();
+				if ( wsFilePath.compare( 0, 4, u"\\\\?\\" ) != 0 ) {
+					wsFilePath = u"\\\\?\\" + wsFilePath;
+				}
+
+				_vResult.push_back( wsFilePath );
 			}
 			catch ( ... ) {
 				::FindClose( hDir );
@@ -154,6 +159,45 @@ namespace sl2 {
 
 		::FindClose( hDir );
 		return _vResult;
+
+		//std::u16string sPath = CUtilities::Replace( _pcFolderPath, u'/', u'\\' );
+		//while ( sPath.size() && sPath[sPath.size()-1] == u'\\' ) { sPath.pop_back(); }
+		//sPath.push_back( u'\\' );
+		//std::u16string sSearch;
+		//if ( _pcSearchString ) {
+		//	sSearch = CUtilities::Replace( _pcSearchString, u'/', u'\\' );
+		//	while ( sSearch[0] == u'\\' ) {
+		//		sSearch.erase( sSearch.begin() );
+		//	}
+		//}
+		//else {
+		//	sSearch = u"*";
+		//}
+
+
+		//std::u16string sSearchPath = sPath + sSearch;
+		///*if ( sSearchPath.FindString( 0, L"\\\\?\\" ).ui32Start != 0 ) {
+		//	if ( !sSearchPath.Insert( 0, L"\\\\?\\" ) ) { return false; }
+		//}*/
+		//WIN32_FIND_DATAW wfdData;
+		//HANDLE hDir = ::FindFirstFileW( reinterpret_cast<LPCWSTR>(sSearchPath.c_str()), &wfdData );
+		//if ( INVALID_HANDLE_VALUE == hDir ) { return _vResult; }
+		//
+		//do {
+		//	if ( wfdData.cFileName[0] == u'.' ) { continue; }
+		//	bool bIsFolder = ((wfdData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0);
+		//	if ( !_bIncludeFolders && bIsFolder ) { continue; }
+		//	try {
+		//		_vResult.push_back( sPath + reinterpret_cast<const char16_t *>(wfdData.cFileName) );
+		//	}
+		//	catch ( ... ) {
+		//		::FindClose( hDir );
+		//		return _vResult;
+		//	}
+		//} while ( ::FindNextFileW( hDir, &wfdData ) );
+
+		//::FindClose( hDir );
+		//return _vResult;
 #else
 #error "CFileBase::FindFiles() unimplemented!"
 #endif	// #ifdef SL2_WINDOWS

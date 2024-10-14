@@ -2267,6 +2267,141 @@ namespace sl2 {
 	}
 
 	/**
+	 * Loads a Phoenix BMP file from memory.
+	 * 
+	 * \param _vData The file to load.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS CImage::LoadPBmp( const std::vector<uint8_t> &_vData ) {
+		CStream sFile( _vData );
+
+
+		if ( _vData.size() < sizeof( SL2_CHUNK ) ) { return SL2_E_INVALIDFILETYPE; }
+		SL2_CHUNK_EX cFile;
+		if ( !sFile.Read( cFile ) ) { return SL2_E_INVALIDFILETYPE; }
+		if ( cFile.ui32Name != 0x504D4250 ) { return SL2_E_INVALIDFILETYPE; }														// PBMP.
+		if ( cFile.ui32Size > _vData.size() ) { return SL2_E_INVALIDFILETYPE; }
+
+
+		const SL2_HEAD_CHUNK * pcHeader = NULL;
+		const SL2_CHUNK_EX * pcData = NULL;
+		const SL2_DETL_CHUNK * pcDetl = NULL;
+		const SL2_PIDX_CHUNK * pcPidX = NULL;
+		const SL2_CHUNK_EX * pcRiff = NULL;
+		bool bContinue = true;
+		while ( bContinue ) {
+			const SL2_CHUNK * pcThis = reinterpret_cast<const SL2_CHUNK *>(_vData.data() + sFile.Pos());
+			if ( (sizeof( SL2_CHUNK ) + pcThis->ui32Size) > (_vData.size() - sFile.Pos()) ) { return SL2_E_INVALIDFILETYPE; }
+			switch ( pcThis->ui32Name ) {
+				case 0x64616568 : {																					// head.
+					pcHeader = reinterpret_cast<const SL2_HEAD_CHUNK *>(_vData.data() + sFile.Pos());
+					break;
+				}
+				case 0x61746164 : {																					// data.
+					pcData = reinterpret_cast<const SL2_CHUNK_EX *>(_vData.data() + sFile.Pos());
+					break;
+				}
+				case 0x4C544544 : {																					// DETL.
+					pcDetl = reinterpret_cast<const SL2_DETL_CHUNK *>(_vData.data() + sFile.Pos());
+					break;
+				}
+				case 0x58446950 : {																					// PiDX.
+					pcPidX = reinterpret_cast<const SL2_PIDX_CHUNK *>(_vData.data() + sFile.Pos());
+					break;
+				}
+				default : {
+					bContinue = false;
+					break;
+				}
+			}
+			if ( !sFile.Read( nullptr, sizeof( SL2_CHUNK ) + pcThis->ui32Size ) ) { return SL2_E_INVALIDFILETYPE; }
+		}
+
+
+		if ( pcHeader == NULL ) { return SL2_E_INVALIDFILETYPE; }
+		if ( pcDetl == NULL ) { return SL2_E_INVALIDFILETYPE; }
+		if ( pcPidX == NULL ) { return SL2_E_INVALIDFILETYPE; }
+		if ( pcData == NULL ) { return SL2_E_INVALIDFILETYPE; }
+
+
+		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * pkifdFormat = nullptr;
+		switch ( pcHeader->ui32BitDepth ) {
+			case 1 : {
+				pkifdFormat = CFormat::FindFormatDataByOgl( SL2_GL_COLOR_INDEX1_EXT );
+				break;
+			}
+			case 2 : {
+				pkifdFormat = CFormat::FindFormatDataByOgl( SL2_GL_COLOR_INDEX2_EXT );
+				break;
+			}
+			case 4 : {
+				pkifdFormat = CFormat::FindFormatDataByOgl( SL2_GL_COLOR_INDEX4_EXT );
+				break;
+			}
+			case 8 : {
+				pkifdFormat = CFormat::FindFormatDataByOgl( SL2_GL_COLOR_INDEX8_EXT );
+				break;
+			}
+			default : { return SL2_E_INVALIDFILETYPE; }
+		}
+
+		uint32_t ui32Mips = 1;
+		if ( pcDetl->ui32MipLevels == 0 ) { return SL2_E_INVALIDFILETYPE; }
+		if ( pcDetl->ui32MipLevels > 1 ) {
+			uint32_t ui32MaxMipsW = static_cast<uint32_t>(std::floor( std::log2( pcHeader->ui32Width ) + 1.0 ));
+			uint32_t ui32MaxMipsH = static_cast<uint32_t>(std::floor( std::log2( pcHeader->ui32Height ) + 1.0 ));
+			ui32Mips = std::min( std::min( ui32MaxMipsW, ui32MaxMipsH ), pcDetl->ui32MipLevels );
+			//if ( !_vMipMaps.Resize( ui32Mips - 1 ) ) { return false; }
+		}
+
+		if ( !AllocateTexture( pkifdFormat,
+			pcHeader->ui32Width, pcHeader->ui32Height, 1,
+			ui32Mips, 1, 1 ) ) { return SL2_E_OUTOFMEMORY; }
+		//Palette().SetFormat( CFormat::FindPaletteFormatData( SL2_GL_PALETTE8_RGB8_OES ) );
+
+
+		const uint8_t * pui8Src = pcData->ui8Data;
+		uint32_t ui32SizeRem = pcData->ui32Size;
+		for ( uint32_t I = 0; I < ui32Mips; ++I ) {
+			uint32_t ui32W = pcHeader->ui32Width >> I;
+			if ( !ui32W ) { return SL2_E_INVALIDFILETYPE; }
+			uint32_t ui32H = pcHeader->ui32Height >> I;
+			if ( !ui32H ) { return SL2_E_INVALIDFILETYPE; }
+			uint32_t ui32ThisSize = ((ui32W * ui32H * pcHeader->ui32BitDepth >> 3) + 3) & ~3;
+
+			auto pui8Dst = Data( I );
+			if ( ui32SizeRem < ui32ThisSize ) { return SL2_E_INVALIDFILETYPE; }
+
+			uint64_t ui64DestRowWidth = CFormat::GetRowSize( Format(), ui32W );
+
+			constexpr bool bReverse = true;
+			switch ( pcHeader->ui32BitDepth ) {
+				case 8 : {
+					for ( uint32_t Y = 0; Y < ui32H; ++Y ) {
+						uint32_t ui32YOff = Y * ui32W;
+
+						// This line is what handles reverse-encoded bitmaps.
+						uint64_t ui64YOffDest = bReverse ? Y * ui64DestRowWidth :
+							(ui32H - Y - 1) * ui64DestRowWidth;
+
+						uint8_t * pui8Dest = &pui8Dst[ui64YOffDest];
+						for ( uint32_t X = 0; X < ui32W; ++X ) {
+							pui8Dest[X] = pui8Src[ui32YOff+X];
+						}
+					}
+					break;
+				}
+				default : { return SL2_E_INVALIDFILETYPE; }
+			}
+
+
+			pui8Src += ui32ThisSize;
+			ui32SizeRem -= ui32ThisSize;
+		}
+		return SL2_E_SUCCESS;
+	}
+
+	/**
 	 * Callback to load each face's data from a KTX file.
 	 *
 	 * \param _iMipLevel Mipmap level, starting from 0.

@@ -203,6 +203,46 @@ namespace sl2 {
 		} * LPSL2_BITMAPPALETTE, * const LPCSL2_BITMAPPALETTE;
 #pragma pack( pop )
 
+				/** A chunk header. */
+		struct SL2_CHUNK {
+#pragma pack( push, 1 )
+			uint32_t										ui32Name;				/**< The chunk name. */
+			uint32_t										ui32Size;				/**< The chunk size. */
+#pragma pack( pop )
+		};
+
+		/** A chunk and its data. */
+		struct SL2_CHUNK_EX : public SL2_CHUNK {
+#pragma pack( push, 1 )
+			uint8_t											ui8Data[1];				/**< The beginning of the chunk data. */
+#pragma pack( pop )
+		};
+
+		/** A "head" chunk. */
+		struct SL2_HEAD_CHUNK : public SL2_CHUNK {
+#pragma pack( push, 1 )
+			uint32_t										ui32Version;			/**< The file version. */
+			uint32_t										ui32Width;				/**< The image (mip 0) width. */
+			uint32_t										ui32Height;				/**< The image height (mip 0). */
+			uint32_t										ui32BitDepth;			/**< The image bit depth (should always be 8). */
+			uint32_t										ui32Attribute;			/**< Image attributes. */
+#pragma pack( pop )
+		};
+
+		/** A "DETL" chunk. */
+		struct SL2_DETL_CHUNK : public SL2_CHUNK {
+#pragma pack( push, 1 )
+			uint32_t										ui32MipLevels;			/**< The number of mip levels, including the base level mip 0. */
+#pragma pack( pop )
+		};
+
+		/** A "PiDX" chunk. */
+		struct SL2_PIDX_CHUNK : public SL2_CHUNK {
+#pragma pack( push, 1 )
+			uint32_t										ui32PalIdx;				/**< If there is no RIFF chunk, this must exist to locate a palette within the palette database. */
+#pragma pack( pop )
+		};
+
 
 		// == Operators.
 		/**
@@ -842,6 +882,14 @@ namespace sl2 {
 		 * \return Returns an error code.
 		 **/
 		SL2_ERRORS											LoadBmp( const std::vector<uint8_t> &_vData );
+
+		/**
+		 * Loads a Phoenix BMP file from memory.
+		 * 
+		 * \param _vData The file to load.
+		 * \return Returns an error code.
+		 **/
+		SL2_ERRORS											LoadPBmp( const std::vector<uint8_t> &_vData );
 
 		/**
 		 * Callback to load each face's data from a KTX file.

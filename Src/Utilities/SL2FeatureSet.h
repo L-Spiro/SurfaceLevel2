@@ -115,6 +115,8 @@ namespace sl2 {
         static bool                     AVX512BW() { return m_iiCpuRep.m_bEbx7[30]; }
         static bool                     AVX512VL() { return m_iiCpuRep.m_bEbx7[31]; }
 
+        static bool                     AVX512BF16() { return m_iiCpuRep.m_bEax7_1[5]; }
+
         static bool                     PREFETCHWT1() { return m_iiCpuRep.m_bEcx7[0]; }
 
         static bool                     LAHF() { return m_iiCpuRep.m_bEcx81[0]; }
@@ -190,6 +192,16 @@ namespace sl2 {
                     m_bEcx7 = m_vData[7][2];
                 }
 
+                // Query CPUID.(EAX=07H, ECX=1) for AVX-512 BF16 support
+                if ( m_iNumIds >= 7 ) {
+                    std::array<int, 4> aCpuI2;
+                    __cpuidex( aCpuI2.data(), 7, 1 );
+                    m_bEax7_1 = aCpuI2[0];
+                    m_bEbx7_1 = aCpuI2[1];
+                    m_bEcx7_1 = aCpuI2[2];
+                    m_bEdx7_1 = aCpuI2[3];
+                }
+
                 // Calling __cpuid with 0x80000000 as the function_id argument
                 // gets the number of the highest valid extended ID.
                 __cpuid( aCpuI.data(), 0x80000000 );
@@ -230,6 +242,12 @@ namespace sl2 {
             std::bitset<32>                 m_bEdx1;
             std::bitset<32>                 m_bEbx7;
             std::bitset<32>                 m_bEcx7;
+
+            std::bitset<32>                 m_bEax7_1;
+            std::bitset<32>                 m_bEbx7_1;
+            std::bitset<32>                 m_bEcx7_1;
+            std::bitset<32>                 m_bEdx7_1;
+
             std::bitset<32>                 m_bEcx81;
             std::bitset<32>                 m_bEdx81;
             std::vector<std::array<int, 4>> m_vData;
