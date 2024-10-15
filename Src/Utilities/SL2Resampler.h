@@ -166,7 +166,7 @@ namespace sl2 {
 		 * \return Returns happiness.
 		 */
 		static inline double									Bessel0( double _dX ) {
-			static const double dEspiRatio = 1.0e-16;
+			constexpr double dEspiRatio = 1.0e-16;
 			double dSum = 1.0, dPow = 1.0, dDs = 1.0, dXh = _dX * 0.5;
 			uint32_t ui32K = 0;
 
@@ -229,9 +229,16 @@ namespace sl2 {
 		 * \return Returns happiness.
 		 */
 		static inline double									BlackmanWindow( double _dX ) {
-			constexpr double dA0 = 7938.0 / 18608.0;	// 0.42659071367153911236158592146239243447780609130859375
-			constexpr double dA1 = 9240.0 / 18608.0;	// 0.4965606190885640813803547644056379795074462890625
-			constexpr double dA2 = 1430.0 / 18608.0;	// 0.07684866723989682013584712194642634131014347076416015625
+			// These exact values place zeros at the third and fourth sidelobes, but result in a discontinuity at the edges and a 6 dB/oct fall-off.
+			//constexpr double dA0 = 7938.0 / 18608.0;	// 0.42659071367153911236158592146239243447780609130859375
+			//constexpr double dA1 = 9240.0 / 18608.0;	// 0.4965606190885640813803547644056379795074462890625
+			//constexpr double dA2 = 1430.0 / 18608.0;	// 0.07684866723989682013584712194642634131014347076416015625
+			
+			// The truncated coefficients do not null the sidelobes as well, but have an improved 18 dB/oct fall-off.
+			constexpr double dA = 0.16;
+			constexpr double dA0 = (1.0 - dA) / 2.0;	// 0.419999999999999984456877655247808434069156646728515625
+			constexpr double dA1 = 1.0 / 2.0;			// 0.5
+			constexpr double dA2 = dA / 2.0;			// 0.08000000000000000166533453693773481063544750213623046875
 			return dA0 + dA1 * std::cos( std::numbers::pi * _dX ) + dA2 * std::cos( 2.0 * std::numbers::pi * _dX );
 		}
 
