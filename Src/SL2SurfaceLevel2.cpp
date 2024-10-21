@@ -6,6 +6,8 @@
  * Description: Let's convert and modify textures!
  */
 
+#ifndef SL2_LIB
+
 #include "SL2SurfaceLevel2.h"
 #include "Files/SL2StdFile.h"
 #include "Image/detex/misc.h"
@@ -4558,3 +4560,5 @@ namespace sl2 {
     }
 
 }   // namespace sl2
+
+#endif  // #ifndef SL2_LIB

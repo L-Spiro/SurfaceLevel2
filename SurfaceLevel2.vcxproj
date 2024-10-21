@@ -5,6 +5,22 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="LibDebug|Win32">
+      <Configuration>LibDebug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="LibDebug|x64">
+      <Configuration>LibDebug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="LibRelease|Win32">
+      <Configuration>LibRelease</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="LibRelease|x64">
+      <Configuration>LibRelease</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
@@ -181,12 +197,18 @@
     <ClCompile Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='LibDebug|Win32'">
+      </ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='LibDebug|x64'">
       </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Src\Image\KTX-Software\lib\basisu\zstd\zstd.c" />
     <ClCompile Include="Src\Image\KTX-Software\lib\basis_transcode.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='LibDebug|x64'">
       </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Src\Image\KTX-Software\lib\checkheader.c" />
@@ -255,9 +277,13 @@
     <ClCompile Include="Src\Image\Squish\squish.cpp" />
     <ClCompile Include="Src\SL2SurfaceLevel2.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='LibDebug|Win32'">KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='LibRelease|Win32'">KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='LibDebug|x64'">KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='LibRelease|x64'">KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="Src\Thread\SL2Events.cpp" />
     <ClCompile Include="Src\Time\SL2Clock.cpp" />
@@ -269,37 +295,61 @@
   <ItemGroup>
     <CustomBuild Include="Src\Image\ISPC\kernel.ispc">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='LibDebug|Win32'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='LibDebug|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='LibRelease|Win32'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='LibRelease|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='LibDebug|x64'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='LibDebug|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='LibRelease|x64'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='LibRelease|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="Src\Image\ISPC\kernel_astc.ispc">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='LibDebug|Win32'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='LibDebug|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='LibRelease|Win32'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='LibRelease|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='LibDebug|x64'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='LibDebug|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='LibRelease|x64'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='LibRelease|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
     </CustomBuild>
     <None Include="Src\Image\astc-encoder\astcenccli_version.h.in" />
     <CustomBuild Include="Src\Image\ISPC\cielab.ispc">
       <FileType>Document</FileType>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='LibDebug|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='LibRelease|Win32'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='LibDebug|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(SolutionDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='LibRelease|x64'">$(ProjectDir)$(Platform)\$(Configuration)\%(Filename).obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse2.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_sse4.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx.obj;$(ProjectDir)$(Platform)\$(Configuration)\%(Filename)_avx2.obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='LibDebug|x64'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='LibRelease|x64'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='LibDebug|Win32'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='LibRelease|Win32'">"$(ProjectDir)ISPC\ispc.exe" -O2 "%(FullPath)" -o "$(Platform)\$(Configuration)\%(Filename).obj" -h "$(ProjectDir)Src\Image\Ispc\%(Filename)_ispc.h" --arch=x86 --target=sse2,sse4,avx,avx2 --opt=fast-math</Command>
     </CustomBuild>
     <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_astc.inc" />
     <None Include="Src\Image\KTX-Software\lib\basisu\transcoder\basisu_transcoder_tables_astc_0_255.inc" />
@@ -329,8 +379,21 @@
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LibDebug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LibRelease|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -342,8 +405,21 @@
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LibDebug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LibRelease|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -357,13 +433,25 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LibDebug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LibRelease|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LibDebug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LibRelease|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -371,15 +459,59 @@
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LibDebug|Win32'">
+    <OutDir>$(SolutionDir)$(Platform)\Debug\</OutDir>
+    <IntDir>$(Platform)\Debug\</IntDir>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LibRelease|Win32'">
+    <OutDir>$(SolutionDir)$(Platform)\Release\</OutDir>
+    <IntDir>$(Platform)\Release\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LibRelease|x64'">
+    <IntDir>$(Platform)\Release\</IntDir>
+    <OutDir>$(SolutionDir)$(Platform)\Release\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LibDebug|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\Debug\</OutDir>
+    <IntDir>$(Platform)\Debug\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>CMS_NO_REGISTER_KEYWORD;__AVX512BW__=1;__AVX512F__=1;__AVX2__=1;__AVX__=1;__SSE4_1__=1;BASISU_NO_ITERATOR_DEBUG_LEVEL;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <StringPooling>true</StringPooling>
+      <OpenMPSupport>true</OpenMPSupport>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)$(Platform)\$(Configuration)\FreeImage.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibOpenJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibPNG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibRaw.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibTIFF4.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibWebP.lib;$(ProjectDir)$(Platform)\$(Configuration)\OpenEXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\ZLib.lib;$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <StackReserveSize>
+      </StackReserveSize>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.dll" "$(SolutionDir)$(Platform)\$(Configuration)\PVRTexLib.dll"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='LibDebug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>SL2_LIB;CMS_NO_REGISTER_KEYWORD;__AVX512BW__=1;__AVX512F__=1;__AVX2__=1;__AVX__=1;__SSE4_1__=1;BASISU_NO_ITERATOR_DEBUG_LEVEL;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
@@ -434,11 +566,70 @@
       <Command>copy "$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.dll" "$(SolutionDir)$(Platform)\$(Configuration)\PVRTexLib.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='LibRelease|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>SL2_LIB;CMS_NO_REGISTER_KEYWORD;__AVX512BW__=1;__AVX512F__=1;__AVX2__=1;__AVX__=1;__SSE4_1__=1;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <OpenMPSupport>true</OpenMPSupport>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)$(Platform)\$(Configuration)\FreeImage.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibOpenJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibPNG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibRaw.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibTIFF4.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibWebP.lib;$(ProjectDir)$(Platform)\$(Configuration)\OpenEXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\ZLib.lib;$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <StackReserveSize>
+      </StackReserveSize>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.dll" "$(SolutionDir)$(Platform)\$(Configuration)\PVRTexLib.dll"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>CMS_NO_REGISTER_KEYWORD;__AVX512BW__=1;__AVX512F__=1;__AVX2__=1;__AVX__=1;__SSE4_1__=1;BASISU_NO_ITERATOR_DEBUG_LEVEL;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <StringPooling>true</StringPooling>
+      <OpenMPSupport>true</OpenMPSupport>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)$(Platform)\$(Configuration)\FreeImage.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibOpenJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibPNG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibRaw.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibTIFF4.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibWebP.lib;$(ProjectDir)$(Platform)\$(Configuration)\OpenEXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\ZLib.lib;$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <StackReserveSize>
+      </StackReserveSize>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.dll" "$(SolutionDir)$(Platform)\$(Configuration)\PVRTexLib.dll"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='LibDebug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>SL2_LIB;CMS_NO_REGISTER_KEYWORD;__AVX512BW__=1;__AVX512F__=1;__AVX2__=1;__AVX__=1;__SSE4_1__=1;BASISU_NO_ITERATOR_DEBUG_LEVEL;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
@@ -469,6 +660,37 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>CMS_NO_REGISTER_KEYWORD;__AVX512BW__=1;__AVX512F__=1;__AVX2__=1;__AVX__=1;__SSE4_1__=1;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <OpenMPSupport>true</OpenMPSupport>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)$(Platform)\$(Configuration)\FreeImage.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibJXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibOpenJPEG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibPNG.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibRaw.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibTIFF4.lib;$(ProjectDir)$(Platform)\$(Configuration)\LibWebP.lib;$(ProjectDir)$(Platform)\$(Configuration)\OpenEXR.lib;$(ProjectDir)$(Platform)\$(Configuration)\ZLib.lib;$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <StackReserveSize>
+      </StackReserveSize>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(ProjectDir)PVRTC\Windows_$(Platform)\PVRTexLib.dll" "$(SolutionDir)$(Platform)\$(Configuration)\PVRTexLib.dll"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='LibRelease|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>SL2_LIB;CMS_NO_REGISTER_KEYWORD;__AVX512BW__=1;__AVX512F__=1;__AVX2__=1;__AVX__=1;__SSE4_1__=1;KTX_FEATURE_WRITE=1;KHRONOS_STATIC;_LIB;OPJ_STATIC;LIBRAW_NODLL;FREEIMAGE_LIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);STBI_NO_STDIO</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)Src\Image\Squish;$(ProjectDir)Src\Image\FreeImage\Source;$(ProjectDir)Src\Image\KTX-Software\include;$(ProjectDir)Src\Image\KTX-Software\lib\dfdutils;$(ProjectDir)Src\Image\KTX-Software\utils;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\zstd;$(ProjectDir)Src\Image\KTX-Software\lib\basisu\transcoder</AdditionalIncludeDirectories>
