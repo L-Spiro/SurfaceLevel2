@@ -65,9 +65,12 @@ namespace sl2 {
 		/**
 		 * Reallocates
 		 * 
-		 * \param PARM DESC
-		 * \param PARM DESC
-		 * \return DESC
+		 * \param _sAllocSize The actual size to allocate, which may include some extra overflow bytes.
+		 * \param _sBaseSize The actual size of the allocated surface.
+		 * \param _ui32W Width of the surface.
+		 * \param _ui32H Height of the surface.
+		 * \param _ui32D Depth of the surface.
+		 * \return Returns true if the allocation succeeds.
 		 **/
 		inline bool										Reallocate( size_t _sAllocSize, size_t _sBaseSize, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D ) {
 			try {

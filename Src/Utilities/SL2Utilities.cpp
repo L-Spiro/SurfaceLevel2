@@ -77,7 +77,8 @@ namespace sl2 {
 			return wsOutput;
 		}
 		if ( _pbErrored != nullptr ) { (*_pbErrored) = false; }
-		while ( wsOutput.size() && !wsOutput[wsOutput.size()-1] ) { wsOutput.pop_back(); }
+		int32_t I = 10;
+		while ( wsOutput.size() && !wsOutput[wsOutput.size()-1] && I-- ) { wsOutput.pop_back(); }
 		return wsOutput;
 #else
 		// Visual Studio reports these as deprecated since C++17.
@@ -112,7 +113,8 @@ namespace sl2 {
 			return sOutput;
 		}
 		if ( _pbErrored != nullptr ) { (*_pbErrored) = false; }
-		while ( sOutput.size() && !sOutput[sOutput.size()-1] ) { sOutput.pop_back(); }
+		int32_t I = 10;
+		while ( sOutput.size() && !sOutput[sOutput.size()-1] && I-- ) { sOutput.pop_back(); }
 		return sOutput;
 #else
 		// Visual Studio reports these as deprecated since C++17.

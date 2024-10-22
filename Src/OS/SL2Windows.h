@@ -119,5 +119,43 @@ inline uint64_t SL2_FASTCALL _udiv128( uint64_t _ui64High, uint64_t _ui64Low, ui
 
 #endif  // #ifndef SL2_WIN64
 
+extern "C" {
+
+#if defined( _M_AMD64 )
+extern void sincos( double _dAngle, double * _pdSin, double * _pdCos );
+extern void sincosf( float _fAngle, float * _pfSin, float * _pfCos );
+#else
+
+// 32 bit implementation in inline assembly
+inline void sincos( double _dAngle, double * _pdSin, double * _pdCos ) {
+	double dSin, dCos;
+	__asm {
+		fld QWORD PTR[_dAngle]
+		fsincos
+		fstp QWORD PTR[dCos]
+		fstp QWORD PTR[dSin]
+		fwait
+	}
+	(*_pdSin) = dSin;
+	(*_pdCos) = dCos;
+}
+
+inline void sincosf( float _fAngle, float * _pfSin, float * _pfCos ) {
+    float fSin, fCos;
+    __asm {
+        fld DWORD PTR[_fAngle]		// Load the 32-bit float into the FPU stack.
+        fsincos						// Compute cosine and sine.
+        fstp DWORD PTR[fCos]		// Store the cosine value.
+        fstp DWORD PTR[fSin]		// Store the sine value.
+        fwait						// Wait for the FPU to finish.
+    }
+    (*_pfSin) = fSin;
+    (*_pfCos) = fCos;
+}
+
+#endif
+
+}	// extern "C"
+
 #endif	// #ifdef SL2_WINDOWS
 

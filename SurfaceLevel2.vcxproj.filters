@@ -160,6 +160,9 @@
     <Filter Include="Source Files\Image\Little-CMS\src">
       <UniqueIdentifier>{8b64bcc4-a05f-45bb-8657-cf977ed6f68d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\OS">
+      <UniqueIdentifier>{571afb6d-cf76-47ec-bb1f-02e3c89e8bbf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\SL2SurfaceLevel2.h">
@@ -900,6 +903,9 @@
     </None>
     <None Include="Src\Image\astc-encoder\astcenccli_version.h.in">
       <Filter>Source Files\Image\astc-encoder</Filter>
+    </None>
+    <None Include="Src\OS\SL2SinCos.asm">
+      <Filter>Source Files\OS</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
