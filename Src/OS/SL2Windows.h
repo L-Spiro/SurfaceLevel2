@@ -141,16 +141,16 @@ inline void sincos( double _dAngle, double * _pdSin, double * _pdCos ) {
 }
 
 inline void sincosf( float _fAngle, float * _pfSin, float * _pfCos ) {
-    float fSin, fCos;
+    float fSinT, fCosT;
     __asm {
         fld DWORD PTR[_fAngle]		// Load the 32-bit float into the FPU stack.
         fsincos						// Compute cosine and sine.
-        fstp DWORD PTR[fCos]		// Store the cosine value.
-        fstp DWORD PTR[fSin]		// Store the sine value.
+        fstp DWORD PTR[fCosT]		// Store the cosine value.
+        fstp DWORD PTR[fSinT]		// Store the sine value.
         fwait						// Wait for the FPU to finish.
     }
-    (*_pfSin) = fSin;
-    (*_pfCos) = fCos;
+    (*_pfSin) = fSinT;
+    (*_pfCos) = fCosT;
 }
 
 #endif
