@@ -121,7 +121,7 @@ inline uint64_t SL2_FASTCALL _udiv128( uint64_t _ui64High, uint64_t _ui64Low, ui
 
 extern "C" {
 
-#if defined( _M_AMD64 )
+#if defined( SL2_WIN64 )
 extern void sincos( double _dAngle, double * _pdSin, double * _pdCos );
 extern void sincosf( float _fAngle, float * _pfSin, float * _pfCos );
 #else
@@ -153,7 +153,7 @@ inline void sincosf( float _fAngle, float * _pfSin, float * _pfCos ) {
     (*_pfCos) = fCosT;
 }
 
-#endif
+#endif	// #if defined( SL2_WIN64 )
 
 }	// extern "C"
 

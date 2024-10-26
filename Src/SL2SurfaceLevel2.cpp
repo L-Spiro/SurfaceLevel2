@@ -30,7 +30,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
     --_iArgC;
     std::u16string sThisDir = sl2::CFileBase::GetFilePath( reinterpret_cast<const char16_t *>((*_wcpArgV++)) );
     ::FreeImage_Initialise();
-    ::FreeImage_SetOutputMessage( FreeImageErrorHandler );
+    ::FreeImage_SetOutputMessage( ::FreeImageErrorHandler );
     sl2::CFormat::Init();
     sl2::SL2_OPTIONS oOptions;
 
