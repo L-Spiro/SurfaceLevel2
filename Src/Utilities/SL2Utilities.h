@@ -24,7 +24,7 @@
 #endif	// #ifndef SL2_ELEMENTS
 
 #ifndef SL2_PI
-#define SL2_PI												3.1415926535897932384626433832795
+#define SL2_PI												3.14159265358979323846264338327950288419716939937510	// All good things in excess.
 #endif	// #ifndef SL2_PI
 
 #ifndef SL2_ROUND_UP
@@ -1344,20 +1344,21 @@ namespace sl2 {
 		 * \return Returns the sum of all the floats in the given register.
 		 **/
 		static inline double								HorizontalSum( __m512d _mReg ) {
+			return _mm512_reduce_add_pd( _mReg );
 			// Step 1: Reduce 512 bits to 256 bits by summing the high and low 256 bits.
-			__m256d mLow256 = _mm512_castpd512_pd256( _mReg );			// Low 256 bits.
-			__m256d mHigh256 = _mm512_extractf64x4_pd( _mReg, 1 );		// High 256 bits.
-			__m256d mSum256 = _mm256_add_pd( mLow256, mHigh256 );		// Add high and low 256-bit parts.
+			//__m256d mLow256 = _mm512_castpd512_pd256( _mReg );			// Low 256 bits.
+			//__m256d mHigh256 = _mm512_extractf64x4_pd( _mReg, 1 );		// High 256 bits.
+			//__m256d mSum256 = _mm256_add_pd( mLow256, mHigh256 );		// Add high and low 256-bit parts.
 
-			// Step 2: Follow the same 256-bit reduction routine.
-			__m256d mShuf = _mm256_permute2f128_pd( mSum256, mSum256, 0x1 );	// Swap low and high 128-bit halves.
-			__m256d mSums = _mm256_add_pd( mSum256, mShuf );					// Add low and high halves.
+			//// Step 2: Follow the same 256-bit reduction routine.
+			//__m256d mShuf = _mm256_permute2f128_pd( mSum256, mSum256, 0x1 );	// Swap low and high 128-bit halves.
+			//__m256d mSums = _mm256_add_pd( mSum256, mShuf );					// Add low and high halves.
 
-			mShuf = _mm256_shuffle_pd( mSums, mSums, 0x5 );						// Swap the pairs of doubles.
-			mSums = _mm256_add_pd( mSums, mShuf );								// Add the pairs.
+			//mShuf = _mm256_shuffle_pd( mSums, mSums, 0x5 );						// Swap the pairs of doubles.
+			//mSums = _mm256_add_pd( mSums, mShuf );								// Add the pairs.
 
-			// Step 3: Extract the scalar value (final sum).
-			return _mm256_cvtsd_f64( mSums );									// Extract the lower double as the sum.
+			//// Step 3: Extract the scalar value (final sum).
+			//return _mm256_cvtsd_f64( mSums );									// Extract the lower double as the sum.
 		}
 
 		/**
@@ -1367,17 +1368,18 @@ namespace sl2 {
 		 * \return Returns the sum of all the floats in the given register.
 		 **/
 		static inline float									HorizontalSum( __m512 _mReg ) {
+			return _mm512_reduce_add_ps( _mReg );
 			// Step 1: Reduce 512 bits to 256 bits by permuting and adding high and low 256 bits.
-			__m256 mLow256 = _mm512_castps512_ps256( _mReg );			// Low 256 bits.
-			__m256 mHigh256 = _mm512_extractf32x8_ps( _mReg, 1 );		// High 256 bits.
-			__m256 mSum256 = _mm256_add_ps( mLow256, mHigh256 );		// Add high and low 256-bit parts.
+			//__m256 mLow256 = _mm512_castps512_ps256( _mReg );			// Low 256 bits.
+			//__m256 mHigh256 = _mm512_extractf32x8_ps( _mReg, 1 );		// High 256 bits.
+			//__m256 mSum256 = _mm256_add_ps( mLow256, mHigh256 );		// Add high and low 256-bit parts.
 
-			// Step 2: Perform horizontal addition on 256 bits.
-			mSum256 = _mm256_hadd_ps( mSum256, mSum256 );				// First horizontal add.
-			mSum256 = _mm256_hadd_ps( mSum256, mSum256 );				// Second horizontal add.
+			//// Step 2: Perform horizontal addition on 256 bits.
+			//mSum256 = _mm256_hadd_ps( mSum256, mSum256 );				// First horizontal add.
+			//mSum256 = _mm256_hadd_ps( mSum256, mSum256 );				// Second horizontal add.
 
-			// Step 3: Extract the lower float which now contains the sum.
-			return _mm256_cvtss_f32( mSum256 );
+			//// Step 3: Extract the lower float which now contains the sum.
+			//return _mm256_cvtss_f32( mSum256 );
 		}
 #endif	// #ifdef __AVX512F__
 
@@ -1389,6 +1391,11 @@ namespace sl2 {
 		 * \return Returns the sum of all the floats in the given register.
 		 **/
 		static inline double								HorizontalSum( __m256d &_mReg ) {
+			__m256d mT1 = _mm256_hadd_pd( _mReg, _mReg );
+			__m128d mT2 = _mm256_extractf128_pd( mT1, 1 );
+			__m128d mT3 = _mm256_castpd256_pd128( mT1 );
+			return _mm_cvtsd_f64( _mm_add_pd( mT2, mT3 ) );
+#if 0
 			__m256d mShuf = _mm256_permute2f128_pd( _mReg, _mReg, 0x1 );	// Swap the low and high halves.
 			__m256d mSums = _mm256_add_pd( _mReg, mShuf );					// Add the low and high halves.
 
@@ -1396,6 +1403,7 @@ namespace sl2 {
 			mSums = _mm256_add_pd( mSums, mShuf );							// Add the pairs.
 
 			return _mm256_cvtsd_f64( mSums );								// Extract the sum.
+#endif	// #if 0
 		}
 
 		/**
@@ -1405,6 +1413,13 @@ namespace sl2 {
 		 * \return Returns the sum of all the floats in the given register.
 		 **/
 		static inline float									HorizontalSum( const __m256 &_mReg ) {
+			SL2_ALIGN( 32 )
+			float fSumArray[8];
+			__m256 mTmp = _mm256_hadd_ps( _mReg, _mReg );
+			mTmp = _mm256_hadd_ps( mTmp, mTmp );
+			_mm256_store_ps( fSumArray, mTmp );
+			return fSumArray[0] + fSumArray[4];
+#if 0
 			__m256 mTmp = _mm256_permute2f128_ps(_mReg, _mReg, 1);	// Shuffle high 128 to low.
 			mTmp = _mm256_add_ps( _mReg, mTmp );					// Add high and low parts.
 
@@ -1413,6 +1428,7 @@ namespace sl2 {
 
 			// Extract the lower float which now contains the sum.
 			return _mm256_cvtss_f32( mTmp );
+#endif	// #if 0
 		}
 #endif	// #ifdef __AVX__
 
