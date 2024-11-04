@@ -1391,11 +1391,12 @@ namespace sl2 {
 		 * \return Returns the sum of all the floats in the given register.
 		 **/
 		static inline double								HorizontalSum( __m256d &_mReg ) {
+#if 1
 			__m256d mT1 = _mm256_hadd_pd( _mReg, _mReg );
 			__m128d mT2 = _mm256_extractf128_pd( mT1, 1 );
 			__m128d mT3 = _mm256_castpd256_pd128( mT1 );
 			return _mm_cvtsd_f64( _mm_add_pd( mT2, mT3 ) );
-#if 0
+#else
 			__m256d mShuf = _mm256_permute2f128_pd( _mReg, _mReg, 0x1 );	// Swap the low and high halves.
 			__m256d mSums = _mm256_add_pd( _mReg, mShuf );					// Add the low and high halves.
 
