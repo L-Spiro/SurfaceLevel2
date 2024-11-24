@@ -1144,6 +1144,15 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 }
                 SL2_ADV( 2 );
             }
+            if ( SL2_CHECK( 2, dither_error_weight_scale ) ) {
+                double dScale = ::_wtof( _wcpArgV[1] );
+                sl2::CFormat::m_vDitherFactor = sl2::CFormat::m_vDitherFactor * dScale;
+                if ( sl2::CFormat::m_vDitherFactor.IsNan() ) {
+                    SL2_ERRORT( std::format( L"Invalid \"dither_error_weight_scale\": \"{}\". Invalid paramater.  Must be <float> <float> <float> <float>.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+                SL2_ADV( 2 );
+            }
             
 
 
