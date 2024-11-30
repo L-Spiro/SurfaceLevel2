@@ -1,7 +1,7 @@
 /***
 *sal.h - markers for documenting the semantics of APIs
 *
-* Copyright © Microsoft Corp.
+* Copyright C Microsoft Corp.
 * All rights reserved.
 * 
 * Redistribution and use in source and binary forms, with or without
