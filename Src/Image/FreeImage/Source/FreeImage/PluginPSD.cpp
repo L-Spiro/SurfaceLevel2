@@ -2,7 +2,7 @@
 // Photoshop Loader
 //
 // Design and implementation by
-// - Hervé Drolon (drolon@infonie.fr)
+// - Herve Drolon (drolon@infonie.fr)
 // - Mihail Naydenov (mnaydenov@users.sourceforge.net)
 //
 // Based on LGPL code created and published by http://sourceforge.net/projects/elynx/

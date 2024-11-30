@@ -418,10 +418,6 @@ copy Source\FreeImage.h Dist
     <ClInclude Include="Source\ToneMapping.h" />
     <ClInclude Include="Source\Utilities.h" />
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="Todo.txt" />
-    <Text Include="Whatsnew.txt" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
