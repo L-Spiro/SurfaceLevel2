@@ -1,4 +1,4 @@
-/**
+Ôªø/**
  * Copyright L. Spiro 2024
  *
  * Written by: Shawn (L. Spiro) Wilcoxen
@@ -1045,10 +1045,10 @@ namespace sl2 {
 		 * 
 		 * \param param _dVal The value to convert.
 		 * \param _dLw Screen luminance for white, reference setting is LW = 100 cd/m2.
-		 * \param _dB Variable for black level lift (legacy ìbrightnessî control).
+		 * \param _dB Variable for black level lift (legacy ‚Äúbrightness‚Äù control).
 		 *	The value of _dB is set so that the calculated luminance can be the same as the
 		 *	measurement data at input signal level 0.0183 (= (80-64)/876).
-		 *	The value of _dB changes depending on ìbrightnessî control.
+		 *	The value of _dB changes depending on ‚Äúbrightness‚Äù control.
 		 * \return Returns the corresponding value from a decent CRT curve back to linear.
 		 **/
 		static inline double SL2_FASTCALL					CrtProperToLinear( double _dVal, double _dLw = 1.0, double _dB = 0.0181 ) {
@@ -1068,10 +1068,10 @@ namespace sl2 {
 		 * 
 		 * \param _dVal The value to convert.
 		 * \param _dLw Screen luminance for white, reference setting is LW = 100 cd/m2.
-		 * \param _dB Variable for black level lift (legacy ìbrightnessî control).
+		 * \param _dB Variable for black level lift (legacy ‚Äúbrightness‚Äù control).
 		 *	The value of _dB is set so that the calculated luminance can be the same as the
 		 *	measurement data at input signal level 0.0183 (= (80-64)/876).
-		 *	The value of _dB changes depending on ìbrightnessî control.
+		 *	The value of _dB changes depending on ‚Äúbrightness‚Äù control.
 		 * \return Returns the corresponding value along a decent CRT curve.
 		 **/
 		static inline double SL2_FASTCALL					LinearToCrtProper( double _dVal, double _dLw = 1.0, double _dB = 0.0181 ) {

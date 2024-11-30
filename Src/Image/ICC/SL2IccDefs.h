@@ -1,4 +1,4 @@
-/**
+ï»¿/**
  * Copyright L. Spiro 2024
  *
  * Written by: Shawn (L. Spiro) Wilcoxen
@@ -17,7 +17,7 @@ namespace sl2 {
 	/*
 	 * Defines used in the specification
 	 */
-#define icMagicNumber					0x61637370L								/* ‘acsp’ */
+#define icMagicNumber					0x61637370L								/* â€˜acspâ€™ */
 #define icVersionNumber					0x02000000L								/* 2.0, BCD */
 	/* Screening Encodings */
 #define icPrtrDefaultScreensFalse		0x00000000L								/* Bit position 0 */
@@ -51,104 +51,104 @@ namespace sl2 {
 
 	/* public tags and sizes */
 	typedef enum {
-		icSigAToB0Tag = 0x41324230L,/* ‘A2B0’ */
-		icSigAToB1Tag = 0x41324231L,/* ‘A2B1’ */
-		icSigAToB2Tag = 0x41324232L,/* ‘A2B2’ */
-		icSigBlueColorantTag = 0x6258595AL,/* ‘bXYZ’ */
-		icSigBlueTRCTag = 0x62545243L,/* ‘bTRC’ */
-		icSigBToA0Tag = 0x42324130L,/* ‘B2A0’ */
-		icSigBToA1Tag = 0x42324131L,/* ‘B2A1’ */
-		icSigBToA2Tag = 0x42324132L,/* ‘B2A2’ */
-		icSigCalibrationDateTimeTag = 0x63616C74L,/* ‘calt’ */
-		icSigCharTargetTag = 0x74617267L,/* ‘targ’ */
-		icSigCopyrightTag = 0x63707274L,/* ‘cprt’ */
-		icSigDeviceMfgDescTag = 0x646D6E64L,/* ‘dmnd’ */
-		icSigDeviceModelDescTag = 0x646D6464L,/* ‘dmdd’ */
-		icSigGamutTag = 0x67616D74L,/* ‘gamt ‘ */
-		icSigGrayTRCTag = 0x6b545243L,/* ‘kTRC’ */
-		icSigGreenColorantTag = 0x6758595AL,/* ‘gXYZ’ */
-		icSigGreenTRCTag = 0x67545243L,/* ‘gTRC’ */
-		icSigLuminanceTag = 0x6C756d69L,/* ‘lumi’ */
-		icSigMeasurementTag = 0x6D656173L,/* ‘meas’ */
-		icSigMediaBlackPointTag = 0x626B7074L,/* ‘bkpt’ */
-		icSigMediaWhitePointTag = 0x77747074L,/* ‘wtpt’ */
-		icSigNamedColorTag = 0x6E636f6CL,/* ‘ncol’
+		icSigAToB0Tag = 0x41324230L,/* â€˜A2B0â€™ */
+		icSigAToB1Tag = 0x41324231L,/* â€˜A2B1â€™ */
+		icSigAToB2Tag = 0x41324232L,/* â€˜A2B2â€™ */
+		icSigBlueColorantTag = 0x6258595AL,/* â€˜bXYZâ€™ */
+		icSigBlueTRCTag = 0x62545243L,/* â€˜bTRCâ€™ */
+		icSigBToA0Tag = 0x42324130L,/* â€˜B2A0â€™ */
+		icSigBToA1Tag = 0x42324131L,/* â€˜B2A1â€™ */
+		icSigBToA2Tag = 0x42324132L,/* â€˜B2A2â€™ */
+		icSigCalibrationDateTimeTag = 0x63616C74L,/* â€˜caltâ€™ */
+		icSigCharTargetTag = 0x74617267L,/* â€˜targâ€™ */
+		icSigCopyrightTag = 0x63707274L,/* â€˜cprtâ€™ */
+		icSigDeviceMfgDescTag = 0x646D6E64L,/* â€˜dmndâ€™ */
+		icSigDeviceModelDescTag = 0x646D6464L,/* â€˜dmddâ€™ */
+		icSigGamutTag = 0x67616D74L,/* â€˜gamt â€˜ */
+		icSigGrayTRCTag = 0x6b545243L,/* â€˜kTRCâ€™ */
+		icSigGreenColorantTag = 0x6758595AL,/* â€˜gXYZâ€™ */
+		icSigGreenTRCTag = 0x67545243L,/* â€˜gTRCâ€™ */
+		icSigLuminanceTag = 0x6C756d69L,/* â€˜lumiâ€™ */
+		icSigMeasurementTag = 0x6D656173L,/* â€˜measâ€™ */
+		icSigMediaBlackPointTag = 0x626B7074L,/* â€˜bkptâ€™ */
+		icSigMediaWhitePointTag = 0x77747074L,/* â€˜wtptâ€™ */
+		icSigNamedColorTag = 0x6E636f6CL,/* â€˜ncolâ€™
 		* OBSOLETE, use ncl2 */
-		icSigPreview0Tag = 0x70726530L,/* ‘pre0’ */
-		icSigPreview1Tag = 0x70726531L,/* ‘pre1’ */
-		icSigPreview2Tag = 0x70726532L,/* ‘pre2’ */
-		icSigProfileDescriptionTag = 0x64657363L,/* ‘desc’ */
-		icSigProfileSequenceDescTag = 0x70736571L,/* ‘pseq’ */
-		icSigPs2CRD0Tag = 0x70736430L,/* ‘psd0’ */
-		icSigPs2CRD1Tag = 0x70736431L,/* ‘psd1’ */
-		icSigPs2CRD2Tag = 0x70736432L,/* ‘psd2’ */
-		icSigPs2CRD3Tag = 0x70736433L,/* ‘psd3’ */
-		icSigPs2CSATag = 0x70733273L,/* ‘ps2s’ */
-		icSigPs2RenderingIntentTag = 0x70733269L,/* ‘ps2i’ */
-		icSigRedColorantTag = 0x7258595AL,/* ‘rXYZ’ */
-		icSigRedTRCTag = 0x72545243L,/* ‘rTRC’ */
-		icSigScreeningDescTag = 0x73637264L,/* ‘scrd’ */
-		icSigScreeningTag = 0x7363726EL,/* ‘scrn’ */
-		icSigTechnologyTag = 0x74656368L,/* ‘tech’ */
-		icSigUcrBgTag = 0x62666420L,/* ‘bfd ‘ */
-		icSigViewingCondDescTag = 0x76756564L,/* ‘vued’ */
-		icSigViewingConditionsTag = 0x76696577L,/* ‘view’ */
-		icSigNamedColor2Tag = 0x6E636C32L,/* ‘ncl2’ */
+		icSigPreview0Tag = 0x70726530L,/* â€˜pre0â€™ */
+		icSigPreview1Tag = 0x70726531L,/* â€˜pre1â€™ */
+		icSigPreview2Tag = 0x70726532L,/* â€˜pre2â€™ */
+		icSigProfileDescriptionTag = 0x64657363L,/* â€˜descâ€™ */
+		icSigProfileSequenceDescTag = 0x70736571L,/* â€˜pseqâ€™ */
+		icSigPs2CRD0Tag = 0x70736430L,/* â€˜psd0â€™ */
+		icSigPs2CRD1Tag = 0x70736431L,/* â€˜psd1â€™ */
+		icSigPs2CRD2Tag = 0x70736432L,/* â€˜psd2â€™ */
+		icSigPs2CRD3Tag = 0x70736433L,/* â€˜psd3â€™ */
+		icSigPs2CSATag = 0x70733273L,/* â€˜ps2sâ€™ */
+		icSigPs2RenderingIntentTag = 0x70733269L,/* â€˜ps2iâ€™ */
+		icSigRedColorantTag = 0x7258595AL,/* â€˜rXYZâ€™ */
+		icSigRedTRCTag = 0x72545243L,/* â€˜rTRCâ€™ */
+		icSigScreeningDescTag = 0x73637264L,/* â€˜scrdâ€™ */
+		icSigScreeningTag = 0x7363726EL,/* â€˜scrnâ€™ */
+		icSigTechnologyTag = 0x74656368L,/* â€˜techâ€™ */
+		icSigUcrBgTag = 0x62666420L,/* â€˜bfd â€˜ */
+		icSigViewingCondDescTag = 0x76756564L,/* â€˜vuedâ€™ */
+		icSigViewingConditionsTag = 0x76696577L,/* â€˜viewâ€™ */
+		icSigNamedColor2Tag = 0x6E636C32L,/* â€˜ncl2â€™ */
 		icMaxEnumTag = 0xFFFFFFFFL/* enum = 4 bytes max */
 	} icTagSignature;
 
 	typedef enum {
-		icSigDigitalCamera = 0x6463616DL,/* ‘dcam’ */
-		icSigFilmScanner = 0x6673636EL,/* ‘fscn’ */
-		icSigReflectiveScanner = 0x7273636EL,/* ‘rscn’ */
-		icSigInkJetPrinter = 0x696A6574L,/* ‘ijet’ */
-		icSigThermalWaxPrinter = 0x74776178L,/* ‘twax’ */
-		icSigElectrophotographicPrinter = 0x6570686FL,/* ‘epho’ */
-		icSigElectrostaticPrinter = 0x65737461L,/* ‘esta’ */
-		icSigDyeSublimationPrinter = 0x64737562L,/* ‘dsub’ */
-		icSigPhotographicPaperPrinter = 0x7270686FL,/* ‘rpho’ */
-		icSigFilmWriter = 0x6670726EL,/* ‘fprn’ */
-		icSigVideoMonitor = 0x7669646DL,/* ‘vidm’ */
-		icSigVideoCamera = 0x76696463L,/* ‘vidc’ */
-		icSigProjectionTelevision = 0x706A7476L,/* ‘pjtv’ */
-		icSigCRTDisplay = 0x43525420L,/* ‘CRT ‘ */
-		icSigPMDisplay = 0x504D4420L,/* ‘PMD ‘ */
-		icSigAMDisplay = 0x414D4420L,/* ‘AMD ‘ */
-		icSigPhotoCD = 0x4B504344L,/* ‘KPCD’ */
-		icSigPhotoImageSetter = 0x696D6773L,/* ‘imgs’ */
-		icSigGravure = 0x67726176L,/* ‘grav’ */
-		icSigOffsetLithography = 0x6F666673L,/* ‘offs’ */
-		icSigSilkscreen = 0x73696C6BL, /* ‘silk’ */
-		icSigFlexography = 0x666C6578L,/* ‘flex’ */
+		icSigDigitalCamera = 0x6463616DL,/* â€˜dcamâ€™ */
+		icSigFilmScanner = 0x6673636EL,/* â€˜fscnâ€™ */
+		icSigReflectiveScanner = 0x7273636EL,/* â€˜rscnâ€™ */
+		icSigInkJetPrinter = 0x696A6574L,/* â€˜ijetâ€™ */
+		icSigThermalWaxPrinter = 0x74776178L,/* â€˜twaxâ€™ */
+		icSigElectrophotographicPrinter = 0x6570686FL,/* â€˜ephoâ€™ */
+		icSigElectrostaticPrinter = 0x65737461L,/* â€˜estaâ€™ */
+		icSigDyeSublimationPrinter = 0x64737562L,/* â€˜dsubâ€™ */
+		icSigPhotographicPaperPrinter = 0x7270686FL,/* â€˜rphoâ€™ */
+		icSigFilmWriter = 0x6670726EL,/* â€˜fprnâ€™ */
+		icSigVideoMonitor = 0x7669646DL,/* â€˜vidmâ€™ */
+		icSigVideoCamera = 0x76696463L,/* â€˜vidcâ€™ */
+		icSigProjectionTelevision = 0x706A7476L,/* â€˜pjtvâ€™ */
+		icSigCRTDisplay = 0x43525420L,/* â€˜CRT â€˜ */
+		icSigPMDisplay = 0x504D4420L,/* â€˜PMD â€˜ */
+		icSigAMDisplay = 0x414D4420L,/* â€˜AMD â€˜ */
+		icSigPhotoCD = 0x4B504344L,/* â€˜KPCDâ€™ */
+		icSigPhotoImageSetter = 0x696D6773L,/* â€˜imgsâ€™ */
+		icSigGravure = 0x67726176L,/* â€˜gravâ€™ */
+		icSigOffsetLithography = 0x6F666673L,/* â€˜offsâ€™ */
+		icSigSilkscreen = 0x73696C6BL, /* â€˜silkâ€™ */
+		icSigFlexography = 0x666C6578L,/* â€˜flexâ€™ */
 		icMaxEnumTechnology = 0xFFFFFFFFL/* enum = 4 bytes max */
 	} icTechnologySignature;
 	/* type signatures */
 	typedef enum {
-		icSigCurveType = 0x63757276L,/* ‘curv’ */
-		icSigDataType = 0x64617461L,/* ‘data’ */
-		icSigDateTimeType = 0x6474696DL,/* ‘dtim’ */
-		icSigLut16Type = 0x6d667432L,/* ‘mft2’ */
-		icSigLut8Type = 0x6d667431L,/* ‘mft1’ */
-		icSigMeasurementType = 0x6D656173L,/* ‘meas’ */
-		icSigNamedColorType = 0x6E636f6CL,/* ‘ncol’
+		icSigCurveType = 0x63757276L,/* â€˜curvâ€™ */
+		icSigDataType = 0x64617461L,/* â€˜dataâ€™ */
+		icSigDateTimeType = 0x6474696DL,/* â€˜dtimâ€™ */
+		icSigLut16Type = 0x6d667432L,/* â€˜mft2â€™ */
+		icSigLut8Type = 0x6d667431L,/* â€˜mft1â€™ */
+		icSigMeasurementType = 0x6D656173L,/* â€˜measâ€™ */
+		icSigNamedColorType = 0x6E636f6CL,/* â€˜ncolâ€™
 		* OBSOLETE, use ncl2 */
-		icSigParaType = 0x70617261L,/* ‘para’ */
-		icSigProfileSequenceDescType = 0x70736571L,/* ‘pseq’ */
-		icSigS15Fixed16ArrayType = 0x73663332L,/* ‘sf32’ */
-		icSigScreeningType = 0x7363726EL,/* ‘scrn’ */
-		icSigSignatureType = 0x73696720L,/* ‘sig ‘ */
-		icSigTextType = 0x74657874L,/* ‘text’ */
-		icSigTextDescriptionType = 0x64657363L,/* ‘desc’ */
-		icSigU16Fixed16ArrayType = 0x75663332L,/* ‘uf32’ */
-		icSigUcrBgType = 0x62666420L,/* ‘bfd ‘ */
-		icSigUInt16ArrayType = 0x75693136L,/* ‘ui16’ */
-		icSigUInt32ArrayType = 0x75693332L,/* ‘ui32’ */
-		icSigUInt64ArrayType = 0x75693634L,/* ‘ui64’ */
-		icSigUInt8ArrayType = 0x75693038L,/* ‘ui08’ */
-		icSigViewingConditionsType = 0x76696577L,/* ‘view’ */
-		icSigXYZType = 0x58595A20L,/* ‘XYZ ‘ */
-		icSigXYZArrayType = 0x58595A20L,/* ‘XYZ ‘ */
-		icSigNamedColor2Type = 0x6E636C32L,/* ‘ncl2’ */
+		icSigParaType = 0x70617261L,/* â€˜paraâ€™ */
+		icSigProfileSequenceDescType = 0x70736571L,/* â€˜pseqâ€™ */
+		icSigS15Fixed16ArrayType = 0x73663332L,/* â€˜sf32â€™ */
+		icSigScreeningType = 0x7363726EL,/* â€˜scrnâ€™ */
+		icSigSignatureType = 0x73696720L,/* â€˜sig â€˜ */
+		icSigTextType = 0x74657874L,/* â€˜textâ€™ */
+		icSigTextDescriptionType = 0x64657363L,/* â€˜descâ€™ */
+		icSigU16Fixed16ArrayType = 0x75663332L,/* â€˜uf32â€™ */
+		icSigUcrBgType = 0x62666420L,/* â€˜bfd â€˜ */
+		icSigUInt16ArrayType = 0x75693136L,/* â€˜ui16â€™ */
+		icSigUInt32ArrayType = 0x75693332L,/* â€˜ui32â€™ */
+		icSigUInt64ArrayType = 0x75693634L,/* â€˜ui64â€™ */
+		icSigUInt8ArrayType = 0x75693038L,/* â€˜ui08â€™ */
+		icSigViewingConditionsType = 0x76696577L,/* â€˜viewâ€™ */
+		icSigXYZType = 0x58595A20L,/* â€˜XYZ â€˜ */
+		icSigXYZArrayType = 0x58595A20L,/* â€˜XYZ â€˜ */
+		icSigNamedColor2Type = 0x6E636C32L,/* â€˜ncl2â€™ */
 		icMaxEnumType = 0xFFFFFFFFL/* enum = 4 bytes max */
 	} icTagTypeSignature;
 
@@ -158,37 +158,37 @@ namespace sl2 {
 	 * Profile Connection Spaces (PCSs)
 	 */
 	typedef enum {
-		icSigXYZData = 0x58595A20L,/* ‘XYZ ‘ */
-		icSigLabData = 0x4C616220L,/* ‘Lab ‘ */
-		icSigLuvData = 0x4C757620L,/* ‘Luv ‘ */
-		icSigYCbCrData = 0x59436272L,/* ‘YCbr’ */
-		icSigYxyData = 0x59787920L,/* ‘Yxy ‘ */
-		icSigRgbData = 0x52474220L,/* ‘RGB ‘ */
-		icSigGrayData = 0x47524159L,/* ‘GRAY’ */
-		icSigHsvData = 0x48535620L,/* ‘HSV ‘ */
-		icSigHlsData = 0x484C5320L,/* ‘HLS ‘ */
-		icSigCmykData = 0x434D594BL,/* ‘CMYK’ */
-		icSigCmyData = 0x434D5920L,/* ‘CMY ‘ */
+		icSigXYZData = 0x58595A20L,/* â€˜XYZ â€˜ */
+		icSigLabData = 0x4C616220L,/* â€˜Lab â€˜ */
+		icSigLuvData = 0x4C757620L,/* â€˜Luv â€˜ */
+		icSigYCbCrData = 0x59436272L,/* â€˜YCbrâ€™ */
+		icSigYxyData = 0x59787920L,/* â€˜Yxy â€˜ */
+		icSigRgbData = 0x52474220L,/* â€˜RGB â€˜ */
+		icSigGrayData = 0x47524159L,/* â€˜GRAYâ€™ */
+		icSigHsvData = 0x48535620L,/* â€˜HSV â€˜ */
+		icSigHlsData = 0x484C5320L,/* â€˜HLS â€˜ */
+		icSigCmykData = 0x434D594BL,/* â€˜CMYKâ€™ */
+		icSigCmyData = 0x434D5920L,/* â€˜CMY â€˜ */
 		icMaxEnumData = 0xFFFFFFFFL/* enum = 4 bytes max */
 	} icColorSpaceSignature;
 	/* profileClass enumerations */
 	typedef enum {
-		icSigInputClass = 0x73636E72L,/* ‘scnr’ */
-		icSigDisplayClass = 0x6D6E7472L,/* ‘mntr’ */
-		icSigOutputClass = 0x70727472L,/* ‘prtr’ */
-		icSigLinkClass = 0x6C696E6BL,/* ‘link’ */
-		icSigAbstractClass = 0x61627374L,/* ‘abst’ */
-		icSigColorSpaceClass = 0x73706163L,/* ‘spac’ */
-		icSigNamedColorClass = 0x6e6d636cL,/* ‘nmcl’ */
+		icSigInputClass = 0x73636E72L,/* â€˜scnrâ€™ */
+		icSigDisplayClass = 0x6D6E7472L,/* â€˜mntrâ€™ */
+		icSigOutputClass = 0x70727472L,/* â€˜prtrâ€™ */
+		icSigLinkClass = 0x6C696E6BL,/* â€˜linkâ€™ */
+		icSigAbstractClass = 0x61627374L,/* â€˜abstâ€™ */
+		icSigColorSpaceClass = 0x73706163L,/* â€˜spacâ€™ */
+		icSigNamedColorClass = 0x6e6d636cL,/* â€˜nmclâ€™ */
 		icMaxEnumClass = 0xFFFFFFFFL/* enum = 4 bytes max */
 	} icProfileClassSignature;
 	/* Platform Signatures */
 	typedef enum {
-		icSigMacintosh = 0x4150504CL,/* ‘APPL’ */
-		icSigMicrosoft = 0x4D534654L,/* ‘MSFT’ */
-		icSigSolaris = 0x53554E57L,/* ‘SUNW’ */
-		icSigSGI = 0x53474920L,/* ‘SGI ‘ */
-		icSigTaligent = 0x54474E54L,/* ‘TGNT’ */
+		icSigMacintosh = 0x4150504CL,/* â€˜APPLâ€™ */
+		icSigMicrosoft = 0x4D534654L,/* â€˜MSFTâ€™ */
+		icSigSolaris = 0x53554E57L,/* â€˜SUNWâ€™ */
+		icSigSGI = 0x53474920L,/* â€˜SGI â€˜ */
+		icSigTaligent = 0x54474E54L,/* â€˜TGNTâ€™ */
 		icMaxEnumPlatform = 0xFFFFFFFFL/* enum = 4 bytes max */
 	} icPlatformSignature;
 
@@ -500,8 +500,8 @@ namespace sl2 {
 	} icUcrBg;
 	/* viewingConditionsType */
 	typedef struct {
-		icXYZNumber illuminant;/* In candelas per metre sq’d */
-		icXYZNumber surround;/* In candelas per metre sq’d */
+		icXYZNumber illuminant;/* In candelas per metre sqâ€™d */
+		icXYZNumber surround;/* In candelas per metre sqâ€™d */
 		icIlluminant stdIluminant;/* See icIlluminant defines */
 	} icViewingCondition;
 	/*------------------------------------------------------------------------*/
@@ -521,107 +521,107 @@ namespace sl2 {
 	} icTagBase;
 	/* curveType */
 	typedef struct {
-		icTagBase base; /* Signature, “curv” */
+		icTagBase base; /* Signature, â€œcurvâ€ */
 		icCurve curve; /* The curve data */
 	} icCurveType;
 	/* dataType */
 	typedef struct {
-		icTagBase base; /* Signature, “data” */
+		icTagBase base; /* Signature, â€œdataâ€ */
 		icData data; /* The data structure */
 	} icDataType;
 	/* dateTimeType */
 	typedef struct {
-		icTagBase base; /* Signature, “dtim” */
+		icTagBase base; /* Signature, â€œdtimâ€ */
 		icDateTimeNumber date; /* The date */
 	} icDateTimeType;
 	/* lut16Type */
 	typedef struct {
-		icTagBase base; /* Signature, “mft2” */
+		icTagBase base; /* Signature, â€œmft2â€ */
 		icLut16 lut; /* Lut16 data */
 	} icLut16Type;
 	/* lut8Type, input & output tables are always 256 bytes in length */
 	typedef struct {
-		icTagBase base; /* Signature, “mft1” */
+		icTagBase base; /* Signature, â€œmft1â€ */
 		icLut8 lut; /* Lut8 data */
 	} icLut8Type;
 	/* Measurement Type */
 	typedef struct {
-		icTagBase base; /* Signature, “meas” */
+		icTagBase base; /* Signature, â€œmeasâ€ */
 		icMeasurement measurement;/* Measurement data */
 	} icMeasurementType;
 	/* Named color type */
 	/* icNamedColor2Type, replaces icNamedColorType */
 	typedef struct {
-		icTagBase base; /* Signature, “ncl2” */
+		icTagBase base; /* Signature, â€œncl2â€ */
 		icNamedColor2 ncolor; /* Named color data */
 	} icNamedColor2Type;
 	/* Profile sequence description type */
 	typedef struct {
-		icTagBase base;/* Signature, “pseq” */
+		icTagBase base;/* Signature, â€œpseqâ€ */
 		icProfileSequenceDesc desc;/* The seq description */
 	} icProfileSequenceDescType;
 	/* textDescriptionType */
 	typedef struct {
-		icTagBase base;/* Signature, “desc” */
+		icTagBase base;/* Signature, â€œdescâ€ */
 		icTextDescription desc; /* The description */
 	} icTextDescriptionType;
 	/* s15Fixed16Type */
 	typedef struct {
-		icTagBase base; /* Signature, “sf32” */
+		icTagBase base; /* Signature, â€œsf32â€ */
 		icS15Fixed16Array data; /* Array of values */
 	} icS15Fixed16ArrayType;
 	typedef struct {
-		icTagBase base; /* Signature, “scrn” */
+		icTagBase base; /* Signature, â€œscrnâ€ */
 		icScreening screen; /* Screening structure */
 	} icScreeningType;
 	/* sigType */
 	typedef struct {
-		icTagBase base; /* Signature, “sig” */
+		icTagBase base; /* Signature, â€œsigâ€ */
 		uint32_t signature;/* The signature data */
 	} icSignatureType;
 	/* textType */
 	typedef struct {
-		icTagBase base; /* Signature, “text” */
+		icTagBase base; /* Signature, â€œtextâ€ */
 		icText data; /* Variable array of characters */
 	} icTextType;
 	/* u16Fixed16Type */
 	typedef struct {
-		icTagBase base; /* Signature, “uf32” */
+		icTagBase base; /* Signature, â€œuf32â€ */
 		icU16Fixed16Array data; /* Variable array of values */
 	} icU16Fixed16ArrayType;
 	/* Under color removal, black generation type */
 	typedef struct {
-		icTagBase base; /* Signature, “bfd “ */
+		icTagBase base; /* Signature, â€œbfd â€œ */
 		icUcrBg data; /* ucrBg structure */
 	} icUcrBgType;
 	/* uInt16Type */
 	typedef struct {
-		icTagBase base; /* Signature, “ui16” */
+		icTagBase base; /* Signature, â€œui16â€ */
 		icUInt16Array data; /* Variable array of values */
 	} icUInt16ArrayType;
 	/* uInt32Type */
 	typedef struct {
-		icTagBase base; /* Signature, “ui32” */
+		icTagBase base; /* Signature, â€œui32â€ */
 		icUInt32Array data; /* Variable array of values */
 	} icUInt32ArrayType;
 	/* uInt64Type */
 	typedef struct {
-		icTagBase base; /* Signature, “ui64” */
+		icTagBase base; /* Signature, â€œui64â€ */
 		icUInt64Array data; /* Variable array of values */
 	} icUInt64ArrayType;
 	/* uInt8Type */
 	typedef struct {
-		icTagBase base; /* Signature, “ui08” */
+		icTagBase base; /* Signature, â€œui08â€ */
 		icUInt8Array data; /* Variable array of values */
 	} icUInt8ArrayType;
 	/* viewingConditionsType */
 	typedef struct {
-		icTagBase base; /* Signature, “view” */
+		icTagBase base; /* Signature, â€œviewâ€ */
 		icViewingCondition view; /* Viewing conditions */
 	} icViewingConditionType;
 	/* XYZ Type */
 	typedef struct {
-		icTagBase base; /* Signature, “XYZ” */
+		icTagBase base; /* Signature, â€œXYZâ€ */
 		icXYZArray data; /* Variable array of XYZ numbers */
 	} icXYZType;
 	/*------------------------------------------------------------------------*/
@@ -661,7 +661,7 @@ namespace sl2 {
 	} icHeader;
 	/*
 	 * A profile,
-	 * we can’t use icTagList here because its not at the end of the structure
+	 * we canâ€™t use icTagList here because its not at the end of the structure
 	 */
 	typedef struct {
 		icHeader header; /* The header */
@@ -697,7 +697,7 @@ namespace sl2 {
 	} icNamedColor;
 	/* icNamedColorType was replaced by icNamedColor2Type */
 	typedef struct {
-		icTagBase base; /* Signature, “ncol” */
+		icTagBase base; /* Signature, â€œncolâ€ */
 		icNamedColor ncolor; /* Named color data */
 	} icNamedColorType;
 

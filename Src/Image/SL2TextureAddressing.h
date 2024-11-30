@@ -1,4 +1,4 @@
-/**
+ï»¿/**
  * Copyright L. Spiro 2024
  *
  * Written by: Shawn (L. Spiro) Wilcoxen
@@ -43,7 +43,7 @@ namespace sl2 {
 		/**
 		 * Returns the new texture index after applying the SL2_TA_WRAP texture-addressing mode.
 		 * 
-		 * \param _ui32TextureSize The number of texels along the texture’s axis.
+		 * \param _ui32TextureSize The number of texels along the textureâ€™s axis.
 		 * \param _i32Idx The texel index to translate.
 		 * \return Returns the wrapped texel index.
 		 **/
@@ -55,7 +55,7 @@ namespace sl2 {
 		/**
 		 * Returns the new texture index after applying the SL2_TA_MIRROR texture-addressing mode.
 		 * 
-		 * \param _ui32TextureSize The number of texels along the texture’s axis.
+		 * \param _ui32TextureSize The number of texels along the textureâ€™s axis.
 		 * \param _i32Idx The texel index to translate.
 		 * \return Returns the mirrored texel index.
 		 **/
@@ -70,7 +70,7 @@ namespace sl2 {
 		/**
 		 * Returns the new texture index after applying the SL2_TA_CLAMP texture-addressing mode.
 		 * 
-		 * \param _ui32TextureSize The number of texels along the texture’s axis.
+		 * \param _ui32TextureSize The number of texels along the textureâ€™s axis.
 		 * \param _i32Idx The texel index to translate.
 		 * \return Returns the clamped texel index.
 		 **/
@@ -81,7 +81,7 @@ namespace sl2 {
 		/**
 		 * Returns the new texture index after applying the SL2_TA_BORDER texture-addressing mode.
 		 * 
-		 * \param _ui32TextureSize The number of texels along the texture’s axis.
+		 * \param _ui32TextureSize The number of texels along the textureâ€™s axis.
 		 * \param _i32Idx The texel index to translate.
 		 * \return Returns the texel index or -1 to indicate using the border color.
 		 **/
@@ -92,7 +92,7 @@ namespace sl2 {
 		/**
 		 * Returns the new texture index after applying the SL2_TA_MIRROR_ONCE texture-addressing mode.
 		 * 
-		 * \param _ui32TextureSize The number of texels along the texture’s axis.
+		 * \param _ui32TextureSize The number of texels along the textureâ€™s axis.
 		 * \param _i32Idx The texel index to translate.
 		 * \return Returns the mirrored-once texel index.
 		 **/
@@ -104,7 +104,7 @@ namespace sl2 {
 		/**
 		 * Returns the new texture index after applying the SL2_TA_MIRROR_ONCE texture-addressing mode.
 		 * 
-		 * \param _ui32TextureSize The number of texels along the texture’s axis.
+		 * \param _ui32TextureSize The number of texels along the textureâ€™s axis.
 		 * \param _i32Idx The texel index to translate.
 		 * \return Returns the mirrored-once texel index.
 		 **/
