@@ -43,6 +43,7 @@
 #include <ImfAttribute.h>
 #include "IlmThreadMutex.h"
 #include "Iex.h"
+#include <functional>
 #include <string.h>
 #include <map>
 
