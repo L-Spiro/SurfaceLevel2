@@ -48,7 +48,7 @@ namespace sl2 {
 		 * \param _ui32Index Index of the row to get.
 		 * \return Returns a pointer to the given row.
 		 */
-		inline const double *									operator [] ( size_t _sIndex ) const { return &m_dElements[_sIndex]; }
+		inline const double *									operator [] ( size_t _sIndex ) const { return &m_dElements[_sIndex<<2]; }
 
 		/**
 		 * Array access.
@@ -56,7 +56,7 @@ namespace sl2 {
 		 * \param _ui32Index Index of the row to get.
 		 * \return Returns a pointer to the given row.
 		 */
-		inline double *											operator [] ( size_t _sIndex ) { return &m_dElements[_sIndex]; }
+		inline double *											operator [] ( size_t _sIndex ) { return &m_dElements[_sIndex<<2]; }
 
 		/**
 		 * Multiplies this matrix with the given vector.
