@@ -84,7 +84,7 @@ namespace sl2 {
 		/** Parameters for resampling. */
 		struct SL2_RESAMPLE {
 			double												dBorderColor[4] = { 0.0, 0.0, 0.0, 1.0 };
-			float												fFilterScale = 1.0;
+			float												fFilterScale = 1.0f;
 			uint32_t											ui32W = 0;
 			uint32_t											ui32H = 0;
 			uint32_t											ui32D = 0;

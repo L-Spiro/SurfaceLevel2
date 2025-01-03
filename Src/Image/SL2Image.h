@@ -203,7 +203,7 @@ namespace sl2 {
 		} * LPSL2_BITMAPPALETTE, * const LPCSL2_BITMAPPALETTE;
 #pragma pack( pop )
 
-				/** A chunk header. */
+		/** A chunk header. */
 		struct SL2_CHUNK {
 #pragma pack( push, 1 )
 			uint32_t										ui32Name;				/**< The chunk name. */
@@ -243,6 +243,56 @@ namespace sl2 {
 #pragma pack( pop )
 		};
 
+		/** A cropping window. */
+		struct SL2_WINDOW {
+			int32_t											i32X = 0, i32Y = 0, i32Z = 0;		/**< The starting position of the window. */
+			uint32_t										ui32W = 0, ui32H = 0, ui32D = 0;	/**< The dimensions of the window. */
+
+
+			// == Functions.
+			/**
+			 * Gets the left coordinate.
+			 * 
+			 * \return Returns the left coordinate.
+			 **/
+			inline int64_t									Left() const { return i32X; }
+
+			/**
+			 * Gets the right coordinate.
+			 * 
+			 * \return Returns the right coordinate.
+			 **/
+			inline int64_t									Right() const { return i32X + ui32W; }
+
+			/**
+			 * Gets the top coordinate.
+			 * 
+			 * \return Returns the top coordinate.
+			 **/
+			inline int64_t									Top() const { return i32Y; }
+
+			/**
+			 * Gets the bottom coordinate.
+			 * 
+			 * \return Returns the bottom coordinate.
+			 **/
+			inline int64_t									Bottom() const { return i32Y + ui32H; }
+
+			/**
+			 * Gets the near coordinate.
+			 * 
+			 * \return Returns the near coordinate.
+			 **/
+			inline int64_t									Front() const { return i32Z; }
+
+			/**
+			 * Gets the far coordinate.
+			 * 
+			 * \return Returns the far coordinate.
+			 **/
+			inline int64_t									Back() const { return i32Z + ui32D; }
+		};
+
 
 		// == Operators.
 		/**
@@ -251,7 +301,7 @@ namespace sl2 {
 		 * \param _iOther The image to copy and destroy.
 		 * \return Returns a reference to this image.
 		 **/
-		CImage &											operator = ( CImage &&_iOther );
+		CImage &											operator = ( CImage &&_iOther ) noexcept;
 
 
 		// == Functions.
@@ -493,6 +543,13 @@ namespace sl2 {
 		inline void											SetIgnoreColorspaceGamma( bool _bIgnoreSourceColorspaceGamma ) { m_bIgnoreSourceColorspaceGamma = _bIgnoreSourceColorspaceGamma; }
 
 		/**
+		 * Sets the crop window.  Any dimensions set to 0 will be treated as the full image dimension.
+		 * 
+		 * \param _wWindow The cropping window.
+		 **/
+		inline void											SetCrop( const SL2_WINDOW &_wWindow ) { m_wCroppingWindow = _wWindow; }
+
+		/**
 		 * Sets whether or not alpha needs to be pre-multiplied.
 		 * 
 		 * \param _bPreMult If true, alpha will be premultiplied.
@@ -708,6 +765,8 @@ namespace sl2 {
 		CPaletteSet											m_pPalette;								/**< The palette. */
 		bool												m_bGenPalette;							/**< Generate a new palette? */
 
+		SL2_WINDOW											m_wCroppingWindow;						/**< The cropping window. */
+
 
 		// == Functions.
 		/**
@@ -735,6 +794,36 @@ namespace sl2 {
 		 * \return Returns true if no changes need to be made when copying this image to a new image given the target format, flip flag, resample paramaters, etc.
 		 **/
 		bool												ParametersAreUnchanged( const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * _pkifFormat, bool _bFlip, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth );
+
+		/**
+		 * Crops an image from one buffer into another.  Coordinates can extend outside of the image, at which time the border color will be used.
+		 * 
+		 * \param _pui8Src The source buffer (RGBA64F).  On output, points to the location of the cropped buffer.  if there was no cropping operation, this is unchanged, otherwise it will point to _pdDst.
+		 * \param _vDst The destination buffer (RGBA64F).
+		 * \param _ui32Width Width of the source image on input, width of the new image on output.
+		 * \param _ui32Height Height of the source image on input, width of the new image on output.
+		 * \param _ui32Depth Depth of the source image on input, width of the new image on output.
+		 * \param _taX Texture-addressing mode for sampling outside of the image horizontally.
+		 * \param _taY Texture-addressing mode for sampling outside of the image vertically.
+		 * \param _taZ Texture-addressing mode for sampling outside of the image depthedly.
+		 * \param _wWindow the cropping window and size of the output image.
+		 * \param _pdBorderColor The border color for sampling outside the source image.
+		 **/
+		void												Crop( uint8_t * &_pui8Src, std::vector<uint8_t> &_vDst,
+			uint32_t &_ui32Width, uint32_t &_ui32Height, uint32_t &_ui32Depth,
+			SL2_TEXTURE_ADDRESSING _taX, SL2_TEXTURE_ADDRESSING _taY, SL2_TEXTURE_ADDRESSING _taZ,
+			const SL2_WINDOW &_wWindow, const double * _pdBorderColor );
+
+		/**
+		 * Determines if the given window contains exactly the full image.
+		 * 
+		 * \param _ui32Width The image width.
+		 * \param _ui32Height The image height.
+		 * \param _ui32Depth The image depth.
+		 * \param _wWindow The cropping window to test
+		 * \return Returns true if the cropping window exactly matches the full image.
+		 **/
+		bool												CropIsFullSize( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const SL2_WINDOW &_wWindow );
 
 		/**
 		 * Bakes the image special gamma into a given texture buffer.  The format must be RGBA64F.

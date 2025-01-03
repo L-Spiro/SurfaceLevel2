@@ -489,6 +489,23 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 SL2_ADV( 1 );
             }
 
+			if ( SL2_CHECK( 5, crop ) ) {
+                oOptions.wCropWindow.i32X = ::_wtoi( _wcpArgV[1] );
+                oOptions.wCropWindow.i32Y = ::_wtoi( _wcpArgV[2] );
+                oOptions.wCropWindow.ui32W = ::_wtoi( _wcpArgV[3] );
+                oOptions.wCropWindow.ui32H = ::_wtoi( _wcpArgV[4] );
+                SL2_ADV( 5 );
+            }
+			if ( SL2_CHECK( 7, crop3 ) ) {
+                oOptions.wCropWindow.i32X = ::_wtoi( _wcpArgV[1] );
+                oOptions.wCropWindow.i32Y = ::_wtoi( _wcpArgV[2] );
+				oOptions.wCropWindow.i32Z = ::_wtoi( _wcpArgV[3] );
+                oOptions.wCropWindow.ui32W = ::_wtoi( _wcpArgV[4] );
+                oOptions.wCropWindow.ui32H = ::_wtoi( _wcpArgV[5] );
+				oOptions.wCropWindow.ui32D = ::_wtoi( _wcpArgV[6] );
+                SL2_ADV( 7 );
+            }
+
             if ( SL2_CHECK( 3, prescale ) ) {
                 oOptions.rResample.ui32NewW = ::_wtoi( _wcpArgV[1] );
                 oOptions.rResample.ui32NewH = ::_wtoi( _wcpArgV[2] );
@@ -2016,6 +2033,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
             SL2_ERRORT( std::format( L"Failed to load file: \"{}\".",
                reinterpret_cast<const wchar_t *>(oOptions.vInputs[I].u16Path.c_str()) ).c_str(), eError );
         }
+		iImage.SetCrop( oOptions.wCropWindow );
         FixResampling( oOptions, iImage );
         iImage.Resampling() = oOptions.rResample;
         iImage.MipResampling() = oOptions.rMipResample;
@@ -2323,24 +2341,36 @@ namespace sl2 {
      * \param _iImage The image off of which to base the adjustments.
 	 **/
 	void FixResampling( SL2_OPTIONS &_oOptions, CImage &_iImage ) {
+		if ( !_oOptions.wCropWindow.ui32W ) {
+			_oOptions.wCropWindow.i32X = 0;
+			_oOptions.wCropWindow.ui32W = _iImage.Width();
+		}
+		if ( !_oOptions.wCropWindow.ui32H ) {
+			_oOptions.wCropWindow.i32Y = 0;
+			_oOptions.wCropWindow.ui32H = _iImage.Height();
+		}
+		if ( !_oOptions.wCropWindow.ui32D ) {
+			_oOptions.wCropWindow.i32Z = 0;
+			_oOptions.wCropWindow.ui32D = _iImage.Depth();
+		}
         // Determine the resampling size.
 		uint32_t ui32NewWidth = _oOptions.rResample.ui32NewW;
 		uint32_t ui32NewHeight = _oOptions.rResample.ui32NewH;
         uint32_t ui32NewDepth = _oOptions.rResample.ui32NewD;
         if ( _oOptions.i32ScaleDims == 2 ) {
             if ( ui32NewWidth && !ui32NewHeight ) {
-                ui32NewHeight = static_cast<uint32_t>(std::round( double( ui32NewWidth ) / _iImage.Width() * _iImage.Height() ));
+                ui32NewHeight = static_cast<uint32_t>(std::round( double( ui32NewWidth ) / _oOptions.wCropWindow.ui32W * _oOptions.wCropWindow.ui32H ));
             }
             else if ( !ui32NewWidth && ui32NewHeight ) {
-                ui32NewWidth = static_cast<uint32_t>(std::round( double( ui32NewHeight ) / _iImage.Height() * _iImage.Width() ));
+                ui32NewWidth = static_cast<uint32_t>(std::round( double( ui32NewHeight ) / _oOptions.wCropWindow.ui32H * _oOptions.wCropWindow.ui32W ));
             }
         }
         else if ( _oOptions.i32ScaleDims == 3 ) {
         }
 
-		if ( !ui32NewWidth ) { ui32NewWidth = _iImage.Width(); }
-        if ( !ui32NewHeight ) { ui32NewHeight = _iImage.Height(); }
-        if ( !ui32NewDepth ) { ui32NewDepth = _iImage.Depth(); }
+		if ( !ui32NewWidth ) { ui32NewWidth = _oOptions.wCropWindow.ui32W; }
+        if ( !ui32NewHeight ) { ui32NewHeight = _oOptions.wCropWindow.ui32H; }
+        if ( !ui32NewDepth ) { ui32NewDepth = _oOptions.wCropWindow.ui32D; }
 
 		// If relative scaling is applied, apply it.
 		ui32NewWidth = static_cast<uint32_t>(ui32NewWidth * _oOptions.dRelScaleW);

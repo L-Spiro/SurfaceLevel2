@@ -85,6 +85,8 @@ namespace sl2 {
 
 		bool															bGenNewPalatte = false;											/**< Generate a new palette (applies only when there is an existing palette. */
 
+		sl2::CImage::SL2_WINDOW											wCropWindow;													/**< The cropping window. */
+
 		int																iPngSaveOption = PNG_Z_DEFAULT_COMPRESSION;						/**< Option for saving as PNG. */
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *					pkifdPngFormat = nullptr;										/**< The PNG format. */
 

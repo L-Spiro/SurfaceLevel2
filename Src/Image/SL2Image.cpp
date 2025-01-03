@@ -71,7 +71,7 @@ namespace sl2 {
 	 * \param _iOther The image to copy and destroy.
 	 * \return Returns a reference to this image.
 	 **/
-	CImage & CImage::operator = ( CImage &&_iOther ) {
+	CImage & CImage::operator = ( CImage &&_iOther ) noexcept {
 		if ( this != &_iOther ) {
 			m_vMipMaps = std::move( _iOther.m_vMipMaps );
 			m_sArraySize = _iOther.m_sArraySize;
@@ -119,6 +119,7 @@ namespace sl2 {
 			m_ui32YuvH = _iOther.m_ui32YuvH;
 			m_pPalette = _iOther.m_pPalette;
 			m_bGenPalette = _iOther.m_bGenPalette;
+			m_wCroppingWindow = _iOther.m_wCroppingWindow;
 			
 			_iOther.m_sArraySize = 0;
 			_iOther.m_kKernel.SetSize( 0 );
@@ -160,10 +161,13 @@ namespace sl2 {
 			_iOther.m_ui32YuvW = _iOther.m_ui32YuvH = 0;
 			_iOther.m_pPalette.Reset();
 			_iOther.m_bGenPalette = false;
+			_iOther.m_wCroppingWindow.i32X = _iOther.m_wCroppingWindow.i32Y = _iOther.m_wCroppingWindow.i32Z = 0;
+			_iOther.m_wCroppingWindow.ui32W = _iOther.m_wCroppingWindow.ui32H = _iOther.m_wCroppingWindow.ui32D = 0;
 		}
 
 		return (*this);
 	}
+
 
 	// == Functions.
 	/**
@@ -220,6 +224,8 @@ namespace sl2 {
 		m_ui32YuvW = m_ui32YuvH = 0;
 		m_pPalette.Reset();
 		m_bGenPalette = false;
+		m_wCroppingWindow.i32X = m_wCroppingWindow.i32Y = m_wCroppingWindow.i32Z = 0;
+		m_wCroppingWindow.ui32W = m_wCroppingWindow.ui32H = m_wCroppingWindow.ui32D = 0;
 	}
 
 	/**
@@ -370,15 +376,27 @@ namespace sl2 {
 
 		if ( !Format()->pfToRgba64F ) { return SL2_E_BADFORMAT; }
 		
+		if ( !m_wCroppingWindow.ui32W ) {
+			m_wCroppingWindow.i32X = 0;
+			m_wCroppingWindow.ui32W = Width();
+		}
+		if ( !m_wCroppingWindow.ui32H ) {
+			m_wCroppingWindow.i32Y = 0;
+			m_wCroppingWindow.ui32H = Height();
+		}
+		if ( !m_wCroppingWindow.ui32D ) {
+			m_wCroppingWindow.i32Z = 0;
+			m_wCroppingWindow.ui32D = Depth();
+		}
 		
 
-		m_rResample.ui32W = Width();
-		m_rResample.ui32H = Height();
-		m_rResample.ui32D = Depth();
+		m_rResample.ui32W = m_wCroppingWindow.ui32W;
+		m_rResample.ui32H = m_wCroppingWindow.ui32H;
+		m_rResample.ui32D = m_wCroppingWindow.ui32D;
 		m_rResample.bAlpha = Format()->ui8ABits && _pkifFormat->ui8ABits;
-		uint32_t ui32NewW = m_rResample.ui32NewW ? m_rResample.ui32NewW : Width();
-		uint32_t ui32NewH = m_rResample.ui32NewH ? m_rResample.ui32NewH : Height();
-		uint32_t ui32NewD = m_rResample.ui32NewD ? m_rResample.ui32NewD : Depth();
+		uint32_t ui32NewW = m_rResample.ui32NewW ? m_rResample.ui32NewW : m_wCroppingWindow.ui32W;
+		uint32_t ui32NewH = m_rResample.ui32NewH ? m_rResample.ui32NewH : m_wCroppingWindow.ui32H;
+		uint32_t ui32NewD = m_rResample.ui32NewD ? m_rResample.ui32NewD : m_wCroppingWindow.ui32D;
 		bool bResize = m_rResample.ui32W != ui32NewW || m_rResample.ui32H != ui32NewH || m_rResample.ui32D != ui32NewD;
 		bool bUseTmpBuffer = false;
 		if ( bResize ) {
@@ -418,23 +436,22 @@ namespace sl2 {
 				break;
 			}
 		}
-		if ( sDstMips > sSrcMips ) {
-			bUseTmpBuffer = true;
-		}
+		if ( sDstMips > sSrcMips ) { bUseTmpBuffer = true; }
+		if ( !CropIsFullSize( Width(), Height(), Depth(), m_wCroppingWindow ) ) { bUseTmpBuffer = true; }
 
 		if ( !iTmp.AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), ui32NewW, ui32NewH, ui32NewD, sDstMips, ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
 
 		std::vector<double> vTmp;
 		if ( bUseTmpBuffer ) {
-			try {
-				vTmp.resize( m_rResample.ui32W * m_rResample.ui32H * m_rResample.ui32D * 4 );
-			}
+			try { vTmp.resize( Width() * Height() * Depth() * 4 ); }
 			catch ( ... ) { return SL2_E_OUTOFMEMORY; }
 		}
 		bool bTargetIsPremulAlpha = m_bIsPreMultiplied;
 		bool bOpaque = true;
 		CFormat::SL2_KTX_INTERNAL_FORMAT_DATA ifdData = (*Format());
 		ifdData.pvCustom = this;
+
+		std::vector<uint8_t> vCrop;
 		for ( size_t M = 0; M < sSrcMips; ++M ) {
 			for ( size_t A = 0; A < ArraySize(); ++A ) {
 				for ( size_t F = 0; F < Faces(); ++F ) {
@@ -442,44 +459,52 @@ namespace sl2 {
 					if ( bUseTmpBuffer ) {
 						pui8Dest = reinterpret_cast<uint8_t *>(vTmp.data());
 					}
+					uint32_t ui32W, ui32H, ui32D;
+					ui32W = m_vMipMaps[M]->Width();
+					ui32H = m_vMipMaps[M]->Height();
+					ui32D = m_vMipMaps[M]->Depth();
 
-					if ( !Format()->pfToRgba64F( Data( M, 0, A, F ), pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), &ifdData ) ) {
-						return SL2_E_INTERNALERROR;
+					if ( !Format()->pfToRgba64F( Data( M, 0, A, F ), pui8Dest, ui32W, ui32H, ui32D, &ifdData ) ) { return SL2_E_INTERNALERROR; }
+					try {
+						Crop( pui8Dest, vCrop, ui32W, ui32H, ui32D,
+							m_rResample.taColorW, m_rResample.taColorH, m_rResample.taColorD,
+							m_wCroppingWindow, m_rResample.dBorderColor );
 					}
+					catch ( ... ) { return SL2_E_OUTOFMEMORY; }
 					if ( m_dGamma ) {
-						BakeGamma( pui8Dest, 1.0 / m_dGamma, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), CFormat::TransferFunc( m_cgcInputCurve ) );
+						BakeGamma( pui8Dest, 1.0 / m_dGamma, ui32W, ui32H, ui32D, CFormat::TransferFunc( m_cgcInputCurve ) );
 					}
 					if ( m_bApplyInputColorSpaceTransfer ) {
-						ApplySrcColorSpace( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+						ApplySrcColorSpace( pui8Dest, ui32W, ui32H, ui32D );
 					}
 					if ( m_bIgnoreAlpha ) {
 						m_bIsPreMultiplied = m_bNeedsPreMultiply = false;
-						SetAlpha( pui8Dest, 1.0, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+						SetAlpha( pui8Dest, 1.0, ui32W, ui32H, ui32D );
 					}
-					if ( m_bFlipX && m_vMipMaps[M]->Width() > 1 ) {
-						CFormat::FlipX( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					if ( m_bFlipX && ui32W > 1 ) {
+						CFormat::FlipX( pui8Dest, ui32W, ui32H, ui32D );
 					}
-					if ( m_bFlipY && m_vMipMaps[M]->Height() > 1 ) {
-						CFormat::FlipY( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					if ( m_bFlipY && ui32H > 1 ) {
+						CFormat::FlipY( pui8Dest, ui32W, ui32H, ui32D );
 					}
-					if ( m_bFlipZ && m_vMipMaps[M]->Depth() > 1 ) {
-						CFormat::FlipZ( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					if ( m_bFlipZ && ui32D > 1 ) {
+						CFormat::FlipZ( pui8Dest, ui32W, ui32H, ui32D );
 					}
 					if ( m_bSwap ) {
-						CFormat::Swap( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+						CFormat::Swap( pui8Dest, ui32W, ui32H, ui32D );
 					}
 					if ( !CFormat::SwizzleIsDefault( m_sSwizzle ) ) {
-						CFormat::ApplySwizzle( pui8Dest, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth(), m_sSwizzle );
+						CFormat::ApplySwizzle( pui8Dest, ui32W, ui32H, ui32D, m_sSwizzle );
 					}
 
-					bool bThisIsOpuaqe = AlphaIsFullyEqualTo( pui8Dest, 1.0, m_vMipMaps[M]->Width(), m_vMipMaps[M]->Height(), m_vMipMaps[M]->Depth() );
+					bool bThisIsOpuaqe = AlphaIsFullyEqualTo( pui8Dest, 1.0, ui32W, ui32H, ui32D );
 					bOpaque = bOpaque && bThisIsOpuaqe;
 					if ( bResize ) {
 						CResampler rResampleMe;
 						CResampler::SL2_RESAMPLE rResampleCopy = m_rResample;
-						rResampleCopy.ui32W = m_vMipMaps[M]->Width();
-						rResampleCopy.ui32H = m_vMipMaps[M]->Height();
-						rResampleCopy.ui32D = m_vMipMaps[M]->Depth();
+						rResampleCopy.ui32W = ui32W;
+						rResampleCopy.ui32H = ui32H;
+						rResampleCopy.ui32D = ui32D;
 						rResampleCopy.ui32NewW = std::max( m_rResample.ui32NewW >> M, 1U );
 						rResampleCopy.ui32NewH = std::max( m_rResample.ui32NewH >> M, 1U );
 						rResampleCopy.ui32NewD = std::max( m_rResample.ui32NewD >> M, 1U );
@@ -488,16 +513,16 @@ namespace sl2 {
 					}
 					else if ( bUseTmpBuffer ) {
 						// Using the temporary buffer but not resizing?  Copy it over.
-						std::memcpy( iTmp.Data( M, 0, A, F ), pui8Dest, m_vMipMaps[M]->Width() * m_vMipMaps[M]->Height() * m_vMipMaps[M]->Depth() * 4 * sizeof( double ) );
+						std::memcpy( iTmp.Data( M, 0, A, F ), pui8Dest, ui32W * ui32H * ui32D * 4 * sizeof( double ) );
 					}
 					if ( M == 0 ) {
 						// Generate mipmaps using the original full-sized non-scaled image.
 						for ( size_t N = sSrcMips; N < sDstMips; ++N ) {
 							CResampler rResampleMe;
 							CResampler::SL2_RESAMPLE rResampleCopy = m_rMipResample;
-							rResampleCopy.ui32W = m_vMipMaps[M]->Width();
-							rResampleCopy.ui32H = m_vMipMaps[M]->Height();
-							rResampleCopy.ui32D = m_vMipMaps[M]->Depth();
+							rResampleCopy.ui32W = ui32W;
+							rResampleCopy.ui32H = ui32H;
+							rResampleCopy.ui32D = ui32D;
 							rResampleCopy.ui32NewW = std::max( m_rResample.ui32NewW >> N, 1U );
 							rResampleCopy.ui32NewH = std::max( m_rResample.ui32NewH >> N, 1U );
 							rResampleCopy.ui32NewD = std::max( m_rResample.ui32NewD >> N, 1U );
@@ -935,6 +960,87 @@ namespace sl2 {
 			if ( (m_rResample.ui32NewW == 0 || m_rResample.ui32NewW == _ui32Width) &&
 				(m_rResample.ui32NewH == 0 || m_rResample.ui32NewH == _ui32Height) &&
 				(m_rResample.ui32NewD == 0 || m_rResample.ui32NewD == _ui32Depth) ) { return true; }
+		}
+		return false;
+	}
+
+	/**
+	 * Crops an image from one buffer into another.  Coordinates can extend outside of the image, at which time the border color will be used.
+	 * 
+	 * \param _pui8Src The source buffer (RGBA64F).  On output, points to the location of the cropped buffer.  if there was no cropping operation, this is unchanged, otherwise it will point to _pdDst.
+	 * \param _vDst The destination buffer (RGBA64F).
+	 * \param _ui32Width Width of the source image on input, width of the new image on output.
+	 * \param _ui32Height Height of the source image on input, width of the new image on output.
+	 * \param _ui32Depth Depth of the source image on input, width of the new image on output.
+	 * \param _taX Texture-addressing mode for sampling outside of the image horizontally.
+	 * \param _taY Texture-addressing mode for sampling outside of the image vertically.
+	 * \param _taZ Texture-addressing mode for sampling outside of the image depthedly.
+	 * \param _wWindow the cropping window and size of the output image.
+	 * \param _pdBorderColor The border color for sampling outside the source image.
+	 **/
+	void CImage::Crop( uint8_t * &_pui8Src, std::vector<uint8_t> &_vDst,
+		uint32_t &_ui32Width, uint32_t &_ui32Height, uint32_t &_ui32Depth,
+		SL2_TEXTURE_ADDRESSING _taX, SL2_TEXTURE_ADDRESSING _taY, SL2_TEXTURE_ADDRESSING _taZ,
+		const SL2_WINDOW &_wWindow, const double * _pdBorderColor ) {
+		if ( CropIsFullSize( _ui32Width, _ui32Height, _ui32Depth, _wWindow ) ) { return; }
+
+		_vDst.resize( _wWindow.ui32D * _wWindow.ui32H * _wWindow.ui32W * sizeof( CFormat::SL2_RGBA64F ) );
+		const CFormat::SL2_RGBA64F * prgbSrc = reinterpret_cast<const CFormat::SL2_RGBA64F *>(_pui8Src);
+		CFormat::SL2_RGBA64F * prgbDst = reinterpret_cast<CFormat::SL2_RGBA64F *>(_vDst.data());
+
+		size_t sSrcPageSize = _ui32Height * _ui32Width;
+		size_t sDstPageSize = _wWindow.ui32H * _wWindow.ui32W;
+		for ( int64_t D = 0; D < _wWindow.ui32D; ++D ) {
+			for ( int64_t H = 0; H < _wWindow.ui32H; ++H ) {
+				for ( int64_t W = 0; W < _wWindow.ui32W; ++W ) {
+					size_t sDstIdx = size_t( (sDstPageSize * D) + (H * _wWindow.ui32W) + W );
+					int32_t i32IdxW = CTextureAddressing::m_pfFuncs[_taX]( _ui32Width, static_cast<int32_t>(W + _wWindow.i32X) );
+					int32_t i32IdxH = CTextureAddressing::m_pfFuncs[_taY]( _ui32Height, static_cast<int32_t>(H + _wWindow.i32Y) );
+					int32_t i32IdxD = CTextureAddressing::m_pfFuncs[_taZ]( _ui32Depth, static_cast<int32_t>(D + _wWindow.i32Z) );
+					// -1 = Border Color.
+					// -2 = Invalid.  We can't treat anything as invalid here, so to make it distinct from Boder Color it will be black with full alpha.
+					if ( i32IdxW == -2 || i32IdxH == -2 || i32IdxD == -2 ) {
+						prgbDst[sDstIdx].dRgba[SL2_PC_R] = 0.0;
+						prgbDst[sDstIdx].dRgba[SL2_PC_G] = 0.0;
+						prgbDst[sDstIdx].dRgba[SL2_PC_B] = 0.0;
+						prgbDst[sDstIdx].dRgba[SL2_PC_A] = 1.0;
+					}
+					else if ( i32IdxW == -1 || i32IdxH == -1 || i32IdxD == -1 ) {
+						prgbDst[sDstIdx].dRgba[SL2_PC_R] = _pdBorderColor[SL2_PC_R];
+						prgbDst[sDstIdx].dRgba[SL2_PC_G] = _pdBorderColor[SL2_PC_G];
+						prgbDst[sDstIdx].dRgba[SL2_PC_B] = _pdBorderColor[SL2_PC_B];
+						prgbDst[sDstIdx].dRgba[SL2_PC_A] = _pdBorderColor[SL2_PC_A];
+					}
+					else {
+						size_t sSrcIdx = size_t( (sSrcPageSize * i32IdxD) + (i32IdxH * _ui32Width) + i32IdxW );
+						prgbDst[sDstIdx] = prgbSrc[sSrcIdx];
+					}
+				}
+			}
+		}
+		_ui32Width = _wWindow.ui32W;
+		_ui32Height = _wWindow.ui32H;
+		_ui32Depth = _wWindow.ui32D;
+		_pui8Src = _vDst.data();
+	}
+
+	/**
+	 * Determines if the given window contains exactly the full image.
+	 * 
+	 * \param _ui32Width The image width.
+	 * \param _ui32Height The image height.
+	 * \param _ui32Depth The image depth.
+	 * \param _wWindow The cropping window to test
+	 * \return Returns true if the cropping window exactly matches the full image.
+	 **/
+	bool CImage::CropIsFullSize( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const SL2_WINDOW &_wWindow ) {
+		if ( _wWindow.ui32W == 0 || (_wWindow.ui32W == _ui32Width && _wWindow.i32X == 0) ) {
+			if ( _wWindow.ui32H == 0 || (_wWindow.ui32H == _ui32Height && _wWindow.i32Y == 0) ) {
+				if ( _wWindow.ui32D == 0 || (_wWindow.ui32D == _ui32Depth && _wWindow.i32Z == 0) ) {
+					// Full crop.
+					return true;
+				}
+			}
 		}
 		return false;
 	}
@@ -1674,7 +1780,7 @@ namespace sl2 {
 				break;	// FIT_RGBAF
 			}
 			case FIT_UNKNOWN : { return SL2_E_INVALIDFILETYPE; }
-			default : {}
+			default : { break; }
 		};
 
 #undef FreeImage_GetScanLine
