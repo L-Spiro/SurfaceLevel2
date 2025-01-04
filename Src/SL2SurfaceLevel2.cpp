@@ -702,7 +702,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
                 }
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"textureaddressing\"|\"ta\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressing\"|\"ta\": \"{}\". Must be clamp, wrap, mirror, mirroronce, border, or no_border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 oOptions.rResample.taColorH = oOptions.rResample.taColorD = oOptions.rResample.taAlphaW = oOptions.rResample.taAlphaH = oOptions.rResample.taAlphaD = oOptions.rResample.taColorW;
@@ -732,7 +732,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
                 }
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingw\"|\"taw\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingw\"|\"taw\": \"{}\". Must be clamp, wrap, mirror, mirroronce, border, or no_border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 oOptions.rResample.taAlphaW = oOptions.rResample.taColorW;
@@ -759,7 +759,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
                 }
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingh\"|\"tah\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingh\"|\"tah\": \"{}\". Must be clamp, wrap, mirror, mirroronce, border, or no_border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 oOptions.rResample.taAlphaH = oOptions.rResample.taColorH;
@@ -786,7 +786,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
                 }
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingd\"|\"tad\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingd\"|\"tad\": \"{}\". Must be clamp, wrap, mirror, mirroronce, border, or no_border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 oOptions.rResample.taAlphaD = oOptions.rResample.taColorD;
@@ -814,7 +814,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
                 }
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingw_color\"|\"taw_color\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingw_color\"|\"taw_color\": \"{}\". Must be clamp, wrap, mirror, mirroronce, border, or no_border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 oOptions.rMipResample.taColorW = oOptions.rResample.taColorW;
@@ -840,7 +840,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
                 }
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingh_color\"|\"tah_color\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingh_color\"|\"tah_color\": \"{}\". Must be clamp, wrap, mirror, mirroronce, border, or no_border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 oOptions.rMipResample.taColorH = oOptions.rResample.taColorH;
@@ -866,7 +866,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
                 }
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingd_color\"|\"tad_color\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingd_color\"|\"tad_color\": \"{}\". Must be clamp, wrap, mirror, mirroronce, border, or no_border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 oOptions.rMipResample.taColorD = oOptions.rResample.taColorD;
@@ -893,7 +893,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
                 }
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingw_alpha\"|\"taw_alpha\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingw_alpha\"|\"taw_alpha\": \"{}\". Must be clamp, wrap, mirror, mirroronce, border, or no_border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 oOptions.rMipResample.taAlphaW = oOptions.rResample.taAlphaW;
@@ -919,7 +919,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
                 }
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingh_alpha\"|\"tah_alpha\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingh_alpha\"|\"tah_alpha\": \"{}\". Must be clamp, wrap, mirror, mirroronce, border, or no_border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 oOptions.rMipResample.taAlphaH = oOptions.rResample.taAlphaH;
@@ -945,7 +945,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                     oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
                 }
                 else {
-                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingd_alpha\"|\"tad_alpha\": \"{}\". Must be clamp, wrap, mirror, mirroronce, or border.",
+                    SL2_ERRORT( std::format( L"Invalid \"textureaddressingd_alpha\"|\"tad_alpha\": \"{}\". Must be clamp, wrap, mirror, mirroronce, border, or no_border.",
                         _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
                 }
                 oOptions.rMipResample.taAlphaD = oOptions.rResample.taAlphaD;
@@ -964,9 +964,92 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 				SL2_ADV( 5 );
 			}
 
-            // TODO: bake_tex_mapping_u, bake_tex_mapping_v, bake_tex_mapping_w.
-            //  bake_tex_mapping_u ADDRESSING_MODE REPEATS
-            //  bake_tex_mapping_u mirror 1
+
+			if ( SL2_CHECK( 3, bake_tex_mapping_u ) ) {
+				if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_CLAMP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"repeat" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"wrap" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_WRAP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirror" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"reflect" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_MIRROR;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirroronce" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"mirror_once" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_MIRROR_ONCE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_BORDER;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"no_border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"nul_border" ) == 0 ) {
+                    oOptions.rResample.taColorW = sl2::SL2_TA_NULL_BORDER;
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"bake_tex_mapping_u\": \"{}\". Must be clamp, wrap, mirror, mirroronce, border, or no_border.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+				oOptions.ui32BakedW = ::_wtoi( _wcpArgV[2] );
+                oOptions.rResample.taAlphaW = oOptions.rResample.taColorW;
+                oOptions.rMipResample.taColorW = oOptions.rMipResample.taAlphaW = oOptions.rResample.taColorW;
+				SL2_ADV( 3 );
+			}
+			if ( SL2_CHECK( 3, bake_tex_mapping_v ) ) {
+				if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
+                    oOptions.rResample.taColorH = sl2::SL2_TA_CLAMP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"repeat" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"wrap" ) == 0 ) {
+                    oOptions.rResample.taColorH = sl2::SL2_TA_WRAP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirror" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"reflect" ) == 0 ) {
+                    oOptions.rResample.taColorH = sl2::SL2_TA_MIRROR;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirroronce" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"mirror_once" ) == 0 ) {
+                    oOptions.rResample.taColorH = sl2::SL2_TA_MIRROR_ONCE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
+                    oOptions.rResample.taColorH = sl2::SL2_TA_BORDER;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"no_border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"nul_border" ) == 0 ) {
+                    oOptions.rResample.taColorH = sl2::SL2_TA_NULL_BORDER;
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"bake_tex_mapping_v\": \"{}\". Must be clamp, wrap, mirror, mirroronce, border, or no_border.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+				oOptions.ui32BakedH = ::_wtoi( _wcpArgV[2] );
+                oOptions.rResample.taAlphaH = oOptions.rResample.taColorH;
+                oOptions.rMipResample.taColorH = oOptions.rMipResample.taAlphaH = oOptions.rResample.taColorH;
+				SL2_ADV( 3 );
+			}
+			if ( SL2_CHECK( 3, bake_tex_mapping_w ) ) {
+				if ( ::_wcsicmp( _wcpArgV[1], L"clamp" ) == 0 ) {
+                    oOptions.rResample.taColorD = sl2::SL2_TA_CLAMP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"repeat" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"wrap" ) == 0 ) {
+                    oOptions.rResample.taColorD = sl2::SL2_TA_WRAP;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirror" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"reflect" ) == 0 ) {
+                    oOptions.rResample.taColorD = sl2::SL2_TA_MIRROR;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"mirroronce" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"mirror_once" ) == 0 ) {
+                    oOptions.rResample.taColorD = sl2::SL2_TA_MIRROR_ONCE;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"bordercolor" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"border_color" ) == 0 ) {
+                    oOptions.rResample.taColorD = sl2::SL2_TA_BORDER;
+                }
+                else if ( ::_wcsicmp( _wcpArgV[1], L"no_border" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"nul_border" ) == 0 ) {
+                    oOptions.rResample.taColorD = sl2::SL2_TA_NULL_BORDER;
+                }
+                else {
+                    SL2_ERRORT( std::format( L"Invalid \"bake_tex_mapping_w\": \"{}\". Must be clamp, wrap, mirror, mirroronce, border, or no_border.",
+                        _wcpArgV[1] ).c_str(), sl2::SL2_E_INVALIDCALL );
+                }
+				oOptions.ui32BakedD = ::_wtoi( _wcpArgV[2] );
+                oOptions.rResample.taAlphaD = oOptions.rResample.taColorD;
+                oOptions.rMipResample.taColorD = oOptions.rMipResample.taAlphaD = oOptions.rResample.taColorD;
+				SL2_ADV( 3 );
+			}
+
 
             if ( SL2_CHECK( 2, nm_channel ) ) {
                 if ( ::_wcsicmp( _wcpArgV[1], L"r" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"red" ) == 0 ) {
@@ -1036,7 +1119,6 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 oOptions.bNormalizeMips = true;
                 SL2_ADV( 1 );
             }
-
             if ( SL2_CHECK( 2, scale ) || SL2_CHECK( 2, nm_z ) ) {
 				oOptions.dNormalScale = ::_wtof( _wcpArgV[1] );
 				SL2_ADV( 2 );
@@ -2341,6 +2423,19 @@ namespace sl2 {
      * \param _iImage The image off of which to base the adjustments.
 	 **/
 	void FixResampling( SL2_OPTIONS &_oOptions, CImage &_iImage ) {
+		if ( _oOptions.ui32BakedW ) {
+			_oOptions.wCropWindow.i32X = -static_cast<int32_t>(_iImage.Width() * _oOptions.ui32BakedW);
+			_oOptions.wCropWindow.ui32W = (1 + _oOptions.ui32BakedW * 2) * _iImage.Width();
+		}
+		if ( _oOptions.ui32BakedH ) {
+			_oOptions.wCropWindow.i32Y = -static_cast<int32_t>(_iImage.Height() * _oOptions.ui32BakedH);
+			_oOptions.wCropWindow.ui32H = (1 + _oOptions.ui32BakedH * 2) * _iImage.Height();
+		}
+		if ( _oOptions.ui32BakedD ) {
+			_oOptions.wCropWindow.i32Z = -static_cast<int32_t>(_iImage.Depth() * _oOptions.ui32BakedD);
+			_oOptions.wCropWindow.ui32D = (1 + _oOptions.ui32BakedD * 2) * _iImage.Depth();
+		}
+
 		if ( !_oOptions.wCropWindow.ui32W ) {
 			_oOptions.wCropWindow.i32X = 0;
 			_oOptions.wCropWindow.ui32W = _iImage.Width();
@@ -2353,6 +2448,7 @@ namespace sl2 {
 			_oOptions.wCropWindow.i32Z = 0;
 			_oOptions.wCropWindow.ui32D = _iImage.Depth();
 		}
+
         // Determine the resampling size.
 		uint32_t ui32NewWidth = _oOptions.rResample.ui32NewW;
 		uint32_t ui32NewHeight = _oOptions.rResample.ui32NewH;

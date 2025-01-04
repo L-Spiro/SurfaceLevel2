@@ -94,6 +94,21 @@ namespace sl2 {
 			FIBITMAP *										pbBitmap;
 		};
 
+		/** Wraps FreeImage_LoadMultiBitmapFromMemory(). */
+		struct SL2_FREEIMAGE_LOAD_MULTI_BIPMAP_FROM_MEMORY {
+			SL2_FREEIMAGE_LOAD_MULTI_BIPMAP_FROM_MEMORY( SL2_FREE_IMAGE &_fiImage ) :
+				pbBitmap( ::FreeImage_LoadMultiBitmapFromMemory( ::FreeImage_GetFileTypeFromMemory( _fiImage.pmMemory, 0 ), _fiImage.pmMemory, 0 ) ) {
+			}
+			~SL2_FREEIMAGE_LOAD_MULTI_BIPMAP_FROM_MEMORY() {
+				::FreeImage_CloseMultiBitmap( pbBitmap );
+				pbBitmap = nullptr;
+			}
+
+
+			// == Members.
+			FIMULTIBITMAP *									pbBitmap;
+		};
+
 		/** Wraps FreeImage_Allocate(). */
 		struct SL2_FREEIMAGE_ALLOCATE {
 			SL2_FREEIMAGE_ALLOCATE( int _iWidth, int _iHeight, int _iBpp, unsigned _uRedMask FI_DEFAULT(0), unsigned _uGreenMask FI_DEFAULT(0), unsigned _uBlueMask FI_DEFAULT(0) ) :
