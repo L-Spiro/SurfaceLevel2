@@ -139,6 +139,27 @@ namespace sl2 {
 			FIBITMAP *										pbBitmap;
 		};
 
+		/** Wraps FreeImage_LockPage(). */
+		struct SL2_FREEIMAGE_LOCK_PAGE {
+			SL2_FREEIMAGE_LOCK_PAGE( FIMULTIBITMAP * _pfmpbBitmap, int _iPage ) :
+				pfmpbBitmap( _pfmpbBitmap ),
+				pbBitmap( ::FreeImage_LockPage( _pfmpbBitmap, _iPage ) ) {
+			}
+			~SL2_FREEIMAGE_LOCK_PAGE() {
+				if ( pfmpbBitmap ) {
+					FreeImage_UnlockPage( pfmpbBitmap, pbBitmap, bChanged );
+				}
+				pbBitmap = nullptr;
+				pfmpbBitmap = nullptr;
+			}
+
+
+			// == Members.
+			FIBITMAP *										pbBitmap;
+			FIMULTIBITMAP *									pfmpbBitmap;
+			BOOL											bChanged = FALSE;
+		};
+
 		/** Wraps PVRTexLib_PVRTextureHeader. */
 		struct SL2_PVRTEXTUREHEADER {
 			SL2_PVRTEXTUREHEADER( PVRTexLib_PVRTextureHeader _thHeader ) :
@@ -954,6 +975,16 @@ namespace sl2 {
 		 * \return Returns an error code.
 		 **/
 		SL2_ERRORS											LoadFreeImage( const std::vector<uint8_t> &_vData );
+
+		/**
+		 * Loads a page given a FreeImage FIBITMAP pointer and the page index.
+		 * 
+		 * \param _pbBitmap The page to load.
+		 * \param _sIdx The index of the image to load (image array).
+		 * \param _sTotalIdx The total number of images to load.
+		 * \return Returns an error code.
+		 **/
+		SL2_ERRORS											LoadFreeImagePage( FIBITMAP * _pbBitmap, size_t _sIdx, size_t _sTotalIdx );
 
 		/**
 		 * Loads a KTX1 file from memory.

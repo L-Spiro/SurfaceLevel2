@@ -29,7 +29,7 @@ void FreeImageErrorHandler(FREE_IMAGE_FORMAT fif, const char* message) {
 int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
     --_iArgC;
     std::u16string sThisDir = sl2::CFileBase::GetFilePath( reinterpret_cast<const char16_t *>((*_wcpArgV++)) );
-    ::FreeImage_Initialise();
+    ::FreeImage_Initialise();									// Version 3.16.0.
     ::FreeImage_SetOutputMessage( ::FreeImageErrorHandler );
     sl2::CFormat::Init();
     sl2::SL2_OPTIONS oOptions;
