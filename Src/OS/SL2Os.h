@@ -25,9 +25,11 @@
 #if defined( _MSC_VER )
 // Microsoft Visual Studio Compiler
 #define														SL2_ALIGN( N ) 						__declspec( align( N ) )
+#define														SL2_FALLTHROUGH						[[fallthrough]];
 #elif defined( __GNUC__ ) || defined( __clang__ )
 // GNU Compiler Collection (GCC) or Clang
 #define														SL2_ALIGN( N ) 						__attribute__( (aligned( N )) )
+#define														SL2_FALLTHROUGH
 #else
 #error "Unsupported compiler"
 #endif

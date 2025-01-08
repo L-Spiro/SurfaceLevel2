@@ -1415,16 +1415,77 @@ namespace sl2 {
 		if ( fifFormat == FIF_GIF ) {
 			SL2_FREEIMAGE_LOAD_MULTI_BIPMAP_FROM_MEMORY flmbfmData( fiImage );
 			int iFrameCount = ::FreeImage_GetPageCount( flmbfmData.pbBitmap );
+
+			SL2_FREEIMAGE_CLONE fcBase;
 			for ( int I = 0; I < iFrameCount; ++I ) {
 				SL2_FREEIMAGE_LOCK_PAGE flpLocked( flmbfmData.pbBitmap, I );
-				auto aTmp = LoadFreeImagePage( flpLocked.pbBitmap, I, iFrameCount );
-				if ( aTmp != SL2_E_SUCCESS ) { return aTmp; }
+				if ( !flpLocked.pbBitmap ) { continue; }
+
+				// Retrieve frame metadata.
+				FITAG * pTag = nullptr;
+				uint16_t iFrameLeft = 0, iFrameTop = 0;
+				uint8_t iDisposalMethod = 0;
+
+				::FreeImage_GetMetadata( FIMD_ANIMATION, flpLocked.pbBitmap, "FrameLeft", &pTag );
+				if ( pTag ) { iFrameLeft = (*reinterpret_cast<const uint16_t *>(::FreeImage_GetTagValue( pTag ))); }
+
+				pTag = nullptr;
+				::FreeImage_GetMetadata( FIMD_ANIMATION, flpLocked.pbBitmap, "FrameTop", &pTag );
+				if ( pTag ) { iFrameTop = (*reinterpret_cast<const uint16_t *>(::FreeImage_GetTagValue( pTag ))); }
+
+				pTag = nullptr;
+				::FreeImage_GetMetadata( FIMD_ANIMATION, flpLocked.pbBitmap, "DisposalMethod", &pTag );
+				if ( pTag ) { iDisposalMethod = (*reinterpret_cast<const uint8_t *>(::FreeImage_GetTagValue( pTag ))); }
+				
+				// Initialize or restore the base canvas.
+				if ( I == 0 || !fcBase.Bitmap() ) { fcBase = flpLocked.pbBitmap; }
+
+				// Convert to RGBA32.
+				SL2_FREEIMAGE_FIBITMAP fbTmpBase;
+				SL2_FREEIMAGE_FIBITMAP fbTmpLocked;
+				try {
+					fbTmpBase = ConvertToRGBA32( fcBase.Bitmap() );
+					fbTmpLocked = ConvertToRGBA32( flpLocked.pbBitmap );
+				}
+				catch ( ... ) { return SL2_E_INTERNALERROR; }
+
+				// Blend.
+				AlphaBlend( fbTmpBase.Bitmap(), fbTmpLocked.Bitmap(), iFrameLeft, iFrameTop );
+
+				auto aErr = LoadFreeImagePage( fbTmpBase.Bitmap(), I, iFrameCount );
+				if ( aErr != SL2_E_SUCCESS ) { return aErr; }
+
+				// Disposal.
+				if ( iDisposalMethod == 0 || iDisposalMethod == 1 ) {			// GIF_DISPOSAL_LEAVE
+					// Keeps the current contents for the next image.
+					fcBase = fbTmpBase.Bitmap();
+				}
+				else if ( iDisposalMethod == 2 ) {								// GIF_DISPOSAL_BACKGROUND
+					// Clear the current contents for the next image.
+					switch ( ::FreeImage_GetBPP( fbTmpBase.Bitmap() ) ) {
+						case 1 : {} SL2_FALLTHROUGH
+						case 4 : {} SL2_FALLTHROUGH
+						case 8 : {
+							RGBQUAD rgbaVal;
+							rgbaVal.rgbReserved = 0;
+							::FreeImage_FillBackground( fcBase.Bitmap(), &rgbaVal, FI_COLOR_ALPHA_IS_INDEX );
+						}
+						default : {
+							RGBQUAD rgbaVal;
+							rgbaVal.rgbRed = rgbaVal.rgbBlue = rgbaVal.rgbGreen = rgbaVal.rgbReserved = 0xFF;
+							::FreeImage_FillBackground( fcBase.Bitmap(), &rgbaVal, FI_COLOR_IS_RGBA_COLOR );
+						}
+					}
+				}
+				else if ( iDisposalMethod == 3 ) {								// GIF_DISPOSAL_PREVIOUS
+					// fcBase already contains the previous contents.
+				}
 			}
 			return SL2_E_SUCCESS;
 		}
 		else {
 			SL2_FREEIMAGE_LOAD_FROM_MEMORY flfmData( fiImage );
-			return LoadFreeImagePage( flfmData.pbBitmap, 0, 1 );
+			return LoadFreeImagePage( flfmData.pbBitmap );
 		}
 	}
 
@@ -1437,21 +1498,6 @@ namespace sl2 {
 	 * \return Returns an error code.
 	 **/
 	SL2_ERRORS CImage::LoadFreeImagePage( FIBITMAP * _pbBitmap, size_t _sIdx, size_t _sTotalIdx ) {
-        // Retrieve frame metadata
-        FITAG* pTag = nullptr;
-        uint16_t iFrameLeft = 0, iFrameTop = 0;
-        uint8_t iDisposalMethod = 0;
-
-        FreeImage_GetMetadata(FIMD_ANIMATION, _pbBitmap, "FrameLeft", &pTag);
-        if (pTag) iFrameLeft = *(uint16_t*)FreeImage_GetTagValue(pTag);
-
-        FreeImage_GetMetadata(FIMD_ANIMATION, _pbBitmap, "FrameTop", &pTag);
-        if (pTag) iFrameTop = *(uint16_t*)FreeImage_GetTagValue(pTag);
-
-        FreeImage_GetMetadata(FIMD_ANIMATION, _pbBitmap, "DisposalMethod", &pTag);
-        if (pTag) iDisposalMethod = *(uint8_t*)FreeImage_GetTagValue(pTag);
-
-
 		int iTransIndex = ::FreeImage_GetTransparentIndex( _pbBitmap );
 
 		uint32_t ui32Width = ::FreeImage_GetWidth( _pbBitmap );
@@ -1861,6 +1907,117 @@ namespace sl2 {
 #undef FreeImage_GetScanLine
 
 		return SL2_E_SUCCESS;
+	}
+
+	/**
+	 * \brief Converts a FreeImage bitmap to 32-bit RGBA.
+	 *
+	 * \param _pbBitmap The input bitmap to convert.
+	 * \return FIBITMAP* A 32-bit RGBA bitmap. The caller is responsible for freeing the returned bitmap.
+	 */
+	FIBITMAP * CImage::ConvertToRGBA32( FIBITMAP * _pbBitmap ) {
+		if ( !_pbBitmap ) { throw std::invalid_argument( "Invalid bitmap provided." ); }
+
+		FREE_IMAGE_TYPE itType = ::FreeImage_GetImageType( _pbBitmap );
+		unsigned uBpp = ::FreeImage_GetBPP( _pbBitmap );
+
+		if ( itType == FIT_BITMAP && uBpp == 32 ) {
+			return ::FreeImage_Clone( _pbBitmap );
+		}
+
+		return ::FreeImage_ConvertTo32Bits( _pbBitmap );
+	}
+
+	/**
+	 * \brief Converts a 32-bit RGBA bitmap to another bit depth supported by FreeImage.
+	 *
+	 * \param _pbBitmap The 32-bit RGBA bitmap to convert.
+	 * \param _uTargetBpp The target bit depth (1, 2, 4, 8, 24, or 32).
+	 * \param _bIs565 Whether the target 16-bit format should use 5-6-5 instead of 5-5-5.
+	 * \return FIBITMAP* A bitmap with the specified bit depth. The caller is responsible for freeing the returned bitmap.
+	 */
+	//FIBITMAP * CImage::ConvertFromRGBA32( FIBITMAP * _pbBitmap, unsigned _uTargetBpp, bool _bIs565 ) {
+	//	if ( !_pbBitmap ) { throw std::invalid_argument( "Invalid bitmap provided." ); }
+
+	//	if ( ::FreeImage_GetBPP( _pbBitmap ) != 32 ) { throw std::invalid_argument( "Input bitmap is not 32-bit RGBA." ); }
+
+	//	switch ( _uTargetBpp ) {
+	//		case 1 : {}	SL2_FALLTHROUGH
+	//		case 4 : {}	SL2_FALLTHROUGH
+	//		case 8 : {
+	//			// Convert to 24-bit first, as FreeImage_ColorQuantize only works on 24-bit images.
+	//			FIBITMAP * pConverted24 = FreeImage_ConvertTo24Bits( _pbBitmap );
+	//			if ( !pConverted24 ) {
+	//				throw std::runtime_error( "Failed to convert to 24-bit for color quantization." );
+	//			}
+	//			FIBITMAP * pQuantized = ::FreeImage_ColorQuantize( pConverted24, FIQ_WUQUANT );
+	//			::FreeImage_Unload( pConverted24 );
+	//			if ( !pQuantized ) {
+	//				throw std::runtime_error( "Failed to quantize image to target bit depth." );
+	//			}
+	//			return pQuantized;
+	//		}
+	//		case 16: {
+	//			if ( _bIs565 ) {
+	//				return ::FreeImage_ConvertTo16Bits565( _pbBitmap );
+	//			}
+	//			else {
+	//				return ::FreeImage_ConvertTo16Bits555( _pbBitmap );
+	//			}
+	//		}
+	//		case 24 : {
+	//			return ::FreeImage_ConvertTo24Bits( _pbBitmap );
+	//		}
+	//		case 32 : {
+	//			return ::FreeImage_Clone( _pbBitmap );
+	//		}
+	//		default : {
+	//			throw std::invalid_argument( "Unsupported target bit depth." );
+	//		}
+	//	}
+	//}
+
+	/**
+	 * \brief Blends one image onto another with transparency support.
+	 *
+	 * \param _pbBaseCanvas The destination image.
+	 * \param _pbBitmapFrame The source image to blend onto the destination.
+	 * \param _iFrameLeft The left offset for the frame.
+	 * \param _iFrameTop The top offset for the frame.
+	 */
+	void CImage::AlphaBlend( FIBITMAP * _pbBaseCanvas, FIBITMAP * _pbBitmapFrame, uint16_t _iFrameLeft, uint16_t _iFrameTop ) {
+		unsigned uBaseW = ::FreeImage_GetWidth( _pbBaseCanvas );
+		unsigned uBaseH = ::FreeImage_GetHeight( _pbBaseCanvas );
+		unsigned uFrameW = ::FreeImage_GetWidth( _pbBitmapFrame );
+		unsigned uFrameH = ::FreeImage_GetHeight( _pbBitmapFrame );
+
+		unsigned uBasePitch = ::FreeImage_GetPitch( _pbBaseCanvas );
+		unsigned uFramePitch = ::FreeImage_GetPitch( _pbBitmapFrame );
+
+		BYTE * pbBaseBits = ::FreeImage_GetBits( _pbBaseCanvas );
+		BYTE * pbFrameBits = ::FreeImage_GetBits( _pbBitmapFrame );
+		_iFrameTop = (uBaseH) - (uFrameH + _iFrameTop);
+		for ( unsigned Y = 0; Y < uFrameH; ++Y ) {
+			if ( _iFrameTop + Y >= uBaseH ) { continue; }
+
+			BYTE * pbBaseRow = pbBaseBits + (_iFrameTop + Y) * uBasePitch;
+			BYTE * pbFrameRow = pbFrameBits + Y * uFramePitch;
+
+			for ( unsigned X = 0; X < uFrameW; ++X ) {
+				if ( _iFrameLeft + X >= uBaseW ) { continue; }
+
+				BYTE * pbBasePixel = pbBaseRow + (_iFrameLeft + X) * 4; // Assuming 32-bit images (RGBA)
+				BYTE * pbFramePixel = pbFrameRow + X * 4;
+
+				BYTE bFrameAlpha = pbFramePixel[FI_RGBA_ALPHA];
+				float fAlpha = bFrameAlpha / 255.0f;
+
+				pbBasePixel[FI_RGBA_RED] = static_cast<BYTE>((1 - fAlpha) * pbBasePixel[FI_RGBA_RED] + fAlpha * pbFramePixel[FI_RGBA_RED]);
+				pbBasePixel[FI_RGBA_GREEN] = static_cast<BYTE>((1 - fAlpha) * pbBasePixel[FI_RGBA_GREEN] + fAlpha * pbFramePixel[FI_RGBA_GREEN]);
+				pbBasePixel[FI_RGBA_BLUE] = static_cast<BYTE>((1 - fAlpha) * pbBasePixel[FI_RGBA_BLUE] + fAlpha * pbFramePixel[FI_RGBA_BLUE]);
+				pbBasePixel[FI_RGBA_ALPHA] = static_cast<BYTE>(std::max( pbBasePixel[FI_RGBA_ALPHA], bFrameAlpha ));
+			}
+		}
 	}
 
 	/**

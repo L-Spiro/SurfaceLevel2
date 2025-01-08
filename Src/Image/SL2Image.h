@@ -160,6 +160,66 @@ namespace sl2 {
 			BOOL											bChanged = FALSE;
 		};
 
+		/** Wraps FreeImage_Clone(). */
+		struct SL2_FREEIMAGE_CLONE {
+			SL2_FREEIMAGE_CLONE() :
+				pbBitmap( nullptr ) {}
+			SL2_FREEIMAGE_CLONE( FIBITMAP * _pbBitmap ) :
+				pbBitmap( ::FreeImage_Clone( _pbBitmap ) ) {
+			}
+			~SL2_FREEIMAGE_CLONE() {
+				::FreeImage_Unload( pbBitmap );
+				pbBitmap = nullptr;
+			}
+
+
+			// == Operators.
+			SL2_FREEIMAGE_CLONE &							operator = ( FIBITMAP * _pbBitmap ) {
+				::FreeImage_Unload( pbBitmap );
+				pbBitmap = ::FreeImage_Clone( _pbBitmap );
+				return (*this);
+			}
+
+
+			// == Functions.
+			FIBITMAP *										Bitmap() { return pbBitmap; }
+
+			
+			// == Members.
+		protected :
+			FIBITMAP *										pbBitmap;
+		};
+
+		/** Wraps FIBITMAP(). */
+		struct SL2_FREEIMAGE_FIBITMAP {
+			SL2_FREEIMAGE_FIBITMAP() :
+				pbBitmap( nullptr ) {}
+			SL2_FREEIMAGE_FIBITMAP( FIBITMAP * _pbBitmap ) :
+				pbBitmap( _pbBitmap ) {
+			}
+			~SL2_FREEIMAGE_FIBITMAP() {
+				::FreeImage_Unload( pbBitmap );
+				pbBitmap = nullptr;
+			}
+
+
+			// == Operators.
+			SL2_FREEIMAGE_FIBITMAP &						operator = ( FIBITMAP * _pbBitmap ) {
+				::FreeImage_Unload( pbBitmap );
+				pbBitmap = _pbBitmap;
+				return (*this);
+			}
+
+
+			// == Functions.
+			FIBITMAP *										Bitmap() { return pbBitmap; }
+
+			
+			// == Members.
+		protected :
+			FIBITMAP *										pbBitmap;
+		};
+
 		/** Wraps PVRTexLib_PVRTextureHeader. */
 		struct SL2_PVRTEXTUREHEADER {
 			SL2_PVRTEXTUREHEADER( PVRTexLib_PVRTextureHeader _thHeader ) :
@@ -984,7 +1044,35 @@ namespace sl2 {
 		 * \param _sTotalIdx The total number of images to load.
 		 * \return Returns an error code.
 		 **/
-		SL2_ERRORS											LoadFreeImagePage( FIBITMAP * _pbBitmap, size_t _sIdx, size_t _sTotalIdx );
+		SL2_ERRORS											LoadFreeImagePage( FIBITMAP * _pbBitmap, size_t _sIdx = 0, size_t _sTotalIdx = 1 );
+
+		/**
+		 * \brief Converts a FreeImage bitmap to 32-bit RGBA.
+		 *
+		 * \param _pbBitmap The input bitmap to convert.
+		 * \return FIBITMAP* A 32-bit RGBA bitmap. The caller is responsible for freeing the returned bitmap.
+		 */
+		FIBITMAP *											ConvertToRGBA32( FIBITMAP * _pbBitmap );
+
+		/**
+		 * \brief Converts a 32-bit RGBA bitmap to another bit depth supported by FreeImage.
+		 *
+		 * \param _pbBitmap The 32-bit RGBA bitmap to convert.
+		 * \param _uTargetBpp The target bit depth (1, 2, 4, 8, 24, or 32).
+		 * \param _bIs565 Whether the target 16-bit format should use 5-6-5 instead of 5-5-5.
+		 * \return FIBITMAP* A bitmap with the specified bit depth. The caller is responsible for freeing the returned bitmap.
+		 */
+		//FIBITMAP *											ConvertFromRGBA32( FIBITMAP * _pbBitmap, unsigned _uTargetBpp, bool _bIs565 = false );
+
+		/**
+		 * \brief Blends one image onto another with transparency support.
+		 *
+		 * \param _pbBaseCanvas The destination image.
+		 * \param _pbBitmapFrame The source image to blend onto the destination.
+		 * \param _iFrameLeft The left offset for the frame.
+		 * \param _iFrameTop The top offset for the frame.
+		 */
+		void												AlphaBlend( FIBITMAP * _pbBaseCanvas, FIBITMAP * _pbBitmapFrame, uint16_t _iFrameLeft, uint16_t _iFrameTop );
 
 		/**
 		 * Loads a KTX1 file from memory.
