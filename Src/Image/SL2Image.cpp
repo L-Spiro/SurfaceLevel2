@@ -1423,6 +1423,7 @@ namespace sl2 {
 
 				// Retrieve frame metadata.
 				FITAG * pTag = nullptr;
+				long lFrameTime = 0;
 				uint16_t iFrameLeft = 0, iFrameTop = 0;
 				uint8_t iDisposalMethod = 0;
 
@@ -1436,6 +1437,10 @@ namespace sl2 {
 				pTag = nullptr;
 				::FreeImage_GetMetadata( FIMD_ANIMATION, flpLocked.pbBitmap, "DisposalMethod", &pTag );
 				if ( pTag ) { iDisposalMethod = (*reinterpret_cast<const uint8_t *>(::FreeImage_GetTagValue( pTag ))); }
+
+				pTag = nullptr;
+				::FreeImage_GetMetadata( FIMD_ANIMATION, flpLocked.pbBitmap, "FrameTime", &pTag );
+				if ( pTag ) { lFrameTime = (*reinterpret_cast<const long *>(::FreeImage_GetTagValue( pTag ))); }
 				
 				// Initialize or restore the base canvas.
 				if ( I == 0 || !fcBase.Bitmap() ) { fcBase = flpLocked.pbBitmap; }
