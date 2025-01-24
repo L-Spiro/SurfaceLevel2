@@ -1105,7 +1105,7 @@
   </tr>
 </table>
 
-<h3>PNG</h3>
+<h3>PNG Options</h3>
 
 <table border="1" cellpadding="5">
   <tr>
