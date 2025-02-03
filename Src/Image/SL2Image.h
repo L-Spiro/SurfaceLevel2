@@ -863,6 +863,8 @@ namespace sl2 {
 
 		SL2_WINDOW											m_wCroppingWindow;						/**< The cropping window. */
 
+		std::vector<long>									m_vFrameTimes;							/**< Frame times, in milliseconds. */
+
 
 		// == Functions.
 		/**

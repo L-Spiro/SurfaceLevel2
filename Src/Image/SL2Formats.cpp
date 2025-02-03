@@ -1765,6 +1765,10 @@ namespace sl2 {
 			for ( uint32_t H = 0; H < _ui32H; ++H ) {
 				for ( uint32_t W = 0; W < _ui32W; ++W ) {
 					size_t sIdx = ui32Slice * D + ui32Pitch * H + W;
+					prgbSrc[sIdx].dRgba[SL2_PC_R] = std::max( 0.0, prgbSrc[sIdx].dRgba[SL2_PC_R] );
+					prgbSrc[sIdx].dRgba[SL2_PC_G] = std::max( 0.0, prgbSrc[sIdx].dRgba[SL2_PC_G] );
+					prgbSrc[sIdx].dRgba[SL2_PC_B] = std::max( 0.0, prgbSrc[sIdx].dRgba[SL2_PC_B] );
+
 					prgbDst[sIdx].fRgba[SL2_PC_R] = CFloat16( prgbSrc[sIdx].dRgba[SL2_PC_R] );
 					prgbDst[sIdx].fRgba[SL2_PC_G] = CFloat16( prgbSrc[sIdx].dRgba[SL2_PC_G] );
 					prgbDst[sIdx].fRgba[SL2_PC_B] = CFloat16( prgbSrc[sIdx].dRgba[SL2_PC_B] );

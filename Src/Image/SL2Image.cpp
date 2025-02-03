@@ -120,6 +120,7 @@ namespace sl2 {
 			m_pPalette = _iOther.m_pPalette;
 			m_bGenPalette = _iOther.m_bGenPalette;
 			m_wCroppingWindow = _iOther.m_wCroppingWindow;
+			m_vFrameTimes = _iOther.m_vFrameTimes;
 			
 			_iOther.m_sArraySize = 0;
 			_iOther.m_kKernel.SetSize( 0 );
@@ -163,6 +164,7 @@ namespace sl2 {
 			_iOther.m_bGenPalette = false;
 			_iOther.m_wCroppingWindow.i32X = _iOther.m_wCroppingWindow.i32Y = _iOther.m_wCroppingWindow.i32Z = 0;
 			_iOther.m_wCroppingWindow.ui32W = _iOther.m_wCroppingWindow.ui32H = _iOther.m_wCroppingWindow.ui32D = 0;
+			_iOther.m_vFrameTimes.clear();
 		}
 
 		return (*this);
@@ -226,6 +228,7 @@ namespace sl2 {
 		m_bGenPalette = false;
 		m_wCroppingWindow.i32X = m_wCroppingWindow.i32Y = m_wCroppingWindow.i32Z = 0;
 		m_wCroppingWindow.ui32W = m_wCroppingWindow.ui32H = m_wCroppingWindow.ui32D = 0;
+		m_vFrameTimes.clear();
 	}
 
 	/**
@@ -1451,6 +1454,7 @@ namespace sl2 {
 				try {
 					fbTmpBase = ConvertToRGBA32( fcBase.Bitmap() );
 					fbTmpLocked = ConvertToRGBA32( flpLocked.pbBitmap );
+					m_vFrameTimes.push_back( lFrameTime );
 				}
 				catch ( ... ) { return SL2_E_INTERNALERROR; }
 
