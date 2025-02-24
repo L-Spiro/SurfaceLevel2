@@ -546,6 +546,27 @@ namespace sl2 {
 		for ( size_t M = 0; M < iTmp.Mipmaps(); ++M ) {
 			for ( size_t A = 0; A < iTmp.ArraySize(); ++A ) {
 				for ( size_t F = 0; F < iTmp.Faces(); ++F ) {
+					if ( !_pkifFormat->bFloatFormat ||
+						_pkifFormat->vfVulkanFormat == SL2_VK_FORMAT_B10G11R11_UFLOAT_PACK32 || _pkifFormat->vfVulkanFormat == SL2_VK_FORMAT_E5B9G9R9_UFLOAT_PACK32 ||
+						_pkifFormat->vfVulkanFormat == SL2_VK_FORMAT_D32_SFLOAT || _pkifFormat->vfVulkanFormat == SL2_VK_FORMAT_D32_SFLOAT_S8_UINT ||
+						_pkifFormat->kifInternalFormat == SL2_GL_DEPTH32F_STENCIL8_NV || _pkifFormat->kifInternalFormat == SL2_GL_DEPTH_COMPONENT32F_NV ||
+						_pkifFormat->kifInternalFormat == SL2_GL_LUMINANCE_ALPHA32F_ARB || _pkifFormat->kifInternalFormat == SL2_GL_LUMINANCE_ALPHA16F_ARB ||
+						_pkifFormat->kifInternalFormat == SL2_GL_LUMINANCE32F_ARB || _pkifFormat->kifInternalFormat == SL2_GL_LUMINANCE16F_ARB ||
+						_pkifFormat->kifInternalFormat == SL2_GL_ALPHA32F_ARB || _pkifFormat->kifInternalFormat == SL2_GL_ALPHA16F_ARB ) {
+						double dLow = 0.0, dHi = 1.0;
+						if ( _pkifFormat->ui64PvrPixelFmt == PVRTLVT_SignedByteNorm ||
+							_pkifFormat->ui64PvrPixelFmt == PVRTLVT_SignedByte ||
+							_pkifFormat->ui64PvrPixelFmt == PVRTLVT_SignedShortNorm ||
+							_pkifFormat->ui64PvrPixelFmt == PVRTLVT_SignedShort ||
+							_pkifFormat->ui64PvrPixelFmt == PVRTLVT_SignedIntegerNorm ||
+							_pkifFormat->ui64PvrPixelFmt == PVRTLVT_SignedInteger ) {
+							dLow = -1.0;
+						}
+						Clamp( reinterpret_cast<double *>(iTmp.Data( M, 0, A, F )),
+							iTmp.m_vMipMaps[M]->Width() * iTmp.m_vMipMaps[M]->Height() * iTmp.m_vMipMaps[M]->Depth(),
+							dLow, dHi );
+					}
+
 					if ( m_kKernel.Size() ) {
 						if ( !ConvertToNormalMap( reinterpret_cast<CFormat::SL2_RGBA64F *>(iTmp.Data( M, 0, A, F )), iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() ) ) { return SL2_E_OUTOFMEMORY; }
 					}
@@ -1111,6 +1132,26 @@ namespace sl2 {
 	}
 
 	/**
+	 * Clamps the given texture between the high and low values.
+	 * 
+	 * \param _pdBuffer The pointer to the RGBA64F buffer to clamp.
+	 * \param _sTotal The number of texels in the given buffer.
+	 * \param _dLow The low clamp value.
+	 * \param _dHigh The high clamp value.
+	 **/
+	bool CImage::Clamp( double * _pdBuffer, size_t _sTotal, double _dLow, double _dHigh ) {
+		if ( size_t( _sTotal * 4 ) <= _sTotal ) { return false; }
+		_sTotal *= 4;
+		while ( _sTotal-- ) {
+			if SL2_UNLIKELY( _pdBuffer[0] < _dLow ) { _pdBuffer[0] = _dLow; }
+			else if SL2_UNLIKELY( _pdBuffer[0] > _dHigh ) { _pdBuffer[0] = _dHigh; }
+			
+			_pdBuffer++;
+		}
+		return true;
+	}
+
+	/**
 	 * Applies an ICC colorspace transfer function to a given RGBA64F buffer.
 	 * 
 	 * \param _pui8Buffer The texture texels.
@@ -1415,7 +1456,7 @@ namespace sl2 {
 		FREE_IMAGE_FORMAT fifFormat = ::FreeImage_GetFileTypeFromMemory( fiImage.pmMemory, 0 );
 		if ( FIF_UNKNOWN == fifFormat ) { return SL2_E_INVALIDFILETYPE; }
 
-		if ( fifFormat == FIF_GIF ) {
+		if ( fifFormat == FIF_GIF || fifFormat == FIF_ICO || fifFormat == FIF_TIFF ) {
 			SL2_FREEIMAGE_LOAD_MULTI_BIPMAP_FROM_MEMORY flmbfmData( fiImage );
 			int iFrameCount = ::FreeImage_GetPageCount( flmbfmData.pbBitmap );
 

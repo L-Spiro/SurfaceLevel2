@@ -124,6 +124,13 @@ namespace sl2 {
 		virtual bool										WriteToFile( const uint8_t * _pui8Data, size_t _tsSize );
 
 		/**
+		 * Gets the internal FILE handle.
+		 * 
+		 * \return Returns the internal pointer to the FILE object.
+		 **/
+		virtual FILE *										Handle() { return m_pfFile; }
+
+		/**
 		 * Loads the opened file to memory, storing the result in _vResult.
 		 *
 		 * \param _pcFile The file to open.

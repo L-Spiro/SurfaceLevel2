@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "Files/SL2StdFile.h"
 #include "Image/PVRTexTool/PVRTexLib.hpp"
 #include "Image/SL2Formats.h"
 #include "Image/SL2Image.h"
@@ -115,6 +116,15 @@ namespace sl2 {
 		int																iTgaSaveOption = TARGA_DEFAULT;									/**< TGA option. */
 
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *					pkifdYuvFormat = nullptr;										/**< The YUV format. */
+
+		int																iPbmSaveOption = PNM_DEFAULT;									/**< Option for saving as PBM. */
+
+		int																iPgmSaveOption = PNM_DEFAULT;									/**< Option for saving as PGM. */
+
+		int																iPpmSaveOption = PNM_DEFAULT;									/**< Option for saving as PPM. */
+
+		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *					pkifdIcoFormat = nullptr;										/**< The ICO format. */
+		int																iIcoSaveOption = ICO_DEFAULT;									/**< Option for saving as PPM. */
 
 		bool															bNeedsPreMultiply = false;										/**< Does the target format, or user request, demand pre-multiplied alpha? */
 		bool															bSwap = false;													/**< Swap R and B? */
@@ -431,6 +441,72 @@ namespace sl2 {
 	 * \return Returns an error code.
 	 **/
 	SL2_ERRORS															ExportAsPbm( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice );
+
+	/**
+	 * Exports as PGM.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS															ExportAsPgm( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions );
+
+	/**
+	 * Exports as PGM.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \param _sMip The mipmap level to export.
+	 * \param _sArray The array index to export.
+	 * \param _sFace The face to export.
+	 * \param _sSlice The slice to export.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS															ExportAsPgm( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice );
+
+	/**
+	 * Export as ICO.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS															ExportAsIco( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions );
+
+	/**
+	 * Export as ICO.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \param _sMip The mipmap level to export.
+	 * \param _sArray The array index to export.
+	 * \param _sFace The face to export.
+	 * \param _sSlice The slice to export.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS															ExportAsIco( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice );
+
+	/**
+	 * Exports as ICO.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \param _sMip The mipmap level to export.
+	 * \param _sArray The array index to export.
+	 * \param _sFace The face to export.
+	 * \param _sSlice The slice to export.
+	 * \param _pbifFormat The target indexed format.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS															ExportAsIco_Indexed( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions, size_t _sMip, size_t _sArray, size_t _sFace, size_t _sSlice,
+		const CFormat::SL2_BEST_INTERNAL_FORMAT * _pbifFormat );
+
+
 
 }	// namespace sl2
 

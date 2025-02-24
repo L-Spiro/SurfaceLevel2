@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright L. Spiro 2024
  *
  * Written by: Shawn (L. Spiro) Wilcoxen
@@ -100,6 +100,21 @@ namespace sl2 {
 				pbBitmap( ::FreeImage_LoadMultiBitmapFromMemory( ::FreeImage_GetFileTypeFromMemory( _fiImage.pmMemory, 0 ), _fiImage.pmMemory, 0 ) ) {
 			}
 			~SL2_FREEIMAGE_LOAD_MULTI_BIPMAP_FROM_MEMORY() {
+				::FreeImage_CloseMultiBitmap( pbBitmap );
+				pbBitmap = nullptr;
+			}
+
+
+			// == Members.
+			FIMULTIBITMAP *									pbBitmap;
+		};
+
+		/** Wraps FreeImage_OpenMultiBitmapFromHandle(). */
+		struct SL2_FREEIMAGE_OPEN_MULTI_BIPMAP_FROM_HANDLE {
+			SL2_FREEIMAGE_OPEN_MULTI_BIPMAP_FROM_HANDLE( FREE_IMAGE_FORMAT _fiF, FreeImageIO * _pfiIo, fi_handle _hHandle, int _iFlags FI_DEFAULT( 0 ) ) :
+				pbBitmap( ::FreeImage_OpenMultiBitmapFromHandle( _fiF, _pfiIo, _hHandle,  _iFlags ) ) {
+			}
+			~SL2_FREEIMAGE_OPEN_MULTI_BIPMAP_FROM_HANDLE() {
 				::FreeImage_CloseMultiBitmap( pbBitmap );
 				pbBitmap = nullptr;
 			}
@@ -806,7 +821,53 @@ namespace sl2 {
 		static double										ApplyKernel( double * _pdImage, uint32_t _ui32X, uint32_t _ui32Y, uint32_t _ui32W, uint32_t _ui32H, uint32_t _ui32D, const CKernel &_kKernel,
 			SL2_TEXTURE_ADDRESSING _taAddressW, SL2_TEXTURE_ADDRESSING _taAddressH, double _dBorder );
 
-		
+		/**
+		 * FreeImage read handler.
+		 * 
+		 * \param _pvBuffer Pointer to the array where the read objects are stored.
+		 * \param _uSize Size of each object in bytes.
+		 * \param _uCount The number of the objects to be read.
+		 * \param _hHandle The stream to read.
+		 * \return Number of objects read successfully, which may be less than _uCount if an error or end-of-file condition occurs.  If _uSize or _uCount is zero, fread returns zero and performs no other action.
+		 **/
+		static unsigned DLL_CALLCONV						FI_Read( void * _pvBuffer, unsigned _uSize, unsigned _uCount, fi_handle _hHandle ) {
+			return static_cast<unsigned>(::fread( _pvBuffer, _uSize, _uCount, reinterpret_cast<FILE *>(_hHandle)));
+		}
+
+		/**
+		 * FreeImage write handler.
+		 * 
+		 * \param _pvBuffer Pointer to the first object in the array to be written.
+		 * \param _uSize Size of each object.
+		 * \param _uCount The number of the objects to be written.
+		 * \param _hHandle Pointer to the output stream.
+		 * \return The number of objects written successfully, which may be less than _uCount if an error occurs.  If _uSize or _uCount is zero, fwrite returns zero and performs no other action.
+		 **/
+		static unsigned DLL_CALLCONV						FI_Write( void * _pvBuffer, unsigned _uSize, unsigned _uCount, fi_handle _hHandle ) {
+			return static_cast<unsigned>(::fwrite( _pvBuffer, _uSize, _uCount, reinterpret_cast<FILE *>(_hHandle)));
+		}
+
+		/**
+		 * Sets the file position indicator for the file stream stream to the value pointed to by _uOffset.
+		 * 
+		 * \param _hHandle File stream to modify
+		 * \param _uOffset Number of characters to shift the position relative to origin.
+		 * \param _uOrigin Position to which offset is added. It can have one of the following values: SEEK_SET, SEEK_CUR, SEEK_END.
+		 * \return ​0​ upon success, nonzero value otherwise.
+		 **/
+		static int DLL_CALLCONV								FI_Seek( fi_handle _hHandle, long _uOffset, int _uOrigin ) {
+			return static_cast<int>(::fseek( reinterpret_cast<FILE *>(_hHandle), _uOffset, _uOrigin));
+		}
+
+		/**
+		 * Returns the file position indicator for the file stream _hHandle.
+		 * 
+		 * \param _hHandle File stream to examine.
+		 * \return File position indicator on success or -1L if failure occurs.
+		 **/
+		static long DLL_CALLCONV							FI_Tell( fi_handle _hHandle ) {
+			return static_cast<long>(::ftell( reinterpret_cast<FILE *>(_hHandle) ));
+		}		
 
 
 	protected :
@@ -934,6 +995,16 @@ namespace sl2 {
 		 * \param _ptfGamma The gamma transfer functions.
 		 **/
 		void												BakeGamma( uint8_t * _pui8Buffer, double _dGamma, uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, CFormat::SL2_TRANSFER_FUNCS _ptfGamma );
+
+		/**
+		 * Clamps the given texture between the high and low values.
+		 * 
+		 * \param _pdBuffer The pointer to the RGBA64F buffer to clamp.
+		 * \param _sTotal The number of texels in the given buffer.
+		 * \param _dLow The low clamp value.
+		 * \param _dHigh The high clamp value.
+		 **/
+		static bool											Clamp( double * _pdBuffer, size_t _sTotal, double _dLow = 0.0, double _dHigh = 1.0 );
 
 		/**
 		 * Applies an ICC colorspace transfer function to a given RGBA64F buffer.
