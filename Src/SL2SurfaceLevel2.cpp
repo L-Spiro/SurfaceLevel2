@@ -400,6 +400,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 				oOptions.bEmbedColorProfile = true;
 
 				oOptions.dGamma = -2.2;
+				//oOptions.bManuallySetGamma = false;
                 SL2_ADV( 1 );
 			}
 

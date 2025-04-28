@@ -444,7 +444,7 @@ namespace sl2 {
 	 *
 	 * \param _pdWeights The convolution weights.
 	 * \param _pdTexels The texels to be convolved.
-	 * \param _sTotal The total values to which pdTexels and _pdWeights point.
+	 * \param _sTotal The total values to which _pdTexels and _pdWeights point.
 	 * \return Returns the summed weights * texels.
 	 **/
 	double CResampler::ConvolveAligned( const double * _pdWeights, const double * _pdTexels, size_t _sTotal ) {
@@ -511,7 +511,7 @@ namespace sl2 {
 	 *
 	 * \param _pdWeights The convolution weights.
 	 * \param _pdTexels The texels to be convolved.
-	 * \param _sTotal The total values to which pdTexels and _pdWeights point.
+	 * \param _sTotal The total values to which _pdTexels and _pdWeights point.
 	 * \return Returns the summed weights * texels.
 	 **/
 	double CResampler::ConvolveUnaligned( const double * _pdWeights, const double * _pdTexels, size_t _sTotal ) {
