@@ -42,6 +42,14 @@ namespace sl2 {
 		SL2_RT_NEXT_LO,
 	};
 
+	/** Quick rotations. */
+	enum SL2_QUICK_ROTATION {
+		SL2_QR_ROT_0,
+		SL2_QR_ROT_90,
+		SL2_QR_ROT_180,
+		SL2_QR_ROT_270
+	};
+
 	/**
 	 * Class CImage
 	 * \brief This class is the primary workhorse of the tool.
@@ -661,6 +669,15 @@ namespace sl2 {
 		inline void											SetCrop( const SL2_WINDOW &_wWindow ) { m_wCroppingWindow = _wWindow; }
 
 		/**
+		 * Sets the quick-rotation angle.
+		 * 
+		 * \param _qrRot The rotation to set.
+		 **/
+		inline void											SetQuickRotate( SL2_QUICK_ROTATION _qrRot ) {
+			m_qrQuickRotation = _qrRot;
+		}
+
+		/**
 		 * Sets whether or not alpha needs to be pre-multiplied.
 		 * 
 		 * \param _bPreMult If true, alpha will be premultiplied.
@@ -923,6 +940,7 @@ namespace sl2 {
 		bool												m_bGenPalette;							/**< Generate a new palette? */
 
 		SL2_WINDOW											m_wCroppingWindow;						/**< The cropping window. */
+		SL2_QUICK_ROTATION									m_qrQuickRotation;						/**< Quick rotation. */
 
 		std::vector<long>									m_vFrameTimes;							/**< Frame times, in milliseconds. */
 
@@ -983,6 +1001,20 @@ namespace sl2 {
 		 * \return Returns true if the cropping window exactly matches the full image.
 		 **/
 		bool												CropIsFullSize( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const SL2_WINDOW &_wWindow );
+
+		/**
+		 * Applies a quick rotation on a buffer in-place.
+		 * 
+		 * \param _pui8Src The buffer to rotate in-place.
+		 * \param _ui32Width On input, the width of the incoming buffer.  On output, the width of the rotated image.
+		 * \param _ui32Height On input, the height of the incoming buffer.  On output, the height of the rotated image.
+		 * \param _ui32Depth The depth of the buffer.
+		 * \param _qrRot The amount to quick-rotate.
+		 * \return Returns true if a temporary buffer was able to be created.  False always means memory failure.
+		 **/
+		bool												QuickRotate( uint8_t * _pui8Src,
+			uint32_t &_ui32Width, uint32_t &_ui32Height, uint32_t _ui32Depth,
+			SL2_QUICK_ROTATION _qrRot );
 
 		/**
 		 * Bakes the image special gamma into a given texture buffer.  The format must be RGBA64F.

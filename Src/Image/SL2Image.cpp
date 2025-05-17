@@ -56,7 +56,8 @@ namespace sl2 {
 		m_bIgnoreSourceColorspaceGamma( false ),
 		m_ui32YuvW( 0 ),
 		m_ui32YuvH( 0 ),
-		m_bGenPalette( false ) {
+		m_bGenPalette( false ),
+		m_qrQuickRotation( SL2_QR_ROT_0 ) {
 		m_sSwizzle = CFormat::DefaultSwizzle();
 	}
 	CImage::~CImage() {
@@ -120,6 +121,7 @@ namespace sl2 {
 			m_pPalette = _iOther.m_pPalette;
 			m_bGenPalette = _iOther.m_bGenPalette;
 			m_wCroppingWindow = _iOther.m_wCroppingWindow;
+			m_qrQuickRotation = _iOther.m_qrQuickRotation;
 			m_vFrameTimes = _iOther.m_vFrameTimes;
 			
 			_iOther.m_sArraySize = 0;
@@ -164,6 +166,7 @@ namespace sl2 {
 			_iOther.m_bGenPalette = false;
 			_iOther.m_wCroppingWindow.i32X = _iOther.m_wCroppingWindow.i32Y = _iOther.m_wCroppingWindow.i32Z = 0;
 			_iOther.m_wCroppingWindow.ui32W = _iOther.m_wCroppingWindow.ui32H = _iOther.m_wCroppingWindow.ui32D = 0;
+			_iOther.m_qrQuickRotation = SL2_QR_ROT_0;
 			_iOther.m_vFrameTimes.clear();
 		}
 
@@ -228,6 +231,7 @@ namespace sl2 {
 		m_bGenPalette = false;
 		m_wCroppingWindow.i32X = m_wCroppingWindow.i32Y = m_wCroppingWindow.i32Z = 0;
 		m_wCroppingWindow.ui32W = m_wCroppingWindow.ui32H = m_wCroppingWindow.ui32D = 0;
+		m_qrQuickRotation = SL2_QR_ROT_0;
 		m_vFrameTimes.clear();
 	}
 
@@ -391,6 +395,16 @@ namespace sl2 {
 			m_wCroppingWindow.i32Z = 0;
 			m_wCroppingWindow.ui32D = Depth();
 		}
+
+		switch ( m_qrQuickRotation ) {
+			case SL2_QR_ROT_270 : {}		SL2_FALLTHROUGH
+			case SL2_QR_ROT_90 : {
+				//bUseTmpBuffer = true;
+				std::swap( m_wCroppingWindow.ui32W, m_wCroppingWindow.ui32H );
+				//std::swap( m_rResample.ui32NewW, m_rResample.ui32NewH );
+				break;
+			}
+		}
 		
 
 		m_rResample.ui32W = m_wCroppingWindow.ui32W;
@@ -442,6 +456,16 @@ namespace sl2 {
 		if ( sDstMips > sSrcMips ) { bUseTmpBuffer = true; }
 		if ( !CropIsFullSize( Width(), Height(), Depth(), m_wCroppingWindow ) ) { bUseTmpBuffer = true; }
 
+		switch ( m_qrQuickRotation ) {
+			case SL2_QR_ROT_270 : {}		SL2_FALLTHROUGH
+			case SL2_QR_ROT_90 : {
+				bUseTmpBuffer = true;
+				std::swap( ui32NewW, ui32NewH );
+				std::swap( m_rResample.ui32NewW, m_rResample.ui32NewH );
+				break;
+			}
+		}
+
 		if ( !iTmp.AllocateTexture( CFormat::FindFormatDataByVulkan( SL2_VK_FORMAT_R64G64B64A64_SFLOAT ), ui32NewW, ui32NewH, ui32NewD, sDstMips, ArraySize(), Faces() ) ) { return SL2_E_OUTOFMEMORY; }
 
 		std::vector<double> vTmp;
@@ -468,12 +492,15 @@ namespace sl2 {
 					ui32D = m_vMipMaps[M]->Depth();
 
 					if ( !Format()->pfToRgba64F( Data( M, 0, A, F ), pui8Dest, ui32W, ui32H, ui32D, &ifdData ) ) { return SL2_E_INTERNALERROR; }
+					if ( !QuickRotate( pui8Dest, ui32W, ui32H, ui32D, m_qrQuickRotation ) ) { return SL2_E_OUTOFMEMORY; }
 					try {
 						Crop( pui8Dest, vCrop, ui32W, ui32H, ui32D,
 							m_rResample.taColorW, m_rResample.taColorH, m_rResample.taColorD,
 							m_wCroppingWindow, m_rResample.dBorderColor );
 					}
 					catch ( ... ) { return SL2_E_OUTOFMEMORY; }
+					
+
 					if ( m_dGamma ) {
 						BakeGamma( pui8Dest, 1.0 / m_dGamma, ui32W, ui32H, ui32D, CFormat::TransferFunc( m_cgcInputCurve ) );
 					}
@@ -576,6 +603,8 @@ namespace sl2 {
 						}
 						ApplyDstColorSpace( iTmp.Data( M, 0, A, F ), iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );
 					}
+
+					//if ( !QuickRotate( iTmp.Data( M, 0, A, F ), ui32W, ui32H, ui32D, m_qrQuickRotation ) ) { return SL2_E_OUTOFMEMORY; }
 				}
 			}
 		}
@@ -1067,6 +1096,80 @@ namespace sl2 {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Applies a quick rotation on a buffer in-place.
+	 * 
+	 * \param _pui8Src The buffer to rotate in-place.
+	 * \param _ui32Width On input, the width of the incoming buffer.  On output, the width of the rotated image.
+	 * \param _ui32Height On input, the height of the incoming buffer.  On output, the height of the rotated image.
+	 * \param _ui32Depth The depth of the buffer.
+	 * \param _qrRot The amount to quick-rotate.
+	 * \return Returns true if a temporary buffer was able to be created.  False always means memory failure.
+	 **/
+	bool CImage::QuickRotate( uint8_t * _pui8Src,
+		uint32_t &_ui32Width, uint32_t &_ui32Height, uint32_t _ui32Depth,
+		SL2_QUICK_ROTATION _qrRot ) {
+		try {
+			CFormat::SL2_RGBA64F * prgbaDst = reinterpret_cast<CFormat::SL2_RGBA64F *>(_pui8Src);
+			size_t sPageSize = _ui32Height * _ui32Width;
+			std::vector<CFormat::SL2_RGBA64F> vBuffer;
+			switch ( _qrRot ) {
+				case SL2_QR_ROT_90 : {
+					vBuffer.resize( _ui32Depth * sPageSize );
+					std::memcpy( vBuffer.data(), _pui8Src, vBuffer.size() * sizeof( CFormat::SL2_RGBA64F ) );
+					for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+						for ( int64_t H = 0; H < _ui32Height; ++H ) {
+							for ( int64_t W = 0; W < _ui32Width; ++W ) {
+								size_t sIdx0 = size_t( (sPageSize * D) + (H * _ui32Width) + W );
+								size_t sNewX = _ui32Height - H - 1;
+								size_t sNewY = W;
+								size_t sIdx1 = size_t( (sPageSize * D) + (sNewY * _ui32Height) + sNewX );
+
+								prgbaDst[sIdx1] = vBuffer[sIdx0];
+							}
+						}
+					}
+					std::swap( _ui32Height, _ui32Width );
+					return true;
+				}
+				case SL2_QR_ROT_180 : {
+					vBuffer.resize( _ui32Depth * sPageSize );
+					std::memcpy( vBuffer.data(), _pui8Src, vBuffer.size() * sizeof( CFormat::SL2_RGBA64F ) );
+					for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+						for ( int64_t H = 0; H < _ui32Height; ++H ) {
+							for ( int64_t W = 0; W < _ui32Width; ++W ) {
+								size_t sIdx0 = size_t( (sPageSize * D) + (H * _ui32Width) + W );
+								size_t sIdx1 = size_t( (sPageSize * D) + ((_ui32Height - H - 1) * _ui32Width) + (_ui32Width - W - 1) );
+								prgbaDst[sIdx0] = vBuffer[sIdx1];
+							}
+						}
+					}
+					return true;
+				}
+				case SL2_QR_ROT_270 : {
+					vBuffer.resize( _ui32Depth * sPageSize );
+					std::memcpy( vBuffer.data(), _pui8Src, vBuffer.size() * sizeof( CFormat::SL2_RGBA64F ) );
+					for ( uint32_t D = 0; D < _ui32Depth; ++D ) {
+						for ( int64_t H = 0; H < _ui32Height; ++H ) {
+							for ( int64_t W = 0; W < _ui32Width; ++W ) {
+								size_t sIdx0 = size_t( (sPageSize * D) + (H * _ui32Width) + W );
+								size_t sNewX = H;
+								size_t sNewY = _ui32Width - W - 1;
+								size_t sIdx1 = size_t( (sPageSize * D) + (sNewY * _ui32Height) + sNewX );
+
+								prgbaDst[sIdx1] = vBuffer[sIdx0];
+							}
+						}
+					}
+					std::swap( _ui32Height, _ui32Width );
+					return true;
+				}
+				default : { return true; }
+			}
+		}
+		catch ( ... ) { return false; }
 	}
 
 	/**

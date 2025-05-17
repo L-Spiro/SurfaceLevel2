@@ -425,6 +425,23 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                 SL2_ADV( 2 );
             }
 
+			if ( SL2_CHECK( 1, rot0 ) ) {
+				oOptions.qrQuickRot = sl2::SL2_QR_ROT_0;
+				SL2_ADV( 1 );
+			}
+			if ( SL2_CHECK( 1, rot90 ) ) {
+				oOptions.qrQuickRot = sl2::SL2_QR_ROT_90;
+				SL2_ADV( 1 );
+			}
+			if ( SL2_CHECK( 1, rot180 ) ) {
+				oOptions.qrQuickRot = sl2::SL2_QR_ROT_180;
+				SL2_ADV( 1 );
+			}
+			if ( SL2_CHECK( 1, rot270 ) ) {
+				oOptions.qrQuickRot = sl2::SL2_QR_ROT_270;
+				SL2_ADV( 1 );
+			}
+
             if ( SL2_CHECK( 1, printformats ) || SL2_CHECK( 1, print_formats ) ) {
                 sl2::CFormat::PrintFormats_List();
                 SL2_ADV( 1 );
@@ -2146,6 +2163,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
                reinterpret_cast<const wchar_t *>(oOptions.vInputs[I].u16Path.c_str()) ).c_str(), eError );
         }
 		iImage.SetCrop( oOptions.wCropWindow );
+		iImage.SetQuickRotate( oOptions.qrQuickRot );
         FixResampling( oOptions, iImage );
         iImage.Resampling() = oOptions.rResample;
         iImage.MipResampling() = oOptions.rMipResample;

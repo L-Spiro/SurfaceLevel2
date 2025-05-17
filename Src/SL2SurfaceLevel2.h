@@ -90,6 +90,7 @@ namespace sl2 {
 		uint32_t														ui32BakedW = 0;													/**< Number of baked horizontal iterations. */
 		uint32_t														ui32BakedH = 0;													/**< Number of baked vertical iterations. */
 		uint32_t														ui32BakedD = 0;													/**< Number of baked depth iterations. */
+		sl2::SL2_QUICK_ROTATION											qrQuickRot = sl2::SL2_QR_ROT_0;									/**< Quick rotation. */
 
 		int																iPngSaveOption = PNG_Z_DEFAULT_COMPRESSION;						/**< Option for saving as PNG. */
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *					pkifdPngFormat = nullptr;										/**< The PNG format. */
