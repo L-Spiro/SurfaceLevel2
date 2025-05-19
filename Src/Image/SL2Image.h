@@ -40,6 +40,7 @@ namespace sl2 {
 		SL2_RT_NEAREST,
 		SL2_RT_NEXT_HI,
 		SL2_RT_NEXT_LO,
+		SL2_RT_FIT,
 	};
 
 	/** Quick rotations. */

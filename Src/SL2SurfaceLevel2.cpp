@@ -386,18 +386,18 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 				oOptions.cgcOutputGammaCurve = sl2::SL2_CGC_sRGB_PRECISE;
 				sl2::CIcc::SL2_CMS_PROFILE cpProfile;
 				if ( !sl2::CIcc::CreateProfile( NULL, oOptions.cgcOutputGammaCurve, cpProfile, true ) ) {
-					SL2_ERRORT( std::format( L"\"photo\": \"{}\". Failed to create colorspace profile.",
-						L"sRGB" ).c_str(), sl2::SL2_E_OUTOFMEMORY );
+					SL2_ERRORT( std::format( L"\"photo\": Failed to create sRGB colorspace profile." ).c_str(), sl2::SL2_E_OUTOFMEMORY );
 				}
 				if ( !sl2::CIcc::SaveProfileToMemory( cpProfile, oOptions.vOutColorProfile ) ) {
-					SL2_ERRORT( std::format( L"\"photo\": \"{}\". Failed to save colorspace profile.",
-						L"sRGB" ).c_str(), sl2::SL2_E_OUTOFMEMORY );
+					SL2_ERRORT( std::format( L"\"photo\": Failed to save sRGB colorspace profile." ).c_str(), sl2::SL2_E_OUTOFMEMORY );
 				}
 				if ( !oOptions.bManuallySetTargetGamma ) {
 					oOptions.bManuallySetTargetGamma = true;
 					oOptions.dTargetGamma = 0.0;
 				}
 				oOptions.bEmbedColorProfile = true;
+				oOptions.rResample.taColorW = oOptions.rResample.taColorH = oOptions.rResample.taColorD = sl2::SL2_TA_NULL_BORDER;
+				oOptions.rResample.taAlphaW = oOptions.rResample.taAlphaH = oOptions.rResample.taAlphaD = sl2::SL2_TA_NULL_BORDER;
 
 				oOptions.dGamma = -2.2;
 				//oOptions.bManuallySetGamma = false;
@@ -587,6 +587,20 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 				oOptions.dRelScaleW = ::_wtof( _wcpArgV[1] );
 				oOptions.dRelScaleH = ::_wtof( _wcpArgV[2] );
                 oOptions.dRelScaleD = ::_wtof( _wcpArgV[3] );
+				SL2_ADV( 4 );
+			}
+
+			if ( SL2_CHECK( 3, fit ) ) {
+				oOptions.ui32FitW = ::_wtoi( _wcpArgV[1] );
+				oOptions.ui32FitH = ::_wtoi( _wcpArgV[2] );
+				oOptions.rtResampleTo = sl2::SL2_RT_FIT;
+				SL2_ADV( 3 );
+			}
+			if ( SL2_CHECK( 4, fit3 ) ) {
+				oOptions.ui32FitW = ::_wtoi( _wcpArgV[1] );
+				oOptions.ui32FitH = ::_wtoi( _wcpArgV[2] );
+				oOptions.ui32FitD = ::_wtoi( _wcpArgV[3] );
+				oOptions.rtResampleTo = sl2::SL2_RT_FIT;
 				SL2_ADV( 4 );
 			}
 
@@ -2575,6 +2589,27 @@ namespace sl2 {
 				ui32NewWidth = ui32TempW == ui32NewWidth ? ui32NewWidth : ui32TempW >> 1;
 				ui32NewHeight = ui32TempH == ui32NewHeight ? ui32NewHeight : ui32TempH >> 1;
                 ui32NewDepth = ui32TempD == ui32NewDepth ? ui32NewDepth : ui32TempD >> 1;
+				break;
+			}
+			case sl2::SL2_RT_FIT : {
+				double dScale = 0.0;
+				if ( _oOptions.ui32FitW ) {
+					double dTmp = double( _oOptions.ui32FitW ) / ui32NewWidth;
+					if ( dScale == 0.0 || dTmp < dScale ) { dScale = dTmp; }
+				}
+				if ( _oOptions.ui32FitH ) {
+					double dTmp = double( _oOptions.ui32FitH ) / ui32NewHeight;
+					if ( dScale == 0.0 || dTmp < dScale ) { dScale = dTmp; }
+				}
+				if ( _oOptions.ui32FitD ) {
+					double dTmp = double( _oOptions.ui32FitD ) / ui32NewDepth;
+					if ( dScale == 0.0 || dTmp < dScale ) { dScale = dTmp; }
+				}
+				if ( dScale != 0.0 ) {
+					ui32NewWidth = uint32_t( std::round( ui32NewWidth * dScale ) );
+					ui32NewHeight = uint32_t( std::round( ui32NewHeight * dScale ) );
+					ui32NewDepth = uint32_t( std::round( ui32NewDepth * dScale ) );
+				}
 				break;
 			}
 		}

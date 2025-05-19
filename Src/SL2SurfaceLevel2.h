@@ -55,6 +55,9 @@ namespace sl2 {
 		double															dRelScaleH = 1.0;												/**< Relative height scale. */
 		double															dRelScaleD = 1.0;												/**< Relative depth scale. */
 		int32_t															i32ScaleDims = 2;												/**< Which scaling dimension was specified (prescale or prescale3). */
+		uint32_t														ui32FitW = 0;													/**< The fit resmapling width. */
+		uint32_t														ui32FitH = 0;													/**< The fit resmapling height. */
+		uint32_t														ui32FitD = 0;													/**< The fit resmapling depth. */
 
 		CResampler::SL2_FILTER_FUNCS									fFilterFuncW = CResampler::SL2_FF_QUADRATICSHARP;				/**< The width filter. */
 		CResampler::SL2_FILTER_FUNCS									fFilterFuncH = CResampler::SL2_FF_QUADRATICSHARP;				/**< The height filter. */
