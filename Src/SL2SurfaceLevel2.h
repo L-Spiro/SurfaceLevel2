@@ -87,7 +87,7 @@ namespace sl2 {
 		double															dNormalYAxis = 1.0;												/**< Normal map Y axis.  1.0 for OpenGL, -1.0 for DirectX. */
 		bool															bNormalizeMips = false;											/**< If mipmaps should be normalized or not. */
 
-		bool															bGenNewPalatte = false;											/**< Generate a new palette (applies only when there is an existing palette. */
+		bool															bGenNewPalatte = false;											/**< Generate a new palette (applies only when there is an existing palette). */
 
 		sl2::CImage::SL2_WINDOW											wCropWindow;													/**< The cropping window. */
 		uint32_t														ui32BakedW = 0;													/**< Number of baked horizontal iterations. */
@@ -132,6 +132,9 @@ namespace sl2 {
 
 		bool															bNeedsPreMultiply = false;										/**< Does the target format, or user request, demand pre-multiplied alpha? */
 		bool															bSwap = false;													/**< Swap R and B? */
+		bool															bFlipX = false;													/**< Horizontal flip? */
+		bool															bFlipY = false;													/**< Vertical flip? */
+		bool															bFlipZ = false;													/**< Depth flip? */
 		bool															bPause = false;													/**< If true, the program pauses before closing the command window. */
 		bool															bShowTime = true;												/**< If true, the time taken to perform the conversion is printed. */
 		

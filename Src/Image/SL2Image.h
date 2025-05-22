@@ -714,6 +714,15 @@ namespace sl2 {
 		inline void											SetSwap( bool _bSwap ) { m_bSwap = _bSwap; }
 
 		/**
+		 * Sets whether to vertically flip or not.
+		 * 
+		 * \param _bFlipX If true, the image will be horizontally flipped.
+		 * \param _bFlipY If true, the image will be vertically flipped.
+		 * \param _bFlipZ If true, the image will be depth flipped.
+		 **/
+		inline void											SetFlip( bool _bFlipX, bool _bFlipY, bool _bFlipZ ) { m_bFlipX = _bFlipY; m_bFlipX = _bFlipY; m_bFlipZ = _bFlipZ; }
+
+		/**
 		 * Sets whether to ignore alpha or not.
 		 * 
 		 * \param _bIgnore If true, alpha will be ignored.
