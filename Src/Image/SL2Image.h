@@ -507,6 +507,13 @@ namespace sl2 {
 		SL2_ERRORS											LoadFile( const std::vector<uint8_t> &_vData );
 
 		/**
+		 * Loads an image format from the clipboard.  PNG is attempted first, the standard bitmap formats.
+		 * 
+		 * \return Returns an error code.
+		 **/
+		SL2_ERRORS											LoadFromClipboard();
+
+		/**
 		 * Loads a basic YUV image file.  All image slices, faces, and array slices will be loaded.
 		 * 
 		 * \param _vData The image file to load.

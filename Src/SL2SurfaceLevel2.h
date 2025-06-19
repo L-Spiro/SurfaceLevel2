@@ -25,7 +25,7 @@ namespace sl2 {
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *					pkifduvFormat = nullptr;										/**< The YUV format. */
 		uint32_t														ui32YuvW = 0;													/**< The YUV file width. */
 		uint32_t														ui32YuvH = 0;													/**< The YUV file height. */
-
+		bool															bFromClipBoard = false;											/**< If true, the file is loaded from the clipboard instead of from a file. */
 	};
 
 	// == Types.

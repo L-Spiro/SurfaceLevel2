@@ -362,6 +362,51 @@ namespace sl2 {
 	}
 
 	/**
+	 * Loads an image format from the clipboard.  PNG is attempted first, the standard bitmap formats.
+	 * 
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS CImage::LoadFromClipboard()  {
+		try {
+			std::vector<uint8_t> vData;
+			auto aFormat = CUtilities::ImageFromClipBoard( vData );
+			if ( aFormat == CUtilities::SL2_CF_NONE ) { return SL2_E_BADFORMAT; }
+			if ( CUtilities::SL2_CF_PNG == aFormat || CUtilities::SL2_CF_TIFF == aFormat ) { return LoadFreeImage( vData ); }
+
+			if ( CUtilities::SL2_CF_DIB == aFormat || CUtilities::SL2_CF_DIBV5 == aFormat ) {
+				if ( vData.size() < sizeof( SL2_BITMAPINFOHEADER ) ) { return SL2_E_BADFORMAT; }
+				auto * pBih				= reinterpret_cast<const SL2_BITMAPINFOHEADER *>(vData.data());
+				uint32_t dwClrCount;
+				if ( pBih->ui32ColorsInPalette > 0 ) {
+					dwClrCount = pBih->ui32ColorsInPalette;
+				}
+				else if ( pBih->ui16BitsPerPixel <= 8 ) {
+					dwClrCount = 1u << pBih->ui16BitsPerPixel;
+				}
+				else { dwClrCount = 0; }
+
+				uint32_t dwHeaderBytes	= pBih->ui32InfoSize + dwClrCount * sizeof( SL2_BITMAPPALETTE::SL2_BM_COLOR );
+				uint32_t dwFileSize		= sizeof( SL2_BITMAPFILEHEADER ) + uint32_t( vData.size() );
+
+				SL2_BITMAPFILEHEADER	bfhHeader;
+				bfhHeader.ui16Header	= 0x4D42;                                             // 'BM'
+				bfhHeader.ui32Size		= dwFileSize;
+				bfhHeader.ui16Reserved1	= 0;
+				bfhHeader.ui16Reserved2	= 0;
+				bfhHeader.ui32Offset	= sizeof( SL2_BITMAPFILEHEADER ) + dwHeaderBytes;
+
+				vData.resize( dwFileSize );
+				std::memmove( vData.data() + sizeof( bfhHeader ), vData.data(), vData.size() - sizeof( bfhHeader ) );
+				std::memcpy( vData.data(), &bfhHeader, sizeof( bfhHeader ) );
+				return LoadFile( vData );
+			}
+			return SL2_E_BADFORMAT;
+			
+		}
+		catch ( ... ) { return SL2_E_OUTOFMEMORY; }
+	}
+
+	/**
 	 * Converts to another format.  _iDst holds the converted image.
 	 * 
 	 * \param _pkifFormat The format to which to convert.

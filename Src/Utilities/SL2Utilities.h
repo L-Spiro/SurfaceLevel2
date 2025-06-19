@@ -12,11 +12,18 @@
 #include "SL2FeatureSet.h"
 #include "../OS/SL2Os.h"
 
+#include <cassert>
 #include <cmath>
 #include <filesystem>
 #include <numbers>
 #include <string>
 #include <vector>
+
+#if defined( __APPLE__ )
+#import <Cocoa/Cocoa.h>
+#elif defined( __linux__ )
+#include <gtk/gtk.h>
+#endif
 
 
 #ifndef SL2_ELEMENTS
@@ -57,9 +64,18 @@ namespace sl2 {
 			SL2_MS_TRANSPARENT								= 1 << 8,
 		};
 
+		enum SL2_CLIP_FORMATS {
+			SL2_CF_NONE,
+			SL2_CF_DIB,
+			SL2_CF_DIBV5,
+			SL2_CF_BITMAP,
+			SL2_CF_PNG,
+			SL2_CF_TIFF,
+		};
+
 
 		// == Types.
-		/* A structure for associating material names with textures and the texture file names. **/
+		/** A structure for associating material names with textures and the texture file names. **/
 		struct SL2_MAT_TEXTURE {
 			std::string										sMatName;								/**< The material name. */
 			std::u16string									sTexName;								/**< The associated texture. */
@@ -123,6 +139,78 @@ namespace sl2 {
 				return ui32Flags;
 			}
 		};
+
+#ifdef _WIN32
+		/** A wrapper around ::GlobalLock()/::GlobalUnlock() for Windows. */
+		struct SL2_GLOBALLOCK {
+			SL2_GLOBALLOCK( HGLOBAL _gLockMe ) :
+				gLockMe( _gLockMe ) {
+				if ( gLockMe ) {
+					lpvData = ::GlobalLock( gLockMe );
+				}
+			}
+			~SL2_GLOBALLOCK() {
+				if ( gLockMe ) {
+					::GlobalUnlock( gLockMe );
+				}
+			}
+
+
+			// == Functions.
+			/**
+			 * Gets a pointer to the memory pointer returned by ::GlobalLock().
+			 * 
+			 * \return Returns the pointer to the memory pointer returned by ::GlobalLock().
+			 **/
+			inline LPVOID									Data() { return lpvData; }
+
+		private :
+			// == Members.
+			HGLOBAL											gLockMe = NULL;							/**< The handle we manage. */
+			LPVOID											lpvData = NULL;							/**< The pointer to the data. */
+		};
+
+		/** A wrapper around cliboard access for Windows. */
+		struct SL2_CLIPBOARD {
+			SL2_CLIPBOARD( HWND _hWnd = NULL ) :
+				bOpen( ::OpenClipboard( _hWnd ) != FALSE ) {
+			}
+			~SL2_CLIPBOARD() {
+				if ( bOpen ) {
+					::CloseClipboard();
+				}
+			}
+
+
+			// == Functions.
+			/**
+			 * Gets data of a give format.  Call within a try/catch block.  An exception indicates a memory-allocation failure when resizing _vData.
+			 * 
+			 * \param _uiFormat The format of the data to attempt to retreive from the clipboard.
+			 * \param _vData Holds the returned vector of data.
+			 * \return Returns true if data of the given format was found in the clipboard.
+			 **/
+			template <typename _tType = std::vector<uint8_t>>
+			bool											GetData( UINT _uiFormat, _tType &_vData ) {
+				static_assert( sizeof( _tType::value_type ) == 1, "Compile-time assertion failed: sizeof( _tType::value_type ) must equal 1." );
+				if ( !::IsClipboardFormatAvailable( _uiFormat ) ) { return false; }
+
+				HGLOBAL hMem = ::GetClipboardData( _uiFormat );
+				if ( hMem ) {
+					_vData.resize( ::GlobalSize( hMem ) );
+					SL2_GLOBALLOCK glLock( hMem );
+					if ( !glLock.Data() ) { return false; }
+					std::memcpy( _vData.data(), glLock.Data(), _vData.size() );
+					return true;
+				}
+				return false;
+			}
+
+
+		protected :
+			bool											bOpen = false;							/**< Is the clipboard open? */
+		};
+#endif	// #ifdef _WIN32
 
 
 		// == Functions.
@@ -1272,6 +1360,16 @@ namespace sl2 {
 		static uint32_t										GetLowestPo2( uint32_t _ui32Value );
 
 		/**
+		 * Gets an image format from the clipboard and stores its raw data to a vector.  Call within a try/catch block.  All exceptions will be due to a lack of memory allocation.
+		 * 
+		 * \tparam _tType The vector type into which to store the returned clipboard data.
+		 * \param _vData The vector into which to store the found clipboard data.
+		 * \return The type of the raw data is returned, or SL2_CF_NONE to indicate an error.
+		 **/
+		template <typename _tType>
+		static inline SL2_CLIP_FORMATS						ImageFromClipBoard( _tType &_vData );
+
+		/**
 		 * Is AVX supported?
 		 *
 		 * \return Returns true if AVX is supported.
@@ -1465,5 +1563,65 @@ namespace sl2 {
 	// DEFINITIONS
 	// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 	// == Functions.
+	/**
+	 * Gets an image format from the clipboard and stores its raw data to a vector.  Call within a try/catch block.  All exceptions will be due to a lack of memory allocation.
+	 * 
+	 * \tparam _tType The vector type into which to store the returned clipboard data.
+	 * \param _vData The vector into which to store the found clipboard data.
+	 * \return The type of the raw data is returned, or SL2_CF_NONE to indicate an error.
+	 **/
+	template <typename _tType>
+	inline CUtilities::SL2_CLIP_FORMATS CUtilities::ImageFromClipBoard( _tType &_vData ) {
+#ifdef _WIN32
+		UINT uiFmt = ::RegisterClipboardFormatW( L"PNG" );
+		CUtilities::SL2_CLIPBOARD cbClip;
+		if ( uiFmt ) {
+			if ( cbClip.GetData( uiFmt, _vData ) ) { return SL2_CF_PNG; }
+		}
+		if ( cbClip.GetData( CF_DIB, _vData ) ) { return SL2_CF_DIB; }
+		if ( cbClip.GetData( CF_DIBV5, _vData ) ) { return SL2_CF_DIBV5; }
+		return SL2_CF_NONE;
+#elif defined( __APPLE__ )
+		@autoreleasepool {
+			NSPasteboard *	pPb		= [NSPasteboard generalPasteboard];
+			NSData *		pPng	= [pPb dataForType:NSPasteboardTypePNG];
+			if ( pPng ) {
+				_vData.resize( static_cast<size_t>([pPng length]) );
+				std::memcpy( _vData.data(), [pPng bytes], _vData.size() );
+				return SL2_CF_PNG;
+			}
+			// Try TIFF.
+			NSData *		pTiff	= [pPb dataForType:NSPasteboardTypeTIFF];
+			if ( pTiff ) {
+				_vData.resize( static_cast<size_t>([pTiff length]) );
+				std::memcpy( _vData.data(), [pTiff bytes], _vData.size() );
+				return SL2_CF_TIFF;
+			}
+			return SL2_CF_NONE;
+		}
+#elif defined(__linux__)
+		// requires linking to gtk and initializing before use
+		if ( !::gtk_init_check( nullptr, nullptr ) ) { return SL2_CF_NONE; }
+
+		GtkClipboard *	pCb		= ::gtk_clipboard_get( GDK_SELECTION_CLIPBOARD );
+		GdkPixbuf *		pPixbuf	= ::gtk_clipboard_wait_for_image( pCb );
+		if ( pPixbuf ) {
+			guchar *	pBuf	= nullptr;
+			gsize		sBufLen	= 0;
+			if ( ::gdk_pixbuf_save_to_buffer(	pPixbuf,
+												reinterpret_cast<gchar **>(&pBuf),
+												&sBufLen,
+												"png",
+												nullptr, nullptr ) ) {
+				_vData.assign( pBuf, pBuf + sBufLen );
+				::g_free( pBuf );
+				::g_object_unref( pPixbuf );
+				return SL2_CI_PNG;
+			}
+			::g_object_unref( pPixbuf );
+		}
+		return SL2_CF_NONE;
+#endif	// #ifdef _WIN32
+	}
 
 }	// namespace sl2

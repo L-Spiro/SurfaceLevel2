@@ -120,7 +120,14 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 				catch ( ... ) { SL2_ERROR( sl2::SL2_E_OUTOFMEMORY ); }
 				SL2_ADV( 4 );
 			}
-
+			if ( SL2_CHECK( 1, from_clipboard ) || SL2_CHECK( 1, from_cb ) || SL2_CHECK( 1, clipboard_in ) || SL2_CHECK( 1, cb_in ) ) {
+				try {
+					sl2::SL2_OPEN_FILE ofFile = { .bFromClipBoard = true };
+					oOptions.vInputs.push_back( ofFile );
+				}
+				catch ( ... ) { SL2_ERROR( sl2::SL2_E_OUTOFMEMORY ); }
+				SL2_ADV( 1 );
+			}
             
 
 			if ( SL2_CHECK( 4, weight ) || SL2_CHECK( 4, weights ) ) {
@@ -703,8 +710,8 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 	}
 
 			SL2_RESAMPLE( filter, fFilterFuncW, oOptions.fFilterFuncH = oOptions.fFilterFuncD = oOptions.fAlphaFilterFuncW = oOptions.fAlphaFilterFuncH = oOptions.fAlphaFilterFuncD );
-			SL2_RESAMPLE( filtera, fAlphaFilterFuncW, oOptions.fAlphaFilterFuncH = oOptions.fAlphaFilterFuncD = oOptions.fAlphaFilterFuncW );
-			SL2_RESAMPLE( filter_alpha, fAlphaFilterFuncW, oOptions.fAlphaFilterFuncH = oOptions.fAlphaFilterFuncD = oOptions.fAlphaFilterFuncW );
+			SL2_RESAMPLE( filtera, fAlphaFilterFuncW, oOptions.fAlphaFilterFuncH = oOptions.fAlphaFilterFuncD );
+			SL2_RESAMPLE( filter_alpha, fAlphaFilterFuncW, oOptions.fAlphaFilterFuncH = oOptions.fAlphaFilterFuncD );
 			SL2_RESAMPLE( filterw, fFilterFuncW, oOptions.fAlphaFilterFuncW );
 			SL2_RESAMPLE( filterh, fFilterFuncH, oOptions.fAlphaFilterFuncH );
 			SL2_RESAMPLE( filterd, fFilterFuncD, oOptions.fAlphaFilterFuncD );
@@ -716,8 +723,8 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 			SL2_RESAMPLE( filterd_alpha, fAlphaFilterFuncD, oOptions.fAlphaFilterFuncD );
 
 			SL2_RESAMPLE( mip_filter, fMipFilterFuncW, oOptions.fMipFilterFuncH = oOptions.fMipFilterFuncD = oOptions.fMipAlphaFilterFuncW = oOptions.fMipAlphaFilterFuncH = oOptions.fMipAlphaFilterFuncD );
-			SL2_RESAMPLE( mip_filtera, fMipAlphaFilterFuncW, oOptions.fMipAlphaFilterFuncH = oOptions.fMipAlphaFilterFuncD = oOptions.fMipAlphaFilterFuncW );
-			SL2_RESAMPLE( mip_filter_alpha, fMipAlphaFilterFuncW, oOptions.fMipAlphaFilterFuncH = oOptions.fMipAlphaFilterFuncD = oOptions.fMipAlphaFilterFuncW );
+			SL2_RESAMPLE( mip_filtera, fMipAlphaFilterFuncW, oOptions.fMipAlphaFilterFuncH = oOptions.fMipAlphaFilterFuncD );
+			SL2_RESAMPLE( mip_filter_alpha, fMipAlphaFilterFuncW, oOptions.fMipAlphaFilterFuncH = oOptions.fMipAlphaFilterFuncD );
 			SL2_RESAMPLE( mip_filterw, fMipFilterFuncW, oOptions.fMipAlphaFilterFuncW );
 			SL2_RESAMPLE( mip_filterh, fMipFilterFuncH, oOptions.fMipAlphaFilterFuncH );
 			SL2_RESAMPLE( mip_filterd, fMipFilterFuncD, oOptions.fMipAlphaFilterFuncD );
@@ -2183,11 +2190,21 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 		sl2::CImage iImage;
         
 		iImage.SetYuvSize( oOptions.vInputs[I].pkifduvFormat, oOptions.vInputs[I].ui32YuvW, oOptions.vInputs[I].ui32YuvH );
-		sl2::SL2_ERRORS eError = iImage.LoadFile( oOptions.vInputs[I].u16Path.c_str() );
-		if ( eError != sl2::SL2_E_SUCCESS ) {
-			SL2_ERRORT( std::format( L"Failed to load file: \"{}\".",
-				reinterpret_cast<const wchar_t *>(oOptions.vInputs[I].u16Path.c_str()) ).c_str(), eError );
+		sl2::SL2_ERRORS eError;
+		if ( oOptions.vInputs[I].bFromClipBoard ) {
+			eError = iImage.LoadFromClipboard();
+			if ( eError != sl2::SL2_E_SUCCESS ) {
+				SL2_ERRORT( L"Failed to load clipboard image.", eError );
+			}
 		}
+		else {
+			eError = iImage.LoadFile( oOptions.vInputs[I].u16Path.c_str() );
+			if ( eError != sl2::SL2_E_SUCCESS ) {
+				SL2_ERRORT( std::format( L"Failed to load file: \"{}\".",
+					reinterpret_cast<const wchar_t *>(oOptions.vInputs[I].u16Path.c_str()) ).c_str(), eError );
+			}
+		}
+		
 		iImage.SetCrop( oOptions.wCropWindow );
 		iImage.SetQuickRotate( oOptions.qrQuickRot );
 		FixResampling( oOptions, iImage );
