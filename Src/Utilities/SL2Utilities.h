@@ -141,6 +141,45 @@ namespace sl2 {
 		};
 
 #ifdef _WIN32
+		/** Message-only window. */
+		struct LS2_MESSAGE_WINDOW {
+			LS2_MESSAGE_WINDOW() {}
+			~LS2_MESSAGE_WINDOW() {
+				Destroy();
+			}
+
+
+			// == Functions.
+			/**
+			 * Creates the message-only window.
+			 * 
+			 * \return Returns the handle to the created window.
+			 **/
+			HWND											Create() {
+				Destroy();
+
+				hWnd = ::CreateWindowExW(
+					0, L"STATIC", nullptr, 0,
+					0, 0, 0, 0,
+					HWND_MESSAGE, nullptr,
+					::GetModuleHandleW( nullptr ), nullptr );
+				return hWnd;
+			}
+
+			/**
+			 * Destroys the message-only window.
+			 **/
+			void											Destroy() {
+				if ( hWnd ) {
+					::DestroyWindow( hWnd );
+				}
+			}
+
+		private :
+			// == Members.
+			HWND											hWnd = NULL;							/**< The handle to the the window. */
+		};
+
 		/** A wrapper around ::GlobalLock()/::GlobalUnlock() for Windows. */
 		struct SL2_GLOBALLOCK {
 			SL2_GLOBALLOCK( HGLOBAL _gLockMe ) :
@@ -150,9 +189,7 @@ namespace sl2 {
 				}
 			}
 			~SL2_GLOBALLOCK() {
-				if ( gLockMe ) {
-					::GlobalUnlock( gLockMe );
-				}
+				Unlock();
 			}
 
 
@@ -164,6 +201,17 @@ namespace sl2 {
 			 **/
 			inline LPVOID									Data() { return lpvData; }
 
+			/**
+			 * Unlocks the memory.
+			 **/
+			inline void										Unlock() {
+				if ( gLockMe ) {
+					::GlobalUnlock( gLockMe );
+					gLockMe = NULL;
+					lpvData = NULL;
+				}
+			}
+
 		private :
 			// == Members.
 			HGLOBAL											gLockMe = NULL;							/**< The handle we manage. */
@@ -172,8 +220,11 @@ namespace sl2 {
 
 		/** A wrapper around cliboard access for Windows. */
 		struct SL2_CLIPBOARD {
-			SL2_CLIPBOARD( HWND _hWnd = NULL ) :
-				bOpen( ::OpenClipboard( _hWnd ) != FALSE ) {
+			SL2_CLIPBOARD( HWND _hWnd = NULL ) {
+				if ( NULL == _hWnd ) {
+					_hWnd = mwWindow.Create();
+				}
+				bOpen = ::OpenClipboard( _hWnd ) != FALSE;
 			}
 			~SL2_CLIPBOARD() {
 				if ( bOpen ) {
@@ -184,15 +235,17 @@ namespace sl2 {
 
 			// == Functions.
 			/**
-			 * Gets data of a give format.  Call within a try/catch block.  An exception indicates a memory-allocation failure when resizing _vData.
+			 * Gets data of a given format.  Call within a try/catch block.  An exception indicates a memory-allocation failure when resizing _vData.
 			 * 
-			 * \param _uiFormat The format of the data to attempt to retreive from the clipboard.
-			 * \param _vData Holds the returned vector of data.
-			 * \return Returns true if data of the given format was found in the clipboard.
+			 * \param	_uiFormat The format of the data to attempt to retreive from the clipboard.
+			 * \param	_vData Holds the returned vector of data.
+			 * \return	Returns true if data of the given format was found in the clipboard.
+			 * \throws	std::bad_alloc on allocation error.
 			 **/
 			template <typename _tType = std::vector<uint8_t>>
 			bool											GetData( UINT _uiFormat, _tType &_vData ) {
 				static_assert( sizeof( _tType::value_type ) == 1, "Compile-time assertion failed: sizeof( _tType::value_type ) must equal 1." );
+				if ( !bOpen ) { return false; }
 				if ( !::IsClipboardFormatAvailable( _uiFormat ) ) { return false; }
 
 				HGLOBAL hMem = ::GetClipboardData( _uiFormat );
@@ -206,9 +259,43 @@ namespace sl2 {
 				return false;
 			}
 
+			/**
+			 * Sets data in a given format.  Call within a try/catch block.  An exception indicates a memory-allocation failure when allocating the global memory buffer.
+			 * 
+			 * \param	_uiFormat Format of the data to set.
+			 * \param	_vData The actual data to set.
+			 * \return	Returns true if the clipboard is open and the write succeeds.
+			 * \throws	std::bad_alloc on allocation error.
+			 **/
+			template <typename _tType = std::vector<uint8_t>>
+			bool											SetData( UINT _uiFormat, const _tType &_vData ) {
+				if ( !bOpen ) { return false; }
+
+				HGLOBAL hglbBinCopy;
+				hglbBinCopy = ::GlobalAlloc( GMEM_MOVEABLE, _vData.size() );
+				if ( !hglbBinCopy ) { throw std::bad_alloc(); }
+				SL2_GLOBALLOCK glLock( hglbBinCopy );
+				if ( !glLock.Data() ) {
+					glLock.Unlock();
+					::GlobalFree( hglbBinCopy );
+					return false;
+				}
+				std::memcpy( glLock.Data(), _vData.data(), _vData.size() );
+				::EmptyClipboard();
+				if ( NULL == ::SetClipboardData( _uiFormat, hglbBinCopy ) ) {
+					// It wasn't transferred.
+					glLock.Unlock();
+					::GlobalFree( hglbBinCopy );
+					return false;
+				}
+				return true;
+			}
+
 
 		protected :
+			LS2_MESSAGE_WINDOW								mwWindow;								/**< Message window if no winder was provided when opening the clipboard. */
 			bool											bOpen = false;							/**< Is the clipboard open? */
+			
 		};
 #endif	// #ifdef _WIN32
 
@@ -1370,6 +1457,17 @@ namespace sl2 {
 		static inline SL2_CLIP_FORMATS						ImageFromClipBoard( _tType &_vData );
 
 		/**
+		 * Copies an image from a raw-data vector to the clipboard.  Call within a try/catch block.  All exceptions will be due to a lack of memory allocation.
+		 * 
+		 * \tparam _tType The vector type for the incoming data.
+		 * \param _cfFormat The format of the image to be sent to the clipboard.
+		 * \param _vData The actual bytes to copy to the clipbiard.
+		 * \return Returns true if the clipboard could be accessed and the copy made.
+		 **/
+		template <typename _tType>
+		static inline bool									ImageToClipBoard( SL2_CLIP_FORMATS _cfFormat, const _tType &_vData );
+
+		/**
 		 * Is AVX supported?
 		 *
 		 * \return Returns true if AVX is supported.
@@ -1599,7 +1697,7 @@ namespace sl2 {
 			}
 			return SL2_CF_NONE;
 		}
-#elif defined(__linux__)
+#elif defined( __linux__ )
 		// requires linking to gtk and initializing before use
 		if ( !::gtk_init_check( nullptr, nullptr ) ) { return SL2_CF_NONE; }
 
@@ -1621,6 +1719,76 @@ namespace sl2 {
 			::g_object_unref( pPixbuf );
 		}
 		return SL2_CF_NONE;
+#endif	// #ifdef _WIN32
+	}
+
+	/**
+	 * Copies an image from a raw-data vector to the clipboard.  Call within a try/catch block.  All exceptions will be due to a lack of memory allocation.
+	 * 
+	 * \tparam _tType The vector type for the incoming data.
+	 * \param _cfFormat The format of the image to be sent to the clipboard.
+	 * \param _vData The actual bytes to copy to the clipbiard.
+	 * \return Returns true if the clipboard could be accessed and the copy made.
+	 **/
+	template <typename _tType>
+	inline bool CUtilities::ImageToClipBoard( SL2_CLIP_FORMATS _cfFormat, const _tType &_vData ) {
+#ifdef _WIN32
+		UINT uiId;
+		if ( _cfFormat == SL2_CF_PNG ) { uiId = ::RegisterClipboardFormatW( L"PNG" ); }
+		else if ( _cfFormat == SL2_CF_DIB ) { uiId = CF_DIB; }
+		else if ( _cfFormat == SL2_CF_DIBV5 ) { uiId = CF_DIBV5; }
+		else { return false; }
+		CUtilities::SL2_CLIPBOARD cbClip;
+		return cbClip.SetData( uiId, _vData );
+#elif defined( __APPLE__ )
+		@autoreleasepool {
+			NSPasteboard * pPb		= [NSPasteboard generalPasteboard];
+			[pPb clearContents];
+
+			NSData * pData			= [NSData dataWithBytes:_vData.data()
+										length:_vData.size()];
+			if ( _cfFormat == SL2_CF_PNG ) {
+				return [pPb setData:pData forType:NSPasteboardTypePNG];
+			}
+			if ( _cfFormat == SL2_CF_TIFF ) {
+				return [pPb setData:pData forType:NSPasteboardTypeTIFF];
+			}
+			return false;
+		}
+#elif defined( __linux__ )
+		if ( _cfFormat != SL2_CF_PNG ) { return false; }
+		// Ensure GTK is initialized
+		if ( !::gtk_init_check( nullptr, nullptr ) ) { return false; }
+
+		// Decode PNG blob into a pixbuf
+		GError *			pErr		= nullptr;
+		GdkPixbufLoader *	pLoader		= ::gdk_pixbuf_loader_new();
+		if ( !pLoader ) { return false; }
+
+		if ( !::gdk_pixbuf_loader_write( pLoader, _vData.data(),
+			_vData.size(), &pErr ) ) {
+			::g_error_free( pErr );
+			::g_object_unref( pLoader );
+			return false;
+		}
+		::gdk_pixbuf_loader_close( pLoader, &pErr );
+		if ( pErr ) {
+			::g_error_free( pErr );
+			::g_object_unref( pLoader );
+			return false;
+		}
+
+		GdkPixbuf *			pPixbuf		= ::gdk_pixbuf_loader_get_pixbuf( pLoader );
+		if ( !pPixbuf ) {
+			::g_object_unref( pLoader );
+			return false;
+		}
+
+		GtkClipboard *		pCb			= ::gtk_clipboard_get( GDK_SELECTION_CLIPBOARD );
+		::gtk_clipboard_set_image( pCb, pPixbuf );
+
+		::g_object_unref( pLoader );
+		return true;
 #endif	// #ifdef _WIN32
 	}
 

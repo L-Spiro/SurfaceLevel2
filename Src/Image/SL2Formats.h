@@ -126,6 +126,9 @@ namespace sl2 {
 		SL2_E_FILEWRITEERROR														= -13,							/**< An error occurred while writing the file. */
 		SL2_E_BADFORMAT																= -14,							/**< Bad data format. */
 		SL2_E_UNSUPPORTEDSIZE														= -15,							/**< A value is too large for the type required by a given file format. */
+		SL2_E_MULTIFILECLIPBOARD													= -16,							/**< Multi-file outputs cannot be sent to the clipboard. */
+		SL2_E_UNAVAILABLECLIPBOARD													= -17,							/**< Clipboard unavailable. */
+		SL2_E_PNGUNAVAILABLE														= -18,							/**< The PNG clipboard format is unavailable. */
 	};
 
 	/**

@@ -128,6 +128,21 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 				catch ( ... ) { SL2_ERROR( sl2::SL2_E_OUTOFMEMORY ); }
 				SL2_ADV( 1 );
 			}
+			if ( SL2_CHECK( 1, to_clipboard ) || SL2_CHECK( 1, to_cb ) || SL2_CHECK( 1, clipboard_out ) || SL2_CHECK( 1, cb_out ) ) {
+				// Make sure the output list has at least 1 fewer entries than the input list.
+				if ( oOptions.vOutputs.size() >= oOptions.vInputs.size() ) {
+					// Too many outputs have already been submitted.
+					SL2_ERRORT( u"Too many outputs for the given number of inputs.\r\n", sl2::SL2_E_INVALIDCALL );
+				}
+				try {
+					for ( size_t J = oOptions.vOutputs.size(); oOptions.vOutputs.size() < oOptions.vInputs.size() - 1; ++J ) {
+						oOptions.vOutputs.push_back( std::u16string() );
+					}
+					oOptions.vOutputs.push_back( std::u16string() );
+				}
+				catch ( ... ) { SL2_ERROR( sl2::SL2_E_OUTOFMEMORY ); }
+				SL2_ADV( 1 );
+			}
             
 
 			if ( SL2_CHECK( 4, weight ) || SL2_CHECK( 4, weights ) ) {
@@ -2236,7 +2251,6 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 		sl2::CImage iConverted;
 		sl2::CClock cClock;
 		iImage.ConvertToFormat( oOptions.pkifdFinalFormat, iConverted );
-
 		uint64_t ui64Time = cClock.GetRealTick() - cClock.GetStartTick();
 		iImage.Reset();
 		char szPrintfMe[128];
@@ -2247,7 +2261,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 		}
 		cClock.SetStartingTick();
 #define SL2_CHECKEXT( EXT )     sl2::CFileBase::CmpFileExtension( oOptions.vOutputs[I], u ## #EXT )
-		if ( SL2_CHECKEXT( png ) ) {
+		if ( SL2_CHECKEXT( png ) || !oOptions.vOutputs[I].size() ) {
 			eError = sl2::ExportAsPng( iConverted, oOptions.vOutputs[I], oOptions );
 			if ( sl2::SL2_E_SUCCESS != eError ) {
 				SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
@@ -2437,7 +2451,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 		if ( oOptions.bShowTime ) {
 			::printf( "Save time: %.13f seconds.\r\n", ui64Time / static_cast<double>(cClock.GetResolution()) );
 		}
-		auto sStr = std::format( L"Saved file: \"{}\".\r\n", reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) );
+		auto sStr = std::format( L"Saved file: \"{}\".\r\n", oOptions.vOutputs[I].size() ? reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) : L"<clipboard>" );
 		::OutputDebugStringW( sStr.c_str() );
 		::wprintf( sStr.c_str() );
 	}
@@ -2506,6 +2520,15 @@ namespace sl2 {
 			}
 			case SL2_E_UNSUPPORTEDSIZE : {
 				return std::u16string( u"A value is too large for the type required by a given file format." );
+			}
+			case SL2_E_MULTIFILECLIPBOARD : {
+				return std::u16string( u"Only single-file outputs can be sent to the clipboard." );
+			}
+			case SL2_E_UNAVAILABLECLIPBOARD : {
+				return std::u16string( u"Unable to access or write to the clipboard." );
+			}
+			case SL2_E_PNGUNAVAILABLE : {
+				return std::u16string( u"The PNG clipboard format is unavailable." );
 			}
 		}
 		return std::u16string();
@@ -2638,7 +2661,9 @@ namespace sl2 {
 				if ( dScale != 0.0 ) {
 					ui32NewWidth = uint32_t( std::round( ui32NewWidth * dScale ) );
 					ui32NewHeight = uint32_t( std::round( ui32NewHeight * dScale ) );
-					ui32NewDepth = uint32_t( std::round( ui32NewDepth * dScale ) );
+					if ( _oOptions.ui32FitD || _iImage.Depth() != 1 ) {
+						ui32NewDepth = uint32_t( std::round( ui32NewDepth * dScale ) );
+					}
 				}
 				break;
 			}
@@ -2698,6 +2723,10 @@ namespace sl2 {
 			return ExportAsPng( _iImage, _sPath, _oOptions, 0, 0, 0, 0 );
 		}
 		else {
+			if ( _sPath.size() == 0 ) {
+				// Only individual files can be output to the clipboard.
+				return SL2_E_MULTIFILECLIPBOARD;
+			}
 			wchar_t szBuffer[64];
 			std::u16string sRoot = CUtilities::GetFilePath( _sPath ) + CUtilities::NoExtension( _sPath );
 			for ( uint32_t M = 0; M < _iImage.Mipmaps(); ++M ) {
@@ -2926,7 +2955,6 @@ namespace sl2 {
 		if ( !::FreeImage_SaveToMemory( FIF_PNG, fiImage.pbBitmap, fiBuffer.pmMemory, _oOptions.iPngSaveOption ) ) {
 			return SL2_E_OUTOFMEMORY;
 		}
-        
 
 		BYTE * pbData = nullptr;
 		DWORD dwSize = 0;
@@ -2940,13 +2968,30 @@ namespace sl2 {
 			return SL2_E_OUTOFMEMORY;
 		}
 		std::memcpy( vConverted.data(), pbData, dwSize );
-		{
-			CStdFile sfFile;
-			if ( !sfFile.Create( _sPath.c_str() ) ) {
-				return SL2_E_INVALIDWRITEPERMISSIONS;
+        
+		if ( _sPath.size() ) {
+			{
+				CStdFile sfFile;
+				if ( !sfFile.Create( _sPath.c_str() ) ) {
+					return SL2_E_INVALIDWRITEPERMISSIONS;
+				}
+				if ( !sfFile.WriteToFile( vConverted ) ) {
+					return SL2_E_FILEWRITEERROR;
+				}
 			}
-			if ( !sfFile.WriteToFile( vConverted ) ) {
-				return SL2_E_FILEWRITEERROR;
+		}
+		else {
+			// Save to the clipboard.
+			try {
+#ifdef _WIN32
+				if ( !CUtilities::ImageToClipBoard( CUtilities::SL2_CF_PNG, vConverted ) ) { return SL2_E_UNAVAILABLECLIPBOARD; }
+				else {
+					return SL2_E_PNGUNAVAILABLE;
+				}
+#endif	// #ifdef _WIN32
+			}
+			catch ( ... ) {
+				return SL2_E_OUTOFMEMORY;
 			}
 		}
 
