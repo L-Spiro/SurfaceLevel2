@@ -426,6 +426,40 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 				SL2_ADV( 1 );
 			}
 
+			if ( SL2_CHECK( 1, icon ) ) {
+				// -nomips
+				oOptions.mhMipHandling = sl2::SL2_MH_REMOVE_EXISTING;
+
+				// -target_colorspace sRGB
+				oOptions.cgcOutputGammaCurve = sl2::SL2_CGC_sRGB_PRECISE;
+				sl2::CIcc::SL2_CMS_PROFILE cpProfile;
+				if ( !sl2::CIcc::CreateProfile( NULL, oOptions.cgcOutputGammaCurve, cpProfile, true ) ) {
+					SL2_ERRORT( std::format( L"\"icon\": Failed to create sRGB colorspace profile." ).c_str(), sl2::SL2_E_OUTOFMEMORY );
+				}
+				if ( !sl2::CIcc::SaveProfileToMemory( cpProfile, oOptions.vOutColorProfile ) ) {
+					SL2_ERRORT( std::format( L"\"icon\": Failed to save sRGB colorspace profile." ).c_str(), sl2::SL2_E_OUTOFMEMORY );
+				}
+				if ( !oOptions.bManuallySetTargetGamma ) {
+					oOptions.bManuallySetTargetGamma = true;
+					oOptions.dTargetGamma = 0.0;
+				}
+				oOptions.bEmbedColorProfile = true;
+
+				// -textureaddressing border
+				oOptions.rResample.taColorW = oOptions.rResample.taColorH = oOptions.rResample.taColorD = sl2::SL2_TA_BORDER;
+				oOptions.rResample.taAlphaW = oOptions.rResample.taAlphaH = oOptions.rResample.taAlphaD = sl2::SL2_TA_BORDER;
+
+				// -border_color 0 0 0 0
+				oOptions.rResample.dBorderColor[0] = oOptions.rResample.dBorderColor[1] = oOptions.rResample.dBorderColor[2] = oOptions.rResample.dBorderColor[3] = 0.0;
+
+				// -premult_alpha
+				oOptions.bNeedsPreMultiply = true;
+
+				oOptions.dGamma = -2.2;
+				//oOptions.bManuallySetGamma = false;
+				SL2_ADV( 1 );
+			}
+
 			if ( SL2_CHECK( 2, rendering_intent ) || SL2_CHECK( 2, render_intent ) ) {
 				if ( ::_wcsicmp( _wcpArgV[1], L"perceptual" ) == 0 ) {
 					oOptions.i32InRenderingIntent = INTENT_PERCEPTUAL;

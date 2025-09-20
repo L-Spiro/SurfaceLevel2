@@ -574,6 +574,14 @@ namespace sl2 {
 
 					bool bThisIsOpuaqe = AlphaIsFullyEqualTo( pui8Dest, 1.0, ui32W, ui32H, ui32D );
 					bOpaque = bOpaque && bThisIsOpuaqe;
+
+					if ( !m_bIsPreMultiplied && m_bNeedsPreMultiply ) {
+						/*CFormat::ApplyPreMultiply( iTmp.Data( M, 0, A, F ),
+							iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );*/
+							CFormat::ApplyPreMultiply( pui8Dest, ui32W, ui32H, ui32D );
+						bTargetIsPremulAlpha = true;
+					}
+
 					if ( bResize ) {
 						CResampler rResampleMe;
 						CResampler::SL2_RESAMPLE rResampleCopy = m_rResample;
@@ -605,11 +613,7 @@ namespace sl2 {
 							if ( !rResampleMe.Resample( reinterpret_cast<double *>(pui8Dest), reinterpret_cast<double *>(iTmp.Data( N, 0, A, F )), rResampleCopy ) ) { return SL2_E_OUTOFMEMORY; }
 						}
 					}
-					if ( !m_bIsPreMultiplied && m_bNeedsPreMultiply ) {
-						CFormat::ApplyPreMultiply( iTmp.Data( M, 0, A, F ),
-							iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );
-						bTargetIsPremulAlpha = true;
-					}
+					
 					
 				}
 			}
