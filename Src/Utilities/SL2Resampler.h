@@ -49,8 +49,12 @@ namespace sl2 {
 			SL2_FF_LANCZOS12,
 			SL2_FF_LANCZOS64,
 			SL2_FF_MITCHELL,
+			SL2_FF_ROBIDOUX,
+			SL2_FF_ROBIDOUXSHARP,
+			SL2_FF_ROBIDOUXSOFT,
 			SL2_FF_CATMULLROM,
 			SL2_FF_BSPLINE,
+			SL2_FF_ADOBEBICUBIC,
 			SL2_FF_CARDINALSPLINEUNIFORM,
 			SL2_FF_HERMITE,
 			SL2_FF_HAMMING,
@@ -388,6 +392,48 @@ namespace sl2 {
 		}
 
 		/**
+		 * The Robidoux filter function.
+		 *
+		 * \param _dT The value to filter.
+		 * \return Returns the filtered value.
+		 */
+		static inline double									RobidouxFilterFunc( double _dT ) {
+			constexpr double dB = 0.3782157550939986290217120767920278012752532958984375;			// 12.0 / (19.0 + 9.0 * std::sqrt( 2.0 ))
+			constexpr double dC = 0.310892122453000629977992730346159078180789947509765625;			// 113.0 / (58.0 + 216.0 * std::sqrt( 2.0 ))
+			return MitchellFilterHelper( _dT,
+				dB,
+				dC );
+		}
+
+		/**
+		 * The RobidouxSharp filter function.
+		 *
+		 * \param _dT The value to filter.
+		 * \return Returns the filtered value.
+		 */
+		static inline double									RobidouxSharpFilterFunc( double _dT ) {
+			constexpr double dB = 0.26201451239901418777122898973175324499607086181640625;			// 6.0 / (13.0 + 7.0 * std::sqrt( 2.0 ))
+			constexpr double dC = 0.36899274380049285060323427387629635632038116455078125;			// 7.0 / (2.0 + 12.0 * std::sqrt( 2.0 ))
+			return MitchellFilterHelper( _dT,
+				dB,
+				dC );
+		}
+
+		/**
+		 * The RobidouxSoft filter function.
+		 *
+		 * \param _dT The value to filter.
+		 * \return Returns the filtered value.
+		 */
+		static inline double									RobidouxSoftFilterFunc( double _dT ) {
+			constexpr double dB = 0.67962275898295920750769028018112294375896453857421875;			// (9.0 - 3.0 * std::sqrt( 2.0 )) / 7.0
+			constexpr double dC = 0.160188620508520396246154859909438528120517730712890625;			// (-2.0 + 3.0 * std::sqrt( 2.0 )) / 14.0
+			return MitchellFilterHelper( _dT,
+				dB,
+				dC );
+		}
+
+		/**
 		 * The Catmull-Rom filter function.
 		 *
 		 * \param _dT The value to filter.
@@ -405,6 +451,16 @@ namespace sl2 {
 		 */
 		static inline double									BSplineFilterFunc( double _dT ) {
 			return MitchellFilterHelper( _dT, 1.0, 0.0 );
+		}
+
+		/**
+		 * The Adobe bicubic filter function.
+		 *
+		 * \param _dT The value to filter.
+		 * \return Returns the filtered value.
+		 */
+		static inline double									AdobeBicubicFilterFunc( double _dT ) {
+			return MitchellFilterHelper( _dT, 0.0, 0.75 );
 		}
 
 		/**
