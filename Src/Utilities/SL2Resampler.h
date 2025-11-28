@@ -671,31 +671,31 @@ namespace sl2 {
 			int64_t i64XC = (i64WrappedX + 1) % i64Width;
 			int64_t i64YC = (i64WrappedY + 1) % i64Height;
 
-			const CVector4<SL2_ST_RAW> &tDiffuseColor = _pvTexels[TexelIndex2D( i64WrappedX, i64WrappedY, _ui64Width )];
-			const CVector4<SL2_ST_RAW> &tSampleA = _pvTexels[TexelIndex2D( i64XA, i64YA, _ui64Width )];
-			const CVector4<SL2_ST_RAW> &tSampleB = _pvTexels[TexelIndex2D( i64XB, i64YB, _ui64Width )];
-			const CVector4<SL2_ST_RAW> &tSampleC = _pvTexels[TexelIndex2D( i64XC, i64YC, _ui64Width )];
+			const CVector4<SL2_ST_RAW> & vDiffuseColor = _pvTexels[TexelIndex2D(i64WrappedX,i64WrappedY,_ui64Width)];
+			const CVector4<SL2_ST_RAW> & vSampleA = _pvTexels[TexelIndex2D(i64XA,i64YA,_ui64Width)];
+			const CVector4<SL2_ST_RAW> & vSampleB = _pvTexels[TexelIndex2D(i64XB,i64YB,_ui64Width)];
+			const CVector4<SL2_ST_RAW> & vSampleC = _pvTexels[TexelIndex2D(i64XC,i64YC,_ui64Width)];
 
 			// Same triangular-domain blend as in the shader.
 			double dW = dInterpX + dInterpY;
 
-			CVector4<SL2_ST_RAW> tPart0 =
-				tDiffuseColor +
-				(tSampleA - tDiffuseColor) * dInterpX +
-				(tSampleB - tDiffuseColor) * dInterpY;
+			CVector4<SL2_ST_RAW> vPart0 =
+				vDiffuseColor +
+				(vSampleA - vDiffuseColor) * dInterpX +
+				(vSampleB - vDiffuseColor) * dInterpY;
 
-			CVector4<SL2_ST_RAW> tPart1 =
-				tSampleC +
-				(tSampleB - tSampleC) * (1.0 - dInterpX) +
-				(tSampleA - tSampleC) * (1.0 - dInterpY);
+			CVector4<SL2_ST_RAW> vPart1 =
+				vSampleC +
+				(vSampleB - vSampleC) * (1.0 - dInterpX) +
+				(vSampleA - vSampleC) * (1.0 - dInterpY);
 
 			double dStep0 = 1.0 - CUtilities::Step( 1.0, dW );
 			double dStep1 = CUtilities::Step( 1.0, dW );
 
-			CVector4<SL2_ST_RAW> tResult = tPart0 * dStep0 + tPart1 * dStep1;
+			CVector4<SL2_ST_RAW> vResult = vPart0 * dStep0 + vPart1 * dStep1;
 
 			// Modulate by vertex color.
-			return tResult * _tVertexColor;
+			return vResult * _tVertexColor;
 		}
 
 		/**
