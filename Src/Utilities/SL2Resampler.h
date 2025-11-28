@@ -621,7 +621,6 @@ namespace sl2 {
 			const CVector4<SL2_ST_RAW> * _pvTexels,
 			uint64_t _ui64Width,
 			uint64_t _ui64Height,
-			uint64_t _ui64Pitch,
 			double _dU,
 			double _dV,
 			const CVector4<SL2_ST_RAW> &_tVertexColor ) {
@@ -672,10 +671,10 @@ namespace sl2 {
 			int64_t i64XC = (i64WrappedX + 1) % i64Width;
 			int64_t i64YC = (i64WrappedY + 1) % i64Height;
 
-			const CVector4<SL2_ST_RAW> &tDiffuseColor = _pvTexels[TexelIndex2D( i64WrappedX, i64WrappedY, _ui64Pitch )];
-			const CVector4<SL2_ST_RAW> &tSampleA = _pvTexels[TexelIndex2D( i64XA, i64YA, _ui64Pitch )];
-			const CVector4<SL2_ST_RAW> &tSampleB = _pvTexels[TexelIndex2D( i64XB, i64YB, _ui64Pitch )];
-			const CVector4<SL2_ST_RAW> &tSampleC = _pvTexels[TexelIndex2D( i64XC, i64YC, _ui64Pitch )];
+			const CVector4<SL2_ST_RAW> &tDiffuseColor = _pvTexels[TexelIndex2D( i64WrappedX, i64WrappedY, _ui64Width )];
+			const CVector4<SL2_ST_RAW> &tSampleA = _pvTexels[TexelIndex2D( i64XA, i64YA, _ui64Width )];
+			const CVector4<SL2_ST_RAW> &tSampleB = _pvTexels[TexelIndex2D( i64XB, i64YB, _ui64Width )];
+			const CVector4<SL2_ST_RAW> &tSampleC = _pvTexels[TexelIndex2D( i64XC, i64YC, _ui64Width )];
 
 			// Same triangular-domain blend as in the shader.
 			double dW = dInterpX + dInterpY;
@@ -718,7 +717,6 @@ namespace sl2 {
 			uint64_t _ui64Height,
 			uint64_t _ui64Depth,
 			uint64_t _ui64ZSlice,
-			uint64_t _ui64Pitch,
 			double _dU,
 			double _dV,
 			const CVector4<SL2_ST_RAW> &_tVertexColor ) {
@@ -734,7 +732,6 @@ namespace sl2 {
 				prSliceBase,
 				_ui64Width,
 				_ui64Height,
-				_ui64Pitch,
 				_dU,
 				_dV,
 				_tVertexColor );
