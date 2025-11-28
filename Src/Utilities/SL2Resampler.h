@@ -11,6 +11,8 @@
 
 #include "../Image/SL2TextureAddressing.h"
 #include "../Utilities/SL2AlignmentAllocator.h"
+#include "../Utilities/SL2Utilities.h"
+#include "../Utilities/SL2Vector4.h"
 
 #include <cmath>
 #include <numbers>
@@ -574,6 +576,168 @@ namespace sl2 {
 				return 0.5 + 0.5 * std::cos( 2.0 * std::numbers::pi * _dT );
 			}
 			return 0.0;
+		}
+
+		/**
+		 * Computes a 2D texel index into a linear CVector4<SL2_ST_RAW> array.
+		 * 
+		 * \param _ui64X X-coordinate in texels.
+		 * \param _ui64Y Y-coordinate in texels.
+		 * \param _ui64Pitch Texture width in texels.
+		 * \return Returns the linear index of the texel.
+		 */
+		static inline uint64_t									TexelIndex2D( uint64_t _ui64X, uint64_t _ui64Y, uint64_t _ui64Pitch ) {
+			return _ui64Y * _ui64Pitch + _ui64X;
+		}
+
+		/**
+		 * Computes a 3D texel index into a linear CVector4<SL2_ST_RAW> array.
+		 * 
+		 * \param _ui64X X-coordinate in texels.
+		 * \param _ui64Y Y-coordinate in texels.
+		 * \param _ui64Z Z-coordinate in texels.
+		 * \param _ui64Pitch Texture width in texels.
+		 * \param _ui64Height Texture height in texels.
+		 * \return Returns the linear index of the texel.
+		 */
+		static inline uint64_t									TexelIndex3D( uint64_t _ui64X, uint64_t _ui64Y, uint64_t _ui64Z,
+			uint64_t _ui64Pitch, uint64_t _ui64Height ) {
+			return (_ui64Z * _ui64Height + _ui64Y) * _ui64Pitch + _ui64X;
+		}
+
+		/**
+		 * Applies an N64-style bilinear filter to a 2D CVector4<SL2_ST_RAW> texture.
+		 * The algorithm matches the HLSL n64BilinearFilter function using unfiltered texel loads.
+		 * 
+		 * \param _pvTexels Pointer to the first texel in the texture.
+		 * \param _ui64Width The texture width in texels.
+		 * \param _ui64Height The texture height in texels.
+		 * \param _dU The horizontal texture coordinate in the range [-Åá, +Åá] (wrapped).
+		 * \param _dV The vertical texture coordinate in the range [-Åá, +Åá] (wrapped).
+		 * \param _tVertexColor Vertex color by which to modulate the filtered color.
+		 * \return Returns the filtered color multiplied by the vertex color.
+		 */
+		static inline CVector4<SL2_ST_RAW>						N64BilinearFilter2D(
+			const CVector4<SL2_ST_RAW> * _pvTexels,
+			uint64_t _ui64Width,
+			uint64_t _ui64Height,
+			uint64_t _ui64Pitch,
+			double _dU,
+			double _dV,
+			const CVector4<SL2_ST_RAW> &_tVertexColor ) {
+
+			// Half-texel offset so UVs address texel centers as in the HLSL code.
+			double dInvWidth = 1.0 / double( _ui64Width );
+			double dInvHeight = 1.0 / double( _ui64Height );
+			double dHalfTexU = dInvWidth * 0.5;
+			double dHalfTexV = dInvHeight * 0.5;
+
+			double dUc = _dU - dHalfTexU;
+			double dVc = _dV - dHalfTexV;
+
+			// Convert centered UV to texel space.
+			double dTexelX = dUc * double( _ui64Width );
+			double dTexelY = dVc * double( _ui64Height );
+
+			// Interpolation fractions.
+			double dInterpX = CUtilities::Frac( dTexelX );
+			double dInterpY = CUtilities::Frac( dTexelY );
+
+			// Preserve the original negative-UV adjustments.
+			if ( dUc < 0.0 ) {
+				dInterpX = 1.0 - dInterpX * -1.0;
+			}
+			if ( dVc < 0.0 ) {
+				dInterpY = 1.0 - dInterpY * -1.0;
+			}
+
+			// Base texel coordinates in texel space.
+			int64_t i64BaseX = int64_t( std::floor( dTexelX ) );
+			int64_t i64BaseY = int64_t( std::floor( dTexelY ) );
+
+			int64_t i64Width = int64_t( _ui64Width );
+			int64_t i64Height = int64_t( _ui64Height );
+
+			// Wrap around to emulate modulo behavior (handles negative coordinates).
+			int64_t i64WrappedX = (i64BaseX % i64Width + i64Width) % i64Width;
+			int64_t i64WrappedY = (i64BaseY % i64Height + i64Height) % i64Height;
+
+			// Neighboring texels: A = (x+1,y), B = (x,y+1), C = (x+1,y+1).
+			int64_t i64XA = (i64WrappedX + 1) % i64Width;
+			int64_t i64YA = i64WrappedY;
+
+			int64_t i64XB = i64WrappedX;
+			int64_t i64YB = (i64WrappedY + 1) % i64Height;
+
+			int64_t i64XC = (i64WrappedX + 1) % i64Width;
+			int64_t i64YC = (i64WrappedY + 1) % i64Height;
+
+			const CVector4<SL2_ST_RAW> &tDiffuseColor = _pvTexels[TexelIndex2D( i64WrappedX, i64WrappedY, _ui64Pitch )];
+			const CVector4<SL2_ST_RAW> &tSampleA = _pvTexels[TexelIndex2D( i64XA, i64YA, _ui64Pitch )];
+			const CVector4<SL2_ST_RAW> &tSampleB = _pvTexels[TexelIndex2D( i64XB, i64YB, _ui64Pitch )];
+			const CVector4<SL2_ST_RAW> &tSampleC = _pvTexels[TexelIndex2D( i64XC, i64YC, _ui64Pitch )];
+
+			// Same triangular-domain blend as in the shader.
+			double dW = dInterpX + dInterpY;
+
+			CVector4<SL2_ST_RAW> tPart0 =
+				tDiffuseColor +
+				(tSampleA - tDiffuseColor) * dInterpX +
+				(tSampleB - tDiffuseColor) * dInterpY;
+
+			CVector4<SL2_ST_RAW> tPart1 =
+				tSampleC +
+				(tSampleB - tSampleC) * (1.0 - dInterpX) +
+				(tSampleA - tSampleC) * (1.0 - dInterpY);
+
+			double dStep0 = 1.0 - CUtilities::Step( 1.0, dW );
+			double dStep1 = CUtilities::Step( 1.0, dW );
+
+			CVector4<SL2_ST_RAW> tResult = tPart0 * dStep0 + tPart1 * dStep1;
+
+			// Modulate by vertex color.
+			return tResult * _tVertexColor;
+		}
+
+		/**
+		 * Applies the same N64-style bilinear filter to a single Z slice of a 3D CVector4<SL2_ST_RAW> texture.
+		 * 
+		 * \param _pvTexels Pointer to the first texel in the 3D texture.
+		 * \param _ui64Width Texture width in texels.
+		 * \param _ui64Height Texture height in texels.
+		 * \param _ui64Depth Texture depth in texels.
+		 * \param _ui64ZSlice The Z slice on which to perform the 2D filter.
+		 * \param _dU The horizontal texture coordinate.
+		 * \param _dV The vertical texture coordinate.
+		 * \param _tVertexColor Vertex color by which to modulate the filtered color.
+		 * \return Returns the filtered color from the given slice multiplied by the vertex color.
+		 */
+		static inline CVector4<SL2_ST_RAW>						N64BilinearFilter3D(
+			const CVector4<SL2_ST_RAW> * _pvTexels,
+			uint64_t _ui64Width,
+			uint64_t _ui64Height,
+			uint64_t _ui64Depth,
+			uint64_t _ui64ZSlice,
+			uint64_t _ui64Pitch,
+			double _dU,
+			double _dV,
+			const CVector4<SL2_ST_RAW> &_tVertexColor ) {
+
+			if ( _ui64Depth == 0 ) { return CVector4<SL2_ST_RAW>(); }
+
+			uint64_t ui64ClampedZ = (_ui64ZSlice >= _ui64Depth) ? (_ui64Depth - 1) : _ui64ZSlice;
+			uint64_t ui64SliceOffset = ui64ClampedZ * _ui64Width * _ui64Height;
+
+			const CVector4<SL2_ST_RAW> * prSliceBase = _pvTexels + ui64SliceOffset;
+
+			return N64BilinearFilter2D(
+				prSliceBase,
+				_ui64Width,
+				_ui64Height,
+				_ui64Pitch,
+				_dU,
+				_dV,
+				_tVertexColor );
 		}
 
 

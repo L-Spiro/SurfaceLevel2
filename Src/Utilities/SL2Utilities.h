@@ -519,6 +519,26 @@ namespace sl2 {
 		}
 
 		/**
+		 * Gets the fractional part of a given double value.  Differs from std::fmod( X, 1.0 ) because std::fmod( -9.7, 1.0 ) returns -0.699999999999999289457264239899814128875732421875
+		 *	while Frac( -9.7 ) returns 0.300000000000000710542735760100185871124267578125.
+		 * 
+		 * \param _dX The values whose fractional part is to be returned.
+		 * \return Returns the fractional part of _dX.
+		 **/
+		static inline double								Frac( double _dX ) { return _dX - std::floor( _dX ); }
+
+		/**
+		 * Shader-style step function.
+		 * 
+		 * \param _dEdge The edge location.
+		 * \param _dX The input value.
+		 * \return Returns 0.0 if _dX < _dEdge, else 1.0.
+		 */
+		static inline double								Step( double _dEdge, double _dX ) {
+			return (_dX < _dEdge) ? 0.0 : 1.0;
+		}
+
+		/**
 		 * Converts a single double value from sRGB space to linear space.  Performs a conversion according to the standard.
 		 *
 		 * \param _dVal The value to convert.
