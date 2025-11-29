@@ -64,6 +64,8 @@ namespace sl2 {
 	 * \return Returns true if all allocations succeed.
 	 **/
 	bool CResampler::Resample( const double * _pdIn, double * _pdOut, const SL2_RESAMPLE &_pParms ) {
+		SL2_RESAMPLE rRes = _pParms;
+
 		std::vector<double> dBufferR;
 		std::vector<double> dBufferG;
 		std::vector<double> dBufferB;
@@ -73,18 +75,18 @@ namespace sl2 {
 		std::vector<double> dBufferB2;
 		std::vector<double> dBufferA2;
 
-		uint32_t ui32NewW = std::max( 1U, _pParms.ui32NewW );
-		uint32_t ui32NewH = std::max( 1U, _pParms.ui32NewH );
-		uint32_t ui32NewD = std::max( 1U, _pParms.ui32NewD );
-		uint32_t ui32W = std::max( 1U, _pParms.ui32W );
-		uint32_t ui32H = std::max( 1U, _pParms.ui32H );
-		uint32_t ui32D = std::max( 1U, _pParms.ui32D );
+		uint32_t ui32NewW = std::max( 1U, rRes.ui32NewW );
+		uint32_t ui32NewH = std::max( 1U, rRes.ui32NewH );
+		uint32_t ui32NewD = std::max( 1U, rRes.ui32NewD );
+		uint32_t ui32W = std::max( 1U, rRes.ui32W );
+		uint32_t ui32H = std::max( 1U, rRes.ui32H );
+		uint32_t ui32D = std::max( 1U, rRes.ui32D );
 		try {
 			size_t sSize = ui32NewW * ui32H * ui32D;
 			dBufferR.resize( sSize );
 			dBufferG.resize( sSize );
 			dBufferB.resize( sSize );
-			if ( _pParms.bAlpha ) {
+			if ( rRes.bAlpha ) {
 				dBufferA.resize( sSize );
 			}
 			if ( ui32D > 1 || ui32NewD > 1 ) {
@@ -92,7 +94,7 @@ namespace sl2 {
 				dBufferR2.resize( sSize );
 				dBufferG2.resize( sSize );
 				dBufferB2.resize( sSize );
-				if ( _pParms.bAlpha ) {
+				if ( rRes.bAlpha ) {
 					dBufferA2.resize( sSize );
 				}
 			}
@@ -100,7 +102,7 @@ namespace sl2 {
 		catch ( ... ) { return false; }
 
 		// Resize width first for best caching.
-		if ( !CreateContribList( ui32W, ui32NewW, _pParms.taColorW, _pParms.fFilterW.pfFunc, _pParms.fFilterW.dfSupport, _pParms.fFilterScale ) ) { return false; }
+		if ( !CreateContribList( ui32W, ui32NewW, rRes.taColorW, rRes.fFilterW.pfFunc, rRes.fFilterW.dfSupport, rRes.fFilterScale ) ) { return false; }
 		double * pdDst[4] = { dBufferR.data(), dBufferG.data(), dBufferB.data(), dBufferA.data() };
 		// Resize W.
 		size_t sPagesSize = ui32W * ui32H * 4;
@@ -108,10 +110,10 @@ namespace sl2 {
 
 		uint32_t ui32DstW = ui32H;
 		uint32_t ui32DstH = ui32NewW;
-		for ( size_t I = 0; I < (_pParms.bAlpha ? 4 : 3); ++I ) {
+		for ( size_t I = 0; I < (rRes.bAlpha ? 4 : 3); ++I ) {
 			if ( I == 3 ) {
 				// Alpha channel.
-				if ( !CreateContribList( ui32W, ui32NewW, _pParms.taAlphaW, _pParms.fAlphaFilterW.pfFunc, _pParms.fAlphaFilterW.dfSupport, _pParms.fFilterScale ) ) { return false; }
+				if ( !CreateContribList( ui32W, ui32NewW, rRes.taAlphaW, rRes.fAlphaFilterW.pfFunc, rRes.fAlphaFilterW.dfSupport, rRes.fFilterScale ) ) { return false; }
 			}
 			for ( size_t D = 0; D < ui32D; ++D ) {
 				for ( size_t H = 0; H < ui32H; ++H ) {
@@ -120,7 +122,7 @@ namespace sl2 {
 						for ( size_t J = 0; J < m_cContribs[W].i32Indices.size(); ++J ) {
 							int32_t i32Index = m_cContribs[W].i32Indices[J];
 							if ( i32Index == -1 ) {
-								m_dBuffer[J] = _pParms.dBorderColor[I];
+								m_dBuffer[J] = rRes.dBorderColor[I];
 							}
 							else {
 								m_dBuffer[J] = pdRowStart[i32Index*4];
@@ -135,16 +137,16 @@ namespace sl2 {
 		}
 
 		// Resize H, now aligned horizontally in the buffers.
-		if ( !CreateContribList( ui32H, ui32NewH, _pParms.taColorH, _pParms.fFilterH.pfFunc, _pParms.fFilterH.dfSupport, _pParms.fFilterScale ) ) { return false; }
+		if ( !CreateContribList( ui32H, ui32NewH, rRes.taColorH, rRes.fFilterH.pfFunc, rRes.fFilterH.dfSupport, rRes.fFilterScale ) ) { return false; }
 		sPagesSize = sNewPagesSize;
 		sNewPagesSize = ui32NewW * ui32NewH;
 		uint32_t tW = ui32H;
 		uint32_t tH = ui32NewW;
 		double * pdDst2[4] = { dBufferR2.data(), dBufferG2.data(), dBufferB2.data(), dBufferA2.data() };
-		for ( size_t I = 0; I < (_pParms.bAlpha ? 4 : 3); ++I ) {
+		for ( size_t I = 0; I < (rRes.bAlpha ? 4 : 3); ++I ) {
 			if ( I == 3 ) {
 				// Alpha channel.
-				if ( !CreateContribList( ui32H, ui32NewH, _pParms.taAlphaH, _pParms.fAlphaFilterH.pfFunc, _pParms.fAlphaFilterH.dfSupport, _pParms.fFilterScale ) ) { return false; }
+				if ( !CreateContribList( ui32H, ui32NewH, rRes.taAlphaH, rRes.fAlphaFilterH.pfFunc, rRes.fAlphaFilterH.dfSupport, rRes.fFilterScale ) ) { return false; }
 			}
 			for ( size_t D = 0; D < ui32D; ++D ) {
 				for ( size_t H = 0; H < tH; ++H ) {
@@ -158,7 +160,7 @@ namespace sl2 {
 							for ( size_t J = 0; J < m_cContribs[W].i32Indices.size(); ++J ) {
 								int32_t i32Index = m_cContribs[W].i32Indices[J];
 								if ( i32Index == -1 ) {
-									m_dBuffer[J] = _pParms.dBorderColor[I];
+									m_dBuffer[J] = rRes.dBorderColor[I];
 								}
 								else {
 									m_dBuffer[J] = (*(pdRowStart + i32Index));
@@ -181,17 +183,17 @@ namespace sl2 {
 
 		if ( ui32D > 1 || ui32NewD > 1 ) {
 			// Resize D, now aligned horizontally in the buffers.
-			if ( !CreateContribList( ui32D, ui32NewD, _pParms.taColorD, _pParms.fFilterD.pfFunc, _pParms.fFilterD.dfSupport, _pParms.fFilterScale ) ) { return false; }
+			if ( !CreateContribList( ui32D, ui32NewD, rRes.taColorD, rRes.fFilterD.pfFunc, rRes.fFilterD.dfSupport, rRes.fFilterScale ) ) { return false; }
 			sPagesSize = ui32NewW * ui32D;
 			sNewPagesSize = ui32NewW * ui32NewH;
 			tW = ui32NewD;
 			tH = ui32NewW;
 			uint32_t tD = ui32NewH;
 
-			for ( size_t I = 0; I < (_pParms.bAlpha ? 4 : 3); ++I ) {
+			for ( size_t I = 0; I < (rRes.bAlpha ? 4 : 3); ++I ) {
 				if ( I == 3 ) {
 					// Alpha channel.
-					if ( !CreateContribList( ui32D, ui32NewD, _pParms.taAlphaD, _pParms.fAlphaFilterD.pfFunc, _pParms.fAlphaFilterD.dfSupport, _pParms.fFilterScale ) ) { return false; }
+					if ( !CreateContribList( ui32D, ui32NewD, rRes.taAlphaD, rRes.fAlphaFilterD.pfFunc, rRes.fAlphaFilterD.dfSupport, rRes.fFilterScale ) ) { return false; }
 				}
 				for ( size_t D = 0; D < tD; ++D ) {
 					for ( size_t H = 0; H < tH; ++H ) {
@@ -205,7 +207,7 @@ namespace sl2 {
 								for ( size_t J = 0; J < m_cContribs[W].i32Indices.size(); ++J ) {
 									int32_t i32Index = m_cContribs[W].i32Indices[J];
 									if ( i32Index == -1 ) {
-										m_dBuffer[J] = _pParms.dBorderColor[I];
+										m_dBuffer[J] = rRes.dBorderColor[I];
 									}
 									else {
 										m_dBuffer[J] = (*(pdRowStart + i32Index));
@@ -225,7 +227,7 @@ namespace sl2 {
 
 		{
 			// Add alpha to the output.
-			if ( !_pParms.bAlpha ) {
+			if ( !rRes.bAlpha ) {
 				sPagesSize = ui32NewH * ui32NewW;
 				for ( size_t D = 0; D < ui32NewD; ++D ) {
 					for ( size_t H = 0; H < ui32NewH; ++H ) {
@@ -575,6 +577,237 @@ namespace sl2 {
 			--_sTotal;
 		}
 		return dSum[0];
+	}
+
+	/**
+	 * Applies an N64-style bilinear filter to a 2D CVector4<SL2_ST_RAW> texture.
+	 * The algorithm matches the HLSL n64BilinearFilter function using unfiltered texel loads.
+	 * 
+	 * \param _pvTexels Pointer to the first texel in the texture.
+	 * \param _ui64Width The texture width in texels.
+	 * \param _ui64Height The texture height in texels.
+	 * \param _dU The horizontal texture coordinate in the range [-Åá, +Åá] (wrapped).
+	 * \param _dV The vertical texture coordinate in the range [-Åá, +Åá] (wrapped).
+	 * \param _rParameters Resampling parameters, such as the texture-addressing mode and border color.
+	 * \return Returns the filtered color multiplied by the vertex color.
+	 */
+	CVector4<SL2_ST_RAW> CResampler::N64BilinearFilter2D(
+		const CVector4<SL2_ST_RAW> * _pvTexels,
+		uint64_t _ui64Width,
+		uint64_t _ui64Height,
+		double _dU,
+		double _dV,
+		const SL2_RESAMPLE &_rParameters ) {
+
+		// Half-texel offset so UVs address texel centers as in the HLSL code.
+		double dInvWidth = 1.0 / double( _ui64Width );
+		double dInvHeight = 1.0 / double( _ui64Height );
+		double dHalfTexU = dInvWidth * 0.5;
+		double dHalfTexV = dInvHeight * 0.5;
+
+		double dUc = _dU - dHalfTexU;
+		double dVc = _dV - dHalfTexV;
+
+		// Convert centered UV to texel space.
+		double dTexelX = dUc * double( _ui64Width );
+		double dTexelY = dVc * double( _ui64Height );
+
+		// Interpolation fractions.
+		double dInterpX = CUtilities::Frac( dTexelX );
+		double dInterpY = CUtilities::Frac( dTexelY );
+
+		// Preserve the original negative-UV adjustments.
+		if ( dUc < 0.0 ) {
+			dInterpX = 1.0 - dInterpX * -1.0;
+		}
+		if ( dVc < 0.0 ) {
+			dInterpY = 1.0 - dInterpY * -1.0;
+		}
+
+		// Base texel coordinates in texel space.
+		int64_t i64BaseX = int64_t( std::floor( dTexelX ) );
+		int64_t i64BaseY = int64_t( std::floor( dTexelY ) );
+
+		// [X, Y]
+		int32_t i32IdxX = int32_t( CTextureAddressing::m_pfFuncs[_rParameters.taColorW]( uint32_t( _ui64Width ), int32_t( i64BaseX ) ) );
+		int64_t i64WrappedX = i32IdxX < 0 ?int32_t( CTextureAddressing::Clamp( uint32_t( _ui64Width ), int32_t( i64BaseX ) ) ) : i32IdxX;
+
+		int32_t i32IdxY = int32_t( CTextureAddressing::m_pfFuncs[_rParameters.taColorH]( uint32_t( _ui64Height ), int32_t( i64BaseY ) ) );
+		int64_t i64WrappedY = i32IdxY < 0 ? int32_t( CTextureAddressing::Clamp( uint32_t( _ui64Height ), int32_t( i64BaseY ) ) ) : i32IdxY;
+		CVector4<SL2_ST_RAW> vDiffuseColor = (i32IdxX == -1 || i32IdxY == -1) ?
+			CVector4<SL2_ST_RAW>( _rParameters.dBorderColor[0], _rParameters.dBorderColor[1], _rParameters.dBorderColor[2], _rParameters.dBorderColor[3] ) :		// Border color.
+			_pvTexels[TexelIndex2D( i64WrappedX, i64WrappedY, _ui64Width )];
+
+		// Neighboring texels: A = (x+1,y), B = (x,y+1), C = (x+1,y+1).
+		// [X+1, Y]
+		int32_t i32IdxX_1 = int32_t( CTextureAddressing::m_pfFuncs[_rParameters.taColorW]( uint32_t( _ui64Width ), int32_t( i64BaseX + 1 ) ) );
+		int64_t i64XA = i32IdxX_1 < 0 ? int32_t( CTextureAddressing::Clamp( uint32_t( _ui64Width ), int32_t( i64BaseX + 1 ) ) ) : i32IdxX_1;
+
+		// int32_t i32IdxY = int32_t( CTextureAddressing::m_pfFuncs[_rParameters.taColorH]( uint32_t( _ui64Height ), int32_t( i64BaseY ) ) );
+		int64_t i64YA = i64WrappedY;
+		CVector4<SL2_ST_RAW> vSampleA = (i32IdxX_1 == -1 || i32IdxY == -1) ?
+			CVector4<SL2_ST_RAW>( _rParameters.dBorderColor[0], _rParameters.dBorderColor[1], _rParameters.dBorderColor[2], _rParameters.dBorderColor[3] ) :		// Border color.
+			_pvTexels[TexelIndex2D( i64XA, i64YA, _ui64Width )];
+
+		// [X, Y+1]
+		// int32_t i32IdxX = int32_t( CTextureAddressing::m_pfFuncs[_rParameters.taColorW]( uint32_t( _ui64Width ), int32_t( i64BaseX ) ) );
+		int64_t i64XB = i32IdxX < 0 ?int32_t( CTextureAddressing::Clamp( uint32_t( _ui64Width ), int32_t( i64BaseX ) ) ) : i32IdxX;
+
+		int32_t i32IdxY_1 = int32_t( CTextureAddressing::m_pfFuncs[_rParameters.taColorH]( uint32_t( _ui64Height ), int32_t( i64BaseY + 1 ) ) );
+		int64_t i64YB = i32IdxY_1 < 0 ? int32_t( CTextureAddressing::Clamp( uint32_t( _ui64Height ), int32_t( i64BaseY + 1 ) ) ) : i32IdxY_1;
+		CVector4<SL2_ST_RAW> vSampleB = (i32IdxX == -1 || i32IdxY_1 == -1) ?
+			CVector4<SL2_ST_RAW>( _rParameters.dBorderColor[0], _rParameters.dBorderColor[1], _rParameters.dBorderColor[2], _rParameters.dBorderColor[3] ) :		// Border color.
+			_pvTexels[TexelIndex2D( i64XB, i64YB, _ui64Width )];
+
+		// [X+1, Y+1]
+		int64_t i64XC = i64XA;
+		int64_t i64YC = i64YB;
+		CVector4<SL2_ST_RAW> vSampleC = (i32IdxX_1 == -1 || i32IdxY_1 == -1) ?
+			CVector4<SL2_ST_RAW>( _rParameters.dBorderColor[0], _rParameters.dBorderColor[1], _rParameters.dBorderColor[2], _rParameters.dBorderColor[3] ) :		// Border color.
+			_pvTexels[TexelIndex2D( i64XC, i64YC, _ui64Width )];
+
+		// Same triangular-domain blend as in the shader.
+		double dW = dInterpX + dInterpY;
+
+		CVector4<SL2_ST_RAW> vPart0 =
+			vDiffuseColor +
+			(vSampleA - vDiffuseColor) * dInterpX +
+			(vSampleB - vDiffuseColor) * dInterpY;
+
+		CVector4<SL2_ST_RAW> vPart1 =
+			vSampleC +
+			(vSampleB - vSampleC) * (1.0 - dInterpX) +
+			(vSampleA - vSampleC) * (1.0 - dInterpY);
+
+		double dStep0 = 1.0 - CUtilities::Step( 1.0, dW );
+		double dStep1 = CUtilities::Step( 1.0, dW );
+
+		CVector4<SL2_ST_RAW> vResult = vPart0 * dStep0 + vPart1 * dStep1;
+
+		// Modulate by vertex color.
+		return vResult * _rParameters.vBlendColor;
+	}
+
+	/**
+	 * Applies an N64-style bilinear filter to a 2D CVector4<SL2_ST_RAW> texture.
+	 * The algorithm matches the HLSL n64BilinearFilter function using unfiltered texel loads.
+	 * 
+	 * \param _pvTexels Pointer to the first texel in the texture.
+	 * \param _ui64Width The texture width in texels.
+	 * \param _ui64Height The texture height in texels.
+	 * \param _dU The horizontal texture coordinate in the range [-Åá, +Åá] (wrapped).
+	 * \param _dV The vertical texture coordinate in the range [-Åá, +Åá] (wrapped).
+	 * \param _rParameters Resampling parameters, such as the texture-addressing mode and border color.
+	 * \return Returns the filtered color multiplied by the vertex color.
+	 */
+	CVector4<SL2_ST_RAW> CResampler::N64BilinearFilter2D_Quantized(
+		const CVector4<SL2_ST_RAW> * _pvTexels,
+		uint64_t _ui64Width,
+		uint64_t _ui64Height,
+		double _dU,
+		double _dV,
+		const SL2_RESAMPLE &_rParameters ) {
+
+		double dInvWidth = 1.0 / double( _ui64Width );
+		double dInvHeight = 1.0 / double( _ui64Height );
+		double dHalfTexU = dInvWidth * 0.5;
+		double dHalfTexV = dInvHeight * 0.5;
+
+		double dUc = _dU - dHalfTexU;
+		double dVc = _dV - dHalfTexV;
+
+		double dTexelX = dUc * double( _ui64Width );
+		double dTexelY = dVc * double( _ui64Height );
+
+		double dInterpX = CUtilities::Frac( dTexelX );
+		double dInterpY = CUtilities::Frac( dTexelY );
+
+		if ( dUc < 0.0 ) { dInterpX = 1.0 - dInterpX * -1.0; }
+		if ( dVc < 0.0 ) { dInterpY = 1.0 - dInterpY * -1.0; }
+
+		// ================================
+		// 5-bit quantization of fractions
+		// ================================
+		constexpr double dQuantScale = 32.0;
+
+		double dFx5 = std::floor( dInterpX * dQuantScale );
+		double dFy5 = std::floor( dInterpY * dQuantScale );
+
+		// Clamp to [0,31] just in case of any numerical noise.
+		if ( dFx5 < 0.0 ) { dFx5 = 0.0; }
+		else if ( dFx5 > (dQuantScale - 1.0) ) { dFx5 = (dQuantScale - 1.0); }
+		if ( dFy5 < 0.0 ) { dFy5 = 0.0; }
+		else if ( dFy5 > (dQuantScale - 1.0) ) { dFy5 = (dQuantScale - 1.0); }
+
+		// Normalized quantized fractions in [0,1).
+		dInterpX = dFx5 / dQuantScale;
+		dInterpY = dFy5 / dQuantScale;
+
+		// Integer 5-bit sum for the triangle-domain decision (matches RDP logic stfrac_s + stfrac_t >= 32).
+		int32_t i32Fx5 = int32_t( dFx5 );
+		int32_t i32Fy5 = int32_t( dFy5 );
+		int32_t i32W5 = i32Fx5 + i32Fy5;
+		double dStep1 = (i32W5 >= int32_t( dQuantScale )) ? 1.0 : 0.0;
+		double dStep0 = 1.0 - dStep1;
+
+		// Base texel coordinates in texel space.
+		int64_t i64BaseX = int64_t( std::floor( dTexelX ) );
+		int64_t i64BaseY = int64_t( std::floor( dTexelY ) );
+
+		// [X, Y]
+		int32_t i32IdxX = int32_t( CTextureAddressing::m_pfFuncs[_rParameters.taColorW]( uint32_t( _ui64Width ), int32_t( i64BaseX ) ) );
+		int64_t i64WrappedX = i32IdxX < 0 ?int32_t( CTextureAddressing::Clamp( uint32_t( _ui64Width ), int32_t( i64BaseX ) ) ) : i32IdxX;
+
+		int32_t i32IdxY = int32_t( CTextureAddressing::m_pfFuncs[_rParameters.taColorH]( uint32_t( _ui64Height ), int32_t( i64BaseY ) ) );
+		int64_t i64WrappedY = i32IdxY < 0 ? int32_t( CTextureAddressing::Clamp( uint32_t( _ui64Height ), int32_t( i64BaseY ) ) ) : i32IdxY;
+		CVector4<SL2_ST_RAW> vDiffuseColor = (i32IdxX == -1 || i32IdxY == -1) ?
+			CVector4<SL2_ST_RAW>( _rParameters.dBorderColor[0], _rParameters.dBorderColor[1], _rParameters.dBorderColor[2], _rParameters.dBorderColor[3] ) :		// Border color.
+			_pvTexels[TexelIndex2D( i64WrappedX, i64WrappedY, _ui64Width )];
+
+		// Neighboring texels: A = (x+1,y), B = (x,y+1), C = (x+1,y+1).
+		// [X+1, Y]
+		int32_t i32IdxX_1 = int32_t( CTextureAddressing::m_pfFuncs[_rParameters.taColorW]( uint32_t( _ui64Width ), int32_t( i64BaseX + 1 ) ) );
+		int64_t i64XA = i32IdxX_1 < 0 ? int32_t( CTextureAddressing::Clamp( uint32_t( _ui64Width ), int32_t( i64BaseX + 1 ) ) ) : i32IdxX_1;
+
+		// int32_t i32IdxY = int32_t( CTextureAddressing::m_pfFuncs[_rParameters.taColorH]( uint32_t( _ui64Height ), int32_t( i64BaseY ) ) );
+		int64_t i64YA = i64WrappedY;
+		CVector4<SL2_ST_RAW> vSampleA = (i32IdxX_1 == -1 || i32IdxY == -1) ?
+			CVector4<SL2_ST_RAW>( _rParameters.dBorderColor[0], _rParameters.dBorderColor[1], _rParameters.dBorderColor[2], _rParameters.dBorderColor[3] ) :		// Border color.
+			_pvTexels[TexelIndex2D( i64XA, i64YA, _ui64Width )];
+
+		// [X, Y+1]
+		// int32_t i32IdxX = int32_t( CTextureAddressing::m_pfFuncs[_rParameters.taColorW]( uint32_t( _ui64Width ), int32_t( i64BaseX ) ) );
+		int64_t i64XB = i32IdxX < 0 ?int32_t( CTextureAddressing::Clamp( uint32_t( _ui64Width ), int32_t( i64BaseX ) ) ) : i32IdxX;
+
+		int32_t i32IdxY_1 = int32_t( CTextureAddressing::m_pfFuncs[_rParameters.taColorH]( uint32_t( _ui64Height ), int32_t( i64BaseY + 1 ) ) );
+		int64_t i64YB = i32IdxY_1 < 0 ? int32_t( CTextureAddressing::Clamp( uint32_t( _ui64Height ), int32_t( i64BaseY + 1 ) ) ) : i32IdxY_1;
+		CVector4<SL2_ST_RAW> vSampleB = (i32IdxX == -1 || i32IdxY_1 == -1) ?
+			CVector4<SL2_ST_RAW>( _rParameters.dBorderColor[0], _rParameters.dBorderColor[1], _rParameters.dBorderColor[2], _rParameters.dBorderColor[3] ) :		// Border color.
+			_pvTexels[TexelIndex2D( i64XB, i64YB, _ui64Width )];
+
+		// [X+1, Y+1]
+		int64_t i64XC = i64XA;
+		int64_t i64YC = i64YB;
+		CVector4<SL2_ST_RAW> vSampleC = (i32IdxX_1 == -1 || i32IdxY_1 == -1) ?
+			CVector4<SL2_ST_RAW>( _rParameters.dBorderColor[0], _rParameters.dBorderColor[1], _rParameters.dBorderColor[2], _rParameters.dBorderColor[3] ) :		// Border color.
+			_pvTexels[TexelIndex2D( i64XC, i64YC, _ui64Width )];
+
+
+		// Same triangular-domain blend as in the shader, but driven by quantized fractions.
+		CVector4<SL2_ST_RAW> vPart0 =
+			vDiffuseColor +
+			(vSampleA - vDiffuseColor) * dInterpX +
+			(vSampleB - vDiffuseColor) * dInterpY;
+
+		CVector4<SL2_ST_RAW> vPart1 =
+			vSampleC +
+			(vSampleB - vSampleC) * (1.0 - dInterpX) +
+			(vSampleA - vSampleC) * (1.0 - dInterpY);
+
+		CVector4<SL2_ST_RAW> vResult = vPart0 * dStep0 + vPart1 * dStep1;
+
+		// Modulate by vertex color.
+		return vResult * _rParameters.vBlendColor;
 	}
 
 }	// namespace sl2

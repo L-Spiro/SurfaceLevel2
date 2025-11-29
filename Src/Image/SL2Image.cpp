@@ -576,8 +576,6 @@ namespace sl2 {
 					bOpaque = bOpaque && bThisIsOpuaqe;
 
 					if ( !m_bIsPreMultiplied && m_bNeedsPreMultiply ) {
-						/*CFormat::ApplyPreMultiply( iTmp.Data( M, 0, A, F ),
-							iTmp.m_vMipMaps[M]->Width(), iTmp.m_vMipMaps[M]->Height(), iTmp.m_vMipMaps[M]->Depth() );*/
 							CFormat::ApplyPreMultiply( pui8Dest, ui32W, ui32H, ui32D );
 						bTargetIsPremulAlpha = true;
 					}

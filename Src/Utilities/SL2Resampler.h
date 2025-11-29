@@ -77,6 +77,13 @@ namespace sl2 {
 		};
 
 		typedef double (*										PfFilterFunc)( double );
+		typedef CVector4<SL2_ST_RAW> (*							PfSampleFunc)(
+			const CVector4<SL2_ST_RAW> *,
+			uint64_t,
+			uint64_t,
+			double,
+			double,
+			const struct SL2_RESAMPLE & );
 
 		/** Filter information. */
 		typedef struct SL2_FILTER {
@@ -90,6 +97,7 @@ namespace sl2 {
 		/** Parameters for resampling. */
 		struct SL2_RESAMPLE {
 			double												dBorderColor[4] = { 0.0, 0.0, 0.0, 1.0 };
+			CVector4<SL2_ST_RAW>								vBlendColor = { 1.0, 1.0, 1.0, 1.0 };
 			float												fFilterScale = 1.0f;
 			uint32_t											ui32W = 0;
 			uint32_t											ui32H = 0;
@@ -109,8 +117,11 @@ namespace sl2 {
 			SL2_FILTER											fAlphaFilterW;
 			SL2_FILTER											fAlphaFilterH;
 			SL2_FILTER											fAlphaFilterD;
+			PfSampleFunc										pfSampler = nullptr;
 			bool												bAlpha = true;
 		};
+
+		
 
 
 		// == Functions.
@@ -583,11 +594,11 @@ namespace sl2 {
 		 * 
 		 * \param _ui64X X-coordinate in texels.
 		 * \param _ui64Y Y-coordinate in texels.
-		 * \param _ui64Pitch Texture width in texels.
+		 * \param _ui64Width Texture width in texels.
 		 * \return Returns the linear index of the texel.
 		 */
-		static inline uint64_t									TexelIndex2D( uint64_t _ui64X, uint64_t _ui64Y, uint64_t _ui64Pitch ) {
-			return _ui64Y * _ui64Pitch + _ui64X;
+		static inline uint64_t									TexelIndex2D( uint64_t _ui64X, uint64_t _ui64Y, uint64_t _ui64Width ) {
+			return _ui64Y * _ui64Width + _ui64X;
 		}
 
 		/**
@@ -596,13 +607,13 @@ namespace sl2 {
 		 * \param _ui64X X-coordinate in texels.
 		 * \param _ui64Y Y-coordinate in texels.
 		 * \param _ui64Z Z-coordinate in texels.
-		 * \param _ui64Pitch Texture width in texels.
+		 * \param _ui64Width Texture width in texels.
 		 * \param _ui64Height Texture height in texels.
 		 * \return Returns the linear index of the texel.
 		 */
 		static inline uint64_t									TexelIndex3D( uint64_t _ui64X, uint64_t _ui64Y, uint64_t _ui64Z,
-			uint64_t _ui64Pitch, uint64_t _ui64Height ) {
-			return (_ui64Z * _ui64Height + _ui64Y) * _ui64Pitch + _ui64X;
+			uint64_t _ui64Width, uint64_t _ui64Height ) {
+			return (_ui64Z * _ui64Height + _ui64Y) * _ui64Width + _ui64X;
 		}
 
 		/**
@@ -614,89 +625,16 @@ namespace sl2 {
 		 * \param _ui64Height The texture height in texels.
 		 * \param _dU The horizontal texture coordinate in the range [-Åá, +Åá] (wrapped).
 		 * \param _dV The vertical texture coordinate in the range [-Åá, +Åá] (wrapped).
-		 * \param _tVertexColor Vertex color by which to modulate the filtered color.
+		 * \param _rParameters Resampling parameters, such as the texture-addressing mode and border color.
 		 * \return Returns the filtered color multiplied by the vertex color.
 		 */
-		static inline CVector4<SL2_ST_RAW>						N64BilinearFilter2D(
+		static CVector4<SL2_ST_RAW>								N64BilinearFilter2D(
 			const CVector4<SL2_ST_RAW> * _pvTexels,
 			uint64_t _ui64Width,
 			uint64_t _ui64Height,
 			double _dU,
 			double _dV,
-			const CVector4<SL2_ST_RAW> &_tVertexColor ) {
-
-			// Half-texel offset so UVs address texel centers as in the HLSL code.
-			double dInvWidth = 1.0 / double( _ui64Width );
-			double dInvHeight = 1.0 / double( _ui64Height );
-			double dHalfTexU = dInvWidth * 0.5;
-			double dHalfTexV = dInvHeight * 0.5;
-
-			double dUc = _dU - dHalfTexU;
-			double dVc = _dV - dHalfTexV;
-
-			// Convert centered UV to texel space.
-			double dTexelX = dUc * double( _ui64Width );
-			double dTexelY = dVc * double( _ui64Height );
-
-			// Interpolation fractions.
-			double dInterpX = CUtilities::Frac( dTexelX );
-			double dInterpY = CUtilities::Frac( dTexelY );
-
-			// Preserve the original negative-UV adjustments.
-			if ( dUc < 0.0 ) {
-				dInterpX = 1.0 - dInterpX * -1.0;
-			}
-			if ( dVc < 0.0 ) {
-				dInterpY = 1.0 - dInterpY * -1.0;
-			}
-
-			// Base texel coordinates in texel space.
-			int64_t i64BaseX = int64_t( std::floor( dTexelX ) );
-			int64_t i64BaseY = int64_t( std::floor( dTexelY ) );
-
-			int64_t i64Width = int64_t( _ui64Width );
-			int64_t i64Height = int64_t( _ui64Height );
-
-			// Wrap around to emulate modulo behavior (handles negative coordinates).
-			int64_t i64WrappedX = (i64BaseX % i64Width + i64Width) % i64Width;
-			int64_t i64WrappedY = (i64BaseY % i64Height + i64Height) % i64Height;
-
-			// Neighboring texels: A = (x+1,y), B = (x,y+1), C = (x+1,y+1).
-			int64_t i64XA = (i64WrappedX + 1) % i64Width;
-			int64_t i64YA = i64WrappedY;
-
-			int64_t i64XB = i64WrappedX;
-			int64_t i64YB = (i64WrappedY + 1) % i64Height;
-
-			int64_t i64XC = (i64WrappedX + 1) % i64Width;
-			int64_t i64YC = (i64WrappedY + 1) % i64Height;
-
-			const CVector4<SL2_ST_RAW> & vDiffuseColor = _pvTexels[TexelIndex2D(i64WrappedX,i64WrappedY,_ui64Width)];
-			const CVector4<SL2_ST_RAW> & vSampleA = _pvTexels[TexelIndex2D(i64XA,i64YA,_ui64Width)];
-			const CVector4<SL2_ST_RAW> & vSampleB = _pvTexels[TexelIndex2D(i64XB,i64YB,_ui64Width)];
-			const CVector4<SL2_ST_RAW> & vSampleC = _pvTexels[TexelIndex2D(i64XC,i64YC,_ui64Width)];
-
-			// Same triangular-domain blend as in the shader.
-			double dW = dInterpX + dInterpY;
-
-			CVector4<SL2_ST_RAW> vPart0 =
-				vDiffuseColor +
-				(vSampleA - vDiffuseColor) * dInterpX +
-				(vSampleB - vDiffuseColor) * dInterpY;
-
-			CVector4<SL2_ST_RAW> vPart1 =
-				vSampleC +
-				(vSampleB - vSampleC) * (1.0 - dInterpX) +
-				(vSampleA - vSampleC) * (1.0 - dInterpY);
-
-			double dStep0 = 1.0 - CUtilities::Step( 1.0, dW );
-			double dStep1 = CUtilities::Step( 1.0, dW );
-
-			CVector4<SL2_ST_RAW> vResult = vPart0 * dStep0 + vPart1 * dStep1;
-
-			// Modulate by vertex color.
-			return vResult * _tVertexColor;
-		}
+			const SL2_RESAMPLE &_rParameters );
 
 		/**
 		 * Applies the same N64-style bilinear filter to a single Z slice of a 3D CVector4<SL2_ST_RAW> texture.
@@ -708,7 +646,7 @@ namespace sl2 {
 		 * \param _ui64ZSlice The Z slice on which to perform the 2D filter.
 		 * \param _dU The horizontal texture coordinate.
 		 * \param _dV The vertical texture coordinate.
-		 * \param _tVertexColor Vertex color by which to modulate the filtered color.
+		 * \param _rParameters Resampling parameters, such as the texture-addressing mode and border color.
 		 * \return Returns the filtered color from the given slice multiplied by the vertex color.
 		 */
 		static inline CVector4<SL2_ST_RAW>						N64BilinearFilter3D(
@@ -719,7 +657,7 @@ namespace sl2 {
 			uint64_t _ui64ZSlice,
 			double _dU,
 			double _dV,
-			const CVector4<SL2_ST_RAW> &_tVertexColor ) {
+			const SL2_RESAMPLE &_rParameters ) {
 
 			if ( _ui64Depth == 0 ) { return CVector4<SL2_ST_RAW>(); }
 
@@ -734,7 +672,7 @@ namespace sl2 {
 				_ui64Height,
 				_dU,
 				_dV,
-				_tVertexColor );
+				_rParameters );
 		}
 
 		/**
@@ -746,119 +684,16 @@ namespace sl2 {
 		 * \param _ui64Height The texture height in texels.
 		 * \param _dU The horizontal texture coordinate in the range [-Åá, +Åá] (wrapped).
 		 * \param _dV The vertical texture coordinate in the range [-Åá, +Åá] (wrapped).
-		 * \param _tVertexColor Vertex color by which to modulate the filtered color.
+		 * \param _rParameters Resampling parameters, such as the texture-addressing mode and border color.
 		 * \return Returns the filtered color multiplied by the vertex color.
 		 */
-		static inline CVector4<SL2_ST_RAW>						N64BilinearFilter2D_Quantized(
+		static CVector4<SL2_ST_RAW>								N64BilinearFilter2D_Quantized(
 			const CVector4<SL2_ST_RAW> * _pvTexels,
 			uint64_t _ui64Width,
 			uint64_t _ui64Height,
 			double _dU,
 			double _dV,
-			const CVector4<SL2_ST_RAW> &_tVertexColor ) {
-
-			// Half-texel offset so UVs address texel centers as in the HLSL code.
-			double dInvWidth = 1.0 / double( _ui64Width );
-			double dInvHeight = 1.0 / double( _ui64Height );
-			double dHalfTexU = dInvWidth * 0.5;
-			double dHalfTexV = dInvHeight * 0.5;
-
-			double dUc = _dU - dHalfTexU;
-			double dVc = _dV - dHalfTexV;
-
-			// Convert centered UV to texel space.
-			double dTexelX = dUc * double( _ui64Width );
-			double dTexelY = dVc * double( _ui64Height );
-
-			// Interpolation fractions (continuous).
-			double dInterpX = CUtilities::Frac( dTexelX );
-			double dInterpY = CUtilities::Frac( dTexelY );
-
-			// Preserve the original negative-UV adjustments.
-			if ( dUc < 0.0 ) {
-				dInterpX = 1.0 - dInterpX * -1.0;
-			}
-			if ( dVc < 0.0 ) {
-				dInterpY = 1.0 - dInterpY * -1.0;
-			}
-
-			// ================================
-			// 5-bit quantization of fractions
-			// ================================
-			// Hardware uses 5-bit fractional S/T (0..31). Here we quantize to that,
-			// then convert back to [0,1) for the float math.
-			const double dQuantScale = 32.0;
-
-			double dFx5 = std::floor( dInterpX * dQuantScale );
-			double dFy5 = std::floor( dInterpY * dQuantScale );
-
-			// Clamp to [0,31] just in case of any numerical noise.
-			if ( dFx5 < 0.0 ) {
-				dFx5 = 0.0;
-			}
-			else if ( dFx5 > 31.0 ) {
-				dFx5 = 31.0;
-			}
-			if ( dFy5 < 0.0 ) {
-				dFy5 = 0.0;
-			}
-			else if ( dFy5 > 31.0 ) {
-				dFy5 = 31.0;
-			}
-
-			// Normalized quantized fractions in [0,1).
-			dInterpX = dFx5 / dQuantScale;
-			dInterpY = dFy5 / dQuantScale;
-
-			// Integer 5-bit sum for the triangle-domain decision (matches RDP logic stfrac_s + stfrac_t >= 32).
-			int32_t i32Fx5 = int32_t( dFx5 );
-			int32_t i32Fy5 = int32_t( dFy5 );
-			int32_t i32W5 = i32Fx5 + i32Fy5;
-			double dStep1 = (i32W5 >= 32) ? 1.0 : 0.0;
-			double dStep0 = 1.0 - dStep1;
-
-			// Base texel coordinates in texel space.
-			int64_t i64BaseX = int64_t( std::floor( dTexelX ) );
-			int64_t i64BaseY = int64_t( std::floor( dTexelY ) );
-
-			int64_t i64Width = int64_t( _ui64Width );
-			int64_t i64Height = int64_t( _ui64Height );
-
-			// Wrap around to emulate modulo behavior (handles negative coordinates).
-			int64_t i64WrappedX = (i64BaseX % i64Width + i64Width) % i64Width;
-			int64_t i64WrappedY = (i64BaseY % i64Height + i64Height) % i64Height;
-
-			// Neighboring texels: A = (x+1,y), B = (x,y+1), C = (x+1,y+1).
-			int64_t i64XA = (i64WrappedX + 1) % i64Width;
-			int64_t i64YA = i64WrappedY;
-
-			int64_t i64XB = i64WrappedX;
-			int64_t i64YB = (i64WrappedY + 1) % i64Height;
-
-			int64_t i64XC = (i64WrappedX + 1) % i64Width;
-			int64_t i64YC = (i64WrappedY + 1) % i64Height;
-
-			const CVector4<SL2_ST_RAW> & vDiffuseColor = _pvTexels[TexelIndex2D( i64WrappedX, i64WrappedY, _ui64Width )];
-			const CVector4<SL2_ST_RAW> & vSampleA = _pvTexels[TexelIndex2D( i64XA, i64YA, _ui64Width )];
-			const CVector4<SL2_ST_RAW> & vSampleB = _pvTexels[TexelIndex2D( i64XB, i64YB, _ui64Width )];
-			const CVector4<SL2_ST_RAW> & vSampleC = _pvTexels[TexelIndex2D( i64XC, i64YC, _ui64Width )];
-
-			// Same triangular-domain blend as in the shader, but driven by quantized fractions.
-			CVector4<SL2_ST_RAW> vPart0 =
-				vDiffuseColor +
-				(vSampleA - vDiffuseColor) * dInterpX +
-				(vSampleB - vDiffuseColor) * dInterpY;
-
-			CVector4<SL2_ST_RAW> vPart1 =
-				vSampleC +
-				(vSampleB - vSampleC) * (1.0 - dInterpX) +
-				(vSampleA - vSampleC) * (1.0 - dInterpY);
-
-			CVector4<SL2_ST_RAW> vResult = vPart0 * dStep0 + vPart1 * dStep1;
-
-			// Modulate by vertex color.
-			return vResult * _tVertexColor;
-		}
+			const SL2_RESAMPLE &_rParameters );
 
 		/**
 		 * Applies the same N64-style bilinear filter to a single Z slice of a 3D CVector4<SL2_ST_RAW> texture.
@@ -870,7 +705,7 @@ namespace sl2 {
 		 * \param _ui64ZSlice The Z slice on which to perform the 2D filter.
 		 * \param _dU The horizontal texture coordinate.
 		 * \param _dV The vertical texture coordinate.
-		 * \param _tVertexColor Vertex color by which to modulate the filtered color.
+		 * \param _rParameters Resampling parameters, such as the texture-addressing mode and border color.
 		 * \return Returns the filtered color from the given slice multiplied by the vertex color.
 		 */
 		static inline CVector4<SL2_ST_RAW>						N64BilinearFilter3D_Quantized(
@@ -881,7 +716,7 @@ namespace sl2 {
 			uint64_t _ui64ZSlice,
 			double _dU,
 			double _dV,
-			const CVector4<SL2_ST_RAW> &_tVertexColor ) {
+			const SL2_RESAMPLE &_rParameters ) {
 
 			if ( _ui64Depth == 0 ) { return CVector4<SL2_ST_RAW>(); }
 
@@ -896,7 +731,7 @@ namespace sl2 {
 				_ui64Height,
 				_dU,
 				_dV,
-				_tVertexColor );
+				_rParameters );
 		}
 
 
