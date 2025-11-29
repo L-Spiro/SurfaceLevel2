@@ -3,8 +3,8 @@
 
 * The only tool that supports `VK_FORMAT_R64_SFLOAT`, `VK_FORMAT_R64G64_SFLOAT`, `VK_FORMAT_R64G64B64_SFLOAT`, and `VK_FORMAT_R64G64B64A64_SFLOAT`. An entirely 64-bit double pipeline is used!
 * The only resampler to allow different filters for width, height, and depth, and for color channels and the alpha channel.  Use an exclusive custom filter for a sharp color down-sample, but use bilinear filtering for the alpha channel!
-* Provides the fastest texture-compression routines.  Other tools may take 40 minutes to convert a 4K texture to BC7, while SurfaceLevel 2.0 takes only 20 seconds while producing a better result!
-* The supported colorspaces, resampling filters, and texture-addressing modes is exhaustive.  37 built-in colorspaces, 25 resampling filters, and 6 texture-addressing modes.
+* Provides the mostest fastest texture-compression routines.  Other tools may take 40 minutes to convert a 4K texture to BC7, while SurfaceLevel 2.0 takes only 20 seconds while producing a better result!
+* The supported colorspaces, resampling filters, and texture-addressing modes is exhaustive.  37 built-in colorspaces, 29 resampling filters, and 6 texture-addressing modes.
 * Almost all texture formats for Vulkan, Metal, OpenGL, and Direct3D 12 are supported.  Literally hundreds of formats, and more to come!
 * Normal-map generation, swizzling, channel swapping, image flipping, pre-multiplying alpha, and more!
 * Handles 1-D, 2-D, and 3-D textures, multiple faces, texture arrays, and mipmaps.
@@ -76,9 +76,19 @@
     </td>
   </tr>
   <tr>
+    <td rowspan="1">-from_clipboard<br>-from_cb<br>-clipboard_in<br>-cb_in</td>
+    <td></td>
+    <td>The image is loaded from the system clipboard.</td>
+  </tr>
+  <tr>
     <td>-outfile</td>
     <td>&lt;file path&gt;</td>
     <td>The path to which to save the file supplied with the last <em>-file</em> command. The destination file format is determined by the file extension.<br>Currently supported formats:<br>PNG<br>BMP<br>TGA<br>JPG<br>J2K<br>JP2<br>EXR<br>DDS<br>KTX<br>PVR<br>YUV (and variants)</td>
+  </tr>
+  <tr>
+    <td rowspan="1">-to_clipboard<br>-to_cb<br>-clipboard_out<br>-cb_out</td>
+    <td></td>
+    <td>The output file is stored into the system clipboard.</td>
   </tr>
 </table>
 
@@ -318,17 +328,17 @@
     <th>Description</th>
   </tr>
   <tr>
-    <td rowspan="25">-filter</td>
+    <td rowspan="29">-filter</td>
     <td>box<br>point</td>
     <td>Applies the selected filter to all non-mipmap filters.</td>
   </tr>
   <tr>
     <td>tent<br>linear</td>
-    <td>The default mipmap alpha filter.</td>
+    <td>The default alpha filter.</td>
   </tr>
   <tr>
     <td>quadraticsharp<br>quadratic_sharp</td>
-    <td>The default non-mipmap filter.</td>
+    <td></td>
   </tr>
   <tr>
     <td>quadratic</td>
@@ -379,6 +389,18 @@
     <td>One of the best choices for upscaling.</td>
   </tr>
   <tr>
+    <td>robidoux</td>
+    <td>One of the best choices for upscaling.</td>
+  </tr>
+  <tr>
+    <td>robidouxsharp</td>
+    <td>The default color filter.</td>
+  </tr>
+  <tr>
+    <td>robidouxsoft</td>
+    <td></td>
+  </tr>
+  <tr>
     <td>catmul<br>catmulrom<br>catmul-rom</td>
     <td></td>
   </tr>
@@ -387,8 +409,12 @@
     <td></td>
   </tr>
   <tr>
-    <td>cardinal<br>card<br>cardinaluniform<br>cardinal_uniform</td>
-    <td>The default mipmap color filter.</td>
+    <td>adobebicubic<br>adobebc</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>cardinal<br>card<br>cardinaluniform<br>cardinal_uniform<br>adobebicubicsharp<br>adobebcsharp</td>
+    <td></td>
   </tr>
   <tr>
     <td>hermite</td>
