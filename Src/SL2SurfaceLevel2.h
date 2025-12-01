@@ -379,16 +379,6 @@ namespace sl2 {
 	SL2_ERRORS															ExportAsPvr( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions );
 
 	/**
-	 * Exports as KTX2.
-	 * 
-	 * \param _iImage The image to export.
-	 * \param _sPath The path to which to export _iImage.
-	 * \param _oOptions Export options.
-	 * \return Returns an error code.
-	 **/
-	SL2_ERRORS															ExportAsKtx2( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions );
-
-	/**
 	 * Exports as TGA.
 	 * 
 	 * \param _iImage The image to export.
