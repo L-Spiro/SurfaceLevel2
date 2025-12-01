@@ -20,6 +20,8 @@
 
 namespace sl2 {
 
+	// == Types.
+	/** A single file entry. */
 	struct SL2_OPEN_FILE {
 		std::u16string													u16Path;														/**< Path to the file to open. */
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *					pkifduvFormat = nullptr;										/**< The YUV format. */
@@ -28,7 +30,6 @@ namespace sl2 {
 		bool															bFromClipBoard = false;											/**< If true, the file is loaded from the clipboard instead of from a file. */
 	};
 
-	// == Types.
 	/** The conversion options. */
 	struct SL2_OPTIONS {
 		std::vector<SL2_OPEN_FILE>										vInputs;														/**< The input files. */
@@ -44,7 +45,7 @@ namespace sl2 {
 		std::vector<uint8_t>											vInColorProfile;												/**< The input color profile. */
 		std::vector<uint8_t>											vOutColorProfile;												/**< The output color profile. */
 		int32_t															i32InRenderingIntent = INTENT_RELATIVE_COLORIMETRIC;			/**< Input -> linear rendering intent. */
-		int32_t															i32OutRenderingIntent = INTENT_RELATIVE_COLORIMETRIC;			/**< Input -> linear rendering intent. */
+		int32_t															i32OutRenderingIntent = INTENT_RELATIVE_COLORIMETRIC;			/**< linear -> output rendering intent. */
 		bool															bEmbedColorProfile = true;										/**< Embed the color profile. */
 		bool															bIgnoreSourceColorspaceGamma = false;							/**< Ignores the gamma curve inside any embedded or selected ICC profiles. */
 
@@ -376,6 +377,16 @@ namespace sl2 {
 	 * \return Returns an error code.
 	 **/
 	SL2_ERRORS															ExportAsPvr( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions );
+
+	/**
+	 * Exports as KTX2.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+	SL2_ERRORS															ExportAsKtx2( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions );
 
 	/**
 	 * Exports as TGA.

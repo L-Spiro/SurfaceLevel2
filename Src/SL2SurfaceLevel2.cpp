@@ -430,7 +430,6 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 				//oOptions.bManuallySetGamma = false;
 				SL2_ADV( 1 );
 			}
-
 			if ( SL2_CHECK( 1, icon ) ) {
 				// -nomips
 				oOptions.mhMipHandling = sl2::SL2_MH_REMOVE_EXISTING;
@@ -2374,6 +2373,13 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 		}
 		else if ( SL2_CHECKEXT( ktx ) ) {
 			eError = sl2::ExportAsKtx1( iConverted, oOptions.vOutputs[I], oOptions );
+			if ( sl2::SL2_E_SUCCESS != eError ) {
+				SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
+					reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
+			}
+		}
+		else if ( SL2_CHECKEXT( ktx2 ) ) {
+			eError = sl2::ExportAsKtx2( iConverted, oOptions.vOutputs[I], oOptions );
 			if ( sl2::SL2_E_SUCCESS != eError ) {
 				SL2_ERRORT( std::format( L"Failed to save file: \"{}\".",
 					reinterpret_cast<const wchar_t *>(oOptions.vOutputs[I].c_str()) ).c_str(), eError );
@@ -4422,10 +4428,10 @@ namespace sl2 {
 		if ( KTX_SUCCESS != ecErr || kt1Tex.Handle() == nullptr ) { return SL2_E_OUTOFMEMORY; }
 
 		if ( _iImage.Format()->bCompressed ) {
-			//(*kt1Tex).glInternalformat = _iImage.Format()->kifInternalFormat;
-			//(*kt1Tex).glType = 0;
-			//(*kt1Tex).glBaseInternalformat = _iImage.Format()->kbifBaseInternalFormat;
-			//(*kt1Tex).glFormat = 0;
+			(*kt1Tex).glInternalformat = _iImage.Format()->kifInternalFormat;
+			(*kt1Tex).glType = 0;
+			(*kt1Tex).glBaseInternalformat = _iImage.Format()->kbifBaseInternalFormat;
+			(*kt1Tex).glFormat = 0;
 		}
 		else {
 			(*kt1Tex).glInternalformat = _iImage.Format()->kifInternalFormat;
@@ -4439,12 +4445,20 @@ namespace sl2 {
 				// For each level.
 				for ( size_t M = 0; M < _iImage.Mipmaps(); ++M ) {
 					if ( _iImage.Format()->bCompressed ) {
-						if ( ecErr != KTX_SUCCESS ) {
-							size_t sPageSize = CFormat::GetFormatSize( _iImage.Format(), _iImage.GetMipmaps()[M]->Width(), _iImage.GetMipmaps()[M]->Height(), 1 );
-							for ( uint32_t D = 0; D < _iImage.GetMipmaps()[M]->Depth(); ++D ) {
-								ecErr = ktxTexture_SetImageFromMemory( ktxTexture( kt1Tex.Handle() ), static_cast<ktx_uint32_t>(M), static_cast<ktx_uint32_t>(A), static_cast<ktx_uint32_t>(D), _iImage.Data( M, D, A, F ), static_cast<ktx_size_t>(sPageSize) );
-								if ( ecErr != KTX_SUCCESS ) { return SL2_E_OUTOFMEMORY; }
+						size_t sPageSize = CFormat::GetFormatSize( _iImage.Format(), _iImage.GetMipmaps()[M]->Width(), _iImage.GetMipmaps()[M]->Height(), 1 );
+						for ( uint32_t D = 0; D < _iImage.GetMipmaps()[M]->Depth(); ++D ) {
+							ktx_uint32_t ui32FaceSlice = 0;
+							if ( _iImage.Faces() > 1 ) {
+								// Cubemap or cubemap array: faceSlice is the cube face.
+								ui32FaceSlice = static_cast<ktx_uint32_t>(F);
 							}
+							else {
+								// 3D/3D array: faceSlice is the depth slice.
+								ui32FaceSlice = static_cast<ktx_uint32_t>(D);
+							}
+
+							ecErr = ktxTexture_SetImageFromMemory( ktxTexture( kt1Tex.Handle() ), static_cast<ktx_uint32_t>(M), static_cast<ktx_uint32_t>(A), ui32FaceSlice, _iImage.Data( M, D, A, F ), static_cast<ktx_size_t>(sPageSize) );
+							if ( ecErr != KTX_SUCCESS ) { return SL2_E_OUTOFMEMORY; }
 						}
 					}
 					else {
@@ -4462,7 +4476,18 @@ namespace sl2 {
 								std::memcpy( pui8Dst, _iImage.Data( M, D, A, F ) + sPitch * H, sDstPitch );
 								pui8Dst += sDstPitch;
 							}
-							ecErr = ktxTexture_SetImageFromMemory( ktxTexture( kt1Tex.Handle() ), static_cast<ktx_uint32_t>(M), static_cast<ktx_uint32_t>(A), static_cast<ktx_uint32_t>(D), vTmp.data(), static_cast<ktx_size_t>(vTmp.size()) );
+
+							ktx_uint32_t ui32FaceSlice = 0;
+							if ( _iImage.Faces() > 1 ) {
+								// Cubemap or cubemap array: faceSlice is the cube face.
+								ui32FaceSlice = static_cast<ktx_uint32_t>(F);
+							}
+							else {
+								// 3D/3D array: faceSlice is the depth slice.
+								ui32FaceSlice = static_cast<ktx_uint32_t>(D);
+							}
+
+							ecErr = ktxTexture_SetImageFromMemory( ktxTexture( kt1Tex.Handle() ), static_cast<ktx_uint32_t>(M), static_cast<ktx_uint32_t>(A), ui32FaceSlice, vTmp.data(), static_cast<ktx_size_t>(vTmp.size()) );
 							if ( ecErr != KTX_SUCCESS ) { return SL2_E_OUTOFMEMORY; }
 						}
 					}
@@ -4528,37 +4553,57 @@ namespace sl2 {
 		// Create the tTexture header.
 		sl2::CImage::SL2_PVRTEXTUREHEADER thHeader( ::PVRTexLib_CreateTextureHeader( &cpCreateParms ) );
 		if ( !thHeader.thHeader ) { return SL2_E_OUTOFMEMORY; }
-		//::PVRTexLib_SetTextureVulkanFormat( thHeader.thHeader, 56 );
+		if ( _iImage.Format()->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED ) {
+			::PVRTexLib_SetTextureVulkanFormat(
+				thHeader.thHeader,
+				static_cast<PVRTuint32>(_iImage.Format()->vfVulkanFormat)
+			);
+		}
+		else if ( _iImage.Format()->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN ) {
+			::PVRTexLib_SetTextureDXGIFormat(
+				thHeader.thHeader,
+				static_cast<PVRTuint32>(_iImage.Format()->dfDxFormat)
+			);
+		}
 
-		// Create the tTexture object with the header.
-		sl2::CImage::SL2_PVRTEXTURE tTexture( ::PVRTexLib_CreateTexture( thHeader.thHeader, nullptr ) );
-        
-
+		sl2::CImage::SL2_PVRTEXTURE tTexture;
+		std:: vector<uint8_t> vCompBuffer;
 		if ( _iImage.Format()->bCompressed ) {
 			for ( PVRTuint32 M = 0; M < cpCreateParms.numMipMaps; ++M ) {
+				uint32_t ui32MipWidth = _iImage.GetMipmaps()[M]->Width();
+				uint32_t ui32MipHeight = _iImage.GetMipmaps()[M]->Height();
+				uint32_t ui32MipDepth = _iImage.GetMipmaps()[M]->Depth();
+
 				for ( PVRTuint32 A = 0; A < cpCreateParms.numArrayMembers; ++A ) {
 					for ( PVRTuint32 F = 0; F < cpCreateParms.numFaces; ++F ) {
-						size_t sDstPitch = sl2::CFormat::GetRowSize_NoPadding( _iImage.Format(), _iImage.GetMipmaps()[M]->Width() );
-						size_t sPitch = sl2::CFormat::GetRowSize( _iImage.Format(), _iImage.GetMipmaps()[M]->Width() );
-						size_t sSrcPageSize = sPitch * _iImage.GetMipmaps()[M]->Height();
-						for ( uint32_t D = 0; D < _iImage.GetMipmaps()[M]->Depth(); ++D ) {
-							PVRTuint8 * pui8Data = static_cast<PVRTuint8*>(::PVRTexLib_GetTextureDataPtr( tTexture.tTexture, M, A, F, D ));
-							for ( uint32_t H = 0; H < _iImage.GetMipmaps()[M]->Height(); ++H ) {
-								std::memcpy( pui8Data, _iImage.Data( M, D, A, F ) + sPitch * H, sDstPitch );
-								pui8Data += sDstPitch;
-							}
+						size_t sSize = sl2::CFormat::GetFormatSize( _iImage.Format(), ui32MipWidth, ui32MipHeight, ui32MipDepth );
+
+						size_t sIdx = vCompBuffer.size();
+						try {
+							vCompBuffer.resize( vCompBuffer.size() + sSize );
 						}
+						catch ( ... ) { return SL2_E_OUTOFMEMORY; }
+						std::memcpy( vCompBuffer.data() + sIdx, _iImage.Data( M, 0, A, F ), sSize );
 					}
 				}
 			}
+			tTexture = std::move( sl2::CImage::SL2_PVRTEXTURE( ::PVRTexLib_CreateTexture( thHeader.thHeader, vCompBuffer.data() ) ) );
+			if ( !tTexture.tTexture ) { return SL2_E_OUTOFMEMORY; }
 		}
 		else {
+			// Create the tTexture object with the header.
+			tTexture = std::move( sl2::CImage::SL2_PVRTEXTURE( ::PVRTexLib_CreateTexture( thHeader.thHeader, nullptr ) ) );
+			if ( !tTexture.tTexture ) { return SL2_E_OUTOFMEMORY; }
+        
+
+			
 			for ( PVRTuint32 M = 0; M < cpCreateParms.numMipMaps; ++M ) {
 				for ( PVRTuint32 A = 0; A < cpCreateParms.numArrayMembers; ++A ) {
 					for ( PVRTuint32 F = 0; F < cpCreateParms.numFaces; ++F ) {
 						size_t sPageSize = CFormat::GetFormatSize( _iImage.Format(), _iImage.GetMipmaps()[M]->Width(), _iImage.GetMipmaps()[M]->Height(), _iImage.GetMipmaps()[M]->Depth() );
 						PVRTuint8 * pui8Data = static_cast<PVRTuint8*>(::PVRTexLib_GetTextureDataPtr( tTexture.tTexture, M, A, F, 0 ));
-						std::memcpy( pui8Data, _iImage.Data( M, 0, A, F ), static_cast<ktx_size_t>(sPageSize) );
+						if ( !pui8Data ) { return SL2_E_OUTOFMEMORY; }
+						std::memcpy( pui8Data, _iImage.Data( M, 0, A, F ), sPageSize );
 					}
 				}
 			}
@@ -4577,7 +4622,9 @@ namespace sl2 {
 
 				std::u16string u16Tmp = sl2::CUtilities::XStringToU16String( pTmpOut.c_str(), pTmpOut.native().size() );
 				if ( !::PVRTexLib_SaveTextureToFile( tTexture.tTexture, sl2::CUtilities::Utf16ToUtf8( u16Tmp.c_str() ).c_str() ) ) { eErr = SL2_E_FILEWRITEERROR; }
-				std::filesystem::rename( pTmpOut.c_str(), _sPath.c_str() );
+				else {
+					std::filesystem::rename( pTmpOut.c_str(), _sPath.c_str() );
+				}
 				std::filesystem::remove_all( pAsciiPath );
 			}
 			catch ( ... ) {
@@ -4591,6 +4638,268 @@ namespace sl2 {
 		return eErr;
 	}
 
+	/**
+	 * Exports as KTX2.
+	 * 
+	 * \param _iImage The image to export.
+	 * \param _sPath The path to which to export _iImage.
+	 * \param _oOptions Export options.
+	 * \return Returns an error code.
+	 **/
+#if 0
+	SL2_ERRORS ExportAsKtx2( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions ) {
+		if ( _iImage.Format()->tlvtVariableType == PVRTLVT_Invalid ) { return SL2_E_BADFORMAT; }
+    
+		PVRTexLibChannelName tlcnChans[4];
+		PVRTuint64 ui64PvrFormat = CFormat::FormatToPvrFormat( (*_iImage.Format()), tlcnChans );
+
+		// Create texture header creation parameters.
+		PVRHeader_CreateParams cpCreateParms = {};
+		cpCreateParms.pixelFormat = ui64PvrFormat;
+		cpCreateParms.width = _iImage.Width();
+		cpCreateParms.height = _iImage.Height();
+		cpCreateParms.depth = _iImage.Depth();
+		cpCreateParms.numMipMaps = static_cast<PVRTuint32>(_iImage.Mipmaps());
+		cpCreateParms.numArrayMembers = static_cast<PVRTuint32>(_iImage.ArraySize());
+		cpCreateParms.numFaces = static_cast<PVRTuint32>(_iImage.Faces());
+		if ( _iImage.OutputColorSpace().size() ) {
+			cpCreateParms.colourSpace = CFormat::TransferFunc( _iImage.OutputColorSpaceType() ).tlcsPvrColorSpace;
+		}
+		else {
+			cpCreateParms.colourSpace = (_iImage.TargetGamma() == 0.0 || _iImage.TargetGamma() == 1.0) ? PVRTLCS_Linear : PVRTLCS_sRGB;
+		}
+		cpCreateParms.channelType = _iImage.Format()->tlvtVariableType;
+		cpCreateParms.preMultiplied = _iImage.IsPremultiplied();
+
+		// Create the texture header.
+		sl2::CImage::SL2_PVRTEXTUREHEADER thHeader( ::PVRTexLib_CreateTextureHeader( &cpCreateParms ) );
+		if ( !thHeader.thHeader ) { return SL2_E_OUTOFMEMORY; }
+
+		// Ask PVRTexLib how much data this header expects *before* decorating with Vk/DXGI.
+		PVRTuint64 ui64Size = ::PVRTexLib_GetTextureDataSize(
+			thHeader.thHeader,
+			-1,   // All mip levels.
+			true, // All array members.
+			true  // All faces.
+		);
+		if ( ui64Size == 0 ) {
+			// Header + pixelFormat inconsistent (e.g. unsupported compressed format / depth).
+			return SL2_E_BADFORMAT;
+		}
+
+		// Now decorate with Vulkan/DXGI format if available.
+		if ( _iImage.Format()->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED ) {
+			::PVRTexLib_SetTextureVulkanFormat(
+				thHeader.thHeader,
+				static_cast<PVRTuint32>(_iImage.Format()->vfVulkanFormat)
+			);
+		}
+		else if ( _iImage.Format()->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN ) {
+			::PVRTexLib_SetTextureDXGIFormat(
+				thHeader.thHeader,
+				static_cast<PVRTuint32>(_iImage.Format()->dfDxFormat)
+			);
+		}
+
+		// Backing store for all image data, compressed or not.
+		std::vector<uint8_t> vData;
+		try {
+			vData.resize( static_cast<size_t>( ui64Size ) );
+		}
+		catch ( ... ) { return SL2_E_OUTOFMEMORY; }
+
+		uint8_t * pui8Dst = vData.data();
+		uint8_t * const pui8End = vData.data() + vData.size();
+
+		// Pack data in MIP -> ARRAY -> FACE -> DEPTH order.
+		for ( PVRTuint32 M = 0; M < cpCreateParms.numMipMaps; ++M ) {
+			uint32_t ui32MipWidth = _iImage.GetMipmaps()[M]->Width();
+			uint32_t ui32MipHeight = _iImage.GetMipmaps()[M]->Height();
+			uint32_t ui32MipDepth = _iImage.GetMipmaps()[M]->Depth();
+
+			for ( PVRTuint32 A = 0; A < cpCreateParms.numArrayMembers; ++A ) {
+				for ( PVRTuint32 F = 0; F < cpCreateParms.numFaces; ++F ) {
+					if ( _iImage.Format()->bCompressed ) {
+						// Compressed: treat each depth slice as one block of compressed data.
+						size_t sSliceSize = sl2::CFormat::GetFormatSize(
+							_iImage.Format(),
+							ui32MipWidth,
+							ui32MipHeight,
+							1
+						);
+						for ( uint32_t D = 0; D < ui32MipDepth; ++D ) {
+							if ( pui8Dst + sSliceSize > pui8End ) { return SL2_E_BADFORMAT; }
+							const uint8_t * pui8Src = _iImage.Data( M, D, A, F );
+							std::memcpy( pui8Dst, pui8Src, sSliceSize );
+							pui8Dst += sSliceSize;
+						}
+					}
+					else {
+						// Uncompressed: one contiguous surface per (M,A,F) including all depth slices.
+						size_t sSurfaceSize = CFormat::GetFormatSize(
+							_iImage.Format(),
+							ui32MipWidth,
+							ui32MipHeight,
+							ui32MipDepth
+						);
+						if ( pui8Dst + sSurfaceSize > pui8End ) { return SL2_E_BADFORMAT; }
+						const uint8_t * pui8Src = _iImage.Data( M, 0, A, F );
+						std::memcpy( pui8Dst, pui8Src, sSurfaceSize );
+						pui8Dst += sSurfaceSize;
+					}
+				}
+			}
+		}
+
+		// Sanity: we should have filled exactly ui64Size bytes.
+		if ( pui8Dst != pui8End ) { return SL2_E_BADFORMAT; }
+
+		// Create the texture backed by our filled buffer.
+		sl2::CImage::SL2_PVRTEXTURE tTexture( ::PVRTexLib_CreateTexture( thHeader.thHeader, vData.data() ) );
+		if ( !tTexture.tTexture ) { return SL2_E_OUTOFMEMORY; }
+
+		SL2_ERRORS eErr = SL2_E_SUCCESS;
+		// Save the tTexture as a .KTX2 file (PVRTexLib chooses container from extension).
+		if ( !::PVRTexLib_SaveTextureToFile( tTexture.tTexture, sl2::CUtilities::Utf16ToUtf8( _sPath.c_str() ).c_str() ) ) {
+			std::filesystem::path pAsciiPath, pAsciiFile;
+			if ( !CUtilities::CreateAsciiPath( _sPath, pAsciiPath, pAsciiFile ) ) { return SL2_E_OUTOFMEMORY; }
+			bool bDirCreated = false;
+			try {
+				std::filesystem::create_directories( pAsciiPath );
+				bDirCreated = true;
+				std::filesystem::path pTmpOut = pAsciiPath / pAsciiFile;
+
+				std::u16string u16Tmp = sl2::CUtilities::XStringToU16String( pTmpOut.c_str(), pTmpOut.native().size() );
+				if ( !::PVRTexLib_SaveTextureToFile( tTexture.tTexture, sl2::CUtilities::Utf16ToUtf8( u16Tmp.c_str() ).c_str() ) ) { eErr = SL2_E_FILEWRITEERROR; }
+				if ( eErr != SL2_E_FILEWRITEERROR ) {
+					std::filesystem::rename( pTmpOut.c_str(), _sPath.c_str() );
+				}
+				std::filesystem::remove_all( pAsciiPath );
+			}
+			catch ( ... ) {
+				if ( bDirCreated ) {
+					try { std::filesystem::remove_all( pAsciiPath ); }
+					catch ( ... ) {}
+				}
+				return SL2_E_FILEWRITEERROR;
+			}
+		}
+		return eErr;
+	}
+#else
+	SL2_ERRORS ExportAsKtx2( CImage &_iImage, const std::u16string &_sPath, SL2_OPTIONS &_oOptions ) {
+		if ( _iImage.Format()->tlvtVariableType == PVRTLVT_Invalid ) { return SL2_E_BADFORMAT; }
+        
+		PVRTexLibChannelName tlcnChans[4];
+		PVRTuint64 ui64PvrFormat = CFormat::FormatToPvrFormat( (*_iImage.Format()), tlcnChans );
+
+		// Create texture header creation parameters.
+		PVRHeader_CreateParams cpCreateParms = {};
+		cpCreateParms.pixelFormat = ui64PvrFormat;
+		cpCreateParms.width = _iImage.Width();
+		cpCreateParms.height = _iImage.Height();
+		cpCreateParms.depth = _iImage.Depth();
+		cpCreateParms.numMipMaps = static_cast<PVRTuint32>(_iImage.Mipmaps());
+		cpCreateParms.numArrayMembers = static_cast<PVRTuint32>(_iImage.ArraySize());
+		cpCreateParms.numFaces = static_cast<PVRTuint32>(_iImage.Faces());
+		if ( _iImage.OutputColorSpace().size() ) {
+			cpCreateParms.colourSpace = CFormat::TransferFunc( _iImage.OutputColorSpaceType() ).tlcsPvrColorSpace;
+		}
+		else {
+			cpCreateParms.colourSpace = (_iImage.TargetGamma() == 0.0 || _iImage.TargetGamma() == 1.0) ? PVRTLCS_Linear : PVRTLCS_sRGB;
+		}
+		cpCreateParms.colourSpace = PVRTLCS_Linear;
+		cpCreateParms.channelType = _iImage.Format()->tlvtVariableType;
+		cpCreateParms.preMultiplied = _iImage.IsPremultiplied();
+
+		// Create the tTexture header.
+		sl2::CImage::SL2_PVRTEXTUREHEADER thHeader( ::PVRTexLib_CreateTextureHeader( &cpCreateParms ) );
+		if ( !thHeader.thHeader ) { return SL2_E_OUTOFMEMORY; }
+		if ( _iImage.Format()->vfVulkanFormat != SL2_VK_FORMAT_UNDEFINED ) {
+			::PVRTexLib_SetTextureVulkanFormat(
+				thHeader.thHeader,
+				static_cast<PVRTuint32>(_iImage.Format()->vfVulkanFormat)
+			);
+		}
+		else if ( _iImage.Format()->dfDxFormat != SL2_DXGI_FORMAT_UNKNOWN ) {
+			::PVRTexLib_SetTextureDXGIFormat(
+				thHeader.thHeader,
+				static_cast<PVRTuint32>(_iImage.Format()->dfDxFormat)
+			);
+		}
+
+		sl2::CImage::SL2_PVRTEXTURE tTexture;
+		std:: vector<uint8_t> vCompBuffer;
+		if ( _iImage.Format()->bCompressed ) {
+			for ( PVRTuint32 M = 0; M < cpCreateParms.numMipMaps; ++M ) {
+				uint32_t ui32MipWidth = _iImage.GetMipmaps()[M]->Width();
+				uint32_t ui32MipHeight = _iImage.GetMipmaps()[M]->Height();
+				uint32_t ui32MipDepth = _iImage.GetMipmaps()[M]->Depth();
+
+				for ( PVRTuint32 A = 0; A < cpCreateParms.numArrayMembers; ++A ) {
+					for ( PVRTuint32 F = 0; F < cpCreateParms.numFaces; ++F ) {
+						size_t sSize = sl2::CFormat::GetFormatSize( _iImage.Format(), ui32MipWidth, ui32MipHeight, ui32MipDepth );
+
+						size_t sIdx = vCompBuffer.size();
+						try {
+							vCompBuffer.resize( vCompBuffer.size() + sSize );
+						}
+						catch ( ... ) { return SL2_E_OUTOFMEMORY; }
+						std::memcpy( vCompBuffer.data() + sIdx, _iImage.Data( M, 0, A, F ), sSize );
+					}
+				}
+			}
+			tTexture = std::move( sl2::CImage::SL2_PVRTEXTURE( ::PVRTexLib_CreateTexture( thHeader.thHeader, vCompBuffer.data() ) ) );
+			if ( !tTexture.tTexture ) { return SL2_E_OUTOFMEMORY; }
+		}
+		else {
+			// Create the tTexture object with the header.
+			tTexture = std::move( sl2::CImage::SL2_PVRTEXTURE( ::PVRTexLib_CreateTexture( thHeader.thHeader, nullptr ) ) );
+			if ( !tTexture.tTexture ) { return SL2_E_OUTOFMEMORY; }
+        
+
+			
+			for ( PVRTuint32 M = 0; M < cpCreateParms.numMipMaps; ++M ) {
+				for ( PVRTuint32 A = 0; A < cpCreateParms.numArrayMembers; ++A ) {
+					for ( PVRTuint32 F = 0; F < cpCreateParms.numFaces; ++F ) {
+						size_t sPageSize = CFormat::GetFormatSize( _iImage.Format(), _iImage.GetMipmaps()[M]->Width(), _iImage.GetMipmaps()[M]->Height(), _iImage.GetMipmaps()[M]->Depth() );
+						PVRTuint8 * pui8Data = static_cast<PVRTuint8*>(::PVRTexLib_GetTextureDataPtr( tTexture.tTexture, M, A, F, 0 ));
+						if ( !pui8Data ) { return SL2_E_OUTOFMEMORY; }
+						std::memcpy( pui8Data, _iImage.Data( M, 0, A, F ), sPageSize );
+					}
+				}
+			}
+		}
+
+		SL2_ERRORS eErr = SL2_E_SUCCESS;
+		// Save the tTexture as a .PVR file with mipmaps and array layers
+		if ( !::PVRTexLib_SaveTextureToFile( tTexture.tTexture, sl2::CUtilities::Utf16ToUtf8( _sPath.c_str() ).c_str() ) ) {
+			std::filesystem::path pAsciiPath, pAsciiFile;
+			if ( !CUtilities::CreateAsciiPath( _sPath, pAsciiPath, pAsciiFile ) ) { return SL2_E_OUTOFMEMORY; }
+			bool bDirCreated = false;
+			try {
+				std::filesystem::create_directories( pAsciiPath );
+				bDirCreated = true;
+				std::filesystem::path pTmpOut = pAsciiPath / pAsciiFile;
+
+				std::u16string u16Tmp = sl2::CUtilities::XStringToU16String( pTmpOut.c_str(), pTmpOut.native().size() );
+				if ( !::PVRTexLib_SaveTextureToFile( tTexture.tTexture, sl2::CUtilities::Utf16ToUtf8( u16Tmp.c_str() ).c_str() ) ) { eErr = SL2_E_FILEWRITEERROR; }
+				else {
+					std::filesystem::rename( pTmpOut.c_str(), _sPath.c_str() );
+				}
+				std::filesystem::remove_all( pAsciiPath );
+			}
+			catch ( ... ) {
+				if ( bDirCreated ) {
+					try { std::filesystem::remove_all( pAsciiPath ); }
+					catch ( ... ) {}
+				}
+				return SL2_E_FILEWRITEERROR;
+			}
+		}
+		return eErr;
+	}
+#endif
     /**
 	 * Exports as TGA.
 	 * 

@@ -263,6 +263,8 @@ namespace sl2 {
 
 		/** Wraps PVRTexLib_PVRTexture. */
 		struct SL2_PVRTEXTURE {
+			SL2_PVRTEXTURE() :
+				tTexture( nullptr ) {}
 			SL2_PVRTEXTURE( PVRTexLib_PVRTexture _tTexture ) :
 				tTexture( _tTexture ) {
 			}
@@ -271,6 +273,21 @@ namespace sl2 {
 					::PVRTexLib_DestroyTexture( tTexture );
 					tTexture = nullptr;
 				}
+			}
+
+
+			// == Operators.
+			SL2_PVRTEXTURE &								operator = ( SL2_PVRTEXTURE && _ptOther ) {
+				if ( &_ptOther != this ) {
+					if ( tTexture ) {
+						::PVRTexLib_DestroyTexture( tTexture );
+						tTexture = nullptr;
+					}
+
+					tTexture = _ptOther.tTexture;
+					_ptOther.tTexture = nullptr;
+				}
+				return (*this);
 			}
 
 
