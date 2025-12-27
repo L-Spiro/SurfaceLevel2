@@ -1257,34 +1257,36 @@ namespace sl2 {
 		SL2_CGC_EBU_DISPLAY_P3 = 16,												/**< Display P3 Color Encoding (v 1.0) standard. */
 		SL2_CGC_EBU_DISPLAY_P3_PRECISE = 17,										/**< Display P3 Color Encoding (v 1.0) in high precision, without the discontinuities in the standard. */
 
-		SL2_CGC_ITU_BT_601_525 = 18,												/**< ITU-R Recommendation BT.601 (525) standard. */
-		SL2_CGC_ITU_BT_601_525_PRECISE = 19,										/**< ITU-R Recommendation BT.601 (525) in high precision, without the discontinuities in the standard. */
+		SL2_CGC_GENERIC_RGB = 18,													/**< Generic RGB Profile. */
 
-		SL2_CGC_ITU_BT_601_625 = 20,												/**< ITU-R Recommendation BT.601 (625) standard. */
-		SL2_CGC_ITU_BT_601_625_PRECISE = 21,										/**< ITU-R Recommendation BT.601 (625) in high precision, without the discontinuities in the standard. */
+		SL2_CGC_ITU_BT_601_525 = 19,												/**< ITU-R Recommendation BT.601 (525) standard. */
+		SL2_CGC_ITU_BT_601_525_PRECISE = 20,										/**< ITU-R Recommendation BT.601 (525) in high precision, without the discontinuities in the standard. */
 
-		SL2_CGC_GENERIC_FILM = 22,													/**< Generic film (color filters using Illuminant C). */
+		SL2_CGC_ITU_BT_601_625 = 21,												/**< ITU-R Recommendation BT.601 (625) standard. */
+		SL2_CGC_ITU_BT_601_625_PRECISE = 22,										/**< ITU-R Recommendation BT.601 (625) in high precision, without the discontinuities in the standard. */
 
-		SL2_CGC_ITU_BT_470_M_NTSC = 23,												/**< Rec. ITU-R BT.470-6 (M/NTSC). */
-		SL2_CGC_ITU_BT_470_M_PAL = 24,												/**< Rec. ITU-R BT.470-6 (M/PAL). */
-		SL2_CGC_ITU_BT_470_B_N_PAL = 25,											/**< Rec. ITU-R BT.470-6 (B, B1, D, D1, G, H, K, N/PAL, K1, L/SECAM). */
+		SL2_CGC_GENERIC_FILM = 23,													/**< Generic film (color filters using Illuminant C). */
 
-		SL2_CGC_ACESCG = 26,														/**< ACEScg. */
+		SL2_CGC_ITU_BT_470_M_NTSC = 24,												/**< Rec. ITU-R BT.470-6 (M/NTSC). */
+		SL2_CGC_ITU_BT_470_M_PAL = 25,												/**< Rec. ITU-R BT.470-6 (M/PAL). */
+		SL2_CGC_ITU_BT_470_B_N_PAL = 26,											/**< Rec. ITU-R BT.470-6 (B, B1, D, D1, G, H, K, N/PAL, K1, L/SECAM). */
 
-		SL2_CGC_NTSC_1987_STANDARD = 27,											/**< Standard SMPTE C. */
-		SL2_CGC_NTSC_1987 = 28,														/**< SMPTE C with a pow(2.2) curve. */
+		SL2_CGC_ACESCG = 27,														/**< ACEScg. */
 
-		SL2_CGC_ROMM_RGB = 29,														/**< Reference Output Medium Metric RGB (ROMM RGB). */
-		SL2_CGC_RIMM_RGB = 30,														/**< Reference Input Medium Metric RGB (RIMM RGB). */
-		SL2_CGC_ERIMM_RGB = 31,														/**< Extended Reference Input Medium Metric RGB (ERIMM RGB). */
+		SL2_CGC_NTSC_1987_STANDARD = 28,											/**< Standard SMPTE C. */
+		SL2_CGC_NTSC_1987 = 29,														/**< SMPTE C with a pow(2.2) curve. */
 
-		SL2_CGC_PLASA_ANSI_E154 = 32,												/**< PLASA ANSI E1.54. */
+		SL2_CGC_ROMM_RGB = 30,														/**< Reference Output Medium Metric RGB (ROMM RGB). */
+		SL2_CGC_RIMM_RGB = 31,														/**< Reference Input Medium Metric RGB (RIMM RGB). */
+		SL2_CGC_ERIMM_RGB = 32,														/**< Extended Reference Input Medium Metric RGB (ERIMM RGB). */
 
-		SL2_CGC_PROTUNE = 33,														/**< Protune Native. */
+		SL2_CGC_PLASA_ANSI_E154 = 33,												/**< PLASA ANSI E1.54. */
 
-		SL2_CGC_S_GAMUT = 34,														/**< S-Gamut. */
-		SL2_CGC_S_GAMUT3 = 35,														/**< S-Gamut3. */
-		SL2_CGC_S_GAMUT3_CINE = 36,													/**< S-Gamut3.Cine. */
+		SL2_CGC_PROTUNE = 34,														/**< Protune Native. */
+
+		SL2_CGC_S_GAMUT = 35,														/**< S-Gamut. */
+		SL2_CGC_S_GAMUT3 = 36,														/**< S-Gamut3. */
+		SL2_CGC_S_GAMUT3_CINE = 37,													/**< S-Gamut3.Cine. */
 
 		SL2_CGC_NONE = 0x1337,
 	};

@@ -609,6 +609,34 @@ namespace sl2 {
 		}
 
 		/**
+		 * Converts from macOS “Color LCD” (Display P3-class) to linear.
+		 * Uses the sRGB transfer function (sRGB TRC).
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					ColorLCDtoLinear( double _dVal ) {
+			if ( _dVal < -0.04045 ) { return -std::pow( (-_dVal + 0.055) / 1.055, 2.4 ); }
+			return _dVal <= 0.04045 ?
+				_dVal / 12.92 :
+				std::pow( (_dVal + 0.055) / 1.055, 2.4 );
+		}
+
+		/**
+		 * Converts from linear to macOS “Color LCD” (Display P3-class).
+		 * Uses the sRGB transfer function (sRGB TRC).
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to “Color LCD” space.
+		 */
+		static inline double SL2_FASTCALL					LinearToColorLCD( double _dVal ) {
+			if ( _dVal < -(0.04045 / 12.92) ) { return -1.055 * std::pow( -_dVal, 1.0 / 2.4 ) + 0.055; }
+			return _dVal <= (0.04045 / 12.92) ?
+				_dVal * 12.92 :
+				1.055 * std::pow( _dVal, 1.0 / 2.4 ) - 0.055;
+		}
+
+		/**
 		 * Converts from SMPTE 170M-2004 to linear.  Performs a conversion according to the standard.
 		 * 
 		 * \param _dVal The value to convert.
@@ -683,6 +711,32 @@ namespace sl2 {
 		}
 
 		/**
+		 * Converts from macOS “Generic RGB Profile” to linear.
+		 * The Generic RGB profile that ships with macOS uses a simple power-law TRC with gamma 1.8 (no toe).
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					GenericRGBToLinear( double _dVal ) {
+			if ( _dVal < 0.0 ) { return -std::pow( -_dVal, 1.8 ); }
+			return std::pow( _dVal, 1.8 );
+		}
+
+		/**
+		 * Converts from linear to macOS “Generic RGB Profile”.
+		 * The Generic RGB profile that ships with macOS uses a simple power-law TRC with gamma 1.8 (no toe).
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to Generic RGB space.
+		 */
+		static inline double SL2_FASTCALL					LinearToGenericRGB( double _dVal ) {
+			constexpr double dInvGamma = 1.0 / 1.8;
+
+			if ( _dVal < 0.0 ) { return -std::pow( -_dVal, dInvGamma ); }
+			return std::pow( _dVal, dInvGamma );
+		}
+
+		/**
 		 * Converts from linear to linear.
 		 * 
 		 * \param _dVal The value to convert.
@@ -737,7 +791,7 @@ namespace sl2 {
 		}
 
 		/**
-		 * Converts from Adobe RGB to linear.
+		 * Converts from Adobe RGB (1998) to linear.
 		 * 
 		 * \param _dVal The value to convert.
 		 * \return Returns the color value converted to linear space.
@@ -748,7 +802,7 @@ namespace sl2 {
 		}
 
 		/**
-		 * Converts from linear to Adobe RGB.
+		 * Converts from linear to Adobe RGB (1998).
 		 *
 		 * \param _dVal The value to convert.
 		 * \return Returns the value converted to Adobe RGB space.
@@ -853,6 +907,28 @@ namespace sl2 {
 			else {
 				return (std::log2( _dVal ) + dB) / dC;
 			}
+		}
+
+		/**
+		 * Converts from ACEScg (AP1) to linear.
+		 * ACEScg is photometrically linear, so this is an identity transform.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 **/
+		static inline double SL2_FASTCALL					ACEScgToLinear( double _dVal ) {
+			return _dVal;
+		}
+
+		/**
+		 * Converts from linear to ACEScg (AP1).
+		 * ACEScg is photometrically linear, so this is an identity transform.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to ACEScg space.
+		 */
+		static inline double SL2_FASTCALL					LinearToACEScg( double _dVal ) {
+			return _dVal;
 		}
 
 		/**

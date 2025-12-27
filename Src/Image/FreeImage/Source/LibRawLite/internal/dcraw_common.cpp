@@ -2078,7 +2078,7 @@ void CLASS kodak_radc_load_raw()
       for (i=0; i < sizeof(buf[0])/sizeof(short); i++)
 	buf[c][0][i] = (buf[c][0][i] * val + x) >> s;
       last[c] = mul[c];
-      for (r=0; r <= !c; r++) {
+      for (r=0; r <= int(!c); r++) {
 	buf[c][1][width/2] = buf[c][2][width/2] = mul[c] << 7;
 	for (tree=1, col=width/2; col > 0; ) {
 	  if ((tree = radc_token(tree))) {
@@ -4051,7 +4051,7 @@ void CLASS xtrans_interpolate (int passes)
 
   cielab (0,0);
   border_interpolate(6);
-  ndir = 4 << (passes > 1);
+  ndir = 4 << int(passes > 1);
   buffer = (char *) malloc (TS*TS*(ndir*11+6));
   merror (buffer, "xtrans_interpolate()");
   rgb  = (ushort(*)[TS][TS][3]) buffer;
@@ -8863,7 +8863,7 @@ konica_400z:
 dng_skip:
 
   if (fuji_width) {
-    fuji_width = width >> !fuji_layout;
+    fuji_width = width >> int(!fuji_layout);
     if (~fuji_width & 1) filters = 0x49494949;
     width = (height >> fuji_layout) + fuji_width;
     height = width - 1;
