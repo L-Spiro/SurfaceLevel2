@@ -1288,6 +1288,14 @@ namespace sl2 {
 		SL2_CGC_S_GAMUT3 = 36,														/**< S-Gamut3. */
 		SL2_CGC_S_GAMUT3_CINE = 37,													/**< S-Gamut3.Cine. */
 
+		SL2_CGC_COLOR_LCD = 38,														/**< Apple Inc.'s Color LCD. */
+		SL2_CGC_APPLE_ACESCG = 39,													/**< Apple Inc.'s ACEScg. */
+		SL2_CGC_APPLE_DCI_P3 = 40,													/**< Apple Inc.'s SMPTE RP 431-2:2011. */
+		SL2_CGC_APPLE_EBU_DISPLAY_P3 = 41,											/**< Apple Inc.'s Display P3 Color Encoding (v 1.0). */
+		SL2_CGC_APPLE_GENERIC_RGB = 42,												/**< Apple Inc.'s Generic RGB Profile. */
+		SL2_CGC_APPLE_ITU_BT_709 = 43,												/**< Apple Inc.'s Rec. ITU-R BT.709-5. */
+		SL2_CGC_APPLE_ITU_BT_2020 = 44,												/**< Apple Inc.'s Rec. ITU-R BT.2020-1. */
+
 		SL2_CGC_NONE = 0x1337,
 	};
 

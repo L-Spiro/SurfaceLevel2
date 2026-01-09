@@ -700,27 +700,34 @@ namespace sl2 {
 #define SL2_BT_709_CHROMAS								{ 0.640, 0.330, 0.212639005871510 },		{ 0.300, 0.600, 0.715168678767756 },		{ 0.150, 0.060, 0.072192315360734 },		{ 0.31272, 0.32903, 1.0000 }
 #define SL2_ADOBE_RGB_CHROMAS							{ 0.640, 0.330, 0.2988390 },				{ 0.210, 0.710, 0.5868110 },				{ 0.150, 0.060, 0.1143500 },				{ 0.31272, 0.32903, 1.0000 }
 #define SL2_BT_2020_CHROMAS								{ 0.708, 0.292, 0.2627 },					{ 0.170, 0.797, 0.6780 },					{ 0.131, 0.046, 0.0593 },					{ 0.31272, 0.32903, 1.0000 }
-#define SL2_DCI_P3_CHROMAS								{ 0.680, 0.320, 1.0 },						{ 0.265, 0.690, 1.0 },						{ 0.150, 0.060, 1.0 },						{ 0.3140, 0.3510, 1.0000 }
+#define SL2_DCI_P3_CHROMAS								{ 0.680, 0.320, 1.0 },						{ 0.265, 0.690, 1.0 },						{ 0.150, 0.060, 1.0 },						{ 0.3140,  0.3510,  1.0000 }
 #define SL2_SMPTE_240M_CHROMAS							{ 0.630, 0.340, 0.2122 },					{ 0.310, 0.595, 0.7013 },					{ 0.155, 0.070, 0.0865 },					{ 0.31272, 0.32903, 1.0000 }
-#define SL2_NTSC_1953_CHROMAS							{ 0.670, 0.330, 0.3 },						{ 0.210, 0.710, 0.59 },						{ 0.140, 0.080, 0.11 },						{ 0.3100, 0.3160, 1.0000 }
+#define SL2_NTSC_1953_CHROMAS							{ 0.670, 0.330, 0.3 },						{ 0.210, 0.710, 0.59 },						{ 0.140, 0.080, 0.11 },						{ 0.3100,  0.3160,  1.0000 }
 #define SL2_EBU_TECH_3213_CHROMAS						{ 0.640, 0.330, 0.2988390 },				{ 0.290, 0.600, 0.5868110 },				{ 0.150, 0.060, 0.1143500 },				{ 0.31272, 0.32903, 1.0000 }
 #define SL2_DISPLAY_P3_CHROMAS							{ 0.680, 0.320, 1.0 },						{ 0.265, 0.690, 1.0 },						{ 0.150, 0.060, 1.0 },						{ 0.31272, 0.32903, 1.0000 }
-#define SL2_GENERIC_FILM_CHROMAS						{ 0.681, 0.319, 1.0 },						{ 0.243, 0.692, 1.0 },						{ 0.145, 0.049, 1.0 },						{ 0.3100, 0.3160, 1.0000 }
+#define SL2_GENERIC_FILM_CHROMAS						{ 0.681, 0.319, 1.0 },						{ 0.243, 0.692, 1.0 },						{ 0.145, 0.049, 1.0 },						{ 0.3100,  0.3160,  1.0000 }
 
 #define SL2_GENERIC_RGB_PROFILE_CHROMAS					{ 0.6383307573415765, 0.3408739637487706, 0.2425029988004798 },																													\
 																									{ 0.3159824702620517, 0.6031660853233163, 0.6741303478608557 },																		\
 																																				{ 0.1632100052110474, 0.0869202709744659, 0.0833666533386645 },							\
 																																															{ 0.31272, 0.32903, 1.0000 }
 
-#define SL2_ACESCG_CHROMAS								{ 0.713, 0.293, 1.0 },						{ 0.165, 0.830, 1.0 },						{ 0.128, 0.044, 1.0 },						{ 0.32168,0.33767,1.0000 }
-#define SL2_BT_470_NTSC_CHROMA							{ 0.670, 0.330, 0.2988390 },				{ 0.210, 0.710, 0.5868110 },				{ 0.140, 0.080, 0.1143500 },				{ 0.3100, 0.3160, 1.0000 }
+#define SL2_ACESCG_CHROMAS								{ 0.713, 0.293, 1.0 },						{ 0.165, 0.830, 1.0 },						{ 0.128, 0.044, 1.0 },						{ 0.32168, 0.33767, 1.0000 }
+#define SL2_BT_470_NTSC_CHROMA							{ 0.670, 0.330, 0.2988390 },				{ 0.210, 0.710, 0.5868110 },				{ 0.140, 0.080, 0.1143500 },				{ 0.3100,  0.3160,  1.0000 }
 #define SL2_BT_470_PAL_CHROMA							{ 0.640, 0.330, 0.2988390 },				{ 0.290, 0.600, 0.5868110 },				{ 0.150, 0.060, 0.1143500 },				{ 0.31272, 0.32903, 1.0000 }
-#define SL2_ROMM_RGB_CHROMA								{ 0.7347,0.2653,1.0 },						{ 0.1596,0.8404,1.0 },						{ 0.0366,0.0001,1.0 },						{ 0.3457, 0.3585, 1.0000 }
-#define SL2_PLASA_ANSI_E154_CHROMA						{ 0.7347,0.2653,1.0 },						{ 0.1596,0.8404,1.0 },						{ 0.0366,0.0001,1.0 },						{ 0.4254, 0.4044, 1.0000 }
+#define SL2_ROMM_RGB_CHROMA								{ 0.7347,0.2653,1.0 },						{ 0.1596,0.8404,1.0 },						{ 0.0366,0.0001,1.0 },						{ 0.3457,  0.3585,  1.0000 }
+#define SL2_PLASA_ANSI_E154_CHROMA						{ 0.7347,0.2653,1.0 },						{ 0.1596,0.8404,1.0 },						{ 0.0366,0.0001,1.0 },						{ 0.4254,  0.4044,  1.0000 }
 #define SL2_PROTUNE_CHROMA								{ 0.69848046, 0.19302645,1.0 },				{ 0.32955538, 1.02459662,1.0 },				{ 0.10844263, -0.03467857,1.0 },			{ 0.31272, 0.32903, 1.0000 }
 #define SL2_S_GAMUT_CHROMA								{ 0.730, 0.280, 1.0 },						{ 0.140, 0.855, 1.0 },						{ 0.100, -0.05, 1.0 },						{ 0.31272, 0.32903, 1.0000 }
 #define SL2_S_GAMUT3_CINE_CHROMA						{ 0.766, 0.275, 1.0 },						{ 0.225, 0.800, 1.0 },						{ 0.089, -0.087,1.0 },						{ 0.31272, 0.32903, 1.0000 }
-
+// Apple Profiles:
+#define SL2_COLOR_LCD									{ 0.680, 0.320, 1.0 },						{ 0.265, 0.690, 1.0 },						{ 0.150, 0.060, 1.0 },						{ 0.31272, 0.32903, 1.0000 }
+#define SL2_APPLE_ACESCG_CHROMAS						{ 0.713, 0.293, 1.0 },						{ 0.165, 0.830, 1.0 },						{ 0.128, 0.044, 1.0 },						{ 0.3457,  0.3585,  1.0000 }
+#define SL2_APPLE_DCI_P3_CHROMAS						{ 0.680, 0.320, 1.0 },						{ 0.265, 0.690, 1.0 },						{ 0.150, 0.060, 1.0 },						{ 0.3457,  0.3585,  1.0000 }
+#define SL2_APPLE_DISPLAY_P3_CHROMAS					{ 0.680, 0.320, 1.0 },						{ 0.265, 0.690, 1.0 },						{ 0.150, 0.060, 1.0 },						{ 0.3457,  0.3585,	1.0000 }
+#define SL2_APPLE_GENERIC_RGB_PROFILE_CHROMAS			{ 0.630, 0.340, 1.0 },						{ 0.295, 0.605, 1.0 },						{ 0.155, 0.077, 1.0 },						{ 0.31272, 0.32903, 1.0000 }
+#define SL2_APPLE_BT_709_CHROMAS						{ 0.640, 0.330, 1.0 },						{ 0.300, 0.600, 1.0 },						{ 0.150, 0.060, 1.0 },						{ 0.3457,  0.3585,	1.0000 }
+#define SL2_APPLE_BT_2020_CHROMAS						{ 0.708, 0.292, 0.2627 },					{ 0.170, 0.797, 0.6780 },					{ 0.131, 0.046, 0.0593 },					{ 0.3457,  0.3585,	1.0000 }
 
 
 #define SL2_sRGB_STANDARD_CURVE							{ 2.4,					1.0 / 1.055, 0.055 / 1.055, 1.0 / 12.92,												0.04045 }, 4
@@ -787,7 +794,7 @@ namespace sl2 {
 			SL2_DISPLAY_P3_CHROMAS, SL2_sRGB_PRECISE_CURVE, L"Precise EBU Display P3", PVRTLCS_sRGB },
 
 		{ CUtilities::GenericRGBToLinear,				CUtilities::LinearToGenericRGB,							// SL2_CGC_GENERIC_RGB
-			SL2_DISPLAY_P3_CHROMAS, SL2_POW_1_8_CURVE, L"Generic RGB Profile", PVRTLCS_sRGB },
+			SL2_GENERIC_RGB_PROFILE_CHROMAS, SL2_POW_1_8_CURVE, L"Generic RGB Profile", PVRTLCS_sRGB },
 
 		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M,							// SL2_CGC_ITU_BT_601_525
 			SL2_BT_601_525_CHROMA, SL2_SMPTE_170M_1999_CURVE, L"Standard Rec. 601 (525)", PVRTLCS_BT601 },
@@ -836,6 +843,22 @@ namespace sl2 {
 			SL2_S_GAMUT_CHROMA, SL2_BUILD_TABLE, L"S-Gamut3", PVRTLCS_sRGB },
 		{ CUtilities::SLog3ToLinear,					CUtilities::LinearToSLog3,								// SL2_CGC_S_GAMUT3_CINE
 			SL2_S_GAMUT3_CINE_CHROMA, SL2_BUILD_TABLE, L"S-Gamut3.Cine", PVRTLCS_sRGB },
+
+		// Apple Curves.
+		{ CUtilities::sRGBtoLinear,						CUtilities::LinearTosRGB,								// SL2_CGC_COLOR_LCD
+			SL2_COLOR_LCD, SL2_sRGB_STANDARD_CURVE, L"Apple Inc.'s Color LCD", PVRTLCS_sRGB },
+		{ CUtilities::PassThrough,						CUtilities::PassThrough,								// SL2_CGC_APPLE_ACESCG
+			SL2_APPLE_ACESCG_CHROMAS, SL2_LINEAR_CURVE, L"Apple Inc.'s ACES CG Linear (Academy Color Encoding System AP1)", PVRTLCS_Linear },
+		{ CUtilities::DCIP3toLinear,					CUtilities::LinearToDCIP3,								// SL2_CGC_APPLE_DCI_P3
+			SL2_APPLE_DCI_P3_CHROMAS, SL2_POW_2_6_CURVE, L"Apple Inc.'s SMPTE RP 431-2-2007 DCI (P3)", PVRTLCS_sRGB },
+		{ CUtilities::sRGBtoLinear,						CUtilities::LinearTosRGB,								// SL2_CGC_APPLE_EBU_DISPLAY_P3
+			SL2_APPLE_DISPLAY_P3_CHROMAS, SL2_sRGB_STANDARD_CURVE, L"Apple Inc.'s Display P3", PVRTLCS_sRGB },
+		{ CUtilities::GenericRGBToLinear,				CUtilities::LinearToGenericRGB,							// SL2_CGC_APPLE_GENERIC_RGB
+			SL2_APPLE_GENERIC_RGB_PROFILE_CHROMAS, SL2_POW_1_8_CURVE, L"Apple Inc.'s Generic RGB Profile", PVRTLCS_sRGB },
+		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M,							// SL2_CGC_APPLE_ITU_BT_709
+			SL2_APPLE_BT_709_CHROMAS, SL2_SMPTE_170M_1999_CURVE, L"Apple Inc.'s Rec. ITU-R BT.709-5", PVRTLCS_BT709 },
+		{ CUtilities::SMPTE170MtoLinear,				CUtilities::LinearToSMPTE170M,							// SL2_CGC_APPLE_ITU_BT_2020
+			SL2_APPLE_BT_2020_CHROMAS, SL2_SMPTE_170M_1999_CURVE, L"Apple Inc.'s Rec. ITU-R BT.2020-1", PVRTLCS_BT2020 },
 	};
 
 #undef SL2_ROMM_RGB_CURVE
@@ -852,6 +875,13 @@ namespace sl2 {
 #undef SL2_sRGB_PRECISE_CURVE
 #undef SL2_sRGB_STANDARD_CURVE
 
+#undef SL2_APPLE_BT_2020_CHROMAS
+#undef SL2_APPLE_BT_709_CHROMAS
+#undef SL2_APPLE_GENERIC_RGB_PROFILE_CHROMAS
+#undef SL2_APPLE_DISPLAY_P3_CHROMAS
+#undef SL2_APPLE_DCI_P3_CHROMAS
+#undef SL2_APPLE_ACESCG_CHROMAS
+#undef SL2_COLOR_LCD
 #undef SL2_S_GAMUT3_CINE_CHROMA
 #undef SL2_S_GAMUT_CHROMA
 #undef SL2_PROTUNE_CHROMA
