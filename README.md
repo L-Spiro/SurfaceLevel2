@@ -1321,6 +1321,8 @@
   </tr>
 </table>
 
+<h2>Formats</h2>
+
 These image formats supported:
  | Vulkan Formats |
  | --- |
