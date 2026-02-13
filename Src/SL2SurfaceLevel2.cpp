@@ -4581,6 +4581,8 @@ namespace sl2 {
 				static_cast<PVRTuint32>(_iImage.Format()->dfDxFormat) ) ) { return SL2_E_BADFORMAT; }
 		}
 
+		::PVRTexLib_SetTextureIsPreMultiplied( thHeader.thHeader, _iImage.IsPremultiplied() );
+
 		sl2::CImage::SL2_PVRTEXTURE tTexture;
 		std:: vector<uint8_t> vCompBuffer;
 		if ( _iImage.Format()->bCompressed ) {
