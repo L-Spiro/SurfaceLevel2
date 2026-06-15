@@ -411,8 +411,8 @@ namespace sl2 {
 		 * \return Returns the filtered value.
 		 */
 		static inline double									RobidouxFilterFunc( double _dT ) {
-			constexpr double dB = 0.3782157550939986290217120767920278012752532958984375;			// 12.0 / (19.0 + 9.0 * std::sqrt( 2.0 ))
-			constexpr double dC = 0.310892122453000629977992730346159078180789947509765625;			// 113.0 / (58.0 + 216.0 * std::sqrt( 2.0 ))
+			constexpr double dB = 0.378215755093998684532863308049854822456836700439453125;			// 12.0 / (19.0 + 9.0 * std::sqrt( 2.0 ))		// 0.37821575509399866698199807932338
+			constexpr double dC = 0.31089212245300068548914396160398609936237335205078125;			// 113.0 / (58.0 + 216.0 * std::sqrt( 2.0 ))	// 0.31089212245300066650900096033831
 			return MitchellFilterHelper( _dT,
 				dB,
 				dC );
@@ -425,8 +425,8 @@ namespace sl2 {
 		 * \return Returns the filtered value.
 		 */
 		static inline double									RobidouxSharpFilterFunc( double _dT ) {
-			constexpr double dB = 0.26201451239901418777122898973175324499607086181640625;			// 6.0 / (13.0 + 7.0 * std::sqrt( 2.0 ))
-			constexpr double dC = 0.36899274380049285060323427387629635632038116455078125;			// 7.0 / (2.0 + 12.0 * std::sqrt( 2.0 ))
+			constexpr double dB = 0.26201451239901418777122898973175324499607086181640625;			// 6.0 / (13.0 + 7.0 * std::sqrt( 2.0 ))		// 0.26201451239901419648350807863652
+			constexpr double dC = 0.368992743800492906114385505134123377501964569091796875;			// 7.0 / (2.0 + 12.0 * std::sqrt( 2.0 ))		// 0.36899274380049290175824596068174
 			return MitchellFilterHelper( _dT,
 				dB,
 				dC );
@@ -439,8 +439,8 @@ namespace sl2 {
 		 * \return Returns the filtered value.
 		 */
 		static inline double									RobidouxSoftFilterFunc( double _dT ) {
-			constexpr double dB = 0.67962275898295920750769028018112294375896453857421875;			// (9.0 - 3.0 * std::sqrt( 2.0 )) / 7.0
-			constexpr double dC = 0.160188620508520396246154859909438528120517730712890625;			// (-2.0 + 3.0 * std::sqrt( 2.0 )) / 14.0
+			constexpr double dB = 0.67962275898295931852999274269677698612213134765625;				// (9.0 - 3.0 * std::sqrt( 2.0 )) / 7.0			// 0.67962275898295926479927626105299
+			constexpr double dC = 0.1601886205085203684905792442805250175297260284423828125;		// (-2.0 + 3.0 * std::sqrt( 2.0 )) / 14.0		// 0.16018862050852036760036186947351
 			return MitchellFilterHelper( _dT,
 				dB,
 				dC );

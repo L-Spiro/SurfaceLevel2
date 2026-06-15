@@ -109,7 +109,7 @@ namespace sl2 {
 		 * \return Returns the mirrored-once texel index.
 		 **/
 		static inline uint32_t									NullBorder( uint32_t _ui32TextureSize, int32_t _i32Idx ) {
-			if ( _i32Idx < 0 || static_cast<uint32_t>(_i32Idx) >= _ui32TextureSize ) { return -2; }
+			if ( _i32Idx < 0 || static_cast<uint32_t>(_i32Idx) >= _ui32TextureSize ) { return static_cast<uint32_t>(-2); }
 			return static_cast<uint32_t>(_i32Idx);
 		}
 

@@ -1011,17 +1011,20 @@ namespace sl2 {
 			constexpr double dLogEt = -2.56570551809674807230976512073539197444915771484375;
 			constexpr double dEt = 0.0027182818284590451983484538089896886958740651607513427734375;	// e * dEmin.
 
-			constexpr double dLogEclipMinusLogEmin = dLogEclip - dLogEmin;
-			constexpr double dLogEtMinusLogEmin = dLogEt - dLogEmin;
+			constexpr double dLogEclipMinusLogEmin = dLogEclip - dEmin;
+			constexpr double dLogEtMinusLogEmin = dLogEt - dEmin;
 
 			if ( _dVal <= 0.0 ) { return 0.0; }
+    
 			if ( _dVal <= (dLogEtMinusLogEmin / dLogEclipMinusLogEmin) ) {
 				return (dLogEclipMinusLogEmin / dLogEtMinusLogEmin) * (_dVal * dEt);
 			}
+    
 			if ( _dVal < 1.0 ) {
-				return std::pow( 10.0, _dVal * dLogEclipMinusLogEmin + dLogEmin );
+				return std::pow( 10.0, _dVal * dLogEclipMinusLogEmin + dEmin );
 			}
-			return 1.0;
+    
+			return dEclip;
 		}
 
 		/**
@@ -1038,15 +1041,18 @@ namespace sl2 {
 			constexpr double dLogEt = -2.56570551809674807230976512073539197444915771484375;
 			constexpr double dEt = 0.0027182818284590451983484538089896886958740651607513427734375;	// e * dEmin.
 
-			constexpr double dLogEclipMinusLogEmin = dLogEclip - dLogEmin;
+			constexpr double logEclipMinusLogEmin = dLogEclip - dLogEmin;
 
 			if ( _dVal <= 0.0 ) { return 0.0; }
+    
 			if ( _dVal <= dEt ) {
-				return ((dLogEt - dLogEmin) / dLogEclipMinusLogEmin) * (_dVal / dEt);
+				return ((std::log10( dEt ) - dLogEmin) / logEclipMinusLogEmin) * (_dVal / dEt);
 			}
-			if ( _dVal <= dEclip && _dVal < 1.0 ) {
-				return (std::log10( _dVal ) - dLogEmin) / dLogEclipMinusLogEmin;
+    
+			if ( _dVal < dEclip ) {
+				return (std::log10( _dVal ) - dLogEmin) / logEclipMinusLogEmin;
 			}
+    
 			return 1.0;
 		}
 
@@ -1384,16 +1390,34 @@ namespace sl2 {
 		 * \return Returns the value converted to SMPTE 240M space.
 		 */
 		static inline double SL2_FASTCALL					LinearToCrtProper2( double _dVal ) {
-			constexpr double dAlpha = 0.1115721959217312597711924126997473649680614471435546875;
-			constexpr double dBeta = 1.1115721959217312875267680283286608755588531494140625;
-			constexpr double dCut = 0.022821585529445027884509755722319823689758777618408203125;
-			if ( _dVal >= 0.36 ) { return std::pow( _dVal, 1.0 / 2.31 ); }
-			double dFrac = _dVal / 0.36;
-			return ((_dVal <= dCut ?
-				_dVal * 4.0 :
-				dBeta * std::pow( _dVal, 0.45 ) - dAlpha)
-				* (1.0 - dFrac))
-				+ (dFrac * std::pow( _dVal, 1.0 / 2.31 ));
+			if SL2_UNLIKELY( _dVal <= 0.0 ) { return 0.0; }
+			if SL2_UNLIKELY( _dVal >= 1.0 ) { return 1.0; }
+
+			constexpr double dGamma = 2.31;
+			constexpr double dSplitX = 0.36;
+			constexpr double dSplitY = 0.09441886527340710710820559370404225774109363555908203125;	// std::pow( 0.36, 2.31 ).
+
+			if ( _dVal >= dSplitY ) { return std::pow( _dVal, 1.0 / dGamma ); }						// Easily reversible.
+
+			// The X-to-linear can’t be reversed because _dVal is a parameter for both the curves and the blend.  Need an iterative approach.
+			// This is expensive, but luckily this function isn’t actually useful, since you won’t be playing on a monitor/screen that has this curve.  Only
+			//	CrtProper2ToLinear() is actually useful, as it exactly matches the curve some CRT’s applied to their images, which is the part necessary for emulation.
+			// If this function is ever used, it must be for building LUT’s only.
+			double dLo = 0.0;
+			double dHi = dSplitX;
+			
+			for ( int I = 0; I < 48; ++I ) {
+				double dMid = (dLo + dHi) * 0.5;
+				double dY = CrtProper2ToLinear( dMid );
+				if ( dY < _dVal ) {
+					dLo = dMid;
+				}
+				else {
+					dHi = dMid;
+				}
+			}
+
+			return (dLo + dHi) * 0.5;
 		}
 
 		/**
