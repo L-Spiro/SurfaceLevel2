@@ -44,6 +44,7 @@ namespace sl2 {
 		{ CResampler::HammingFilterFunc,				1.0 },
 		{ CResampler::HanningFilterFunc,				1.0 },
 		{ CResampler::BlackmanFilterFunc,				3.0 },
+		{ CResampler::JincFilterFunc,					3.0 },
 		{ CResampler::GaussianSharpFilterFunc,			1.25 },
 		{ CResampler::GaussianFilterFunc,				1.25 },
 		{ CResampler::BellFilterFunc,					1.5 },

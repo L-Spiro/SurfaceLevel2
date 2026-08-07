@@ -783,6 +783,9 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 		else if ( ::_wcsicmp( _wcpArgV[1], L"blackman" ) == 0 ) {																																									\
 			oOptions.ASSIGN = sl2::CResampler::SL2_FF_BLACKMAN;																																										\
 		}																																																							\
+		else if ( ::_wcsicmp( _wcpArgV[1], L"jinc" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"sombrero" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"besinc" ) == 0 ) {																			\
+			oOptions.ASSIGN = sl2::CResampler::SL2_FF_JINC;																																											\
+		}																																																							\
 		else if ( ::_wcsicmp( _wcpArgV[1], L"gaussiansharp" ) == 0 || ::_wcsicmp( _wcpArgV[1], L"gaussian_sharp" ) == 0 ) {																											\
 			oOptions.ASSIGN = sl2::CResampler::SL2_FF_GAUSSIANSHARP;																																								\
 		}																																																							\

@@ -62,6 +62,7 @@ namespace sl2 {
 			SL2_FF_HAMMING,
 			SL2_FF_HANNING,
 			SL2_FF_BLACKMAN,
+			SL2_FF_JINC,
 			SL2_FF_GAUSSIANSHARP,
 			SL2_FF_GAUSSIAN,
 			SL2_FF_BELL,
@@ -195,6 +196,164 @@ namespace sl2 {
 			}
 
 			return dSum;
+		}
+
+		/**
+		 * Calculates the J1 Bessel function approximation.
+		 *
+		 * \param _dX The input double value.
+		 * \return The computed double result.
+		 */
+		static double											J1( double _dX ) {
+			double dP;
+			double dQ;
+			size_t sIdx;
+
+			static const double dPone[] = {
+				0.581199354001606143928050809e+21,
+			   -0.6672106568924916298020941484e+20,
+				0.2316433580634002297931815435e+19,
+			   -0.3588817569910106050743641413e+17,
+				0.2908795263834775409737601689e+15,
+			   -0.1322983480332126453125473247e+13,
+				0.3413234182301700539091292655e+10,
+			   -0.4695753530642995859767162166e+7,
+				0.270112271089232341485679099e+4
+			};
+    
+			static const double dQone[] = {
+				0.11623987080032122878585294e+22,
+				0.1185770712190320999837113348e+20,
+				0.6092061398917521746105196863e+17,
+				0.2081661221307607351240184229e+15,
+				0.5243710262167649715406728642e+12,
+				0.1013863514358673989967045588e+10,
+				0.1501793594998585505921097578e+7,
+				0.1606931573481487801970916749e+4,
+				0.1e+1
+			};
+
+			dP = dPone[8];
+			dQ = dQone[8];
+    
+			for ( sIdx = 7; sIdx--; ) {
+				dP = dP * _dX * _dX + dPone[sIdx];
+				dQ = dQ * _dX * _dX + dQone[sIdx];
+			}
+    
+			return dP / dQ;
+		}
+
+		/**
+		 * Calculates the P1 auxiliary polynomial for the Bessel approximation.
+		 *
+		 * \param _dX The input double value.
+		 * \return The computed double result.
+		 */
+		static double											P1( double _dX ) {
+			double dP;
+			double dQ;
+			size_t sIdx;
+
+			static const double dPone[] = {
+				0.352246649133679798341724373e+5,
+				0.62758845247161281269005675e+5,
+				0.313539631109159574238669888e+5,
+				0.49854832060594338434500455e+4,
+				0.2111529182853962382105718e+3,
+				0.12571716929145341558495e+1
+			};
+    
+			static const double dQone[] = {
+				0.352246649133679798068390431e+5,
+				0.626943469593560511888833731e+5,
+				0.312404063819041039923015703e+5,
+				0.4930396490181088979386097e+4,
+				0.2030775189134759322293574e+3,
+				0.1e+1
+			};
+
+			dP = dPone[5];
+			dQ = dQone[5];
+    
+			for ( sIdx = 4; sIdx--; ) {
+				dP = dP * (8.0 / _dX) * (8.0 / _dX) + dPone[sIdx];
+				dQ = dQ * (8.0 / _dX) * (8.0 / _dX) + dQone[sIdx];
+			}
+    
+			return dP / dQ;
+		}
+
+		/**
+		 * Calculates the Q1 auxiliary polynomial for the Bessel approximation.
+		 *
+		 * \param _dX The input double value.
+		 * \return The computed double result.
+		 */
+		static double											Q1( double _dX ) {
+			double dP;
+			double dQ;
+			size_t sIdx;
+
+			static const double dPone[] = {
+				0.3511751914303552822533318e+3,
+				0.7210391804904475039280863e+3,
+				0.4259873011654442389886993e+3,
+				0.831898957673850827325226e+2,
+				0.45681716295512267064405e+1,
+				0.3532840052740123642735e-1
+			};
+    
+			static const double dQone[] = {
+				0.74917374171809127714519505e+4,
+				0.154141773392650970499848051e+5,
+				0.91522317015169922705904727e+4,
+				0.18111867005523513506724158e+4,
+				0.1038187585462133728776636e+3,
+				0.1e+1
+			};
+
+			dP = dPone[5];
+			dQ = dQone[5];
+    
+			for ( sIdx = 4; sIdx--; ) {
+				dP = dP * (8.0 / _dX) * (8.0 / _dX) + dPone[sIdx];
+				dQ = dQ * (8.0 / _dX) * (8.0 / _dX) + dQone[sIdx];
+			}
+    
+			return dP / dQ;
+		}
+
+		/**
+		 * Calculates the Bessel function of the first kind of order one.
+		 *
+		 * \param _dX The input double value.
+		 * \return The computed double result.
+		 */
+		static double											Bessel1( double _dX ) {
+			double dP;
+			double dQ;
+
+			if ( _dX == 0.0 ) { return 0.0; }
+
+			dP = _dX;
+
+			if ( _dX < 0.0 ) {
+				_dX = -_dX;
+			}
+
+			if ( _dX < 8.0 ) {
+				return dP * J1( _dX );
+			}
+			constexpr double dSqrt2 = 1.4142135623730951454746218587388284504413604736328125;
+			dQ = std::sqrt( (2.0 / (std::numbers::pi * _dX)) ) * (P1( _dX ) * (1.0 / dSqrt2 * (std::sin( _dX ) - std::cos( _dX ))) - 
+				 8.0 / _dX * Q1( _dX ) * (-1.0 / dSqrt2 * (std::sin( _dX ) + std::cos( _dX ))));
+
+			if ( dP < 0.0 ) {
+				dQ = -dQ;
+			}
+
+			return dQ;
 		}
 
 		/**
@@ -498,6 +657,19 @@ namespace sl2 {
 				return Clean( Sinc( _dT ) * BlackmanWindow( _dT / 3.0 ) );
 			}
 			return 0.0;
+		}
+
+		/**
+		 * The Jinc filter function.
+		 *
+		 * \param _dT The value to filter.
+		 * \return Returns the filtered value.
+		 */
+		static inline double									JincFilterFunc( double _dT ) {
+			if ( _dT == 0.0 ) {
+				return 0.5 * std::numbers::pi;
+			}
+			return Bessel1( std::numbers::pi *_dT ) / _dT;
 		}
 
 		/**

@@ -433,6 +433,10 @@
     <td></td>
   </tr>
   <tr>
+    <td>jinc<br>sombrero<br>besinc</td>
+    <td></td>
+  </tr>
+  <tr>
     <td>gaussiansharp<br>gaussian_sharp</td>
     <td></td>
   </tr>
