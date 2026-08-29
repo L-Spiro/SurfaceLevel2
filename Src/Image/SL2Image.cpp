@@ -355,6 +355,7 @@ namespace sl2 {
 	 **/
 	SL2_ERRORS CImage::LoadFile( const std::vector<uint8_t> &_vData ) {
 		if ( SL2_E_SUCCESS == LoadBmp( _vData ) ) { return SL2_E_SUCCESS; }
+		if ( SL2_E_SUCCESS == LoadPBmp( _vData ) ) { return SL2_E_SUCCESS; }
 		if ( SL2_E_SUCCESS == LoadDds( _vData ) ) { return SL2_E_SUCCESS; }
 		if ( SL2_E_SUCCESS == LoadKtx1( _vData ) ) { return SL2_E_SUCCESS; }
 		if ( SL2_E_SUCCESS == LoadKtx2( _vData ) ) { return SL2_E_SUCCESS; }
@@ -2815,19 +2816,21 @@ namespace sl2 {
 
 
 		if ( _vData.size() < sizeof( SL2_CHUNK ) ) { return SL2_E_INVALIDFILETYPE; }
-		SL2_CHUNK_EX cFile;
+		SL2_CHUNK cFile;
 		if ( !sFile.Read( cFile ) ) { return SL2_E_INVALIDFILETYPE; }
-		if ( cFile.ui32Name != 0x504D4250 ) { return SL2_E_INVALIDFILETYPE; }														// PBMP.
+		if ( cFile.ui32Name != 0x504D4250 ) { return SL2_E_INVALIDFILETYPE; }										// PBMP.
 		if ( cFile.ui32Size > _vData.size() ) { return SL2_E_INVALIDFILETYPE; }
 
 
-		const SL2_HEAD_CHUNK * pcHeader = NULL;
-		const SL2_CHUNK_EX * pcData = NULL;
-		const SL2_DETL_CHUNK * pcDetl = NULL;
-		const SL2_PIDX_CHUNK * pcPidX = NULL;
-		const SL2_CHUNK_EX * pcRiff = NULL;
+		const SL2_HEAD_CHUNK * pcHeader = nullptr;
+		const SL2_CHUNK_EX * pcData = nullptr;
+		const SL2_DETL_CHUNK * pcDetl = nullptr;
+		const SL2_PIDX_CHUNK * pcPidX = nullptr;
+		const SL2_CHUNK_EX * pcRiff = nullptr;
 		bool bContinue = true;
+		bool bPaletteIsEmbedded = false;
 		while ( bContinue ) {
+			if ( sFile.Pos() == _vData.size() ) { break; }
 			const SL2_CHUNK * pcThis = reinterpret_cast<const SL2_CHUNK *>(_vData.data() + sFile.Pos());
 			if ( (sizeof( SL2_CHUNK ) + pcThis->ui32Size) > (_vData.size() - sFile.Pos()) ) { return SL2_E_INVALIDFILETYPE; }
 			switch ( pcThis->ui32Name ) {
@@ -2847,6 +2850,11 @@ namespace sl2 {
 					pcPidX = reinterpret_cast<const SL2_PIDX_CHUNK *>(_vData.data() + sFile.Pos());
 					break;
 				}
+				case 0x46464952 : {																					// RIFF.
+					m_pPalette.LoadPaletteFromStream( sFile );
+					bPaletteIsEmbedded = true;
+					continue;
+				}
 				default : {
 					bContinue = false;
 					break;
@@ -2856,10 +2864,10 @@ namespace sl2 {
 		}
 
 
-		if ( pcHeader == NULL ) { return SL2_E_INVALIDFILETYPE; }
-		if ( pcDetl == NULL ) { return SL2_E_INVALIDFILETYPE; }
-		if ( pcPidX == NULL ) { return SL2_E_INVALIDFILETYPE; }
-		if ( pcData == NULL ) { return SL2_E_INVALIDFILETYPE; }
+		if ( pcHeader == nullptr ) { return SL2_E_INVALIDFILETYPE; }
+		if ( pcDetl == nullptr ) { return SL2_E_INVALIDFILETYPE; }
+		if ( pcPidX == nullptr ) { return SL2_E_INVALIDFILETYPE; }
+		if ( pcData == nullptr ) { return SL2_E_INVALIDFILETYPE; }
 
 
 		const CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * pkifdFormat = nullptr;
@@ -2936,6 +2944,15 @@ namespace sl2 {
 			pui8Src += ui32ThisSize;
 			ui32SizeRem -= ui32ThisSize;
 		}
+		if ( !bPaletteIsEmbedded ) {
+			m_pPalette.SetActiveById( pcPidX->ui32PalIdx );
+		}
+
+		if ( (pcHeader->ui32Attribute & (0x1 | 0x4)) == 0 ) {
+			// Default to ignoring alpha.  User can override with options.
+			m_bIgnoreAlpha = true;
+		}
+
 		return SL2_E_SUCCESS;
 	}
 

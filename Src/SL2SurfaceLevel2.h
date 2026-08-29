@@ -34,6 +34,7 @@ namespace sl2 {
 	struct SL2_OPTIONS {
 		std::vector<SL2_OPEN_FILE>										vInputs;														/**< The input files. */
 		std::vector<std::u16string>										vOutputs;														/**< The output files. */
+		std::u16string													u16PalettePath;													/**< The path to a palette file. */
 		const sl2::CFormat::SL2_KTX_INTERNAL_FORMAT_DATA *				pkifdFinalFormat = nullptr;										/**< Actual final format.  If not manually specified, vfAutoFormat is used. */
 		sl2::CFormat::SL2_SWIZZLE										sSwizzle = CFormat::DefaultSwizzle();							/**< The swizzle to apply. */
 		double															dGamma = -2.2;													/**< User-supplied gamma. */
@@ -67,9 +68,9 @@ namespace sl2 {
 		CResampler::SL2_FILTER_FUNCS									fAlphaFilterFuncH = CResampler::SL2_FF_LINEAR;					/**< The height alpha-channel filter. */
 		CResampler::SL2_FILTER_FUNCS									fAlphaFilterFuncD = CResampler::SL2_FF_LINEAR;					/**< The depth alpha-channel filter. */
 
-		CResampler::SL2_FILTER_FUNCS									fMipFilterFuncW = CResampler::SL2_FF_ROBIDOUXSHARP;				/**< The width filter. */
-		CResampler::SL2_FILTER_FUNCS									fMipFilterFuncH = CResampler::SL2_FF_ROBIDOUXSHARP;				/**< The height filter. */
-		CResampler::SL2_FILTER_FUNCS									fMipFilterFuncD = CResampler::SL2_FF_ROBIDOUXSHARP;				/**< The depth filter. */
+		CResampler::SL2_FILTER_FUNCS									fMipFilterFuncW = CResampler::SL2_FF_CARDINALSPLINEUNIFORM;		/**< The width filter. */
+		CResampler::SL2_FILTER_FUNCS									fMipFilterFuncH = CResampler::SL2_FF_CARDINALSPLINEUNIFORM;		/**< The height filter. */
+		CResampler::SL2_FILTER_FUNCS									fMipFilterFuncD = CResampler::SL2_FF_CARDINALSPLINEUNIFORM;		/**< The depth filter. */
 		CResampler::SL2_FILTER_FUNCS									fMipAlphaFilterFuncW = CResampler::SL2_FF_LINEAR;				/**< The width alpha-channel filter. */
 		CResampler::SL2_FILTER_FUNCS									fMipAlphaFilterFuncH = CResampler::SL2_FF_LINEAR;				/**< The height alpha-channel filter. */
 		CResampler::SL2_FILTER_FUNCS									fMipAlphaFilterFuncD = CResampler::SL2_FF_LINEAR;				/**< The depth alpha-channel filter. */

@@ -1304,6 +1304,10 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 			}
 
 
+			if ( SL2_CHECK( 2, palette ) ) {
+				oOptions.u16PalettePath = reinterpret_cast<const char16_t *>((_wcpArgV[1]));
+				SL2_ADV( 2 );
+			}
 			if ( SL2_CHECK( 1, gen_pal ) || SL2_CHECK( 1, gen_palette ) ) {
 				oOptions.bGenNewPalatte = true;
 				SL2_ADV( 1 );
@@ -2291,9 +2295,17 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 	const sl2::CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * pkifdFormat = oOptions.pkifdFinalFormat;
 	for ( size_t I = 0; I < oOptions.vInputs.size(); ++I ) {
 		sl2::CImage iImage;
+		sl2::SL2_ERRORS eError;
+
+		if ( oOptions.u16PalettePath.size() ) {
+			eError = iImage.LoadPalette( oOptions.u16PalettePath );
+			if ( eError != sl2::SL2_E_SUCCESS ) {
+				SL2_ERRORT( L"Failed to load palette.", eError );
+			}
+		}
         
 		iImage.SetYuvSize( oOptions.vInputs[I].pkifduvFormat, oOptions.vInputs[I].ui32YuvW, oOptions.vInputs[I].ui32YuvH );
-		sl2::SL2_ERRORS eError;
+		
 		if ( oOptions.vInputs[I].bFromClipBoard ) {
 			eError = iImage.LoadFromClipboard();
 			if ( eError != sl2::SL2_E_SUCCESS ) {
@@ -2307,6 +2319,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 					reinterpret_cast<const wchar_t *>(oOptions.vInputs[I].u16Path.c_str()) ).c_str(), eError );
 			}
 		}
+		
 		
 		iImage.SetCrop( oOptions.wCropWindow );
 		iImage.SetQuickRotate( oOptions.qrQuickRot );
@@ -2876,26 +2889,34 @@ namespace sl2 {
 					pbifUseMe = &bifFormats[0];
 					break;
 				}
-				case SL2_VK_FORMAT_R8G8B8A8_UNORM : {
+				case SL2_VK_FORMAT_R8G8B8_SRGB : {
 					pbifUseMe = &bifFormats[1];
 					break;
 				}
-				case SL2_VK_FORMAT_R16G16B16_UNORM : {
+				case SL2_VK_FORMAT_R8G8B8A8_UNORM : {
 					pbifUseMe = &bifFormats[2];
 					break;
 				}
-				case SL2_VK_FORMAT_R16G16B16A16_UNORM : {
+				case SL2_VK_FORMAT_R8G8B8A8_SRGB : {
 					pbifUseMe = &bifFormats[3];
+					break;
+				}
+				case SL2_VK_FORMAT_R16G16B16_UNORM : {
+					pbifUseMe = &bifFormats[4];
+					break;
+				}
+				case SL2_VK_FORMAT_R16G16B16A16_UNORM : {
+					pbifUseMe = &bifFormats[5];
 					break;
 				}
 			}
 			switch ( _oOptions.pkifdPngFormat->kifInternalFormat ) {
 				case SL2_GL_LUMINANCE8 : {
-					pbifUseMe = &bifFormats[4];
+					pbifUseMe = &bifFormats[6];
 					break;
 				}
 				case SL2_GL_LUMINANCE16 : {
-					pbifUseMe = &bifFormats[5];
+					pbifUseMe = &bifFormats[7];
 					break;
 				}
 				case SL2_GL_COLOR_INDEX1_EXT : {

@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "../Files/SL2StdFile.h"
 #include "../Utilities/SL2Resampler.h"
 #include "ICC/SL2Icc.h"
 #include "ISPC/cielab_ispc.h"
@@ -831,6 +832,18 @@ namespace sl2 {
 		 **/
 		inline void											SetGenPalette( bool _bGenNew ) {
 			m_bGenPalette = _bGenNew;
+		}
+
+		/**
+		 * Loads a palette by file name.
+		 * 
+		 * \param _pPath The path to the file to load.
+		 * \return Returns an error code indicating the result of the load.
+		 **/
+		inline SL2_ERRORS									LoadPalette( const std::filesystem::path &_pPath ) {
+			std::filesystem::path pTmp = std::filesystem::canonical( _pPath );
+			if ( !std::filesystem::exists( pTmp ) ) { return SL2_E_FILENOTFOUND; }
+			return m_pPalette.LoadPaletteFromFile( pTmp.u16string() ) ? SL2_E_SUCCESS : SL2_E_BADFORMAT;
 		}
 
 		/**

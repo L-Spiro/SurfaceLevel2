@@ -95,6 +95,13 @@ namespace sl2 {
 		inline uint32_t										Id() const;
 
 		/**
+		 * Sets the ID.
+		 * 
+		 * \param _ui32Id The ID to assign to the palette.
+		 **/
+		inline void											SetId( uint32_t _ui32Id );
+
+		/**
 		 * Appends a color to the palette.
 		 * 
 		 * \param _cColor The color to add.
@@ -275,6 +282,13 @@ namespace sl2 {
 	 * \return Returns the palette ID.
 	 **/
 	inline uint32_t CPalette::Id() const { return m_ui32Id; }
+
+	/**
+	 * Sets the ID.
+	 * 
+	 * \param _ui32Id The ID to assign to the palette.
+	 **/
+	inline void CPalette::SetId( uint32_t _ui32Id ) { m_ui32Id = _ui32Id; }
 
 	/**
 	 * Appends a color to the palette.

@@ -391,6 +391,18 @@ namespace sl2 {
 		 **/
 		inline size_t								Pos() const { return m_stPos; }
 
+		/**
+		 * Rewinds by a given number of bytes.  The position marker is updated without modifying the data.  If the rewind amount is greater than the position value, the position is set to 0.
+		 * 
+		 * \param _sAmount The total number of bytes by which to rewind.
+		 * \return Returns the new position of the stream.
+		 **/
+		inline size_t								Rewind( size_t _sAmount ) const {
+			if ( _sAmount >= m_stPos ) { m_stPos = 0; }
+			else { m_stPos -= _sAmount; }
+			return m_stPos;
+		}
+
 
 
 	protected :
