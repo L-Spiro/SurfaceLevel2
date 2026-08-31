@@ -15,7 +15,7 @@ namespace sl2 {
 
 	// == Functions.
 	/**
-	 * Creates a string with _cReplaceMe replaced with _cWithMe inside _s16String.
+	 * Creates a string with _cReplaceMe replaced with _cWithMe inside _s16String.  Must be called within a try/catch block.
 	 *
 	 * \param _s16String The string in which replacements are to be made.
 	 * \param _cReplaceMe The character to replace.
@@ -28,6 +28,27 @@ namespace sl2 {
 		while ( aFound != std::string::npos ) {
 			s16Copy[aFound] = _cWithMe;
 			aFound = s16Copy.find( _cReplaceMe, aFound + 1 );
+		}
+		return s16Copy;
+	}
+
+	/**
+	 * Creates a string with _cReplaceMe replaced with _s16WithMe inside _s16String.  Must be called within a try/catch block.
+	 *
+	 * \param _s16String The string in which replacements are to be made.
+	 * \param _cReplaceMe The character to replace.
+	 * \param _s16WithMe The string with which to replace _cReplaceMe.
+	 * \return Returns the new string with the given replacements made.
+	 */
+	std::u16string CUtilities::Replace( const std::u16string &_s16String, char16_t _cReplaceMe, const std::u16string &_s16WithMe ) {
+		std::u16string s16Copy;
+		for ( size_t I = 0; I < _s16String.size(); ++I ) {
+			if ( _s16String[I] == _cReplaceMe ) {
+				s16Copy.append( _s16WithMe );
+			}
+			else {
+				s16Copy.push_back( _s16String[I] );
+			}
 		}
 		return s16Copy;
 	}

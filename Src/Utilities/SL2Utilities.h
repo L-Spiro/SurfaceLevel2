@@ -302,7 +302,7 @@ namespace sl2 {
 
 		// == Functions.
 		/**
-		 * Creates a string with _cReplaceMe replaced with _cWithMe inside _s16String.
+		 * Creates a string with _cReplaceMe replaced with _cWithMe inside _s16String.  Must be called within a try/catch block.
 		 *
 		 * \param _s16String The string in which replacements are to be made.
 		 * \param _cReplaceMe The character to replace.
@@ -310,6 +310,16 @@ namespace sl2 {
 		 * \return Returns the new string with the given replacements made.
 		 */
 		static std::u16string								Replace( const std::u16string &_s16String, char16_t _cReplaceMe, char16_t _cWithMe );
+
+		/**
+		 * Creates a string with _cReplaceMe replaced with _s16WithMe inside _s16String.  Must be called within a try/catch block.
+		 *
+		 * \param _s16String The string in which replacements are to be made.
+		 * \param _cReplaceMe The character to replace.
+		 * \param _s16WithMe The string with which to replace _cReplaceMe.
+		 * \return Returns the new string with the given replacements made.
+		 */
+		static std::u16string								Replace( const std::u16string &_s16String, char16_t _cReplaceMe, const std::u16string &_s16WithMe );
 
 		/**
 		 * Replaces a string inside a data vector.

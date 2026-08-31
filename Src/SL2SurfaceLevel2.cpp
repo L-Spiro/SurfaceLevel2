@@ -52,7 +52,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 #define SL2_ADV( VAL )							_iArgC -= (VAL); _wcpArgV += (VAL); continue
     while ( _iArgC ) {
         if ( (*_wcpArgV)[0] == L'-' ) {
-			if ( SL2_CHECK( 2, file ) ) {
+			if ( SL2_CHECK( 2, file ) || SL2_CHECK( 2, in_file ) ) {
 				try {
 					sl2::SL2_OPEN_FILE ofFile = { .u16Path = reinterpret_cast<const char16_t *>((_wcpArgV[1])) };
 					oOptions.vInputs.push_back( ofFile );
@@ -94,7 +94,7 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 						sSrc += sl2::CFileBase::NoExtension( sl2::CFileBase::GetFileName( oOptions.vInputs[oOptions.vOutputs.size()].u16Path ) );
 					}
 					else {
-						sSrc += sl2::CFileBase::NoExtension( sl2::CFileBase::GetFileName( sThis ) );
+						sSrc += sl2::CFileBase::NoExtension( sl2::CFileBase::GetFileName( sl2::CUtilities::Replace( sThis, u'*', sl2::CFileBase::NoExtension( sl2::CFileBase::GetFileName( oOptions.vInputs[oOptions.vOutputs.size()].u16Path ) ) ) ) );
 					}
 					sSrc += u".";
 					// If the string is empty, keep the extension of the inputs.
@@ -108,6 +108,22 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 				}
 				catch ( ... ) { SL2_ERROR( sl2::SL2_E_OUTOFMEMORY ); }
 				SL2_ADV( 2 );
+			}
+			if ( SL2_CHECK( 4, folder ) || SL2_CHECK( 4, in_folder ) ) {
+				try {
+					std::vector<std::u16string> vPaths;
+					sl2::CFileBase::FindFiles( reinterpret_cast<const char16_t *>((_wcpArgV[1])),
+						reinterpret_cast<const char16_t *>((_wcpArgV[2])),
+						::_wtoi( _wcpArgV[3] ) != 0,
+						vPaths );
+					if ( !vPaths.size() ) { SL2_ERROR( sl2::SL2_E_NOFILESFOUND ); }
+					for ( size_t I = 0; I < vPaths.size(); ++I ) {
+						sl2::SL2_OPEN_FILE ofFile = { .u16Path = vPaths[I] };
+						oOptions.vInputs.push_back( ofFile );
+					}
+				}
+				catch ( ... ) { SL2_ERROR( sl2::SL2_E_OUTOFMEMORY ); }
+				SL2_ADV( 4 );
 			}
 			if ( SL2_CHECK( 4, yuv_file ) ) {
 				try {
@@ -2293,6 +2309,9 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 #undef SL2_CHECK
 
 	const sl2::CFormat::SL2_KTX_INTERNAL_FORMAT_DATA * pkifdFormat = oOptions.pkifdFinalFormat;
+	auto cwOriginalCrop = oOptions.wCropWindow;
+	auto rResample = oOptions.rResample;
+	auto rMipResample = oOptions.rMipResample;
 	for ( size_t I = 0; I < oOptions.vInputs.size(); ++I ) {
 		sl2::CImage iImage;
 		sl2::SL2_ERRORS eError;
@@ -2320,7 +2339,9 @@ int wmain( int _iArgC, wchar_t const * _wcpArgV[] ) {
 			}
 		}
 		
-		
+		oOptions.wCropWindow = cwOriginalCrop;
+		oOptions.rResample = rResample;
+		oOptions.rMipResample = rMipResample;
 		iImage.SetCrop( oOptions.wCropWindow );
 		iImage.SetQuickRotate( oOptions.qrQuickRot );
 		FixResampling( oOptions, iImage );
@@ -2630,6 +2651,9 @@ namespace sl2 {
 			}
 			case SL2_E_PNGUNAVAILABLE : {
 				return std::u16string( u"The PNG clipboard format is unavailable." );
+			}
+			case SL2_E_NOFILESFOUND : {
+				return std::u16string( u"No files found in the given directory with the given search term." );
 			}
 		}
 		return std::u16string();

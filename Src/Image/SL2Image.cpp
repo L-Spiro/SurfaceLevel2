@@ -457,6 +457,9 @@ namespace sl2 {
 		m_rResample.ui32H = m_wCroppingWindow.ui32H;
 		m_rResample.ui32D = m_wCroppingWindow.ui32D;
 		m_rResample.bAlpha = Format()->ui8ABits && _pkifFormat->ui8ABits;
+		if ( SL2_GET_IDX_FLAG( Format()->ui32Flags ) && Palette().Format() ) {
+			m_rResample.bAlpha = Palette().Format()->ui8ABits && _pkifFormat->ui8ABits;
+		}
 		uint32_t ui32NewW = m_rResample.ui32NewW ? m_rResample.ui32NewW : m_wCroppingWindow.ui32W;
 		uint32_t ui32NewH = m_rResample.ui32NewH ? m_rResample.ui32NewH : m_wCroppingWindow.ui32H;
 		uint32_t ui32NewD = m_rResample.ui32NewD ? m_rResample.ui32NewD : m_wCroppingWindow.ui32D;
@@ -2919,12 +2922,13 @@ namespace sl2 {
 			if ( ui32SizeRem < ui32ThisSize ) { return SL2_E_INVALIDFILETYPE; }
 
 			uint64_t ui64DestRowWidth = CFormat::GetRowSize( Format(), ui32W );
-
+			uint32_t ui32SrcStrde = ui32W / 4 * 4;
+			if ( ui32SrcStrde < ui32W ) { ui32SrcStrde += 4; }
 			constexpr bool bReverse = true;
 			switch ( pcHeader->ui32BitDepth ) {
 				case 8 : {
 					for ( uint32_t Y = 0; Y < ui32H; ++Y ) {
-						uint32_t ui32YOff = Y * ui32W;
+						uint32_t ui32YOff = Y * ui32SrcStrde;
 
 						// This line is what handles reverse-encoded bitmaps.
 						uint64_t ui64YOffDest = bReverse ? Y * ui64DestRowWidth :

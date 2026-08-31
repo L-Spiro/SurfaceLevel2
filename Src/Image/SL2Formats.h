@@ -129,6 +129,7 @@ namespace sl2 {
 		SL2_E_MULTIFILECLIPBOARD													= -16,							/**< Multi-file outputs cannot be sent to the clipboard. */
 		SL2_E_UNAVAILABLECLIPBOARD													= -17,							/**< Clipboard unavailable. */
 		SL2_E_PNGUNAVAILABLE														= -18,							/**< The PNG clipboard format is unavailable. */
+		SL2_E_NOFILESFOUND															= -19,							/**< No files found in the given directory with the given search term. */
 	};
 
 	/**
