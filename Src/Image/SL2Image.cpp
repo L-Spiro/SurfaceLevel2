@@ -482,12 +482,16 @@ namespace sl2 {
 				break;
 			}
 			case SL2_MH_KEEP_EXISTING : {
-				sSrcMips = std::max( std::min( Mipmaps(), m_sTotalMips + 1 ), size_t( 1 ) );
-				sDstMips = std::max( m_sTotalMips + 1, Mipmaps() );
 				if ( !m_sTotalMips ) {
+					// A full chain: keep every existing level and generate any that are missing.
 					sDstMips = CUtilities::Max( size_t( std::floor( std::log2( ui32NewW ) ) ), size_t( std::floor( std::log2( ui32NewH ) ) ) );
 					sDstMips = CUtilities::Max( size_t( std::floor( std::log2( ui32NewD ) ) ), sDstMips ) + 1;
 				}
+				else {
+					// A specific count: keep existing levels up to that count, removing or generating levels as needed.
+					sDstMips = m_sTotalMips + 1;
+				}
+				sSrcMips = std::max( std::min( Mipmaps(), sDstMips ), size_t( 1 ) );
 				break;
 			}
 			case SL2_MH_GENERATE_NEW : {
@@ -543,9 +547,10 @@ namespace sl2 {
 					if ( !Format()->pfToRgba64F( Data( M, 0, A, F ), pui8Dest, ui32W, ui32H, ui32D, &ifdData ) ) { return SL2_E_INTERNALERROR; }
 					if ( !QuickRotate( pui8Dest, ui32W, ui32H, ui32D, m_qrQuickRotation ) ) { return SL2_E_OUTOFMEMORY; }
 					try {
+						// The cropping window is expressed in terms of the top level; scale it down for kept mipmap levels.
 						Crop( pui8Dest, vCrop, ui32W, ui32H, ui32D,
 							m_rResample.taColorW, m_rResample.taColorH, m_rResample.taColorD,
-							m_wCroppingWindow, m_rResample.dBorderColor );
+							MipWindow( m_wCroppingWindow, M ), m_rResample.dBorderColor );
 					}
 					catch ( ... ) { return SL2_E_OUTOFMEMORY; }
 					
@@ -1147,6 +1152,26 @@ namespace sl2 {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Scales a top-level cropping window down to a given mipmap level.
+	 * 
+	 * \param _wWindow The top-level cropping window.
+	 * \param _sMip The mipmap level to which to scale _wWindow.
+	 * \return Returns the cropping window scaled to the given mipmap level.
+	 **/
+	CImage::SL2_WINDOW CImage::MipWindow( const SL2_WINDOW &_wWindow, size_t _sMip ) {
+		if ( !_sMip ) { return _wWindow; }
+		SL2_WINDOW wRet;
+		uint32_t ui32Shift = static_cast<uint32_t>(std::min( _sMip, size_t( 31 ) ));
+		wRet.i32X = static_cast<int32_t>(std::floor( std::ldexp( double( _wWindow.i32X ), -static_cast<int>(ui32Shift) ) ));
+		wRet.i32Y = static_cast<int32_t>(std::floor( std::ldexp( double( _wWindow.i32Y ), -static_cast<int>(ui32Shift) ) ));
+		wRet.i32Z = static_cast<int32_t>(std::floor( std::ldexp( double( _wWindow.i32Z ), -static_cast<int>(ui32Shift) ) ));
+		wRet.ui32W = _wWindow.ui32W ? std::max( _wWindow.ui32W >> ui32Shift, 1U ) : 0;
+		wRet.ui32H = _wWindow.ui32H ? std::max( _wWindow.ui32H >> ui32Shift, 1U ) : 0;
+		wRet.ui32D = _wWindow.ui32D ? std::max( _wWindow.ui32D >> ui32Shift, 1U ) : 0;
+		return wRet;
 	}
 
 	/**
@@ -2315,44 +2340,47 @@ namespace sl2 {
 			dFile.Width(), dFile.Height(), dFile.Depth(),
 			dFile.Mips(), dFile.Array(), dFile.Faces() ) ) { return SL2_E_OUTOFMEMORY; }
 		if ( dFile.Faces() > 1 ) {
-			for ( uint32_t F = 0; F < dFile.Faces(); ++F ) {
-				for ( uint32_t M = 0; M < dFile.Mips(); ++M ) {
-					size_t sIdx = F * dFile.Mips() + M;
-					if ( sIdx >= dFile.Buffers().size() ) { return SL2_E_INVALIDDATA; }
-					uint32_t ui32Width = std::max( dFile.Width() >> M, static_cast<uint32_t>(1) );
-					uint32_t ui32Height = std::max( dFile.Height() >> M, static_cast<uint32_t>(1) );
-					uint32_t ui32Depth = std::max( dFile.Depth() >> M, static_cast<uint32_t>(1) );
+			// Surfaces are stored array slice-major, face-minor, each with its full mipmap chain.
+			for ( uint32_t A = 0; A < dFile.Array(); ++A ) {
+				for ( uint32_t F = 0; F < dFile.Faces(); ++F ) {
+					for ( uint32_t M = 0; M < dFile.Mips(); ++M ) {
+						size_t sIdx = (size_t( A ) * dFile.Faces() + F) * dFile.Mips() + M;
+						if ( sIdx >= dFile.Buffers().size() ) { return SL2_E_INVALIDDATA; }
+						uint32_t ui32Width = std::max( dFile.Width() >> M, static_cast<uint32_t>(1) );
+						uint32_t ui32Height = std::max( dFile.Height() >> M, static_cast<uint32_t>(1) );
+						uint32_t ui32Depth = std::max( dFile.Depth() >> M, static_cast<uint32_t>(1) );
 
-					if ( dFile.Header().ui32Flags & SL2_DF_LINEARSIZE ) {
-						// Compressed texture.
-						uint64_t ui64PageSize = CFormat::GetFormatSize( aFmt, ui32Width,
-							ui32Height,
-							1 );
-						if ( uint64_t( size_t( ui64PageSize ) ) != ui64PageSize ) { return SL2_E_UNSUPPORTEDSIZE; }
-						for ( uint32_t D = 0; D < ui32Depth; ++D ) {
-							if ( dFile.Buffers()[sIdx].vTexture.size() - (ui64PageSize * D) < ui64PageSize ) { return SL2_E_INVALIDDATA; }
-							std::memcpy( Data( M, D, 0, F ), dFile.Buffers()[sIdx].vTexture.data() + ui64PageSize * D, size_t( ui64PageSize ) );
-						}
-					}
-					else {
-						uint64_t ui64SrcPitch = CFormat::GetRowSize_NoPadding( aFmt, std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
-						if ( uint64_t( size_t( ui64SrcPitch ) ) != ui64SrcPitch ) { return SL2_E_UNSUPPORTEDSIZE; }
-						auto aPitch = CFormat::GetRowSize( aFmt, std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
-
-						for ( uint32_t D = 0; D < ui32Depth; ++D ) {
-							uint64_t ui64DstSliceOffset = D * ui32Height * aPitch;
-							uint64_t ui64SrcSliceOffset = D * ui32Height * ui64SrcPitch;
-
-							for ( uint32_t H = 0; H < ui32Height; ++H ) {
-								uint64_t ui64Dst = aPitch * H + ui64DstSliceOffset;
-								uint64_t ui64Src = ui64SrcPitch * H + ui64SrcSliceOffset;
-
-								if ( (dFile.Buffers()[sIdx].vTexture.size() - ui64Src) < ui64SrcPitch ) { return SL2_E_INVALIDDATA; }
-								std::memcpy( Data( M, 0, 0, F ) + ui64Dst, dFile.Buffers()[sIdx].vTexture.data() + ui64Src, size_t( ui64SrcPitch ) );
+						if ( dFile.Header().ui32Flags & SL2_DF_LINEARSIZE ) {
+							// Compressed texture.
+							uint64_t ui64PageSize = CFormat::GetFormatSize( aFmt, ui32Width,
+								ui32Height,
+								1 );
+							if ( uint64_t( size_t( ui64PageSize ) ) != ui64PageSize ) { return SL2_E_UNSUPPORTEDSIZE; }
+							for ( uint32_t D = 0; D < ui32Depth; ++D ) {
+								if ( dFile.Buffers()[sIdx].vTexture.size() - (ui64PageSize * D) < ui64PageSize ) { return SL2_E_INVALIDDATA; }
+								std::memcpy( Data( M, D, A, F ), dFile.Buffers()[sIdx].vTexture.data() + ui64PageSize * D, size_t( ui64PageSize ) );
 							}
 						}
+						else {
+							uint64_t ui64SrcPitch = CFormat::GetRowSize_NoPadding( aFmt, std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
+							if ( uint64_t( size_t( ui64SrcPitch ) ) != ui64SrcPitch ) { return SL2_E_UNSUPPORTEDSIZE; }
+							auto aPitch = CFormat::GetRowSize( aFmt, std::max( dFile.Width() >> M, static_cast<uint32_t>(1) ) );
+
+							for ( uint32_t D = 0; D < ui32Depth; ++D ) {
+								uint64_t ui64DstSliceOffset = D * ui32Height * aPitch;
+								uint64_t ui64SrcSliceOffset = D * ui32Height * ui64SrcPitch;
+
+								for ( uint32_t H = 0; H < ui32Height; ++H ) {
+									uint64_t ui64Dst = aPitch * H + ui64DstSliceOffset;
+									uint64_t ui64Src = ui64SrcPitch * H + ui64SrcSliceOffset;
+
+									if ( (dFile.Buffers()[sIdx].vTexture.size() - ui64Src) < ui64SrcPitch ) { return SL2_E_INVALIDDATA; }
+									std::memcpy( Data( M, 0, A, F ) + ui64Dst, dFile.Buffers()[sIdx].vTexture.data() + ui64Src, size_t( ui64SrcPitch ) );
+								}
+							}
+						}
+						//std::memcpy( Data( M, 0, 0, F ), dFile.Buffers()[sIdx].vTexture.data(), dFile.Buffers()[sIdx].vTexture.size() );
 					}
-					//std::memcpy( Data( M, 0, 0, F ), dFile.Buffers()[sIdx].vTexture.data(), dFile.Buffers()[sIdx].vTexture.size() );
 				}
 			}
 		}

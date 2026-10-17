@@ -9,6 +9,9 @@
 #include "SL2Dds.h"
 #include "../../Utilities/SL2Stream.h"
 
+#include <algorithm>
+#include <cstring>
+
 
 namespace sl2 {
 #define SL2_TYPE( D3D, DXGI, OGL_IF, OGL_TYPE, OGL_BIF )		SL2_ ## D3D, SL2_ ## DXGI, #D3D, #DXGI, #OGL_IF, #OGL_TYPE, #OGL_BIF
@@ -141,7 +144,13 @@ namespace sl2 {
 #undef SL2_TYPE
 
 
-	CDds::CDds() {
+	CDds::CDds() :
+		m_sPitch( 0 ),
+		m_pfdFormat( nullptr ),
+		m_ui32ArraySize( 1 ),
+		m_ui32Faces( 1 ) {
+		std::memset( &m_dhHeader, 0, sizeof( m_dhHeader ) );
+		std::memset( &m_dh10Header10, 0, sizeof( m_dh10Header10 ) );
 	}
 	CDds::~CDds() {
 	}
@@ -176,19 +185,26 @@ namespace sl2 {
 
 		
 		m_ui32ArraySize = 1;
+		m_ui32Faces = 1;
+		m_pfdFormat = nullptr;
+		m_vTextures.clear();
+		std::memset( &m_dh10Header10, 0, sizeof( m_dh10Header10 ) );
 
-		bool bUseDx10 = false;
 		if ( m_dhHeader.dpPixelFormat.ui32Flags & SL2_DPFF_FOURCC ) {
 			switch ( m_dhHeader.dpPixelFormat.ui32FourCC ) {
 				case SL2_MAKEFOURCC( 'D', 'X', '1', '0' ) : {
-					bUseDx10 = true;
 					if ( !sStream.Read( m_dh10Header10 ) ) { return false; }
 					m_pfdFormat = FormatByDXGI_FORMAT( static_cast<SL2_DXGI_FORMAT>(m_dh10Header10.ui32DxgiFormat) );
-					m_ui32ArraySize = m_dh10Header10.ui32ArraySize;
+					m_ui32ArraySize = std::max( m_dh10Header10.ui32ArraySize, static_cast<uint32_t>(1) );
+					if ( m_dh10Header10.ui32MiscFlag & SL2_DDS_RESOURCE_MISC_TEXTURECUBE ) {
+						// The DX10 header is authoritative for cube maps; mirror it into the legacy caps so that all downstream checks agree.
+						m_dhHeader.ui32Caps2 |= SL2_DDSCAPS2_CUBEMAP;
+					}
 					break;
 				}
 				default : {
 					m_pfdFormat = FormatByD3DFORMAT( static_cast<SL2_D3DFORMAT>(m_dhHeader.dpPixelFormat.ui32FourCC) );
+					break;
 				}
 			}
 			if ( nullptr == m_pfdFormat ) { return false; }
@@ -197,57 +213,67 @@ namespace sl2 {
 			// Have to figure out the format based off m_dhHeader.dpPixelFormat.ui32Flags, masks, and bit counts.
 		}
 
+		// A mipmap count of 0 means "1 level."  Normalize it so that every consumer of the header sees the same count that was loaded.
+		uint32_t ui32Mips = std::max( m_dhHeader.ui32MipMapCount, static_cast<uint32_t>(1) );
+		m_dhHeader.ui32MipMapCount = ui32Mips;
+
+		// Total number of surfaces (each with its own mipmap chain) stored in the file, in file order: array slice-major, face-minor.
 		uint32_t ui32Array = m_ui32ArraySize;
 		if ( m_dhHeader.ui32Caps2 & SL2_DDSCAPS2_CUBEMAP ) {
-			ui32Array = m_ui32Faces = 6;
+			m_ui32Faces = 6;
+			ui32Array = m_ui32ArraySize * m_ui32Faces;
 		}
 
 		if ( m_pfdFormat ) {
 			// We have known metadata regarding the format.  This might require conversions.
 			//	Convert (optionally) and load the data.
-			uint32_t ui32Pitch = m_dhHeader.ui32PitchOrLinearSize;
-			uint32_t ui32PitchAfter = m_dhHeader.ui32PitchOrLinearSize;
-			size_t sSrcSize = 0;
-			if ( m_pfdFormat->bIsCompressed ) {
-				ui32Pitch = (m_dhHeader.ui32Width + 3) / 4 * m_pfdFormat->ui8BitsPerBlock / 8;
-				ui32PitchAfter = (m_dhHeader.ui32Width + 3) / 4 * m_pfdFormat->ui8BitsAfterConvert / 8;
-			
-			}
-			else if ( m_pfdFormat->bPacked ) {
-				ui32Pitch = ((m_dhHeader.ui32Width + 1) >> 1) * 4;
-				ui32PitchAfter = ((m_dhHeader.ui32Width + 1) >> 1) * 4;
-			}
-			else {
-				ui32Pitch = (m_dhHeader.ui32Width * m_pfdFormat->ui8BitsPerBlock + 7) / 8;
-				ui32PitchAfter = (m_dhHeader.ui32Width * m_pfdFormat->ui8BitsAfterConvert + 7) / 8;
-			}
-			if ( !m_pfdFormat->ui8BitsAfterConvert ) {
-				ui32PitchAfter = ui32Pitch;
-			}
-
-			size_t iIndex = 0;
-			uint8_t * pui8Src = sStream.Data();
-			for ( uint32_t J = 0; J < ui32Array; J++ ) {
+			uint32_t ui32TopPitch = m_dhHeader.ui32PitchOrLinearSize;
+			for ( uint32_t J = 0; J < ui32Array; ++J ) {
 				uint32_t ui32W = std::max( m_dhHeader.ui32Width, static_cast<uint32_t>(1) );
 				uint32_t ui32H = std::max( m_dhHeader.ui32Height, static_cast<uint32_t>(1) );
 				uint32_t ui32D = std::max( m_dhHeader.ui32Depth, static_cast<uint32_t>(1) );
-				for ( uint32_t I = 0; I < m_dhHeader.ui32MipMapCount; I++ ) {
-					size_t sSrcSize = ui32D * ui32H * ui32Pitch;
+				for ( uint32_t I = 0; I < ui32Mips; ++I ) {
+					// The pitch must be calculated for each mipmap level, not just the top level.
+					uint32_t ui32Pitch;
+					uint32_t ui32PitchAfter;
 					if ( m_pfdFormat->bIsCompressed ) {
-						sSrcSize = GetCompressedSizeBc( ui32W,
+						ui32Pitch = (ui32W + 3) / 4 * m_pfdFormat->ui8BitsPerBlock / 8;
+						ui32PitchAfter = (ui32W + 3) / 4 * m_pfdFormat->ui8BitsAfterConvert / 8;
+					}
+					else if ( m_pfdFormat->bPacked ) {
+						ui32Pitch = ((ui32W + 1) >> 1) * 4;
+						ui32PitchAfter = ui32Pitch;
+					}
+					else {
+						ui32Pitch = (ui32W * m_pfdFormat->ui8BitsPerBlock + 7) / 8;
+						ui32PitchAfter = (ui32W * m_pfdFormat->ui8BitsAfterConvert + 7) / 8;
+					}
+					if ( !m_pfdFormat->ui8BitsAfterConvert ) {
+						ui32PitchAfter = ui32Pitch;
+					}
+					if ( J == 0 && I == 0 ) {
+						ui32TopPitch = ui32Pitch;
+					}
+
+					size_t sSrcSize = size_t( ui32D ) * ui32H * ui32Pitch;
+					size_t sDstSize = std::max( sSrcSize, size_t( ui32D ) * ui32H * ui32PitchAfter );
+					if ( m_pfdFormat->bIsCompressed ) {
+						sSrcSize = sDstSize = GetCompressedSizeBc( ui32W,
 							ui32H,
 							ui32D, m_pfdFormat->ui8BitsPerBlock );
 					}
+					if ( sStream.Remaining() < sSrcSize ) { return false; }
 
 					SL2_TEX tTexture;
 					tTexture.ui32Pitch = ui32PitchAfter;
 					try {
-						tTexture.vTexture.resize( sSrcSize );
+						tTexture.vTexture.resize( m_pfdFormat->pfConverter ? sDstSize : sSrcSize );
 					}
 					catch ( ... ) { return false; }
 					if ( m_pfdFormat->pfConverter ) {
-						m_pfdFormat->pfConverter( pui8Src, tTexture.vTexture.data(), ui32W, ui32H, ui32D, ui32Pitch, m_dhHeader.dpPixelFormat );
-						if ( sStream.Read( nullptr, sSrcSize ) != sSrcSize ) { return false; };
+						// Convert from the current stream position, then skip past the source data.
+						m_pfdFormat->pfConverter( sStream.Data(), tTexture.vTexture.data(), ui32W, ui32H, ui32D, ui32Pitch, m_dhHeader.dpPixelFormat );
+						if ( sStream.Read( nullptr, sSrcSize ) != sSrcSize ) { return false; }
 					}
 					else {
 						if ( sStream.Read( tTexture.vTexture.data(), tTexture.vTexture.size() ) != tTexture.vTexture.size() ) { return false; }
@@ -255,28 +281,29 @@ namespace sl2 {
 					tTexture.ui32W = ui32W;
 					tTexture.ui32H = ui32H;
 					tTexture.ui32D = ui32D;
-					m_vTextures.push_back( std::move( tTexture ) );
+					try {
+						m_vTextures.push_back( std::move( tTexture ) );
+					}
+					catch ( ... ) { return false; }
 
 					ui32W = std::max( ui32W >> 1, static_cast<uint32_t>(1) );
 					ui32H = std::max( ui32H >> 1, static_cast<uint32_t>(1) );
 					ui32D = std::max( ui32D >> 1, static_cast<uint32_t>(1) );
 				}
 			}
-			m_dhHeader.ui32PitchOrLinearSize = ui32Pitch;
+			m_dhHeader.ui32PitchOrLinearSize = ui32TopPitch;
 		}
 		else {
 			// Going based on the pixel format data using bit sizes and assuming tight packing.
-			size_t iIndex = 0;
-			//uint32_t ui32Pitch = m_dhHeader.ui32PitchOrLinearSize;
-			uint8_t * pui8Src = sStream.Data();
-			for ( uint32_t J = 0; J < ui32Array; J++ ) {
+			if ( !m_dhHeader.dpPixelFormat.ui32RGBBitCount ) { return false; }
+			for ( uint32_t J = 0; J < ui32Array; ++J ) {
 				uint32_t ui32W = std::max( m_dhHeader.ui32Width, static_cast<uint32_t>(1) );
 				uint32_t ui32H = std::max( m_dhHeader.ui32Height, static_cast<uint32_t>(1) );
 				uint32_t ui32D = std::max( m_dhHeader.ui32Depth, static_cast<uint32_t>(1) );
-				
-				for ( uint32_t I = 0; I < m_dhHeader.ui32MipMapCount; I++ ) {
-					size_t sPitch = static_cast<size_t>(static_cast<uint64_t>(m_dhHeader.dpPixelFormat.ui32RGBBitCount) * ui32W);
-					size_t sSrcSize = static_cast<size_t>(static_cast<uint64_t>(ui32D) * ui32H * sPitch / 8ULL);
+
+				for ( uint32_t I = 0; I < ui32Mips; ++I ) {
+					size_t sPitch = static_cast<size_t>((static_cast<uint64_t>(m_dhHeader.dpPixelFormat.ui32RGBBitCount) * ui32W + 7ULL) / 8ULL);
+					size_t sSrcSize = static_cast<size_t>(static_cast<uint64_t>(ui32D) * ui32H * sPitch);
 					SL2_TEX tTexture;
 					tTexture.ui32Pitch = static_cast<uint32_t>(sPitch);
 					try {
@@ -288,7 +315,10 @@ namespace sl2 {
 					tTexture.ui32W = ui32W;
 					tTexture.ui32H = ui32H;
 					tTexture.ui32D = ui32D;
-					m_vTextures.push_back( std::move( tTexture ) );
+					try {
+						m_vTextures.push_back( std::move( tTexture ) );
+					}
+					catch ( ... ) { return false; }
 
 					ui32W = std::max( ui32W >> 1, static_cast<uint32_t>(1) );
 					ui32H = std::max( ui32H >> 1, static_cast<uint32_t>(1) );

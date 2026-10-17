@@ -1050,6 +1050,15 @@ namespace sl2 {
 		bool												CropIsFullSize( uint32_t _ui32Width, uint32_t _ui32Height, uint32_t _ui32Depth, const SL2_WINDOW &_wWindow );
 
 		/**
+		 * Scales a top-level cropping window down to a given mipmap level.
+		 * 
+		 * \param _wWindow The top-level cropping window.
+		 * \param _sMip The mipmap level to which to scale _wWindow.
+		 * \return Returns the cropping window scaled to the given mipmap level.
+		 **/
+		static SL2_WINDOW									MipWindow( const SL2_WINDOW &_wWindow, size_t _sMip );
+
+		/**
 		 * Applies a quick rotation on a buffer in-place.
 		 * 
 		 * \param _pui8Src The buffer to rotate in-place.
